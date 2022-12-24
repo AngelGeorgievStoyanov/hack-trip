@@ -8,6 +8,7 @@ import Header from './components/Header/Header';
 import ErrorBoundary from './utils/ErrorBoundary';
 import Footer from './components/Footer/Footer';
 import Logout from './components/Logout/Logout';
+import CreateTrip from './components/CreateTrip/CreateTrip';
 
 
 
@@ -33,7 +34,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/register',
-        element: <Register />
+        element: <Register user={undefined} />
       },
       {
         path: '/trips',
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path:'/logout',
         element:<Logout/>
+      },
+      {
+        path:'/create-trip',
+        element:<CreateTrip/>
       }
     ]
   }

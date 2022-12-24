@@ -16,6 +16,7 @@ export default function Header() {
                     <li className="nav-li"><Link to={'/login'}>Login</Link></li>
                     <li className="nav-li"><Link to={'/register'}>Register</Link></li>
                     <li className="nav-li"><Link to={'/logout'}>Logout</Link></li>
+                    <li className="nav-li"><Link to={'/create-trip'}>Create Trip</Link></li>
                 </nav>
             </header>
        
