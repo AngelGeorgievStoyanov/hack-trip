@@ -1,5 +1,5 @@
 import './App.css';
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, LoaderFunctionArgs, Outlet, RouterProvider } from 'react-router-dom';
 import Home from './components/Home/Home';
 import { Login } from './components/Login/Login';
 import { Register } from './components/Register/Register';
@@ -9,18 +9,55 @@ import ErrorBoundary from './utils/ErrorBoundary';
 import Footer from './components/Footer/Footer';
 import Logout from './components/Logout/Logout';
 import CreateTrip from './components/CreateTrip/CreateTrip';
+import { Trip } from './model/trip';
+import * as tripService from './services/tripService'
+import { ApiTrip } from './services/tripService';
+import TripDetails from './components/TripDetails/TripDetails';
+import { IdType } from './shared/common-types';
+
+
+const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType,Trip>('data/trips');
+
+
+export async function tripsLoader() {
+
+  return API_TRIP.findAll()
+
+}
+
+
+export async function tripLoader({ params }: LoaderFunctionArgs){
+  console.log(params)
+  if (params.tripId) {
+    return API_TRIP.findById(params.tripId);
+  } else {
+    throw new Error(`Invalid or missing post ID`);
+  }
+}
+
+
 
 
 
 const Layout = () => (
   <>
+
+
     <Header />
+
     <Outlet />
+
     <Footer />
+
   </>
 )
 
+
+
+
 const router = createBrowserRouter([
+
+
   {
     element: <Layout />,
     children: [
@@ -38,15 +75,22 @@ const router = createBrowserRouter([
       },
       {
         path: '/trips',
-        element: <Trips />
+        loader: tripsLoader,
+        element: <Trips />,
+       
       },
       {
-        path:'/logout',
-        element:<Logout/>
+        path: '/logout',
+        element: <Logout />
       },
       {
-        path:'/create-trip',
-        element:<CreateTrip/>
+        path: '/create-trip',
+        element: <CreateTrip />
+      },
+      {
+        path:'/trip/details/:tripId',
+        loader:tripLoader,
+        element:<TripDetails/>
       }
     ]
   }
@@ -57,11 +101,16 @@ const router = createBrowserRouter([
 
 
 function App() {
+
+
+
   return (
     <>
       <ErrorBoundary>
 
+
         <RouterProvider router={router} />
+
       </ErrorBoundary>
     </>
 

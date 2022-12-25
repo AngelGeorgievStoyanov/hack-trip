@@ -1,5 +1,5 @@
-import { BaseSyntheticEvent, FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { BaseSyntheticEvent } from 'react';
+import {  useNavigate } from 'react-router-dom';
 import { User } from '../../model/users';
 import * as userService from '../../services/userService'
 import { ApiClient } from '../../services/userService';
@@ -15,6 +15,7 @@ import FormInputText from '../FormFields/FormInputText';
 
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users/register');
+
 
 interface UserProps {
     user: Optional<User>;
@@ -44,7 +45,7 @@ const schema = yup.object({
 
 export function Register({ user }: UserProps) {
     const navigate = useNavigate();
-    const { control, handleSubmit, formState: { errors, isDirty, isValid } } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
 
         mode: 'onChange',
@@ -56,17 +57,29 @@ export function Register({ user }: UserProps) {
         event?.preventDefault();
 
         const newUser = { ...data }
-        // const data = Object.fromEntries(new FormData(e.currentTarget))
-        // const email = data.email + ''
-        // const firstName = data.firstName + ''
-        // const lastName = data.lastName + ''
-        // const password = data.password + ''
 
-        API_CLIENT.register({ ...newUser }).then((authData) => {
-            console.log(authData)
 
+       
+
+         API_CLIENT.register({ ...newUser })
+         .then((user)=>{
+
+            console.log(user)
+            localStorage.setItem('userId', user._id + '');
+            localStorage.setItem('email', user.email);
+            localStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
             navigate('/')
-        }).catch(err => console.log(err.message))
+         }).catch((err)=>{
+            console.log(err.message)
+            throw new Error(err.message)
+         })
+     
+
+
+
+
+
+
 
 
 
@@ -78,6 +91,7 @@ export function Register({ user }: UserProps) {
                 <article className='article-register'>
 
                     <Box component="form" sx={{
+
                         padding: '30px',
                         backgroundColor: '#ddf',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },

@@ -1,9 +1,20 @@
 import { GoogleMap, Marker, useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import { env } from "process";
 import React from "react";
-import { Form } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
+import { ApiTrip } from "../../services/tripService";
 import { containerStyle, options } from "../settings";
-import './CreateTrip.css'
+import './CreateTrip.css';
+
+import * as tripService from '../../services/tripService'
+import { TripCreate } from "../../model/trip";
+import { IdType } from "../../shared/common-types";
+
+
+
+
+const API_TRIP: ApiTrip<IdType,TripCreate> = new tripService.ApiTripImpl<IdType,TripCreate>('data/trips');
+
 let zoom = 8;
 
 let center = {
@@ -13,14 +24,16 @@ let center = {
 
 export const CreateTrip: React.FC = () => {
 
+    const _ownerId = localStorage.getItem('userId')
+
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
 
-
+    const navigate = useNavigate()
     const searchRef = React.useRef<HTMLInputElement | null>(null)
 
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
-     
+
         googleMapsApiKey: ''!,
         libraries: ['places']
     })
@@ -97,7 +110,22 @@ export const CreateTrip: React.FC = () => {
             data.lat = clickedPos.lat + ''
             data.lng = clickedPos.lng + ''
         }
-        console.log(data)
+        console.log(_ownerId)
+
+        if (_ownerId) {
+            data._ownerId = _ownerId
+        }
+
+        const newTrip = { ...data } as any as TripCreate
+        console.log(newTrip)
+
+        API_TRIP.create(newTrip).then((trip) => {
+            console.log(trip)
+
+             navigate('/')
+        }).catch((err) => {
+            console.log(err)
+        })
 
     }
 
@@ -126,7 +154,7 @@ export const CreateTrip: React.FC = () => {
                 </div>
 
                 <div className="form-create-div">
-                    <Form className="form-create" method="post" onSubmit={createTrip} >
+                    <form className="form-create" method="post" onSubmit={createTrip} >
                         <h2>ADD NEW TRIP</h2>
                         <span>
                             <label className="label-create" htmlFor="title">TITLE :</label>
@@ -179,7 +207,7 @@ export const CreateTrip: React.FC = () => {
                             <button type="submit" className="btnAdd">ADD TRIP</button>
 
                         </span>
-                    </Form>
+                    </form>
                 </div>
             </section>
         </>

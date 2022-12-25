@@ -1,13 +1,13 @@
 
 
 
-export type IdType = number | string;
+export type IdType = number | string ;
 
 
 
 export interface Identifiable<K> {
   
-    id: K;
+    _id?: K;
 }
 
 

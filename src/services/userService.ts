@@ -1,4 +1,4 @@
-import { UserRegister } from "../model/users";
+import {  UserRegister } from "../model/users";
 import { Identifiable } from "../shared/common-types";
 
 const baseUrl = 'http://localhost:3030';
@@ -8,13 +8,13 @@ const baseUrl = 'http://localhost:3030';
 
 
 export interface ApiClient<K, V extends Identifiable<K>> {
-    findAll(): Promise<V[]>;
-    findById(id: K): Promise<V>;
-    create(entityWithoutId: Omit<V, 'id'>): Promise<V>;
-    update(entity: V): Promise<V>;
+   
+  
     deleteById(id: K): Promise<void>;
     register(entityWithoutId: UserRegister): Promise<V>
+    login(email: K, password: K): Promise<V>;
     findByUsername(username: any): any;
+    logout(accessToken: string): Promise<V>;
 }
 
 
@@ -29,60 +29,87 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         }
 
     }
-    findAll(): Promise<V[]> {
-        return this.handleJsonRequest<V[]>(`${baseUrl}/${this.apiCollectionSuffix}`);
-    }
-    findById(id: K): Promise<V> {
-        return this.handleJsonRequest<V>(`${baseUrl}/${this.apiCollectionSuffix}/${id}`);
-    }
-    create(entityWithoutId: Omit<V, 'id'>): Promise<V> {
-
-        return this.handleJsonRequest<V>(`${baseUrl}/${this.apiCollectionSuffix}`, {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(entityWithoutId)
-        });
-    }
-    update(entity: V): Promise<V> {
-        return this.handleJsonRequest<V>(`${baseUrl}/${this.apiCollectionSuffix}/${entity.id}`, {
-            method: 'PUT',
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(entity)
-        });
-    }
+   
+   
+   
     async deleteById(id: K): Promise<void> {
         await this.handleJsonRequest<V>(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'DELETE',
         });
     }
 
+    async login(email: K, password: K): Promise<V> {
 
-
-    async register(entityWithoutId: UserRegister): Promise<V> {
-
-
-        return this.handleJsonRequest<V>(`${baseUrl}/${this.apiCollectionSuffix}`, {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`, {
             method: 'POST',
             headers: {
                 "content-type": "application/json"
             },
-            body: JSON.stringify(entityWithoutId)
+            body: JSON.stringify({ email, password })
         })
+
+
+        if (response.status >= 400) {
+            const result = await response.json()
+            throw new Error(result.message)
+        }
+
+        return response.json()
     }
 
+
+    async register(entityWithoutId: UserRegister): Promise<V> {
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(entityWithoutId)
+        })
+
+        if (response.status >= 400) {
+            const result = await response.json()
+            throw new Error(result.message)
+        }
+        return response.json()
+    }
+
+    async logout(accessToken: string) {
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`, {
+            method: 'POST',
+            headers: {
+                'X-Authorization': accessToken
+            }
+
+        })
+     
+        if (response.status === 204) {
+           return await response.json()
+        }
+
+      
+
+        
+    }
+
+
+
     private async handleJsonRequest<V>(url: string, options?: RequestInit): Promise<V> {
-        console.log(url,'---', options,'====')
+
         try {
             const postsResp = await fetch(url, options);
+            // console.log(await postsResp.json(),'========')
             if (postsResp.status >= 400) {
-                return Promise.reject(postsResp.body);
+                throw new Error(await postsResp.json())
+
+                // return Promise.reject(postsResp.body);
             }
             return postsResp.json() as Promise<V>;
         } catch (err) {
+            // // return Promise.reject(postsResp.body);
+            // console.log(JSON.parse(err))
             return Promise.reject(err);
         }
     }

@@ -1,10 +1,21 @@
+import { useLoaderData } from "react-router-dom";
+import { Trip } from "../../model/trip";
 import TripList from "./TripsList/TripsList";
 
-
+import './Trips.css'
 
 
 export default function Trips() {
+
+
+    const trips = useLoaderData() as Trip[]
+    console.log(trips)
+
     return (
-        <TripList />
+
+        <article className="article-all-trips">
+
+        <TripList trips={trips} />
+        </article>
     )
 }

@@ -10,46 +10,9 @@
 .div-login-form {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    border: 2px black solid;
-    border-radius: 12px;
-    padding: 60px 10px;
-    width: 40%;
+    align-items: center;   
+    max-width: 42%;
     height: 324px;
-    justify-content: space-around;
-    background-color: #8d868670;   
-    box-shadow: 3px 2px 5px black;
-}
-
-.login-input {
-    margin: 10px auto;
-    padding: 5px;
-    border-radius: 5px;
-    width: 44%;
-}
-
-.login-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.btnSubmit {
-    width: 40%;
-    cursor: pointer;
-    width: 50%;
-    cursor: pointer;
-    background-color:#181616bd;
-    color: white;
-}
-
-#a {
-    color: black;
-}
-
-.login-input {
-    width: 200px;
    
-        
-
 }
+

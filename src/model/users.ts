@@ -5,19 +5,19 @@ import { Identifiable, IdType } from "../shared/common-types";
 export class User implements Identifiable<IdType> {
     constructor(
 
-        public id: IdType,
+        public _id: IdType,
         public email: string,
         public firstName: string,
         public lastName: string,
         public password: string,
-
+        public accessToken?: string
 
     ) { }
 }
 
 
 
-export class UserRegister implements Omit<User, 'id'>{
+export class UserRegister implements Omit<User, '_id'>{
     constructor(
 
         public email: string,

@@ -1,10 +1,26 @@
+import { Trip } from '../../../model/trip';
 import TripCard from './TripCard/TripCard'
 import './TripsList.css'
 
 
 
-export default function TripList() {
+interface TripsListProps {
+    trips: Trip[];
+
+}
+
+
+export default function TripList({ trips }: TripsListProps) {
+
+
+
     return (
-        <TripCard />
+
+        <>
+
+            {trips.length > 0 ?
+                trips.map(x => <TripCard key={x._id} trip={x} />)
+                : <h1>WELCOME!</h1>}
+        </>
     )
 }
