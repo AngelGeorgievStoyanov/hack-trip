@@ -1,4 +1,4 @@
-import { TripCreate } from "../model/trip";
+import { Trip, TripCreate } from "../model/trip";
 import { Identifiable } from "../shared/common-types";
 
 const baseUrl = 'http://localhost:3030';
@@ -8,7 +8,7 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
     findAll(): Promise<V[]>;
     findById(id: K): Promise<V>;
     create(entityWithoutId: TripCreate): Promise<any>;
-   
+    update(id: K, entity: Trip): Promise<V>;
     deleteById(id: K): Promise<void>;
 }
 
@@ -62,16 +62,34 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         });
 
 
-        if (response.status >= 400) {
-            const result = await response.json()
-            console.log(result)
-            
-            throw new Error(result.message)
-        } else if (response.status === 204) {
-            
-            return  response.json()
-        } 
+        if (response.status === 204) {
+            return response.json()
 
+
+        } else if (response.status >= 400) {
+
+            const res = await response.json()
+
+            return res
+        }
+
+    }
+
+
+    async update(id: K, entity: Trip): Promise<V> {
+       
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(entity)
+        });
+
+        const result = await response.json()
+
+
+        return result
     }
 
 

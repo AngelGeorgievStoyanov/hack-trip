@@ -9,7 +9,6 @@ export default function Trips() {
 
 
     const trips = useLoaderData() as Trip[]
-    console.log(trips)
 
     return (
 

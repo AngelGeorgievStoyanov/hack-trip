@@ -116,12 +116,3 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 }
 
 
-// export const register = (email: string, firstName: string, lastName: string, password: string) => {
-//     return fetch(`${baseUrl}/register`, {
-//         method: 'POST',
-//         headers: {
-//             'content-type': 'application/json'
-//         },
-//         body: JSON.stringify({ email, firstName, lastName, password })
-//     }).then(res => res.json())
-// }

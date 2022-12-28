@@ -1,7 +1,6 @@
 import { GoogleMap, Marker, useJsApiLoader, Autocomplete } from "@react-google-maps/api";
-import { env } from "process";
 import React from "react";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ApiTrip } from "../../services/tripService";
 import { containerStyle, options } from "../settings";
 import './CreateTrip.css';
@@ -13,7 +12,7 @@ import { IdType } from "../../shared/common-types";
 
 
 
-const API_TRIP: ApiTrip<IdType,TripCreate> = new tripService.ApiTripImpl<IdType,TripCreate>('data/trips');
+const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
 
 let zoom = 8;
 
@@ -22,7 +21,8 @@ let center = {
     lng: 23.321590139866355
 }
 
-export const CreateTrip: React.FC = () => {
+export function CreateTrip() {
+
 
     const _ownerId = localStorage.getItem('userId')
 
@@ -103,31 +103,64 @@ export const CreateTrip: React.FC = () => {
 
     console.log(clickedPos, 'state position')
 
-    const createTrip = (e: React.FormEvent<HTMLFormElement>) => {
+    const createTripSubmitHandler = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
         e.preventDefault()
-        const data = Object.fromEntries(new FormData(e.currentTarget))
+
+        let current: boolean
+        let target
+        if (e.currentTarget.tagName === 'BUTTON' && e.currentTarget !== undefined) {
+            current = true
+            target = e.currentTarget.parentElement?.parentElement as HTMLFormElement
+
+        } else {
+            current = false
+            target = e.currentTarget as HTMLFormElement
+        }
+
+
+
+
+        const data = Object.fromEntries(new FormData(target))
         if (clickedPos) {
             data.lat = clickedPos.lat + ''
             data.lng = clickedPos.lng + ''
         }
-        console.log(_ownerId)
 
         if (_ownerId) {
             data._ownerId = _ownerId
         }
 
         const newTrip = { ...data } as any as TripCreate
-        console.log(newTrip)
 
         API_TRIP.create(newTrip).then((trip) => {
-            console.log(trip)
 
-             navigate('/')
+            if (current === true) {
+                navigate(`/trip/points/${trip._id}`)
+
+            } else {
+
+                navigate(`/trip/details/${trip._id}`)
+            }
+
         }).catch((err) => {
             console.log(err)
         })
 
+
     }
+
+
+    const addPoints = (e: React.MouseEvent) => {
+        e.preventDefault()
+
+        e as any as React.FormEvent<HTMLFormElement>
+
+        createTripSubmitHandler(e)
+
+    }
+
+
+
 
     return (
         <>
@@ -154,7 +187,7 @@ export const CreateTrip: React.FC = () => {
                 </div>
 
                 <div className="form-create-div">
-                    <form className="form-create" method="post" onSubmit={createTrip} >
+                    <form className="form-create" method="post" onSubmit={createTripSubmitHandler} >
                         <h2>ADD NEW TRIP</h2>
                         <span>
                             <label className="label-create" htmlFor="title">TITLE :</label>
@@ -205,6 +238,7 @@ export const CreateTrip: React.FC = () => {
 
                         <span>
                             <button type="submit" className="btnAdd">ADD TRIP</button>
+                            <button type="button" onClick={addPoints} className="btnAdd">ADD POINT`S FOR THE TRIP</button>
 
                         </span>
                     </form>

@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
 import { IdType } from "../../shared/common-types";
@@ -7,6 +7,7 @@ import * as tripService from '../../services/tripService'
 import './TripDetails.css'
 
 export default function TripDetails() {
+    let pointOfTrip = 1;
 
     const navigate = useNavigate()
 
@@ -45,10 +46,13 @@ export default function TripDetails() {
                 <h4 className="info">Destination: {trip.destination}</h4>
                 <p>Description : {trip.description}</p>
 
+                <button type="button">
+                    <Link to={`/trip/points/${trip._id}`} className="Btn">ADD POINTS FOR YOUR TRIP</Link>
+                </button>
 
 
                 <button className="Btn">ADD COMMENT</button>
-                <button className="Btn" >EDIT TRIP</button>
+                <button className="Btn"><Link to={`/trip/edit/${trip._id}`} className="Btn">EDIT TRIP</Link></button>
                 <button className="Btn" onClick={deleteClickHandler}>DELETE TRIP</button>
                 <button className="Btn">BACK</button>
 
@@ -56,6 +60,7 @@ export default function TripDetails() {
 
 
             </article>
+
             <article>
                 <img className="section-details-img" src={trip.imageUrl} alt="Trip" />
 
