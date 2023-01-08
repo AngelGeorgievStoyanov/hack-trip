@@ -20,11 +20,18 @@ import { Point } from './model/point';
 import { ApiPoint } from './services/pointService';
 import * as pointService from './services/pointService'
 import PointEdit from './components/TripPoints/PointEdit/PointEdit';
+import CreateComment from './components/CreateComment/CreateComment';
+import EditComment from './components/EditComment/EditComment';
+import { ApiComment } from './services/commentService';
+import { Comment } from './model/comment';
+import * as commentService from './services/commentService'
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
 
 const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
+
+const API_COMMENT: ApiComment<IdType, Comment> = new commentService.ApiCommentImpl<IdType, Comment>('data/comments')
 
 export async function tripsLoader() {
 
@@ -37,7 +44,7 @@ export async function tripLoader({ params }: LoaderFunctionArgs) {
   if (params.tripId) {
     return API_TRIP.findById(params.tripId);
   } else {
-    throw new Error(`Invalid or missing post ID`);
+    throw new Error(`Invalid or missing trip ID`);
   }
 }
 
@@ -47,7 +54,7 @@ export async function pointsLoader({ params }: LoaderFunctionArgs) {
 
     return API_POINT.findByTripId(params.tripId)
   } else {
-    throw new Error(`Invalid or missing post ID`);
+    throw new Error(`Invalid or missing points ID`);
   }
 
 }
@@ -58,9 +65,18 @@ export async function pointLoaderById({ params }: LoaderFunctionArgs) {
 
     return API_POINT.findByPointId(params.pointId)
   } else {
-    throw new Error(`Invalid or missing post ID`);
+    throw new Error(`Invalid or missing point ID`);
   }
 
+}
+
+export async function commentLoaderById({ params }: LoaderFunctionArgs) {
+  if (params.commentId) {
+    return API_COMMENT.findById(params.commentId)
+  } else {
+    throw new Error(`Invalid or missing comment ID`);
+
+  }
 }
 
 
@@ -121,7 +137,7 @@ const router = createBrowserRouter([
       {
         path: '/trip/details/:tripId',
         loader: tripLoader,
-        element: <TripDetails />
+        element: <TripDetails />,
       },
       {
         path: '/trip/edit/:tripId',
@@ -137,6 +153,15 @@ const router = createBrowserRouter([
         path: '/points/edit/:pointId',
         loader: pointLoaderById,
         element: <PointEdit />
+      },
+      {
+        path: '/comments/add-comment/:tripId',
+        element: <CreateComment />
+      },
+      {
+        path: '/comments/edit/:commentId',
+        loader: commentLoaderById,
+        element: <EditComment />
       }
     ]
   }

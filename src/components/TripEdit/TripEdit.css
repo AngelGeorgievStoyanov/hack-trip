@@ -1,25 +1,24 @@
 .sectiom-edit-trip {
-    min-height: 100vh;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-    
- }
- 
- .form-edit-trip {
-     display: flex;
-     flex-direction: column;
-     align-items: flex-end;
-     border: solid 2px;
-     border-radius: 9px;
-     width: 450px;
-     height: 550px;
-     justify-content: space-around;
-     padding-right: 40px;
-     background-color: #8d868633;   
-     box-shadow: 3px 2px 5px black;
- }
- 
- .edit-trip{
-     cursor: pointer;
- }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+.form-edit-trip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    border: solid 2px;
+    border-radius: 9px;
+    width: 450px;
+    height: 550px;
+    justify-content: space-around;
+    padding-right: 40px;
+    background-color: #8d868633;
+    box-shadow: 3px 2px 5px black;
+}
+
+.edit-trip {
+    cursor: pointer;
+}

@@ -2,7 +2,10 @@ import { Autocomplete, GoogleMap, Marker, MarkerF, useJsApiLoader } from "@react
 import React from "react";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { Point } from "../../../model/point";
+import { IdType } from "../../../shared/common-types";
 import { containerStyle, options } from "../../settings";
+import * as pointService from '../../../services/pointService'
+import { ApiPoint } from "../../../services/pointService";
 
 let zoom = 8;
 let center = {
@@ -11,23 +14,24 @@ let center = {
 }
 
 
+const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
+const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
+const googleKey = process.env.REACT_APP_GOOGLE_KEY
+
 export default function PointEdit() {
 
     const point = useLoaderData() as Point;
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
-    console.log(point)
 
     const [initialPoint, setInitialPoint] = React.useState<google.maps.LatLngLiteral>({ lat: Number(point.lat), lng: Number(point.lng) } as google.maps.LatLngLiteral)
 
     const [visible, setVisible] = React.useState(true)
 
     let positionPoint
-
-    if (point.lng !== undefined && point.lat !== undefined) {
+    if (point.lng !== undefined && point.lat !== undefined && (clickedPos?.lat === undefined)) {
 
         positionPoint = { lat: Number(point.lat), lng: Number(point.lng) }
         center = { lat: Number(point.lat), lng: Number(point.lng) }
-        console.log(center, '-----center')
 
     }
     let pointNumber = 1
@@ -42,8 +46,8 @@ export default function PointEdit() {
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
 
-        googleMapsApiKey: ''!,
-        libraries: ['places']
+        googleMapsApiKey: googleKey!,
+        libraries,
     })
 
 
@@ -65,6 +69,8 @@ export default function PointEdit() {
             setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
             setVisible(true)
 
+            setInitialPoint({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+
         }
 
 
@@ -77,8 +83,11 @@ export default function PointEdit() {
 
         let findAddress = ''
         const inpName = document.getElementById('inputAddPointName') as HTMLInputElement
+
+
         if (e.currentTarget.textContent === 'FIND IN MAP') {
             findAddress = inpName.value
+
         } else if (searchRef.current?.value === '') {
             return
         } else {
@@ -93,11 +102,14 @@ export default function PointEdit() {
 
 
         if (result) {
-            zoom = 16
-            center = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
-            setClickedPos({ lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() })
+            let searchPosition = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
+            zoom = 12
+            center = searchPosition
+            setClickedPos(searchPosition)
             setVisible(true)
-            console.log(visible, '----visible---')
+            setInitialPoint(searchPosition)
+
+
         }
 
 
@@ -107,8 +119,8 @@ export default function PointEdit() {
     }
 
     const findInMap = (e: React.MouseEvent) => {
-        let inpName = document.getElementById('inputAddPointName') as HTMLInputElement
-        console.log(inpName.value)
+
+
 
         searchInp(e)
     }
@@ -129,6 +141,8 @@ export default function PointEdit() {
             lng: 23.321590139866355
         }
         zoom = 8
+
+
     }
 
 
@@ -146,35 +160,37 @@ export default function PointEdit() {
         }
 
 
-        // if (idTrip) {
-        //     data._ownerTripId = idTrip
-        // }
 
 
 
 
 
-        const newPoint = { ...data };
 
-        newPoint.pointNumber = pointNumber
+
+
+        const editedPoint = { ...data };
+
+        editedPoint.pointNumber = pointNumber
         pointNumber++
 
-        if (newPoint.name.split(',').length > 0) {
-            newPoint.name = newPoint.name.split(',')[0]
+        if (editedPoint.name.split(',').length > 1) {
+            editedPoint.name = editedPoint.name.split(',')[0]
+
+        } else if (editedPoint.name.split(' - ').length > 1) {
+            editedPoint.name = editedPoint.name.split(' - ')[0]
 
         }
 
-        const form = e.currentTarget as HTMLFormElement
 
 
-        // API_POINT.create(newPoint).then((point) => {
-        //     setClickedPos(undefined)
-        //     form.reset()
+        API_POINT.update(point._id, editedPoint).then((point) => {
 
-        //     navigate(`/trip/points/${idTrip}`)
-        // }).catch((err) => {
-        //     console.log(err)
-        // })
+            navigate(`/trip/points/${point._ownerTripId}`)
+
+        }).catch((err) => {
+            console.log(err)
+        })
+
     }
 
     return (
@@ -189,7 +205,7 @@ export default function PointEdit() {
                 onUnmount={onUnmount}
                 onClick={onMapClick}
             >
-                {positionPoint?.lat ? <MarkerF visible={visible} draggable={true} position={initialPoint} /> : clickedPos?.lat ? <MarkerF visible={visible} position={clickedPos} /> : null}
+                {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} /> : clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP}  visible={visible} position={clickedPos} /> : null}
             </GoogleMap>
             <div className="div-search-btn">
 

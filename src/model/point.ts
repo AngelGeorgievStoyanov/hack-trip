@@ -35,3 +35,4 @@ export class PointCreate implements Omit<Point, '_id'> {
     ) { }
 
 }
+

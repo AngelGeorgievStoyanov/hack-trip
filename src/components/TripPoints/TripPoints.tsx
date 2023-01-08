@@ -15,13 +15,15 @@ import PointList from "./PointList/PointList";
 
 
 const API_POINT: ApiPoint<IdType, PointCreate> = new pointService.ApiPointImpl<IdType, PointCreate>('data/points');
-
+const googleKey = process.env.REACT_APP_GOOGLE_KEY
 let zoom = 8;
 
 let center = {
     lat: 42.697866831005435,
     lng: 23.321590139866355
 }
+
+const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
 export function CreateTrip() {
 
@@ -42,8 +44,8 @@ export function CreateTrip() {
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
 
-        googleMapsApiKey: ''!,
-        libraries: ['places']
+        googleMapsApiKey: googleKey!,
+        libraries,
     })
 
 
@@ -63,6 +65,7 @@ export function CreateTrip() {
         if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
 
             setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+          
         }
 
 
@@ -104,9 +107,7 @@ export function CreateTrip() {
     }
 
     const findInMap = (e: React.MouseEvent) => {
-        let inpName = document.getElementById('inputAddPointName') as HTMLInputElement
-        console.log(inpName.value)
-
+       
         searchInp(e)
     }
 
@@ -162,7 +163,12 @@ export function CreateTrip() {
         API_POINT.create(newPoint).then((point) => {
             setClickedPos(undefined)
             form.reset()
+            center = {
+                lat: 42.697866831005435,
+                lng: 23.321590139866355
+            }
 
+            zoom=8
             navigate(`/trip/points/${idTrip}`)
         }).catch((err) => {
             console.log(err)
@@ -192,7 +198,7 @@ export function CreateTrip() {
                         onUnmount={onUnmount}
                         onClick={onMapClick}
                     >
-                        {clickedPos?.lat ? <Marker position={clickedPos} /> : null}
+                        {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} /> : null}
                     </GoogleMap>
                     <div className="div-search-btn">
                         <Autocomplete>

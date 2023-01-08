@@ -1,4 +1,4 @@
-import { GoogleMap, Marker, useJsApiLoader, Autocomplete } from "@react-google-maps/api";
+import { GoogleMap, Marker, useJsApiLoader, Autocomplete, Polyline, MarkerF } from "@react-google-maps/api";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiTrip } from "../../services/tripService";
@@ -21,6 +21,10 @@ let center = {
     lng: 23.321590139866355
 }
 
+const googleKey = process.env.REACT_APP_GOOGLE_KEY
+const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
+
+
 export function CreateTrip() {
 
 
@@ -34,8 +38,8 @@ export function CreateTrip() {
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
 
-        googleMapsApiKey: ''!,
-        libraries: ['places']
+        googleMapsApiKey:googleKey! ,
+        libraries,
     })
 
 
@@ -174,8 +178,10 @@ export function CreateTrip() {
                     onLoad={onLoad}
                     onUnmount={onUnmount}
                     onClick={onMapClick}
+                   
                 >
-                    {clickedPos?.lat ? <Marker position={clickedPos} /> : null}
+                
+                    {clickedPos?.lat ? <Marker  position={clickedPos} /> : null}
                 </GoogleMap>
                 <div className="div-search-btn">
                     <Autocomplete>

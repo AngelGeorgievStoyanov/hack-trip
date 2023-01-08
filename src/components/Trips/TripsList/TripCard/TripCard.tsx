@@ -22,7 +22,7 @@ export default function TripCard({ trip }: TripCardProps) {
                         <p>Short description : {trip.description}</p>
                         <img className="trip-item-image" src={trip.imageUrl} alt="Trip" />
 
-                        <p>LIKES :</p>
+                        <p>LIKES :{trip.likes.length}</p>
                         <Link to={`/trip/details/${trip._id}`} className="btnDetails">Details</Link>
                     </li>
                 </div>

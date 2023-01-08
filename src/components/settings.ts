@@ -12,8 +12,7 @@ export const options = {
  
    
     zoomControl: true,
-
-}
+   }
 
 
 

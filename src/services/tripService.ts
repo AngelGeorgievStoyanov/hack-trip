@@ -60,18 +60,13 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
             method: 'DELETE',
 
         });
+ 
+        if (response.status >= 400) {
+            const result = await response.json()
 
-
-        if (response.status === 204) {
-            return response.json()
-
-
-        } else if (response.status >= 400) {
-
-            const res = await response.json()
-
-            return res
+            throw new Error(result.message)
         }
+        return await response.json()
 
     }
 

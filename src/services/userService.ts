@@ -1,4 +1,4 @@
-import {  UserRegister } from "../model/users";
+import { User, UserRegister } from "../model/users";
 import { Identifiable } from "../shared/common-types";
 
 const baseUrl = 'http://localhost:3030';
@@ -6,10 +6,9 @@ const baseUrl = 'http://localhost:3030';
 
 
 
-
 export interface ApiClient<K, V extends Identifiable<K>> {
-   
-  
+
+
     deleteById(id: K): Promise<void>;
     register(entityWithoutId: UserRegister): Promise<V>
     login(email: K, password: K): Promise<V>;
@@ -29,9 +28,9 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         }
 
     }
-   
-   
-   
+
+
+
     async deleteById(id: K): Promise<void> {
         await this.handleJsonRequest<V>(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'DELETE',
@@ -53,7 +52,7 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
             const result = await response.json()
             throw new Error(result.message)
         }
-
+    
         return response.json()
     }
 
@@ -84,14 +83,14 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
             }
 
         })
-     
+
         if (response.status === 204) {
-           return await response.json()
+            return await response.json()
         }
 
-      
 
-        
+
+
     }
 
 
@@ -100,16 +99,13 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
         try {
             const postsResp = await fetch(url, options);
-            // console.log(await postsResp.json(),'========')
             if (postsResp.status >= 400) {
                 throw new Error(await postsResp.json())
 
-                // return Promise.reject(postsResp.body);
             }
             return postsResp.json() as Promise<V>;
         } catch (err) {
-            // // return Promise.reject(postsResp.body);
-            // console.log(JSON.parse(err))
+
             return Promise.reject(err);
         }
     }

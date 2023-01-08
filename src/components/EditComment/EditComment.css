@@ -1,0 +1,32 @@
+.div-edit-coment {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+   
+}
+
+.section-edit-comment {
+    display: flex;
+    justify-content: center;
+   
+}
+
+.form-edit-comment {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    border: solid 1px black;
+    border-radius: 9px;
+    padding: 20px;
+    height: 202px;
+    width: 260px;
+    background-color: #8d868670;   
+    box-shadow: 3px 2px 5px black;
+}
+
+.btnEdit{
+    cursor: pointer;
+}
