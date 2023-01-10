@@ -31,27 +31,40 @@ const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualiz
 
 export default function TripDetails() {
 
-    const userId = localStorage.getItem('userId') as string
+
+
+    
+    const trip = useLoaderData() as Trip;
+    const userId = sessionStorage.getItem('userId') as string
     const navigate = useNavigate()
 
     const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
     const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
-
-
     const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
-    const [points, setPoints] = useState<Point[]>()
+
+
+    const [points, setPoints] = useState<Point[]>([])
     const [point, setPoint] = useState<Point>()
     const [pointNumber, setPointNumber] = useState<number>()
     const [visibile, setVisibile] = useState(false)
-    const trip = useLoaderData() as Trip;
     const [comments, setComments] = useState<Comment[]>([])
-    const [liked, setLiked] = useState<boolean>()
+    const [liked, setLiked] = useState<boolean>(false)
 
-    
+
+
+
+    if ((trip.lat !== 'undefined') && (trip.lng !== 'undefined')) {
+
+
+        center = {
+            lat: Number(trip.lat),
+            lng: Number(trip.lng)
+
+
+        }
+
+    }
     useEffect(() => {
-
-        trip.likes.find((x) => x === userId) ? setLiked(true) : setLiked(false)
-
 
 
         API_POINT.findByTripId(trip._id).then((data) => {
@@ -66,7 +79,6 @@ export default function TripDetails() {
                 }
             }
         })
-
 
         API_COMMENT.findByTripId(trip._id).then(async (data) => {
             if (data) {
@@ -126,7 +138,7 @@ export default function TripDetails() {
 
     const mapRef = React.useRef<google.maps.Map | null>(null)
 
-    const pathPoints = points?.map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } })
+    const pathPoints = (points?.length) && (points !== undefined) ? points?.map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : []
     const onLoad = (map: google.maps.Map): void => {
         mapRef.current = map
 
@@ -235,7 +247,6 @@ export default function TripDetails() {
 
     }
     const onEditComment = async (comment: Comment) => {
-        console.log(comment, '---coment--')
         navigate(`/comments/edit/${comment._id}`)
 
 
@@ -243,21 +254,38 @@ export default function TripDetails() {
     }
 
     const onLikeTrip = () => {
-        console.log(trip)
-        console.log(userId)
+       
+        setLiked(true)
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
             trip.likes.push(userId)
             console.log(trip)
 
-            API_TRIP.update(trip._id, trip).then((data) => {
+            API_TRIP.updateLikes(trip._id, trip).then((data) => {
                 console.log(data)
-                setLiked(true)
+
             }).catch((err) => {
                 console.log(err)
             })
 
         }
 
+    }
+
+    const reportClickHandler = () => {
+        console.log(trip)
+        console.log(userId)
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+            trip.reportTrip?.push(userId)
+
+
+            API_TRIP.reportTrip(trip._id, trip).then((data) => {
+                console.log(data)
+
+            }).catch((err) => {
+                console.log(err)
+            })
+
+        }
     }
 
     return (
@@ -275,7 +303,9 @@ export default function TripDetails() {
                     <p>Description : {trip?.description}</p>
 
                     <button type="button">
-                        <Link to={`/trip/points/${trip?._id}`} className="Btn">ADD POINTS FOR YOUR TRIP</Link>
+                        {trip._ownerId === userId ?
+                            <Link to={`/trip/points/${trip?._id}`} className="Btn">ADD OR EDIT POINTS FOR YOUR TRIP</Link> :
+                            (points !== undefined && points.length > 0) ? <Link to={`/trip/points/${trip?._id}`} className="Btn">FOR THIS TRIP HAVE {points.length} POINTS</Link> : <h4 className="h4-points">FOR THIS TRIP DONT HAVE POINTS</h4>}
                     </button>
 
 
@@ -284,8 +314,9 @@ export default function TripDetails() {
                     </button>
                     <button className="btn"><Link to={`/trip/edit/${trip?._id}`} className="btn">EDIT TRIP</Link></button>
                     <button className="btn" onClick={deleteClickHandler}>DELETE TRIP</button>
+                    <button className="btn" onClick={reportClickHandler}>REPORT TRIP</button>
                     <button className="btn"><Link to={'/trips'}>BACK</Link></button>
-                    {liked === true ? <button disabled>YOU LIKED THIS TRIP</button> : <button onClick={onLikeTrip}>LIKE TRIP</button>}
+                    {trip.likes.some((x) => x === userId) || (liked === true) ? <button disabled>YOU LIKED THIS TRIP</button> : <button onClick={onLikeTrip}>LIKE TRIP</button>}
 
                     {comments?.length ? <button onClick={() => onLoadComments(undefined)} className="btn">FOR THIS TRIP HAVE {comments?.length} COMMENTS, SEE ALL COMMENTS</button> : <h4>FOR THIS TRIP DON'T HAVE COMMENT</h4>}
                     {comments.length > 0 ? <button onClick={onHideComments} className="btn-hide" style={{ display: 'none' }} >HIDE COMMENTS</button> : ''}
@@ -302,13 +333,15 @@ export default function TripDetails() {
             <section style={{ display: 'none' }} className="section-trip-comments">
                 {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} />) : ''}
             </section>
+
+
             <section>
 
 
                 <GoogleMap
                     mapContainerStyle={containerStyle}
                     options={options as google.maps.MapOptions}
-                    center={pathPoints ? pathPoints[0] : center}
+                    center={(pathPoints?.length > 0) && (pathPoints !== undefined) ? pathPoints[0] : center}
                     zoom={zoom}
                     onLoad={onLoad}
                     onUnmount={onUnmount}
@@ -317,10 +350,13 @@ export default function TripDetails() {
 
                 >
                     {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                    {points ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={i + 1 + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : null}
+                    {/* {points ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={i + 1 + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : null} */}
+                    {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={i + 1 + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} />}
                 </GoogleMap>
 
             </section>
+            {/* : '' */}
+            {/* } */}
             <section id="point-section-add"></section>
         </>
     )

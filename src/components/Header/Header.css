@@ -14,12 +14,20 @@
 .nav-li{
     margin: 15px 30px;
     list-style: none;
+    color: white;
   
     
 }
 
 
-a{
+li.nav-li>a{
     text-decoration: none;
     color: white;
+}
+
+.btn-logout{
+    background-color: black;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
 }

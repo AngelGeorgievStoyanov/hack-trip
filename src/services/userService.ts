@@ -52,7 +52,7 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
             const result = await response.json()
             throw new Error(result.message)
         }
-    
+
         return response.json()
     }
 
@@ -85,7 +85,9 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         })
 
         if (response.status === 204) {
-            return await response.json()
+
+          
+            return response.json()
         }
 
 

@@ -1,12 +1,12 @@
-import { Identifiable, IdType } from "../shared/common-types";
+import { Identifiable, IdType, toIsoDate } from "../shared/common-types";
 
 
 export enum TripTransport {
     Car = 1, Bus, Aircraft, 'Another type'
 }
 
-export enum TripTipeOfGroup{
-    Family=1, 'Family with children', Friends, 'Another type'
+export enum TripTipeOfGroup {
+    Family = 1, 'Family with children', Friends, 'Another type'
 }
 
 export class Trip implements Identifiable<IdType> {
@@ -26,7 +26,9 @@ export class Trip implements Identifiable<IdType> {
         public _ownerId: string,
         public lat: string,
         public lng: string,
-
+        public timeCreated: string = toIsoDate(new Date()),
+        public timeEdited?: string,
+        public reportTrip?: string[],
     ) { }
 
 }
@@ -49,6 +51,9 @@ export class TripCreate implements Omit<Trip, '_id'>{
         public _ownerId: string,
         public lat: string,
         public lng: string,
+        public timeCreated: string = toIsoDate(new Date()),
+        public timeEdited?: string,
+        public reportTrip?: string[],
 
     ) { }
 }

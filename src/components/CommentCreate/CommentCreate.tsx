@@ -5,18 +5,19 @@ import { IdType } from "../../shared/common-types";
 
 import * as commentService from '../../services/commentService'
 
-import './CreateComment.css'
+import './CommentCreate.css'
 
 
 
 const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
 
 
+
 export default function CreateComment() {
 
     const idTrip = useParams().tripId
-    const userId = localStorage.getItem('userId')
-    const nameAuthor = localStorage.getItem('email')
+    const userId = sessionStorage.getItem('userId')
+    const nameAuthor = sessionStorage.getItem('email')
 
 
     const navigate = useNavigate()
@@ -45,7 +46,11 @@ export default function CreateComment() {
             })
         }
 
+
+
     }
+
+
 
     return (
         <div className="div-add-coment">
@@ -57,6 +62,7 @@ export default function CreateComment() {
                     <button className="add-comment">
                         <Link to={`/trip/details/${idTrip}`} className="btnDetails">BACK</Link>
                     </button>
+                 
                 </form>
             </section>
         </div>

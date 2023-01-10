@@ -28,7 +28,7 @@ export default function PointEdit() {
     const [visible, setVisible] = React.useState(true)
 
     let positionPoint
-    if (point.lng !== undefined && point.lat !== undefined && (clickedPos?.lat === undefined)) {
+    if (point.lng !== 'undefined' && point.lat !== 'undefined' && (clickedPos?.lat === undefined)) {
 
         positionPoint = { lat: Number(point.lat), lng: Number(point.lng) }
         center = { lat: Number(point.lat), lng: Number(point.lng) }
@@ -154,7 +154,9 @@ export default function PointEdit() {
     const createTripSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const data = Object.fromEntries(new FormData(e.currentTarget)) as any as Point;
-        if (clickedPos) {
+        data.lat = point.lat
+        data.lng = point.lng
+        if (clickedPos?.lat!==undefined) {
             data.lat = clickedPos.lat + ''
             data.lng = clickedPos.lng + ''
         }
@@ -162,12 +164,11 @@ export default function PointEdit() {
 
 
 
-
-
-
-
-
-
+        
+        
+        
+        
+        
         const editedPoint = { ...data };
 
         editedPoint.pointNumber = pointNumber
@@ -205,7 +206,7 @@ export default function PointEdit() {
                 onUnmount={onUnmount}
                 onClick={onMapClick}
             >
-                {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} /> : clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP}  visible={visible} position={clickedPos} /> : null}
+                {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} /> : clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos} /> : null}
             </GoogleMap>
             <div className="div-search-btn">
 

@@ -6,10 +6,12 @@ import FormInputText from '../FormFields/FormInputText';
 import * as userService from '../../services/userService'
 
 import './Login.css'
-import { BaseSyntheticEvent } from 'react';
+import { BaseSyntheticEvent, useContext } from 'react';
 import { ApiClient } from '../../services/userService';
 import { IdType } from '../../shared/common-types';
 import { User } from '../../model/users';
+import { LoginContext } from '../../App';
+
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users/login');
 
@@ -22,7 +24,10 @@ type FormData = {
 
 export function Login() {
     const navigate = useNavigate();
-    const { control, handleSubmit, formState: { errors} } = useForm<FormData>({
+
+    const loginContext = useContext(LoginContext)
+
+    const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
 
         mode: 'onChange',
@@ -42,9 +47,14 @@ export function Login() {
             .then((user) => {
 
                 console.log(user)
-                localStorage.setItem('userId', user._id + '');
-                localStorage.setItem('email', user.email);
-                localStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
+                sessionStorage.setItem('userId', user._id + '');
+                sessionStorage.setItem('email', user.email);
+                sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
+                if (user !== undefined) {
+
+
+                    loginContext?.setUserL({ ...user })
+                }
                 navigate('/')
             }).catch((err) => {
                 console.log(err.message)

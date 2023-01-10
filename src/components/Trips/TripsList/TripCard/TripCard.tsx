@@ -12,6 +12,11 @@ interface TripCardProps {
 
 
 export default function TripCard({ trip }: TripCardProps) {
+
+    const userId = sessionStorage.getItem('userId')
+
+
+
     return (
         <>
             <section className="section-trip" id={trip._id + ''}>
@@ -23,7 +28,7 @@ export default function TripCard({ trip }: TripCardProps) {
                         <img className="trip-item-image" src={trip.imageUrl} alt="Trip" />
 
                         <p>LIKES :{trip.likes.length}</p>
-                        <Link to={`/trip/details/${trip._id}`} className="btnDetails">Details</Link>
+                        {userId ? <Link to={`/trip/details/${trip._id}`} className="btnDetails">Details</Link>:'' }
                     </li>
                 </div>
             </section>

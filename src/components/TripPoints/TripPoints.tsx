@@ -34,7 +34,7 @@ export function CreateTrip() {
     let pointNumber = 1
 
 
-    const _ownerId = localStorage.getItem('userId')
+    const _ownerId = sessionStorage.getItem('userId')
 
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
 
@@ -65,7 +65,7 @@ export function CreateTrip() {
         if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
 
             setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
-          
+            console.log(clickedPos)
         }
 
 
@@ -107,7 +107,7 @@ export function CreateTrip() {
     }
 
     const findInMap = (e: React.MouseEvent) => {
-       
+
         searchInp(e)
     }
 
@@ -138,7 +138,6 @@ export function CreateTrip() {
             data.lng = clickedPos.lng + ''
         }
 
-
         if (idTrip) {
             data._ownerTripId = idTrip
         }
@@ -162,13 +161,14 @@ export function CreateTrip() {
 
         API_POINT.create(newPoint).then((point) => {
             setClickedPos(undefined)
+            console.log(point)
             form.reset()
             center = {
-                lat: 42.697866831005435,
-                lng: 23.321590139866355
+                lat: Number(point.lat),
+                lng: Number(point.lng)
             }
 
-            zoom=8
+            zoom = 8
             navigate(`/trip/points/${idTrip}`)
         }).catch((err) => {
             console.log(err)

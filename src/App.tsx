@@ -1,5 +1,5 @@
 import './App.css';
-import { createBrowserRouter, LoaderFunctionArgs, Outlet, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, LoaderFunctionArgs, Outlet, RouterProvider, useNavigate } from 'react-router-dom';
 import Home from './components/Home/Home';
 import { Login } from './components/Login/Login';
 import { Register } from './components/Register/Register';
@@ -7,8 +7,7 @@ import Trips from './components/Trips/Trips';
 import Header from './components/Header/Header';
 import ErrorBoundary from './utils/ErrorBoundary';
 import Footer from './components/Footer/Footer';
-import Logout from './components/Logout/Logout';
-import CreateTrip from './components/CreateTrip/CreateTrip';
+import CreateTrip from './components/TripCreate/TripCreate';
 import { Trip } from './model/trip';
 import * as tripService from './services/tripService'
 import { ApiTrip } from './services/tripService';
@@ -20,11 +19,14 @@ import { Point } from './model/point';
 import { ApiPoint } from './services/pointService';
 import * as pointService from './services/pointService'
 import PointEdit from './components/TripPoints/PointEdit/PointEdit';
-import CreateComment from './components/CreateComment/CreateComment';
-import EditComment from './components/EditComment/EditComment';
+import CreateComment from './components/CommentCreate/CommentCreate';
+import EditComment from './components/CommentEdit/CommentEdit';
 import { ApiComment } from './services/commentService';
 import { Comment } from './model/comment';
 import * as commentService from './services/commentService'
+import { useState, createContext } from 'react';
+import { User } from './model/users';
+import MyTrips from './components/MyTrips/MyTrips';
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
@@ -33,12 +35,30 @@ const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType,
 
 const API_COMMENT: ApiComment<IdType, Comment> = new commentService.ApiCommentImpl<IdType, Comment>('data/comments')
 
+const userId = sessionStorage.getItem('userId')
+
+
+
+type LoginContext = {
+  userL: User | null;
+  setUserL: React.Dispatch<React.SetStateAction<User | null>>
+}
+
+export const LoginContext = createContext({} as LoginContext)
+
+
 export async function tripsLoader() {
+  console.log()
 
   return API_TRIP.findAll()
 
 }
+export async function tripsLoaderTop() {
+  console.log()
 
+  return API_TRIP.findTopTrips()
+
+}
 
 export async function tripLoader({ params }: LoaderFunctionArgs) {
   if (params.tripId) {
@@ -47,7 +67,16 @@ export async function tripLoader({ params }: LoaderFunctionArgs) {
     throw new Error(`Invalid or missing trip ID`);
   }
 }
+export async function mytripsLoader() {
+  if (userId) {
+    return API_TRIP.findAllMyTrips(userId);
 
+  } else {
+
+    throw new Error(`Please login`);
+
+  }
+}
 
 export async function pointsLoader({ params }: LoaderFunctionArgs) {
   if (params.tripId) {
@@ -110,6 +139,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
+        loader: tripsLoaderTop,
         element: <Home />
       },
       {
@@ -125,10 +155,6 @@ const router = createBrowserRouter([
         loader: tripsLoader,
         element: <Trips />,
 
-      },
-      {
-        path: '/logout',
-        element: <Logout />
       },
       {
         path: '/create-trip',
@@ -162,6 +188,11 @@ const router = createBrowserRouter([
         path: '/comments/edit/:commentId',
         loader: commentLoaderById,
         element: <EditComment />
+      },
+      {
+        path: '/my-trips',
+        loader: mytripsLoader,
+        element: <MyTrips />
       }
     ]
   }
@@ -173,14 +204,16 @@ const router = createBrowserRouter([
 
 function App() {
 
-
+  const [userL, setUserL] = useState<null | User>(null)
 
   return (
     <>
       <ErrorBoundary>
 
+        <LoginContext.Provider value={{ userL, setUserL }}>
 
-        <RouterProvider router={router} />
+          <RouterProvider router={router} />
+        </LoginContext.Provider>
 
       </ErrorBoundary>
     </>

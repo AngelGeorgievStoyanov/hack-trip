@@ -1,6 +1,6 @@
 import { Form, useLoaderData, useNavigate } from "react-router-dom"
 import { Trip, TripCreate } from "../../model/trip"
-import { IdType } from "../../shared/common-types";
+import { IdType, toIsoDate } from "../../shared/common-types";
 import * as tripService from '../../services/tripService'
 
 import './TripEdit.css'
@@ -147,6 +147,7 @@ export default function TripEdit() {
             editTrip.lat = clickedPos.lat + ''
             editTrip.lng = clickedPos.lng + ''
         }
+        editTrip.timeEdited= toIsoDate(new Date())
         editTrip.id = trip._id as any as Trip
         console.log(editTrip)
         API_TRIP.update(trip._id, editTrip).then((data) => {

@@ -65,9 +65,9 @@ export function Register({ user }: UserProps) {
          .then((user)=>{
 
             console.log(user)
-            localStorage.setItem('userId', user._id + '');
-            localStorage.setItem('email', user.email);
-            localStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
+            sessionStorage.setItem('userId', user._id + '');
+            sessionStorage.setItem('email', user.email);
+            sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
             navigate('/')
          }).catch((err)=>{
             console.log(err.message)

@@ -1,4 +1,6 @@
-
+export function toIsoDate(date:Date){
+    return date.toJSON()
+}
 
 
 export type IdType = number | string ;

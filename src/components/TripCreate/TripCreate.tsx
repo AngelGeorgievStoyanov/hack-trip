@@ -3,11 +3,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiTrip } from "../../services/tripService";
 import { containerStyle, options } from "../settings";
-import './CreateTrip.css';
+import './TripCreate.css';
 
 import * as tripService from '../../services/tripService'
 import { TripCreate } from "../../model/trip";
-import { IdType } from "../../shared/common-types";
+import { IdType, toIsoDate } from "../../shared/common-types";
 
 
 
@@ -28,7 +28,7 @@ const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualiz
 export function CreateTrip() {
 
 
-    const _ownerId = localStorage.getItem('userId')
+    const _ownerId = sessionStorage.getItem('userId')
 
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
 
@@ -38,7 +38,7 @@ export function CreateTrip() {
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
 
-        googleMapsApiKey:googleKey! ,
+        googleMapsApiKey: googleKey!,
         libraries,
     })
 
@@ -130,11 +130,18 @@ export function CreateTrip() {
             data.lng = clickedPos.lng + ''
         }
 
+
+
         if (_ownerId) {
             data._ownerId = _ownerId
         }
 
+
+
+        data.timeCreated = toIsoDate(new Date())
+
         const newTrip = { ...data } as any as TripCreate
+        console.log(newTrip)
 
         API_TRIP.create(newTrip).then((trip) => {
 
@@ -178,10 +185,10 @@ export function CreateTrip() {
                     onLoad={onLoad}
                     onUnmount={onUnmount}
                     onClick={onMapClick}
-                   
+
                 >
-                
-                    {clickedPos?.lat ? <Marker  position={clickedPos} /> : null}
+
+                    {clickedPos?.lat ? <Marker position={clickedPos} /> : null}
                 </GoogleMap>
                 <div className="div-search-btn">
                     <Autocomplete>

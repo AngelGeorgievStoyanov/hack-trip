@@ -1,6 +1,5 @@
 import { Trip } from '../../../model/trip';
 import TripCard from './TripCard/TripCard'
-import './TripsList.css'
 
 
 

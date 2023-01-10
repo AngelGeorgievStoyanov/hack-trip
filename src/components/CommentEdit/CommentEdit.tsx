@@ -4,7 +4,7 @@ import { ApiComment } from "../../services/commentService";
 import { IdType } from "../../shared/common-types";
 import * as commentService from '../../services/commentService'
 
-import './EditComment.css'
+import './CommentEdit.css'
 
 const API_COMMENT: ApiComment<IdType, Comment> = new commentService.ApiCommentImpl<IdType, Comment>('data/comments')
 

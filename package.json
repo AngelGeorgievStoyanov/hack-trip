@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@types/googlemaps": "^3.43.3",
-    "json-server": "^0.17.1"
+    "json-server": "^0.17.1",
+    "json5": ">=1.0.2"
   }
 }
