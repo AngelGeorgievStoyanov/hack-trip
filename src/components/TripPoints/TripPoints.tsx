@@ -1,5 +1,5 @@
 import { GoogleMap, Marker, useJsApiLoader, Autocomplete } from "@react-google-maps/api";
-import React from "react";
+import React, { BaseSyntheticEvent } from "react";
 import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { containerStyle, options } from "../settings";
 import './TripPoints.css';
@@ -9,7 +9,12 @@ import { Point, PointCreate } from "../../model/point";
 import * as pointService from '../../services/pointService'
 import { ApiPoint } from "../../services/pointService";
 import PointList from "./PointList/PointList";
-
+import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
+import FormInputText from "../FormFields/FormInputText";
+import FormTextArea from "../FormFields/FormTextArea";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from '@hookform/resolvers/yup';
 
 
 
@@ -23,7 +28,30 @@ let center = {
     lng: 23.321590139866355
 }
 
+
+type FormData = {
+    name: string;
+    description: string;
+    imageUrl?: string;
+    lat: string;
+    lng: string;
+    _ownerTripId:string
+
+};
+
+
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
+
+
+const schema = yup.object({
+    name: yup.string().required().min(1).max(50),
+    description: yup.string().max(1050, 'Description max length is 1050 chars'),
+    imageUrl: yup.string(),
+
+
+
+}).required();
+
 
 export function TripPoints() {
 
@@ -33,7 +61,17 @@ export function TripPoints() {
 
     let pointNumber = 1
 
+    const { control, handleSubmit, setError, reset, setValue, formState: { errors } } = useForm<FormData>({
 
+
+
+
+        defaultValues: {
+            name: '', description: '', imageUrl: ''
+        },
+        mode: 'onChange',
+        resolver: yupResolver(schema),
+    });
     const _ownerId = sessionStorage.getItem('userId')
 
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
@@ -78,14 +116,23 @@ export function TripPoints() {
 
         let findAddress = ''
         const inpName = document.getElementById('inputAddPointName') as HTMLInputElement
-        if (e.currentTarget.textContent === 'FIND IN MAP') {
+        const btnFind = e.target as HTMLElement
+        if (btnFind.textContent === 'FIND IN MAP') {
             findAddress = inpName.value
+
         } else if (searchRef.current?.value === '') {
             return
         } else {
+            reset({ name: '',description:'',imageUrl:'',lat:'',lng:'',_ownerTripId:'' })
+           
             findAddress = searchRef.current!.value
             inpName.value = searchRef.current!.value
+
+
+            setValue('name', searchRef.current!.value, { shouldValidate: true })
+
         }
+
 
         const geocode = new google.maps.Geocoder()
         const result = await geocode.geocode({
@@ -130,10 +177,13 @@ export function TripPoints() {
     if (!isLoaded) return <div>MAP LOADING ...</div>
 
 
-    const createTripSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const data = Object.fromEntries(new FormData(e.currentTarget)) as any as PointCreate;
-        if (clickedPos) {
+    const createTripSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
+      
+      
+      
+        
+
+        if (clickedPos?.lat !== undefined) {
             data.lat = clickedPos.lat + ''
             data.lng = clickedPos.lng + ''
         }
@@ -144,25 +194,22 @@ export function TripPoints() {
 
 
 
+         const newPoint = { ...data } as PointCreate
 
-
-        const newPoint = { ...data };
-
-        newPoint.pointNumber = pointNumber
-        pointNumber++
+       
 
         if (newPoint.name.split(',').length > 0) {
             newPoint.name = newPoint.name.split(',')[0]
 
         }
-console.log(newPoint)
-        const form = e.currentTarget as HTMLFormElement
+        console.log(newPoint)
+    
 
 
         API_POINT.create(newPoint).then((point) => {
             setClickedPos(undefined)
             console.log(point)
-            form.reset()
+            reset({ name: '' })
             center = {
                 lat: Number(point.lat),
                 lng: Number(point.lng)
@@ -181,68 +228,91 @@ console.log(newPoint)
 
     return (
         <>
-            <section className="section-points">
-                <div className="div-points">
+          
 
-                    <PointList points={points} />
-                </div>
-
-                <section className="section-create">
-
-                    <GoogleMap
-                        mapContainerStyle={containerStyle}
-                        options={options as google.maps.MapOptions}
-                        center={center}
-                        zoom={zoom}
-                        onLoad={onLoad}
-                        onUnmount={onUnmount}
-                        onClick={onMapClick}
-                    >
-                        {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} /> : null}
-                    </GoogleMap>
-                    <div className="div-search-btn">
-                        <Autocomplete>
-                            <input type="text" ref={searchRef} />
-
-                        </Autocomplete>
-                        <button type="button" onClick={searchInp}>Search</button>
-                        <button type="button" onClick={removeMarker}>Remove Marker</button>
-                    </div>
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
 
-                    <div className="form-create-div">
-                        <form className="form-create" method="post" onSubmit={createTripSubmitHandler} >
-                            <h2>ADD POINT</h2>
-                            <span>
-                                <label className="label-create" htmlFor="name">NEME OF CITY,PLACE,LANDMARK OR ANOTHER :
-                                    <Autocomplete>
-                                        <input type="text" name="name" id="inputAddPointName" />
-                                    </Autocomplete>
-                                    <button type="button" onClick={findInMap}>FIND IN MAP</button>
+                <Container maxWidth={false} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc' }}>
+                    <Box>
+                        <PointList points={points} />
 
-                                </label>
+
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <GoogleMap
+                            mapContainerStyle={containerStyle}
+                            options={options as google.maps.MapOptions}
+                            center={center}
+                            zoom={zoom}
+                            onLoad={onLoad}
+                            onUnmount={onUnmount}
+                            onClick={onMapClick}
+                        >
+                            {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} /> : null}
+                        </GoogleMap>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px' }}>
+
+
+                            <Autocomplete>
+                                <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} />
+
+                            </Autocomplete>
+
+                            <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
+
+                            <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
+                        </Box>
+
+                        <Box component='form'
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                maxWidth: '600px',
+                                maxHeight: '450px',
+                                padding: '30px',
+                                marginTop: '50px',
+                                backgroundColor: '#8d868670',
+                                boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                                '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+                                '& .MuiButton-root': { m: 1, width: '32ch' },
+                            }}
+                            noValidate
+                            autoComplete="off"
+                         onSubmit={handleSubmit(createTripSubmitHandler)}
+                        >
+
+                            <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
+                                ADD POINT
+                            </Typography>
+
+                            <span >
+
+
+                                <FormInputText name='name' type="search" label='NEME OF CITY,PLACE,LANDMARK OR ANOTHER' control={control} error={errors.name?.message} id='inputAddPointName'
+                                />
+
                             </span>
 
+                            <Button variant="contained" onClick={findInMap} sx={{ ':hover': { background: '#4daf30' } }}>FIND IN MAP</Button>
+                            <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
+
+                            <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message} />
                             <span>
-                                <label className="label-create" htmlFor="description">Description</label>
-                                <textarea name="description"></textarea>
+
+                                <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD TRIP</Button>
+                                <Button component={Link} to={`/trip/details/${idTrip}`} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+
+
                             </span>
-                            <span>
-                                <label className="label-create" htmlFor="imageUrl">Image Url : </label>
-                                <input type="text" name="imageUrl" />
-                            </span>
 
+                        </Box>
 
-                            <span>
-                                <button type="submit" className="btnAdd">ADD POINT</button>
-                                <button type="button" className="btnAdd"><Link to={`/trip/details/${idTrip}`} className="Btn">FINISH</Link></button>
-                            </span>
-                        </form>
-                    </div>
-                </section>
-            </section>
+                    </Box>
 
-
+                </Container>
+            </Grid>
         </>
     )
 };

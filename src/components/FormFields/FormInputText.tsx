@@ -9,13 +9,14 @@ interface FormInputTextProps<TFieldValues extends FieldValues> {
     disabled?: boolean;
     size?: 'small' | 'medium';
     error?: string | undefined;
-    type?: 'text' | 'password' | 'number' | 'intiger';
+    type?: 'text' | 'password' | 'number' | 'intiger' | 'search';
+    id?: string | undefined
 
 }
 
 
 function FormInputText<TFieldValues extends FieldValues>(
-    { name, control, label, rules = {}, disabled = false, size = 'medium', error = undefined, type = 'text' }:
+    { name, control, label, rules = {}, disabled = false, size = 'medium', error = undefined, type = 'text', id }:
         FormInputTextProps<TFieldValues>) {
     return (
         (
@@ -23,7 +24,7 @@ function FormInputText<TFieldValues extends FieldValues>(
                 name={name}
                 control={control}
                 render={({ field }) =>
-                    <TextField label={label} disabled={disabled} size={size} error={!!error}
+                    <TextField label={label} disabled={disabled} size={size} error={!!error} id={id}
                         helperText={error || ''} type={type} {...field} />
                 }
                 rules={rules}

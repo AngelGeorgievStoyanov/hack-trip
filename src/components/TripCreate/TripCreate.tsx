@@ -314,11 +314,11 @@ export function CreateTrip() {
                         onSubmit={handleSubmit(createTripSubmitHandler)}
                     >
 
-                        <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
+                        <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message} 
                         />
 
 
-                        <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
+                        <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message} 
                         />
 
 
@@ -328,7 +328,7 @@ export function CreateTrip() {
 
 
 
-                        <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}
+                        <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message} 
                         />
 
 
@@ -336,11 +336,11 @@ export function CreateTrip() {
                             options={TRIP_SELECT_OPTIONS_TYPE_GROUPE} defaultOptionIndex={1} />
 
 
-                        <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
+                        <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}  
                         />
 
                         
-                        <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message}
+                        <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message} 
                         />
 
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
