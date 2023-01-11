@@ -1,35 +1,98 @@
-import { GoogleMap, Marker, useJsApiLoader, Autocomplete, Polyline, MarkerF } from "@react-google-maps/api";
-import React from "react";
+import { GoogleMap, Marker, useJsApiLoader, Autocomplete, } from "@react-google-maps/api";
+import React, { BaseSyntheticEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiTrip } from "../../services/tripService";
 import { containerStyle, options } from "../settings";
 import './TripCreate.css';
 
 import * as tripService from '../../services/tripService'
-import { TripCreate } from "../../model/trip";
+import { TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
+import { Box, Button, Container, Grid, TextField } from "@mui/material";
+import { useForm } from "react-hook-form";
+import FormInputText from "../FormFields/FormInputText";
+import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 
+import * as yup from "yup";
+import { yupResolver } from '@hookform/resolvers/yup';
+import FormTextArea from "../FormFields/FormTextArea";
 
 
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
 
-let zoom = 8;
 
-let center = {
-    lat: 42.697866831005435,
-    lng: 23.321590139866355
-}
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
+type FormData = {
+    _ownerId: string;
+    title: string;
+    price: number;
+    transport: string;
+    countPeoples: number;
+    typeOfPeople: string;
+    destination: string;
+    description: string;
+    imageUrl?: string;
+    timeCreated: string | undefined;
+    timeEdited?: string | undefined;
+    lat: number | undefined;
+    lng: number | undefined;
+
+};
+const TRIP_SELECT_OPTIONS_TRANSPORT: SelectOption[] = Object.keys(TripTransport)
+    .filter((item) => !isNaN(Number(item)))
+    .map((ordinal: string) => parseInt(ordinal))
+    .map((ordinal: number) => ({ key: ordinal, value: TripTransport[ordinal] }));
+
+const TRIP_SELECT_OPTIONS_TYPE_GROUPE: SelectOption[] = Object.keys(TripTipeOfGroup)
+    .filter((item) => !isNaN(Number(item)))
+    .map((ordinal: string) => parseInt(ordinal))
+    .map((ordinal: number) => ({ key: ordinal, value: TripTipeOfGroup[ordinal] }));
+
+const schema = yup.object({
+    title: yup.string().required().min(2).max(50),
+    price: yup.number().min(0.1, 'Price must be positive'),
+    countPeoples: yup.number().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.'),
+    destination: yup.string().required().min(3, 'Destination is required min length 3 chars.').max(60, 'Max length is 60 chars.'),
+    description: yup.string().max(1050, 'Description max length is 1050 chars'),
+    imageUrl: yup.string(),
+
+
+
+}).required();
+
+
+
+
+
 
 export function CreateTrip() {
 
+    let zoom = 8;
+
+    let center = {
+        lat: 42.697866831005435,
+        lng: 23.321590139866355
+    }
 
     const _ownerId = sessionStorage.getItem('userId')
+    const { control, handleSubmit, setError, formState: { errors } } = useForm<FormData>({
 
+
+
+
+        defaultValues: {
+            title: '', _ownerId: '', countPeoples: undefined, timeCreated: '', lat: undefined, lng: undefined,
+            timeEdited: '', typeOfPeople: '', description: '', destination: '', imageUrl: '', price: undefined, transport: ''
+        },
+        mode: 'onChange',
+        resolver: yupResolver(schema),
+    });
+
+    const [errorMessageSearch, setErrorMessageSearch] = useState('')
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
 
     const navigate = useNavigate()
@@ -68,9 +131,15 @@ export function CreateTrip() {
 
     const searchInp = async () => {
 
-        if (searchRef.current?.value === '') {
+        console.log(searchRef.current?.value)
+        console.log(searchRef.current?.value)
+        if (!searchRef.current?.value) {
+
+            setErrorMessageSearch('Plece enter location')
             return
         }
+        setErrorMessageSearch('')
+
         const geocode = new google.maps.Geocoder()
         const result = await geocode.geocode({
             address: searchRef.current!.value
@@ -105,31 +174,28 @@ export function CreateTrip() {
 
     if (!isLoaded) return <div>MAP LOADING ...</div>
 
-    console.log(clickedPos, 'state position')
-
-    const createTripSubmitHandler = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
-        e.preventDefault()
-
-        let current: boolean
-        let target
-        if (e.currentTarget.tagName === 'BUTTON' && e.currentTarget !== undefined) {
-            current = true
-            target = e.currentTarget.parentElement?.parentElement as HTMLFormElement
-
-        } else {
-            current = false
-            target = e.currentTarget as HTMLFormElement
-        }
 
 
 
 
-        const data = Object.fromEntries(new FormData(target))
+    const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined, addPoints?: boolean) => {
+        event?.preventDefault()
+
+
+
+
+        console.log(event)
+        console.log(addPoints, '-------')
+
+
+
+
+
+
         if (clickedPos) {
-            data.lat = clickedPos.lat + ''
-            data.lng = clickedPos.lng + ''
+            data.lat = clickedPos.lat
+            data.lng = clickedPos.lng
         }
-
 
 
         if (_ownerId) {
@@ -139,13 +205,14 @@ export function CreateTrip() {
 
 
         data.timeCreated = toIsoDate(new Date())
-
+        data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)]
+        data.transport = TripTransport[parseInt(data.transport)]
         const newTrip = { ...data } as any as TripCreate
-        console.log(newTrip)
+
 
         API_TRIP.create(newTrip).then((trip) => {
 
-            if (current === true) {
+            if (addPoints === true) {
                 navigate(`/trip/points/${trip._id}`)
 
             } else {
@@ -153,20 +220,34 @@ export function CreateTrip() {
                 navigate(`/trip/details/${trip._id}`)
             }
 
+           
+
         }).catch((err) => {
             console.log(err)
         })
 
 
     }
+    const onErrors = (e: Error) => {
+        console.log(e)
+    }
 
 
     const addPoints = (e: React.MouseEvent) => {
         e.preventDefault()
 
-        e as any as React.FormEvent<HTMLFormElement>
 
-        createTripSubmitHandler(e)
+        console.log(e)
+        const target = e.currentTarget.parentElement?.parentElement as HTMLFormElement
+        const data = Object.fromEntries(new FormData(target)) as any as FormData
+        console.log(data)
+
+        e as any as BaseSyntheticEvent<HTMLFormElement>
+
+
+
+
+        createTripSubmitHandler(data, e, true)
 
     }
 
@@ -175,88 +256,112 @@ export function CreateTrip() {
 
     return (
         <>
-            <section className="section-create">
 
-                <GoogleMap
-                    mapContainerStyle={containerStyle}
-                    options={options as google.maps.MapOptions}
-                    center={center}
-                    zoom={zoom}
-                    onLoad={onLoad}
-                    onUnmount={onUnmount}
-                    onClick={onMapClick}
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-                >
 
-                    {clickedPos?.lat ? <Marker position={clickedPos} /> : null}
-                </GoogleMap>
-                <div className="div-search-btn">
-                    <Autocomplete>
-                        <input type="text" ref={searchRef} />
+                    <GoogleMap
+                        mapContainerStyle={containerStyle}
+                        options={options as google.maps.MapOptions}
+                        center={center}
+                        zoom={zoom}
+                        onLoad={onLoad}
+                        onUnmount={onUnmount}
+                        onClick={onMapClick}
 
-                    </Autocomplete>
-                    <button type="button" onClick={searchInp}>Search</button>
-                    <button type="button" onClick={removeMarker}>Remove Marker</button>
-                </div>
+                    >
 
-                <div className="form-create-div">
-                    <form className="form-create" method="post" onSubmit={createTripSubmitHandler} >
-                        <h2>ADD NEW TRIP</h2>
+                        {clickedPos?.lat ? <Marker position={clickedPos} /> : null}
+                    </GoogleMap>
+
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+
+
+
+                        <Autocomplete>
+                            <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+
+                        </Autocomplete>
+
+
+
+
+
+                        <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
+
+                        <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
+
+
+                    </Box>
+
+
+                    <Box component='form'
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            maxWidth: '600px',
+                            maxHeight: '750px',
+                            padding: '30px',
+                            backgroundColor: '#8d868670',
+                            boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                            '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+                            '& .MuiButton-root': { m: 1, width: '32ch' },
+                        }}
+                        noValidate
+                        autoComplete='0ff'
+                        onSubmit={handleSubmit(createTripSubmitHandler)}
+                    >
+
+                        <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
+                        />
+
+
+                        <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
+                        />
+
+
+                        <FormInputSelect name='transport' label='TRANSPORT' control={control} error={errors.transport?.message}
+                            options={TRIP_SELECT_OPTIONS_TRANSPORT} defaultOptionIndex={1} />
+
+
+
+
+                        <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}
+                        />
+
+
+                        <FormInputSelect name='typeOfPeople' label='TYPE OF THE GROUP' control={control} error={errors.typeOfPeople?.message}
+                            options={TRIP_SELECT_OPTIONS_TYPE_GROUPE} defaultOptionIndex={1} />
+
+
+                        <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
+                        />
+
+                        
+                        <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message}
+                        />
+
+                        <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
+
                         <span>
-                            <label className="label-create" htmlFor="title">TITLE :</label>
-                            <input type="text" name="title" />
-                        </span>
-                        <span>
-                            <label className="label-create" htmlFor="price">PRICE :</label>
-                            <input type="number" name="price" />
-                        </span>
-                        <span>
-                            <label className="label-create" htmlFor="transport">TRANSPORT WITH :</label>
-                            <select name="transport" id="" >
-                                <option value="Car">Car</option>
-                                <option value="Bus">Bus</option>
-                                <option value="Aircraft">Aircraft</option>
-                                <option value="Another type">Another type</option>
-                            </select>
-                        </span>
 
-                        <span>
-                            <label className="label-create" htmlFor="countPeoples">COUNT OF PEOPLE :</label>
-                            <input type="number" name="countPeoples" />
-                        </span>
+                            <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD TRIP</Button>
+                            <Button variant="contained" onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >ADD POINT`S FOR THE TRIP</Button>
 
-                        <span>
-                            <label className="label-create" htmlFor="typeOfPeople"> TYPE OF THE GROUP : </label>
-                            <select name="typeOfPeople" >
-                                <option value="Family">Family</option>
-                                <option value="Family with children">Family with children</option>
-                                <option value="Friends">Friends</option>
-                                <option value="Another type">Another type</option>
-                            </select>
-                        </span>
-                        <span>
-                            <label className="label-create" htmlFor="destination">DESTINATION :</label>
-                            <input type="text" name="destination" />
-                        </span>
-
-                        <span>
-                            <label className="label-create" htmlFor="description">Description</label>
-                            <textarea name="description"></textarea>
-                        </span>
-                        <span>
-                            <label className="label-create" htmlFor="imageUrl">Image Url : </label>
-                            <input type="text" name="imageUrl" />
                         </span>
 
 
-                        <span>
-                            <button type="submit" className="btnAdd">ADD TRIP</button>
-                            <button type="button" onClick={addPoints} className="btnAdd">ADD POINT`S FOR THE TRIP</button>
 
-                        </span>
-                    </form>
-                </div>
-            </section>
+
+
+
+                    </Box>
+
+
+                </Container>
+            </Grid>
         </>
     )
 };

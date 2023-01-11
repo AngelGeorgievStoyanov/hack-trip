@@ -6,12 +6,29 @@ import { IdType } from "../../shared/common-types";
 import * as commentService from '../../services/commentService'
 
 import './CommentCreate.css'
-
+import { Box, Button, Grid } from "@mui/material";
+import { useForm } from "react-hook-form";
+import { BaseSyntheticEvent } from "react";
+import FormTextArea from "../FormFields/FormTextArea";
+import * as yup from "yup";
+import { yupResolver } from '@hookform/resolvers/yup';
 
 
 const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
 
+type FormData = {
+    comment: string;
+    nameAuthor: string;
+    _ownerId: string;
+    _tripId: string;
+}
 
+
+const schema = yup.object({
+    comment: yup.string().required('Comment cannot be empty.').min(1).max(1000, 'Maximum comment length is 1000 characters.'),
+   
+
+}).required();
 
 export default function CreateComment() {
 
@@ -20,31 +37,42 @@ export default function CreateComment() {
     const nameAuthor = sessionStorage.getItem('email')
 
 
+    const { control, handleSubmit,  formState: { errors } } = useForm<FormData>({
+
+
+
+
+        defaultValues: { comment: '', nameAuthor: '', _ownerId: '', _tripId: '' },
+        mode: 'onChange',
+        resolver: yupResolver(schema),
+    });
+
+
     const navigate = useNavigate()
-    const createCommentSubmitHandler = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
-        e.preventDefault()
+    const createCommentSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
+
+      
 
 
-        const target = e.currentTarget as HTMLFormElement
-        if (target) {
-            const data = Object.fromEntries(new FormData(target))
-            if (userId !== undefined && nameAuthor !== undefined) {
-                data.nameAuthor = nameAuthor + ''
-                data._ownerId = userId + ''
-                data._tripId = idTrip + ''
+        if (userId !== undefined && nameAuthor !== undefined) {
+            data.nameAuthor = nameAuthor + ''
+            data._ownerId = userId + ''
+            data._tripId = idTrip + ''
 
-            }
-
-            const newComment = { ...data } as any as CommentCreate
-
-            API_COMMENT.create(newComment).then((data) => {
-                console.log(data)
-
-                navigate(`/trip/details/${idTrip}`)
-            }).catch((err) => {
-                console.log(err)
-            })
         }
+
+        
+        const newComment = { ...data } as any as CommentCreate
+        console.log(newComment)
+
+        API_COMMENT.create(newComment).then((data) => {
+            console.log(data)
+
+            navigate(`/trip/details/${idTrip}`)
+        }).catch((err) => {
+            console.log(err)
+        })
+
 
 
 
@@ -52,19 +80,41 @@ export default function CreateComment() {
 
 
 
+
     return (
-        <div className="div-add-coment">
-            <section className="section-add-comment">
-                <form id="form" className="form-add-comment" method="POST" onSubmit={createCommentSubmitHandler}>
-                    <label htmlFor="comment" >Comment</label>
-                    <textarea name="comment" id="comment" cols={20} rows={4} ></textarea>
-                    <button className="add-comment">ADD COMMENT</button>
-                    <button className="add-comment">
-                        <Link to={`/trip/details/${idTrip}`} className="btnDetails">BACK</Link>
-                    </button>
-                 
-                </form>
-            </section>
-        </div>
+        <>
+
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                <Box component='form'
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        maxWidth: '600px',
+                        maxHeight: '250px',
+                        padding: '30px',
+                        marginTop: '50px',
+                        backgroundColor: '#8d868670',
+                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                        '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+                        '& .MuiButton-root': { m: 1, width: '32ch' },
+                    }}
+                    noValidate
+                    autoComplete='0ff'
+                    onSubmit={handleSubmit(createCommentSubmitHandler)}
+                >
+
+                    <FormTextArea name="comment" label="Comment" control={control} error={errors.comment?.message} multiline={true} rows={4} />
+
+                    <span>
+
+                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD COMMENT</Button>
+                        <Button component={Link} to={`/trip/details/${idTrip}`} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                    </span>
+
+                </Box>
+
+            </Grid>
+        </>
     )
 }

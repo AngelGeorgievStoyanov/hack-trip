@@ -1,5 +1,5 @@
 import { BaseSyntheticEvent } from 'react';
-import {  useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { User } from '../../model/users';
 import * as userService from '../../services/userService'
 import { ApiClient } from '../../services/userService';
@@ -9,7 +9,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 
 import './Register.css'
 import { useForm } from 'react-hook-form';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Container, Grid } from '@mui/material';
 import FormInputText from '../FormFields/FormInputText';
 
 
@@ -47,6 +47,7 @@ export function Register({ user }: UserProps) {
     const navigate = useNavigate();
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
+        defaultValues: { email: '', firstName: '', lastName: '', password: '', confirmpass: '' },
 
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -59,21 +60,21 @@ export function Register({ user }: UserProps) {
         const newUser = { ...data }
 
 
-       
 
-         API_CLIENT.register({ ...newUser })
-         .then((user)=>{
 
-            console.log(user)
-            sessionStorage.setItem('userId', user._id + '');
-            sessionStorage.setItem('email', user.email);
-            sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
-            navigate('/')
-         }).catch((err)=>{
-            console.log(err.message)
-            throw new Error(err.message)
-         })
-     
+        API_CLIENT.register({ ...newUser })
+            .then((user) => {
+
+                console.log(user)
+                sessionStorage.setItem('userId', user._id + '');
+                sessionStorage.setItem('email', user.email);
+                sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
+                navigate('/')
+            }).catch((err) => {
+                console.log(err.message)
+                throw new Error(err.message)
+            })
+
 
 
 
@@ -87,13 +88,22 @@ export function Register({ user }: UserProps) {
 
     return (
         <>
-            <section id="register-section">
-                <article className='article-register'>
+
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+
+
+                <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', minWidth: '100vH', padding: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
 
                     <Box component="form" sx={{
-
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        maxWidth: '600px',
+                        maxHeight: '500px',
                         padding: '30px',
-                        backgroundColor: '#ddf',
+                        backgroundColor: '#8d868670',
+                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                         '& .MuiButton-root': { m: 1, width: '32ch' },
                     }}
@@ -109,19 +119,21 @@ export function Register({ user }: UserProps) {
                         <FormInputText name='lastName' label='Last Name' control={control} error={errors.lastName?.message}
                             rules={{ required: true, minLength: 2, maxLength: 15 }} />
 
-                        <FormInputText name='password' label='Password' control={control} error={errors.password?.message}
+                        <FormInputText name='password' label='Password' type='password' control={control} error={errors.password?.message}
                             rules={{ required: true }} />
 
-                        <FormInputText name='confirmpass' label='Confirm Password' control={control} error={errors.confirmpass?.message}
+                        <FormInputText name='confirmpass' label='Confirm Password' type='password' control={control} error={errors.confirmpass?.message}
                             rules={{ required: true }} />
-                        <span>
+                        <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
                             <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>Sign Up</Button>
-                            <Button variant="contained" href='/login' sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Already Have An Account?</Button>
-                        </span>
+                            <Button component={Link} to={'/login'} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Already Have An Account?</Button>
+
+
+                        </Box >
 
                     </Box>
-                </article>
-            </section>
+                </Container>
+            </Grid>
         </>
     )
 

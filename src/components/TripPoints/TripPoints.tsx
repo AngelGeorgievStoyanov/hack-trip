@@ -25,7 +25,7 @@ let center = {
 
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
-export function CreateTrip() {
+export function TripPoints() {
 
     const points = useLoaderData() as Point[]
 
@@ -155,7 +155,7 @@ export function CreateTrip() {
             newPoint.name = newPoint.name.split(',')[0]
 
         }
-
+console.log(newPoint)
         const form = e.currentTarget as HTMLFormElement
 
 
@@ -241,10 +241,12 @@ export function CreateTrip() {
                     </div>
                 </section>
             </section>
+
+
         </>
     )
 };
 
-export default CreateTrip;
+export default TripPoints;
 
 

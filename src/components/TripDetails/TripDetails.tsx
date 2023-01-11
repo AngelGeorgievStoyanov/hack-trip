@@ -18,12 +18,7 @@ import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
 
 
-let zoom = 8;
 
-let center = {
-    lat: 42.697866831005435,
-    lng: 23.321590139866355
-}
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 
@@ -32,8 +27,13 @@ const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualiz
 export default function TripDetails() {
 
 
+    let zoom = 8;
 
-    
+    let center = {
+        lat: 42.697866831005435,
+        lng: 23.321590139866355
+    }
+
     const trip = useLoaderData() as Trip;
     const userId = sessionStorage.getItem('userId') as string
     const navigate = useNavigate()
@@ -52,7 +52,8 @@ export default function TripDetails() {
 
 
 
-
+    
+    // console.log(trip.lat !== 'undefined')
     if ((trip.lat !== 'undefined') && (trip.lng !== 'undefined')) {
 
 
@@ -254,7 +255,7 @@ export default function TripDetails() {
     }
 
     const onLikeTrip = () => {
-       
+
         setLiked(true)
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
             trip.likes.push(userId)

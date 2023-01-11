@@ -6,10 +6,11 @@ import { IdType } from "../../../../shared/common-types";
 import { containerStylePoint, optionsPoint } from "../../../settings";
 import * as pointService from '../../../../services/pointService'
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { Button, Card, Typography } from "@mui/material";
 
 interface PointCardProps {
     point: Point;
-    i:number
+    i: number
 }
 
 
@@ -17,7 +18,7 @@ const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType,
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 
-export default function PointCard({ point,i }: PointCardProps) {
+export default function PointCard({ point, i }: PointCardProps) {
 
     const idTrip = useParams().tripId
 
@@ -63,11 +64,26 @@ export default function PointCard({ point,i }: PointCardProps) {
 
     return (
         <>
-            <article className="article-points">
-            <h6>Point N {++i}</h6>
-                <h1>Name: {point.name}</h1>
-                <p>Description : {point.description}</p>
-                {center.lng ? <div className="div-map-point" >
+
+            <Card sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                maxWidth: '300px', margin: '20px',
+                padding: '15px', backgroundColor: '#8d868670',
+                boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '12px'
+            }}>
+                <Typography gutterBottom component="h6">
+                    Point N {++i}
+                </Typography>
+                <Typography gutterBottom component="h1">
+                    NAME: {point.name}
+                </Typography>
+                <Typography gutterBottom component="p">
+                    DESCRIPTION : {point.description}
+                </Typography>
+                {center.lng ?
+
                     <GoogleMap
                         mapContainerStyle={containerStylePoint}
                         options={optionsPoint}
@@ -78,10 +94,21 @@ export default function PointCard({ point,i }: PointCardProps) {
 
                     >
                         <MarkerF position={center} animation={google.maps.Animation.DROP} />
-                    </GoogleMap></div> : <p>NO MAP MARKER ADDED</p>}
-                <button onClick={deleteClickHandler} >DELETE POINT</button>
-                <button className="Btn"><Link to={`/points/edit/${point._id}`} className="Btn">EDIT POINT</Link></button>
-            </article>
+                    </GoogleMap>
+
+                    :
+
+                    <Typography gutterBottom component="p">
+                        NO MAP MARKER ADDED
+                    </Typography>
+                }
+                <span>
+
+                    <Button variant="contained" component={Link} to={`/points/edit/${point._id}`} sx={{ ':hover': { background: '#4daf30' }, margin: '5px' }}>EDIT POINT</Button>
+                    <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE POINT</Button>
+                </span>
+
+            </Card>
         </>
     )
 }

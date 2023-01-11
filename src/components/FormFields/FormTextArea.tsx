@@ -1,7 +1,7 @@
 import TextField from '@mui/material/TextField';
 import { Control, Controller, FieldPath, FieldValues, Path, RegisterOptions, UnPackAsyncDefaultValues } from "react-hook-form";
 
-interface FormInputTextProps<TFieldValues extends FieldValues> {
+interface FormTextAreaProps<TFieldValues extends FieldValues> {
     name: Path<UnPackAsyncDefaultValues<TFieldValues>>
     control: Control<TFieldValues, any>;
     label: string;
@@ -10,20 +10,22 @@ interface FormInputTextProps<TFieldValues extends FieldValues> {
     size?: 'small' | 'medium';
     error?: string | undefined;
     type?: 'text' | 'password' | 'number' | 'intiger';
-
+    multiline: boolean
+    rows:number;
+    
 }
 
 
-function FormInputText<TFieldValues extends FieldValues>(
-    { name, control, label, rules = {}, disabled = false, size = 'medium', error = undefined, type = 'text' }:
-        FormInputTextProps<TFieldValues>) {
+function FormTextArea<TFieldValues extends FieldValues>(
+    { name, control, label, rules = {}, disabled = false, size = 'medium', error = undefined, type = 'text', multiline ,rows }:
+        FormTextAreaProps<TFieldValues>) {
     return (
         (
             <Controller
                 name={name}
                 control={control}
                 render={({ field }) =>
-                    <TextField label={label} disabled={disabled} size={size} error={!!error}
+                    <TextField label={label} disabled={disabled} size={size} error={!!error} multiline={multiline} rows={rows}
                         helperText={error || ''} type={type} {...field} />
                 }
                 rules={rules}
@@ -32,4 +34,4 @@ function FormInputText<TFieldValues extends FieldValues>(
     )
 }
 
-export default FormInputText
+export default FormTextArea

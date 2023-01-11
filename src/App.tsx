@@ -1,5 +1,5 @@
 import './App.css';
-import { createBrowserRouter, LoaderFunctionArgs, Outlet, RouterProvider, useNavigate } from 'react-router-dom';
+import { createBrowserRouter, LoaderFunctionArgs, Outlet, RouterProvider } from 'react-router-dom';
 import Home from './components/Home/Home';
 import { Login } from './components/Login/Login';
 import { Register } from './components/Register/Register';
@@ -35,7 +35,6 @@ const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType,
 
 const API_COMMENT: ApiComment<IdType, Comment> = new commentService.ApiCommentImpl<IdType, Comment>('data/comments')
 
-const userId = sessionStorage.getItem('userId')
 
 
 
@@ -67,16 +66,7 @@ export async function tripLoader({ params }: LoaderFunctionArgs) {
     throw new Error(`Invalid or missing trip ID`);
   }
 }
-export async function mytripsLoader() {
-  if (userId) {
-    return API_TRIP.findAllMyTrips(userId);
 
-  } else {
-
-    throw new Error(`Please login`);
-
-  }
-}
 
 export async function pointsLoader({ params }: LoaderFunctionArgs) {
   if (params.tripId) {
@@ -191,7 +181,6 @@ const router = createBrowserRouter([
       },
       {
         path: '/my-trips',
-        loader: mytripsLoader,
         element: <MyTrips />
       }
     ]
@@ -208,13 +197,16 @@ function App() {
 
   return (
     <>
+
       <ErrorBoundary>
 
-        <LoginContext.Provider value={{ userL, setUserL }}>
+       
+          <LoginContext.Provider value={{ userL, setUserL }}>
 
-          <RouterProvider router={router} />
-        </LoginContext.Provider>
+            <RouterProvider router={router} />
+          </LoginContext.Provider>
 
+       
       </ErrorBoundary>
     </>
 
