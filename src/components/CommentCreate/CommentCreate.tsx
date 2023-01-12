@@ -6,7 +6,7 @@ import { IdType } from "../../shared/common-types";
 import * as commentService from '../../services/commentService'
 
 import './CommentCreate.css'
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { BaseSyntheticEvent } from "react";
 import FormTextArea from "../FormFields/FormTextArea";
@@ -26,7 +26,7 @@ type FormData = {
 
 const schema = yup.object({
     comment: yup.string().required('Comment cannot be empty.').min(1).max(1000, 'Maximum comment length is 1000 characters.'),
-   
+
 
 }).required();
 
@@ -37,7 +37,7 @@ export default function CreateComment() {
     const nameAuthor = sessionStorage.getItem('email')
 
 
-    const { control, handleSubmit,  formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
 
 
@@ -51,7 +51,7 @@ export default function CreateComment() {
     const navigate = useNavigate()
     const createCommentSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
 
-      
+
 
 
         if (userId !== undefined && nameAuthor !== undefined) {
@@ -61,7 +61,7 @@ export default function CreateComment() {
 
         }
 
-        
+
         const newComment = { ...data } as any as CommentCreate
         console.log(newComment)
 
@@ -78,7 +78,9 @@ export default function CreateComment() {
 
     }
 
-
+    const goBack = () => {
+        navigate(-1);
+    }
 
 
     return (
@@ -103,13 +105,16 @@ export default function CreateComment() {
                     autoComplete='0ff'
                     onSubmit={handleSubmit(createCommentSubmitHandler)}
                 >
+                    <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
+                        WRITE A COMMENT
+                    </Typography>
 
                     <FormTextArea name="comment" label="Comment" control={control} error={errors.comment?.message} multiline={true} rows={4} />
 
                     <span>
 
                         <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD COMMENT</Button>
-                        <Button component={Link} to={`/trip/details/${idTrip}`} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                        <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                     </span>
 
                 </Box>

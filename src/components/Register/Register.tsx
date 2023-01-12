@@ -1,4 +1,4 @@
-import { BaseSyntheticEvent } from 'react';
+import { BaseSyntheticEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User } from '../../model/users';
 import * as userService from '../../services/userService'
@@ -8,8 +8,8 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import './Register.css'
-import { useForm } from 'react-hook-form';
-import { Box, Button, Container, Grid } from '@mui/material';
+import { set, useForm } from 'react-hook-form';
+import { Box, Button, Container, Grid, Typography } from '@mui/material';
 import FormInputText from '../FormFields/FormInputText';
 
 
@@ -45,6 +45,12 @@ const schema = yup.object({
 
 export function Register({ user }: UserProps) {
     const navigate = useNavigate();
+
+    const [errorApi, setErrorApi] = useState()
+
+
+    console.log(errorApi)
+
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
         defaultValues: { email: '', firstName: '', lastName: '', password: '', confirmpass: '' },
@@ -69,8 +75,12 @@ export function Register({ user }: UserProps) {
                 sessionStorage.setItem('userId', user._id + '');
                 sessionStorage.setItem('email', user.email);
                 sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
+                setErrorApi(undefined)
                 navigate('/')
             }).catch((err) => {
+
+                setErrorApi(err.message)
+
                 console.log(err.message)
                 throw new Error(err.message)
             })
@@ -92,9 +102,14 @@ export function Register({ user }: UserProps) {
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
 
-                <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', minWidth: '100vH', padding: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-
-
+                <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', minWidth: '100vH', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    {errorApi ?
+                        <Box component='div' sx={{ backgroundColor: 'red', color: 'black', padding: '10px 20px', borderRadius: '9px', margin:'20px' }}>
+                            <Typography component='h4'>
+                                {errorApi}
+                            </Typography>
+                        </Box>
+                        : ''}
                     <Box component="form" sx={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -111,6 +126,9 @@ export function Register({ user }: UserProps) {
                         autoComplete='0ff'
                         onSubmit={handleSubmit(registerSubmitHandler)}
                     >
+                        <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
+                            REGISTER
+                        </Typography>
                         <FormInputText name='email' label='Email' control={control} error={errors.email?.message}
                             rules={{ required: true, minLength: 5 }} />
                         <FormInputText name='firstName' label='First Name' control={control} error={errors.firstName?.message}

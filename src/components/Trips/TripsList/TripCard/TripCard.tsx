@@ -16,7 +16,7 @@ interface TripCardProps {
 
 export default function TripCard({ trip }: TripCardProps) {
 
-   
+
 
 
 
@@ -40,21 +40,21 @@ export default function TripCard({ trip }: TripCardProps) {
                 </Typography>
 
                 {trip.imageUrl ?
-                    <CardMedia
+                   <CardMedia
                         component="img"
                         height="200"
                         image={trip.imageUrl}
                         alt="TRIP"
 
-                    /> :
-                    <Typography gutterBottom  component="h6">
+                    />  :
+                    <Typography gutterBottom component="h6">
                         There is no image for this trip
                     </Typography>
 
                 }
-                <CardContent sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems:'center' }}>
 
-                    <Button component={Link} to={`/trip/details/${trip._id}`} sx={{ backgroundColor: "#0e0d0d", color: "#f3eeee", margin: '10px', ':hover': { backgroundColor: "#f3eeee", color: "#0e0d0d" } }}>DETAILS</Button>
+                    <Button component={Link} to={`/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } ,padding:'10px 50px' }}>DETAILS</Button>
 
                     {trip.likes.length > 0 ?
                         < Typography sx={{ margin: '10px' }} gutterBottom variant="h6" component="div">

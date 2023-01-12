@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { Box, Button, Container, Grid } from '@mui/material';
+import { Box, Button, Container, Grid, Typography } from '@mui/material';
 
 import { Link, useNavigate } from 'react-router-dom';
 import FormInputText from '../FormFields/FormInputText';
@@ -42,7 +42,7 @@ export function Login() {
 
     const { control, handleSubmit, setError, formState: { errors } } = useForm<FormData>({
 
-        defaultValues: {email:'', password:''},
+        defaultValues: { email: '', password: '' },
         mode: 'onChange',
         resolver: yupResolver(schema),
     });
@@ -60,7 +60,7 @@ export function Login() {
         API_CLIENT.login(data.email, data.password)
             .then((user) => {
 
-             
+
                 sessionStorage.setItem('userId', user._id + '');
                 sessionStorage.setItem('email', user.email);
                 sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
@@ -117,10 +117,13 @@ export function Login() {
                         autoComplete='0ff'
                         onSubmit={handleSubmit(loginSubmitHandler)}
                     >
-                        <FormInputText name='email' label='Email' control={control} error={errors.email?.message} 
-                            rules={{ required: true, minLength: 5 }} /> 
+                        <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
+                            LOGIN
+                        </Typography>
+                        <FormInputText name='email' label='Email' control={control} error={errors.email?.message}
+                            rules={{ required: true, minLength: 5 }} />
 
-                        <FormInputText name='password' label='Password' control={control} error={errors.password?.message} 
+                        <FormInputText name='password' label='Password' control={control} error={errors.password?.message}
                             rules={{ required: true }} />
 
 

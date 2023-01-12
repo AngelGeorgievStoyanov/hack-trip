@@ -65,10 +65,12 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
             body: JSON.stringify(entity)
         });
 
-        const result = await response.json()
+        if (response.status >= 400) {
+            const result = await response.json()
 
-
-        return result
+            throw new Error(result.message)
+        }
+        return await response.json()
     }
 
 

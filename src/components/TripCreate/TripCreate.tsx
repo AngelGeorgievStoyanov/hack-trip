@@ -8,7 +8,7 @@ import './TripCreate.css';
 import * as tripService from '../../services/tripService'
 import { TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
-import { Box, Button, Container, Grid, TextField } from "@mui/material";
+import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
@@ -53,7 +53,7 @@ const TRIP_SELECT_OPTIONS_TYPE_GROUPE: SelectOption[] = Object.keys(TripTipeOfGr
     .map((ordinal: number) => ({ key: ordinal, value: TripTipeOfGroup[ordinal] }));
 
 const schema = yup.object({
-    title: yup.string().required().min(2).max(50),
+    title: yup.string().required().min(2).max(60),
     price: yup.number().min(0.1, 'Price must be positive'),
     countPeoples: yup.number().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.'),
     destination: yup.string().required().min(3, 'Destination is required min length 3 chars.').max(60, 'Max length is 60 chars.'),
@@ -65,18 +65,18 @@ const schema = yup.object({
 }).required();
 
 
+let center = {
+    lat: 42.697866831005435,
+    lng: 23.321590139866355
+}
 
 
-
+let zoom = 8;
 
 export function CreateTrip() {
 
-    let zoom = 8;
 
-    let center = {
-        lat: 42.697866831005435,
-        lng: 23.321590139866355
-    }
+  
 
     const _ownerId = sessionStorage.getItem('userId')
     const { control, handleSubmit, setError, formState: { errors } } = useForm<FormData>({
@@ -131,8 +131,8 @@ export function CreateTrip() {
 
     const searchInp = async () => {
 
-        console.log(searchRef.current?.value)
-        console.log(searchRef.current?.value)
+      
+      
         if (!searchRef.current?.value) {
 
             setErrorMessageSearch('Plece enter location')
@@ -145,7 +145,7 @@ export function CreateTrip() {
             address: searchRef.current!.value
         })
 
-
+       
         if (result) {
             zoom = 16
             center = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
@@ -183,15 +183,6 @@ export function CreateTrip() {
 
 
 
-
-        console.log(event)
-        console.log(addPoints, '-------')
-
-
-
-
-
-
         if (clickedPos) {
             data.lat = clickedPos.lat
             data.lng = clickedPos.lng
@@ -220,7 +211,7 @@ export function CreateTrip() {
                 navigate(`/trip/details/${trip._id}`)
             }
 
-           
+
 
         }).catch((err) => {
             console.log(err)
@@ -275,7 +266,7 @@ export function CreateTrip() {
                         {clickedPos?.lat ? <Marker position={clickedPos} /> : null}
                     </GoogleMap>
 
-                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px' }}>
 
 
 
@@ -314,11 +305,16 @@ export function CreateTrip() {
                         onSubmit={handleSubmit(createTripSubmitHandler)}
                     >
 
-                        <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message} 
+                        <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
+                            CREATE TRIP
+                        </Typography>
+
+
+                        <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
                         />
 
 
-                        <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message} 
+                        <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
                         />
 
 
@@ -328,7 +324,7 @@ export function CreateTrip() {
 
 
 
-                        <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message} 
+                        <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}
                         />
 
 
@@ -336,11 +332,11 @@ export function CreateTrip() {
                             options={TRIP_SELECT_OPTIONS_TYPE_GROUPE} defaultOptionIndex={1} />
 
 
-                        <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}  
+                        <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
                         />
 
-                        
-                        <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message} 
+
+                        <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message}
                         />
 
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />

@@ -5,7 +5,7 @@ import { IdType } from "../../shared/common-types";
 import * as commentService from '../../services/commentService'
 
 import './CommentEdit.css'
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import FormTextArea from "../FormFields/FormTextArea";
 
 import * as yup from "yup";
@@ -63,6 +63,14 @@ export default function EditComment() {
         }).catch((err) => console.log(err))
 
     }
+
+
+
+    const goBack = () => {
+        navigate(-1);
+    }
+
+
     return (
         <>
 
@@ -85,13 +93,15 @@ export default function EditComment() {
                     autoComplete='0ff'
                     onSubmit={handleSubmit(editCommentSubmitHandler)}
                 >
-
+                    <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
+                        EDIT A COMMENT
+                    </Typography>
                     <FormTextArea name="comment" label="Comment" control={control} error={errors.comment?.message} multiline={true} rows={4} />
 
                     <span>
 
                         <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD COMMENT</Button>
-                        <Button component={Link} to={`/trip/details/${comment._tripId}`} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                        <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                     </span>
 
                 </Box>

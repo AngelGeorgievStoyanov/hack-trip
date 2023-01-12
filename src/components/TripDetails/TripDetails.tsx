@@ -16,6 +16,8 @@ import * as commentService from '../../services/commentService'
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
+import { Box, Button, Card, CardMedia, Container, Grid, styled, Typography } from "@mui/material";
+import TripDetailsPointCard from "./TripDetailsPoint";
 
 
 
@@ -49,12 +51,12 @@ export default function TripDetails() {
     const [visibile, setVisibile] = useState(false)
     const [comments, setComments] = useState<Comment[]>([])
     const [liked, setLiked] = useState<boolean>(false)
+    const [hide, setHide] = useState<boolean>(false)
+    const [pointCard, setPointCard] = useState<Point>()
 
 
-
-    
-    // console.log(trip.lat !== 'undefined')
-    if ((trip.lat !== 'undefined') && (trip.lng !== 'undefined')) {
+    // console.log(trip.lat !== undefined)
+    if ((trip.lat !== undefined) && (trip.lng !== undefined)) {
 
 
         center = {
@@ -165,41 +167,12 @@ export default function TripDetails() {
 
         if (currentPoint !== undefined && currentPoint !== null) {
 
-            const sec = document.getElementById('point-section-add') as HTMLElement
-            setPoint(currentPoint[0])
 
-            if (sec.childNodes.length > 0) {
-                const children = Array.from(sec.childNodes)
+            setPointCard(currentPoint[0])
 
-                children.map((x) => x.remove())
-
-            }
-
-
-            const article = document.createElement('article')
-            article.className = 'article-point-card'
-            const h1 = document.createElement('h1')
-            h1.innerText = 'Point name ' + currentPoint[0].name
-            const p = document.createElement('p')
-            p.innerText = 'Descrioption ' + currentPoint[0].description
-            let image
-            if (currentPoint[0].imageUrl) {
-                image = document.createElement('img')
-                image.className = 'article-point-image'
-                image.setAttribute('src', currentPoint[0].imageUrl)
-            }
-
-            article.append(h1)
-            article.append(p)
-            if (image !== undefined) {
-                article.append(image)
-            }
-
-            sec.append(article)
+          
 
         }
-
-
 
 
 
@@ -207,22 +180,13 @@ export default function TripDetails() {
 
     const onLoadComments = (newCommentArr: Comment[] | undefined) => {
 
-
-        const btnHide = document.getElementsByClassName('btn-hide')[0] as HTMLElement
-        btnHide.style.display = 'block'
-        const section = document.getElementsByClassName('section-trip-comments')[0] as HTMLElement
-        section.style.display = 'flex'
-
-
-
+        setHide(true)
 
     }
 
     const onHideComments = () => {
-        const section = document.getElementsByClassName('section-trip-comments')[0] as HTMLElement
-        section.style.display = 'none'
-        const btnHide = document.getElementsByClassName('btn-hide')[0] as HTMLElement
-        btnHide.style.display = 'none'
+
+        setHide(false)
     }
 
     const onDeleteComment = async (comment: Comment) => {
@@ -249,7 +213,6 @@ export default function TripDetails() {
     }
     const onEditComment = async (comment: Comment) => {
         navigate(`/comments/edit/${comment._id}`)
-
 
 
     }
@@ -289,76 +252,149 @@ export default function TripDetails() {
         }
     }
 
+
+    const goBack = () => {
+        navigate(-1);
+    }
+
     return (
         <>
-            <section className="section-details">
 
-                <article className="article-details">
 
-                    <h2 className="info">Trip name : {trip?.title}</h2>
-                    <h4 className="info">Price of the Trip: {trip?.price} euro </h4>
-                    <h4 className="info">Transport with: {trip?.transport}</h4>
-                    <h4 className="info">Coun of people: {trip?.countPeoples}</h4>
-                    <h4 className="info">Type of the group: {trip?.typeOfPeople}</h4>
-                    <h4 className="info">Destination: {trip?.destination}</h4>
-                    <p>Description : {trip?.description}</p>
 
-                    <button type="button">
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+
+                <Container maxWidth={false} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc' }}>
+
+                    <Card sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: '',
+                        maxWidth: '450px', margin: '20px',
+                        padding: '25px', backgroundColor: '#8d868670',
+                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
+                    }}>
+                        <Typography gutterBottom variant="h5" component="div">
+                            TRIP NAME : {trip?.title}
+                        </Typography>
+                        <Typography gutterBottom variant="subtitle1" component="h5">
+                            PRICE OF THE TRIP: {trip?.price ? trip.price + 'euro' : 'missing price'}
+                        </Typography>
+                        <Typography gutterBottom variant="subtitle1" component="div">
+                            TRANSPORT WITH: {trip?.transport}
+                        </Typography>
+                        <Typography gutterBottom variant="subtitle1" component="div">
+                            COUNT OF PEOPLE: {trip?.countPeoples}
+                        </Typography>
+                        <Typography gutterBottom variant="subtitle1" component="div">
+                            TYPE OF THE GROUP: {trip?.typeOfPeople}
+                        </Typography>
+                        <Typography gutterBottom variant="subtitle1" component="div">
+                            DESTINATION: {trip?.destination}
+                        </Typography>
+                        <Typography gutterBottom variant="subtitle1" component="div">
+                            DESCRIPTION : {trip?.description}
+                        </Typography>
+
                         {trip._ownerId === userId ?
-                            <Link to={`/trip/points/${trip?._id}`} className="Btn">ADD OR EDIT POINTS FOR YOUR TRIP</Link> :
-                            (points !== undefined && points.length > 0) ? <Link to={`/trip/points/${trip?._id}`} className="Btn">FOR THIS TRIP HAVE {points.length} POINTS</Link> : <h4 className="h4-points">FOR THIS TRIP DONT HAVE POINTS</h4>}
-                    </button>
+                            <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
+
+                            :
+                            (points !== undefined && points.length > 0) ?
+                                <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>FOR THIS TRIP HAVE {points.length} POINTS</Button>
+
+                                :
+                                <Typography gutterBottom variant="subtitle1" component="div">
+                                    FOR THIS TRIP DONT HAVE POINTS
+                                </Typography>
+                        }
+
+                        <Button component={Link} to={`/comments/add-comment/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD COMMENT</Button>
+                        <Button component={Link} to={`/trip/edit/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>EDIT TRIP</Button>
+                        <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE TRIP</Button>
+                        <Button variant="contained" onClick={reportClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>REPORT TRIP</Button>
+                        <Button onClick={goBack} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >BACK</Button>
 
 
-                    <button className="btn">
-                        <Link to={`/comments/add-comment/${trip?._id}`} className="btn">ADD COMMENT</Link>
-                    </button>
-                    <button className="btn"><Link to={`/trip/edit/${trip?._id}`} className="btn">EDIT TRIP</Link></button>
-                    <button className="btn" onClick={deleteClickHandler}>DELETE TRIP</button>
-                    <button className="btn" onClick={reportClickHandler}>REPORT TRIP</button>
-                    <button className="btn"><Link to={'/trips'}>BACK</Link></button>
-                    {trip.likes.some((x) => x === userId) || (liked === true) ? <button disabled>YOU LIKED THIS TRIP</button> : <button onClick={onLikeTrip}>LIKE TRIP</button>}
+                        {trip.likes.some((x) => x === userId) || (liked === true) ?
 
-                    {comments?.length ? <button onClick={() => onLoadComments(undefined)} className="btn">FOR THIS TRIP HAVE {comments?.length} COMMENTS, SEE ALL COMMENTS</button> : <h4>FOR THIS TRIP DON'T HAVE COMMENT</h4>}
-                    {comments.length > 0 ? <button onClick={onHideComments} className="btn-hide" style={{ display: 'none' }} >HIDE COMMENTS</button> : ''}
+                            <Button disabled variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >YOU LIKED THIS TRIP</Button>
+                            :
 
-                </article>
-
-                <article>
-                    <img className="section-details-img" src={trip?.imageUrl} alt="Trip" />
-
-                </article>
-
-
-            </section>
-            <section style={{ display: 'none' }} className="section-trip-comments">
-                {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} />) : ''}
-            </section>
-
-
-            <section>
-
-
-                <GoogleMap
-                    mapContainerStyle={containerStyle}
-                    options={options as google.maps.MapOptions}
-                    center={(pathPoints?.length > 0) && (pathPoints !== undefined) ? pathPoints[0] : center}
-                    zoom={zoom}
-                    onLoad={onLoad}
-                    onUnmount={onUnmount}
+                            <Button onClick={onLikeTrip} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >LIKE TRIP</Button>
+                        }
 
 
 
-                >
-                    {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                    {/* {points ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={i + 1 + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : null} */}
-                    {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={i + 1 + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} />}
-                </GoogleMap>
 
-            </section>
-            {/* : '' */}
-            {/* } */}
-            <section id="point-section-add"></section>
+                        {comments?.length ?
+
+                            <Button onClick={() => onLoadComments(undefined)} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >FOR THIS TRIP HAVE {comments?.length} COMMENTS, SEE ALL COMMENTS</Button>
+                            :
+                            <Typography gutterBottom variant="subtitle1" component="div">
+                                FOR THIS TRIP DON'T HAVE COMMENT
+                            </Typography>
+                        }
+
+                        {comments.length > 0 ?
+
+                            <Button onClick={onHideComments} className="btn-hide" variant="contained" sx={{ display: hide ? 'block' : 'none', ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >HIDE COMMENTS</Button>
+                            : ''
+                        }
+
+
+                    </Card>
+
+                    <CardMedia
+                        component="img"
+
+                        height="500px"
+                        width="800"
+                        image={trip.imageUrl}
+                        alt="TRIP"
+
+                    />
+
+
+
+
+                </Container>
+                <Container maxWidth={false} sx={{ display: hide ? 'flex' : 'none', flexWrap: 'wrap' }} >
+
+
+                    {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} />) : ''}
+                </Container>
+                <Container maxWidth={false} sx={{ display: 'flex', flexDirection:'row',justifyContent:'space-between' ,padding:'50px 50px'}} >
+
+
+                    <GoogleMap
+                        mapContainerStyle={containerStyle}
+                        options={options as google.maps.MapOptions}
+                        center={(pathPoints?.length > 0) && (pathPoints !== undefined) ? pathPoints[0] : center}
+                        zoom={zoom}
+                        onLoad={onLoad}
+                        onUnmount={onUnmount}
+
+
+
+                    >
+                        {pathPoints ? <PolylineF path={pathPoints} /> : null}
+                        {/* {points ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={i + 1 + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : null} */}
+                        {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={i + 1 + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} />}
+                    </GoogleMap>
+
+
+
+
+                    <Box component='section' id="point-section-add">
+                        {
+                            pointCard ?<TripDetailsPointCard point={pointCard} key={pointCard._id} /> : ''
+
+                        }
+
+                    </Box>
+                </Container>
+            </Grid>
         </>
     )
 }

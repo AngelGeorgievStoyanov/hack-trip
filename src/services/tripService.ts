@@ -98,10 +98,12 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
             body: JSON.stringify(entity)
         });
 
-        const result = await response.json()
+        if (response.status >= 400) {
+            const result = await response.json()
 
-
-        return result
+            throw new Error(result.message)
+        }
+        return await response.json()
     }
 
     async updateLikes(id: K, entity: Trip): Promise<V> {
