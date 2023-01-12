@@ -1,4 +1,4 @@
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import {  useLoaderData, useNavigate } from "react-router-dom";
 import { Comment } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import { IdType } from "../../shared/common-types";

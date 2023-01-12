@@ -1,8 +1,6 @@
 
 
-import { AlignHorizontalCenter } from '@mui/icons-material';
-import { Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Typography } from '@mui/material';
-import { margin } from '@mui/system';
+import { Button, Card, CardContent, CardMedia, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Trip } from '../../../../model/trip';
 import './TripCard.css'

@@ -16,7 +16,7 @@ import * as commentService from '../../services/commentService'
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Box, Button, Card, CardMedia, Container, Grid, styled, Typography } from "@mui/material";
+import { Box, Button, Card, CardMedia, Container, Grid,  Typography } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 
 
@@ -46,9 +46,6 @@ export default function TripDetails() {
 
 
     const [points, setPoints] = useState<Point[]>([])
-    const [point, setPoint] = useState<Point>()
-    const [pointNumber, setPointNumber] = useState<number>()
-    const [visibile, setVisibile] = useState(false)
     const [comments, setComments] = useState<Comment[]>([])
     const [liked, setLiked] = useState<boolean>(false)
     const [hide, setHide] = useState<boolean>(false)
@@ -81,6 +78,8 @@ export default function TripDetails() {
                     setPoints(arrPoints)
                 }
             }
+        }).catch((err)=>{
+            console.log(err)
         })
 
         API_COMMENT.findByTripId(trip._id).then(async (data) => {
@@ -95,7 +94,8 @@ export default function TripDetails() {
             }
 
 
-
+        }).catch((err)=>{
+            console.log(err)
         })
 
 
@@ -158,9 +158,8 @@ export default function TripDetails() {
     const onMarkerClick = (id: string, i: number) => {
 
 
-        setVisibile(true)
 
-        setPointNumber(i)
+        
 
 
         const currentPoint = points!.filter((x) => x._id === id)
@@ -170,10 +169,8 @@ export default function TripDetails() {
 
             setPointCard(currentPoint[0])
 
-          
 
         }
-
 
 
     }

@@ -59,9 +59,9 @@ export function TripPoints() {
 
     const idTrip = useParams().tripId
 
-    let pointNumber = 1
+  
 
-    const { control, handleSubmit, setError, reset, setValue, formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit,  reset, setValue, formState: { errors } } = useForm<FormData>({
 
 
 
@@ -72,7 +72,7 @@ export function TripPoints() {
         mode: 'onChange',
         resolver: yupResolver(schema),
     });
-    const _ownerId = sessionStorage.getItem('userId')
+  
 
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
 

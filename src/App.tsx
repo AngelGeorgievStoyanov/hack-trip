@@ -27,6 +27,8 @@ import * as commentService from './services/commentService'
 import { useState, createContext } from 'react';
 import { User } from './model/users';
 import MyTrips from './components/MyTrips/MyTrips';
+import GuardedRoute from './components/GuardedRoute/GuardedRoute';
+import NotFound from './components/NotFound/NotFound';
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
@@ -61,7 +63,18 @@ export async function tripsLoaderTop() {
 
 export async function tripLoader({ params }: LoaderFunctionArgs) {
   if (params.tripId) {
-    return API_TRIP.findById(params.tripId);
+    try {
+
+      const trip = await API_TRIP.findById(params.tripId);
+      if (trip) {
+        return trip
+      }
+    } catch (error) {
+      const err = error as Error
+      console.log(err.message)
+      throw new Error(`${err.message}`)
+    }
+
   } else {
     throw new Error(`Invalid or missing trip ID`);
   }
@@ -144,44 +157,117 @@ const router = createBrowserRouter([
         path: '/trips',
         loader: tripsLoader,
         element: <Trips />,
+        errorElement: <NotFound />
 
       },
       {
         path: '/create-trip',
-        element: <CreateTrip />
+        element: <GuardedRoute />,
+        children: [
+          {
+            path: '',
+            element: <CreateTrip />,
+            errorElement: <NotFound />
+          }
+        ]
+
+
       },
       {
         path: '/trip/details/:tripId',
-        loader: tripLoader,
-        element: <TripDetails />,
+        element: <GuardedRoute />,
+
+        children: [
+          {
+            path: '',
+            loader: tripLoader,
+            element: <TripDetails />,
+            errorElement: <NotFound />
+          },
+          {
+            path: '*'
+          }
+        ]
+
       },
       {
         path: '/trip/edit/:tripId',
-        loader: tripLoader,
-        element: <TripEdit />
+        element: <GuardedRoute />,
+        children: [
+          {
+            path: '',
+            loader: tripLoader,
+            element: <TripEdit />,
+            errorElement: <NotFound />
+          }
+        ]
+
       },
       {
         path: '/trip/points/:tripId',
-        loader: pointsLoader,
-        element: <TripPoints />
+        element: <GuardedRoute />,
+        children: [
+          {
+            path: '',
+            loader: pointsLoader,
+            element: <TripPoints />,
+            errorElement: <NotFound />
+          }
+        ]
+
       },
       {
         path: '/points/edit/:pointId',
-        loader: pointLoaderById,
-        element: <PointEdit />
+        element: <GuardedRoute />,
+        children: [
+          {
+            path: '',
+            loader: pointLoaderById,
+            element: <PointEdit />,
+            errorElement: <NotFound />
+          }
+        ]
+
       },
       {
         path: '/comments/add-comment/:tripId',
-        element: <CreateComment />
+        element: <GuardedRoute />,
+        children: [
+          {
+            path: '',
+            element: <CreateComment />
+          }
+        ]
+
       },
       {
         path: '/comments/edit/:commentId',
-        loader: commentLoaderById,
-        element: <EditComment />
+
+        element: <GuardedRoute />,
+        children: [
+          {
+            path: '',
+            loader: commentLoaderById,
+            element: <EditComment />,
+            errorElement: <NotFound />
+          }
+        ]
+
       },
       {
         path: '/my-trips',
-        element: <MyTrips />
+        element: <GuardedRoute />,
+        children: [
+          {
+            path: '',
+            element: <MyTrips />
+          }
+        ]
+
+      },
+      {
+        path: '*',
+        element: <NotFound />
       }
     ]
   }
@@ -200,13 +286,13 @@ function App() {
 
       <ErrorBoundary>
 
-       
-          <LoginContext.Provider value={{ userL, setUserL }}>
 
-            <RouterProvider router={router} />
-          </LoginContext.Provider>
+        <LoginContext.Provider value={{ userL, setUserL }}>
 
-       
+          <RouterProvider router={router} />
+        </LoginContext.Provider>
+
+
       </ErrorBoundary>
     </>
 

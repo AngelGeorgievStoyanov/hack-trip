@@ -79,7 +79,7 @@ export function CreateTrip() {
   
 
     const _ownerId = sessionStorage.getItem('userId')
-    const { control, handleSubmit, setError, formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit,  formState: { errors } } = useForm<FormData>({
 
 
 
@@ -219,10 +219,7 @@ export function CreateTrip() {
 
 
     }
-    const onErrors = (e: Error) => {
-        console.log(e)
-    }
-
+  
 
     const addPoints = (e: React.MouseEvent) => {
         e.preventDefault()

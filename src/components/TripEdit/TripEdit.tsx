@@ -1,14 +1,13 @@
-import { Form, useLoaderData, useNavigate } from "react-router-dom"
-import { Trip, TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip"
+import {  useLoaderData, useNavigate } from "react-router-dom"
+import { Trip,  TripTipeOfGroup, TripTransport } from "../../model/trip"
 import { IdType, toIsoDate } from "../../shared/common-types";
 import * as tripService from '../../services/tripService'
 
 import './TripEdit.css'
 import { ApiTrip } from "../../services/tripService";
-import { Autocomplete, GoogleMap, Marker, MarkerF, useJsApiLoader } from "@react-google-maps/api";
+import { Autocomplete, GoogleMap,  MarkerF, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent } from "react";
 import { containerStyle, options } from "../settings";
-import { useEffect } from 'react'
 import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
@@ -85,7 +84,7 @@ export default function TripEdit() {
     const [visible, setVisible] = React.useState(true)
     let positionPoint
 
-    const { control, handleSubmit, setError, formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
 
 

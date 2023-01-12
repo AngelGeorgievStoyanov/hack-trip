@@ -8,7 +8,7 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import './Register.css'
-import { set, useForm } from 'react-hook-form';
+import {  useForm } from 'react-hook-form';
 import { Box, Button, Container, Grid, Typography } from '@mui/material';
 import FormInputText from '../FormFields/FormInputText';
 

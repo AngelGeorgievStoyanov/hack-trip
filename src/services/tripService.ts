@@ -13,7 +13,7 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
     deleteById(id: K): Promise<void>;
     reportTrip(id: K, entity: Trip): Promise<V>;
     findTopTrips(): Promise<V[]>;
-    findAllMyTrips(id:K):Promise<V[]>
+    findAllMyTrips(id: K): Promise<V[]>
 
 }
 
@@ -66,7 +66,12 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`);
 
-        return response.json()
+        if (response.status >= 400) {
+            const result = await response.json()
+
+            throw new Error(result.message)
+        }
+        return await response.json()
     }
 
     async deleteById(id: K): Promise<void> {

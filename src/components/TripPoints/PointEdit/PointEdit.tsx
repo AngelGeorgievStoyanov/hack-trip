@@ -1,12 +1,11 @@
-import { Autocomplete, GoogleMap, Marker, MarkerF, useJsApiLoader } from "@react-google-maps/api";
+import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, useState } from "react";
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import { Point } from "../../../model/point";
 import { IdType } from "../../../shared/common-types";
 import { containerStyle, options } from "../../settings";
 import * as pointService from '../../../services/pointService'
 import { ApiPoint } from "../../../services/pointService";
-import { number } from "yup";
 import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
 import FormInputText from "../../FormFields/FormInputText";
 import { useForm } from "react-hook-form";
@@ -59,7 +58,7 @@ export default function PointEdit() {
 
 
 
-    const { control, handleSubmit, setError, reset, setValue, formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit,  reset, setValue, formState: { errors } } = useForm<FormData>({
 
 
 
@@ -78,7 +77,7 @@ export default function PointEdit() {
         center = { lat: Number(point.lat), lng: Number(point.lng) }
 
     }
-    let pointNumber = 1
+  
 
 
     const navigate = useNavigate()
@@ -126,12 +125,7 @@ export default function PointEdit() {
 
     const searchInp = async (e: React.MouseEvent) => {
 
-        // if (!searchRef.current?.value) {
-
-        //     setErrorMessageSearch('Plece enter location')
-        //     return
-        // }
-        // setErrorMessageSearch('')
+      
 
         let findAddress = ''
         const inpName = document.getElementById('inputAddPointName') as HTMLInputElement

@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "react-router-dom"
+import {  useNavigate, useParams } from "react-router-dom"
 import { CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import { IdType } from "../../shared/common-types";
