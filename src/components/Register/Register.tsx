@@ -71,7 +71,6 @@ export function Register({ user }: UserProps) {
         API_CLIENT.register({ ...newUser })
             .then((user) => {
 
-                console.log(user)
                 sessionStorage.setItem('userId', user._id + '');
                 sessionStorage.setItem('email', user.email);
                 sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');

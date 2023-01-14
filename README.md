@@ -1,3 +1,38 @@
+# HACK-TRIP - https://github.com/AngelGeorgievStoyanov/hack-trip
+
+## React-TypeSript project for AKKODIS react-typescript-academy-2022 by Trayan Iliev-iproduct
+
+### Technologies used:
+* React-TypeSript
+* MySQL 
+* Express.js
+* Node.js
+* MUI
+* YUP
+* Google Maps
+* HTML & CSS
+* MongoDB + Mongoose 
+
+### Functionality
+* Guest users can see Home page with TOP 5 TRIPS (HOME PAGE) most liked trips and page with ALL TRIPS, they wont't be able to see any comments.  
+* Logged users have extended functionality with option to create trips and comments, add/edit/delete trips and comments, they will only be able to like trips if they are not the owner,on MY-TRIPS page they will be able to see all their own trips.
+* Trips owners can edit and delete their trips.
+* Comments' owners can edit and delete their comments.
+
+# Connection with REST API MySQL or REST API MONGODB
+* Default HACK-TRIP is the connection with REST API MySQL, to change the connection with to REST API MONGODB enter the folder 
+*  src/utils  in the file baseUrl.ts and change the CONNECTIONURL.   
+
+# REST API MySQL - https://github.com/AngelGeorgievStoyanov/REST-API-MYSQL
+* To run server npm start
+* To run client app cd client and npm start
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.2.6.
+
+# REST API MONGODB - https://github.com/AngelGeorgievStoyanov/REST-API-MONGODB
+* To run server npm start
+* To run client app cd client and npm start
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.2.6.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

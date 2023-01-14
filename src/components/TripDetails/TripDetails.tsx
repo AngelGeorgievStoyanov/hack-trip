@@ -165,8 +165,8 @@ export default function TripDetails() {
 
 
 
+        const currentPoint = points!.filter((x) => x._id + '' === id)
 
-        const currentPoint = points!.filter((x) => x._id === id)
 
         if (currentPoint !== undefined && currentPoint !== null) {
 
@@ -302,8 +302,9 @@ export default function TripDetails() {
 
                             :
                             (points !== undefined && points.length > 0) ?
-                                <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>FOR THIS TRIP HAVE {points.length} POINTS</Button>
-
+                                <Typography gutterBottom variant="subtitle1" component="div">
+                                    FOR THIS TRIP HAVE {points.length} POINTS
+                                </Typography>
                                 :
                                 <Typography gutterBottom variant="subtitle1" component="div">
                                     FOR THIS TRIP DONT HAVE POINTS

@@ -51,7 +51,8 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
         if (response.status >= 400) {
             const result = await response.json()
-            throw new Error(result.message)
+            console.log(result)
+            throw new Error(result)
         }
 
         return response.json()

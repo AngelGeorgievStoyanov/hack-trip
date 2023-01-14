@@ -7,7 +7,7 @@ import * as userService from '../../services/userService'
 import * as yup from "yup";
 
 import './Login.css'
-import { BaseSyntheticEvent, useContext } from 'react';
+import { BaseSyntheticEvent, useContext, useState } from 'react';
 import { ApiClient } from '../../services/userService';
 import { IdType } from '../../shared/common-types';
 import { User } from '../../model/users';
@@ -39,7 +39,7 @@ export function Login() {
 
     const loginContext = useContext(LoginContext)
 
-
+    const [errorsLogin, setErrprsLogin] = useState(undefined)
     const { control, handleSubmit, setError, formState: { errors } } = useForm<FormData>({
 
         defaultValues: { email: '', password: '' },
@@ -71,7 +71,8 @@ export function Login() {
                 }
                 navigate('/')
             }).catch((err) => {
-                console.log(err.message)
+                console.log(err.message, '-------')
+                setErrprsLogin(err.message)
                 if (err) {
                     setError('email', {
                         type: "server",
@@ -98,7 +99,6 @@ export function Login() {
 
 
                 <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', minWidth: '100vH', padding: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-
 
 
                     <Box component="form" sx={{
