@@ -16,7 +16,7 @@ import * as commentService from '../../services/commentService'
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Box, Button, Card, CardMedia, Container, Grid,  Typography } from "@mui/material";
+import { Box, Button, Card, CardMedia, Container, Grid, Typography } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 
 
@@ -37,6 +37,10 @@ export default function TripDetails() {
     }
 
     const trip = useLoaderData() as Trip;
+
+
+    console.log(trip)
+
     const userId = sessionStorage.getItem('userId') as string
     const navigate = useNavigate()
 
@@ -52,7 +56,7 @@ export default function TripDetails() {
     const [pointCard, setPointCard] = useState<Point>()
 
 
-    // console.log(trip.lat !== undefined)
+
     if ((trip.lat !== undefined) && (trip.lng !== undefined)) {
 
 
@@ -78,7 +82,7 @@ export default function TripDetails() {
                     setPoints(arrPoints)
                 }
             }
-        }).catch((err)=>{
+        }).catch((err) => {
             console.log(err)
         })
 
@@ -94,7 +98,7 @@ export default function TripDetails() {
             }
 
 
-        }).catch((err)=>{
+        }).catch((err) => {
             console.log(err)
         })
 
@@ -159,7 +163,7 @@ export default function TripDetails() {
 
 
 
-        
+
 
 
         const currentPoint = points!.filter((x) => x._id === id)
@@ -219,10 +223,10 @@ export default function TripDetails() {
         setLiked(true)
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
             trip.likes.push(userId)
-            console.log(trip)
+
 
             API_TRIP.updateLikes(trip._id, trip).then((data) => {
-                console.log(data)
+
 
             }).catch((err) => {
                 console.log(err)
@@ -233,14 +237,13 @@ export default function TripDetails() {
     }
 
     const reportClickHandler = () => {
-        console.log(trip)
-        console.log(userId)
+
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
             trip.reportTrip?.push(userId)
 
 
             API_TRIP.reportTrip(trip._id, trip).then((data) => {
-                console.log(data)
+
 
             }).catch((err) => {
                 console.log(err)
@@ -293,6 +296,7 @@ export default function TripDetails() {
                             DESCRIPTION : {trip?.description}
                         </Typography>
 
+
                         {trip._ownerId === userId ?
                             <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
 
@@ -307,9 +311,17 @@ export default function TripDetails() {
                         }
 
                         <Button component={Link} to={`/comments/add-comment/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD COMMENT</Button>
-                        <Button component={Link} to={`/trip/edit/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>EDIT TRIP</Button>
-                        <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE TRIP</Button>
+
+                        {trip._ownerId === userId ?
+                            <>
+                                <Button component={Link} to={`/trip/edit/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>EDIT TRIP</Button>
+                                <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE TRIP</Button>
+                            </>
+
+                            : ''}
                         <Button variant="contained" onClick={reportClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>REPORT TRIP</Button>
+
+
                         <Button onClick={goBack} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >BACK</Button>
 
 
@@ -361,7 +373,7 @@ export default function TripDetails() {
 
                     {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} />) : ''}
                 </Container>
-                <Container maxWidth={false} sx={{ display: 'flex', flexDirection:'row',justifyContent:'space-between' ,padding:'50px 50px'}} >
+                <Container maxWidth={false} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px' }} >
 
 
                     <GoogleMap
@@ -385,7 +397,7 @@ export default function TripDetails() {
 
                     <Box component='section' id="point-section-add">
                         {
-                            pointCard ?<TripDetailsPointCard point={pointCard} key={pointCard._id} /> : ''
+                            pointCard ? <TripDetailsPointCard point={pointCard} key={pointCard._id} /> : ''
 
                         }
 

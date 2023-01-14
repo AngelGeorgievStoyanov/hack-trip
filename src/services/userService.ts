@@ -1,7 +1,8 @@
-import { User, UserRegister } from "../model/users";
+import {  UserRegister } from "../model/users";
 import { Identifiable } from "../shared/common-types";
+import { CONNECTIONURL } from "../utils/baseUrl";
 
-const baseUrl = 'http://localhost:3030';
+const baseUrl = CONNECTIONURL;
 
 
 

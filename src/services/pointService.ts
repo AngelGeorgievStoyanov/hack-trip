@@ -1,7 +1,8 @@
 import { Point, PointCreate } from "../model/point";
 import { Identifiable } from "../shared/common-types";
+import { CONNECTIONURL } from "../utils/baseUrl";
 
-const baseUrl = 'http://localhost:3030';
+const baseUrl = CONNECTIONURL;
 
 
 export interface ApiPoint<K, V extends Identifiable<K>> {

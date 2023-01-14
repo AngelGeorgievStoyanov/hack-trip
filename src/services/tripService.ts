@@ -1,7 +1,8 @@
 import { Trip, TripCreate } from "../model/trip";
 import { Identifiable } from "../shared/common-types";
+import { CONNECTIONURL } from "../utils/baseUrl";
 
-const baseUrl = 'http://localhost:3030';
+const baseUrl = CONNECTIONURL;
 
 
 export interface ApiTrip<K, V extends Identifiable<K>> {

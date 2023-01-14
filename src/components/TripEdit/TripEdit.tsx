@@ -1,11 +1,11 @@
-import {  useLoaderData, useNavigate } from "react-router-dom"
-import { Trip,  TripTipeOfGroup, TripTransport } from "../../model/trip"
+import { useLoaderData, useNavigate } from "react-router-dom"
+import { Trip, TripTipeOfGroup, TripTransport } from "../../model/trip"
 import { IdType, toIsoDate } from "../../shared/common-types";
 import * as tripService from '../../services/tripService'
 
 import './TripEdit.css'
 import { ApiTrip } from "../../services/tripService";
-import { Autocomplete, GoogleMap,  MarkerF, useJsApiLoader } from "@react-google-maps/api";
+import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent } from "react";
 import { containerStyle, options } from "../settings";
 import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
@@ -54,9 +54,9 @@ const TRIP_SELECT_OPTIONS_TYPE_GROUPE: SelectOption[] = Object.keys(TripTipeOfGr
     .map((ordinal: number) => ({ key: ordinal, value: TripTipeOfGroup[ordinal] }));
 
 const schema = yup.object({
-    title: yup.string().required().min(2).max(50),
-    price: yup.number().min(0.1, 'Price must be positive'),
-    countPeoples: yup.number().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.'),
+    title: yup.string().required().min(2).max(60),
+    price: yup.number().min(0.1, 'Price must be positive').max(1000000),
+    countPeoples: yup.number().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.').max(1000),
     destination: yup.string().required().min(3, 'Destination is required min length 3 chars.').max(60, 'Max length is 60 chars.'),
     description: yup.string().max(1050, 'Description max length is 1050 chars'),
     imageUrl: yup.string(),
@@ -214,9 +214,13 @@ export default function TripEdit() {
 
 
 
-        if (clickedPos) {
+        if (clickedPos?.lat) {
+
             data.lat = clickedPos.lat
             data.lng = clickedPos.lng
+        } else {
+            data.lat = Number(trip.lat)
+            data.lng = Number(trip.lng)
         }
         data.timeEdited = toIsoDate(new Date())
 
@@ -225,7 +229,7 @@ export default function TripEdit() {
         const editTrip = { ...data } as any
 
         editTrip.id = trip._id as any as Trip
-        console.log(editTrip)
+
         API_TRIP.update(trip._id, editTrip).then((data) => {
             navigate(`/trip/details/${trip._id}`)
         }).catch((err) => {

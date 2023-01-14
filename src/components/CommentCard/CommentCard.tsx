@@ -39,7 +39,7 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom }: Comment
                 <Typography gutterBottom component="h4">
                     Author name: {comment.nameAuthor}
                 </Typography>
-                <Typography gutterBottom component="p">
+                <Typography  gutterBottom component="p" sx={{wordWrap: "break-word", padding:'5px'}}>
                     Comment: {comment.comment}
                 </Typography>
                 <span>

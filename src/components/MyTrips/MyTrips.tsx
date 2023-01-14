@@ -25,6 +25,8 @@ export default function MyTrips() {
 
                 setTrips(data)
 
+                console.log(data,'===========')
+
             }).catch((err) => {
                 console.log(err)
                 throw err.message

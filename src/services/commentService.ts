@@ -1,8 +1,9 @@
 
 import { Comment, CommentCreate } from "../model/comment";
 import { Identifiable } from "../shared/common-types";
+import { CONNECTIONURL } from "../utils/baseUrl";
 
-const baseUrl = 'http://localhost:3030';
+const baseUrl = CONNECTIONURL;
 
 
 export interface ApiComment<K, V extends Identifiable<K>> {

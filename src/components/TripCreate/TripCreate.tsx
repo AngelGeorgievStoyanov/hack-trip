@@ -54,8 +54,8 @@ const TRIP_SELECT_OPTIONS_TYPE_GROUPE: SelectOption[] = Object.keys(TripTipeOfGr
 
 const schema = yup.object({
     title: yup.string().required().min(2).max(60),
-    price: yup.number().min(0.1, 'Price must be positive'),
-    countPeoples: yup.number().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.'),
+    price: yup.number().min(0.1, 'Price must be positive').max(1000000),
+    countPeoples: yup.number().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.').max(1000),
     destination: yup.string().required().min(3, 'Destination is required min length 3 chars.').max(60, 'Max length is 60 chars.'),
     description: yup.string().max(1050, 'Description max length is 1050 chars'),
     imageUrl: yup.string(),
@@ -76,10 +76,10 @@ let zoom = 8;
 export function CreateTrip() {
 
 
-  
+
 
     const _ownerId = sessionStorage.getItem('userId')
-    const { control, handleSubmit,  formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
 
 
@@ -131,8 +131,8 @@ export function CreateTrip() {
 
     const searchInp = async () => {
 
-      
-      
+
+
         if (!searchRef.current?.value) {
 
             setErrorMessageSearch('Plece enter location')
@@ -145,7 +145,7 @@ export function CreateTrip() {
             address: searchRef.current!.value
         })
 
-       
+
         if (result) {
             zoom = 16
             center = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
@@ -219,7 +219,7 @@ export function CreateTrip() {
 
 
     }
-  
+
 
     const addPoints = (e: React.MouseEvent) => {
         e.preventDefault()
