@@ -82,7 +82,6 @@ export default function TripEdit() {
 
     const trip = useLoaderData() as Trip;
 
-    console.log(trip)
 
 
     const [images, setImages] = useState<string[]>()
@@ -101,7 +100,6 @@ export default function TripEdit() {
     useEffect(() => {
         API_TRIP.findById(trip._id).then((data) => {
             setImages(data.imageFile)
-            console.log(images)
         }).catch((err) => console.log(err))
     }, [])
 

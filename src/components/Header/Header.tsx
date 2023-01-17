@@ -30,8 +30,7 @@ export default function Header() {
 
                     sessionStorage.clear()
 
-                    console.log(sessionStorage)
-                    console.log(data)
+              
                     loginContext?.setUserL(null)
 
                     navigate('/')

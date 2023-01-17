@@ -31,6 +31,8 @@ type FormData = {
     imageUrl?: string;
     lat: string;
     lng: string;
+    pointNumber: IdType;
+
 
 };
 
@@ -47,7 +49,7 @@ const schema = yup.object({
 export default function PointEdit() {
 
     const point = useLoaderData() as Point;
-
+ 
 
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
 
@@ -58,13 +60,14 @@ export default function PointEdit() {
 
 
 
-    const { control, handleSubmit,  reset, setValue, formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
 
 
 
 
         defaultValues: {
-            name: point.name, description: point.description, imageUrl: point.imageUrl
+
+            name: point.name, description: point.description, imageUrl: point.imageUrl, pointNumber: Number(point.pointNumber)
         },
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -77,7 +80,7 @@ export default function PointEdit() {
         center = { lat: Number(point.lat), lng: Number(point.lng) }
 
     }
-  
+
 
 
     const navigate = useNavigate()
@@ -125,7 +128,7 @@ export default function PointEdit() {
 
     const searchInp = async (e: React.MouseEvent) => {
 
-      
+
 
         let findAddress = ''
         const inpName = document.getElementById('inputAddPointName') as HTMLInputElement
@@ -226,7 +229,7 @@ export default function PointEdit() {
 
         }
 
-
+  
 
         API_POINT.update(point._id, editedPoint).then((point) => {
 

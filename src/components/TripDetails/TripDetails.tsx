@@ -40,7 +40,10 @@ export default function TripDetails() {
 
 
 
-    const userId = sessionStorage.getItem('userId') as string
+
+
+    const userId = sessionStorage.getItem('userId') + ''
+  
     const navigate = useNavigate()
 
     const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
@@ -324,14 +327,18 @@ export default function TripDetails() {
 
                         <Button onClick={goBack} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >BACK</Button>
 
+                        {trip._ownerId !== userId ?
+                            <>
+                                {
+                                    trip.likes.some((x) => x === userId) || (liked === true) ?
 
-                        {trip.likes.some((x) => x === userId) || (liked === true) ?
+                                        <Button disabled variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >YOU LIKED THIS TRIP</Button>
+                                        :
 
-                            <Button disabled variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >YOU LIKED THIS TRIP</Button>
-                            :
-
-                            <Button onClick={onLikeTrip} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >LIKE TRIP</Button>
-                        }
+                                        <Button onClick={onLikeTrip} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >LIKE TRIP</Button>
+                                }
+                            </>
+                            : ''}
 
 
 
