@@ -3,12 +3,11 @@ import React, { BaseSyntheticEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiTrip } from "../../services/tripService";
 import { containerStyle, options } from "../settings";
-import './TripCreate.css';
 
 import * as tripService from '../../services/tripService'
 import { TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
-import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, Grid,TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
@@ -16,7 +15,9 @@ import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormTextArea from "../FormFields/FormTextArea";
+import FileUpload from "react-mui-fileuploader";
 
+import './TripCreate.css';
 
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
@@ -25,6 +26,8 @@ const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
+
+
 
 type FormData = {
     _ownerId: string;
@@ -35,11 +38,13 @@ type FormData = {
     typeOfPeople: string;
     destination: string;
     description: string;
-    imageUrl?: string;
+    imageUrl?: string | undefined;
     timeCreated: string | undefined;
     timeEdited?: string | undefined;
     lat: number | undefined;
     lng: number | undefined;
+    imageFile: string[] | undefined;
+
 
 };
 const TRIP_SELECT_OPTIONS_TRANSPORT: SelectOption[] = Object.keys(TripTransport)
@@ -55,7 +60,7 @@ const TRIP_SELECT_OPTIONS_TYPE_GROUPE: SelectOption[] = Object.keys(TripTipeOfGr
 const schema = yup.object({
     title: yup.string().required().min(2).max(60),
     price: yup.number().min(0.1, 'Price must be positive').max(1000000),
-    countPeoples: yup.number().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.').max(1000),
+    countPeoples: yup.number().required().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.').max(1000),
     destination: yup.string().required().min(3, 'Destination is required min length 3 chars.').max(60, 'Max length is 60 chars.'),
     description: yup.string().max(1050, 'Description max length is 1050 chars'),
     imageUrl: yup.string(),
@@ -76,6 +81,14 @@ let zoom = 8;
 export function CreateTrip() {
 
 
+    const [errorMessageSearch, setErrorMessageSearch] = useState('')
+
+    const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
+
+    const [fileSelected, setFileSelected] = React.useState<File[]>([])
+
+
+
 
 
     const _ownerId = sessionStorage.getItem('userId')
@@ -92,12 +105,20 @@ export function CreateTrip() {
         resolver: yupResolver(schema),
     });
 
-    const [errorMessageSearch, setErrorMessageSearch] = useState('')
-    const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
 
     const navigate = useNavigate()
     const searchRef = React.useRef<HTMLInputElement | null>(null)
 
+
+
+
+    const handleFilesChange = (files: any) => {
+
+        if (!files) return;
+
+        setFileSelected([...files]);
+
+    };
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
 
@@ -181,6 +202,31 @@ export function CreateTrip() {
     const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined, addPoints?: boolean) => {
         event?.preventDefault()
 
+        let formData = new FormData();
+
+
+        if (fileSelected) {
+            fileSelected.forEach((file) => {
+                formData.append('file', file)
+            }
+            )
+        }
+
+
+        const imagesNames = await API_TRIP.sendFile(formData).then((data) => {
+            let imageName = data as unknown as any as any[]
+            return imageName.map((x) => { return x.filename })
+        }).catch((err) => {
+            console.log(err)
+        })
+
+        if (imagesNames) {
+
+
+            data.imageFile = imagesNames
+        }
+
+
 
 
         if (clickedPos) {
@@ -218,6 +264,9 @@ export function CreateTrip() {
         })
 
 
+
+
+
     }
 
 
@@ -225,10 +274,8 @@ export function CreateTrip() {
         e.preventDefault()
 
 
-        console.log(e)
         const target = e.currentTarget.parentElement?.parentElement as HTMLFormElement
         const data = Object.fromEntries(new FormData(target)) as any as FormData
-        console.log(data)
 
         e as any as BaseSyntheticEvent<HTMLFormElement>
 
@@ -290,13 +337,16 @@ export function CreateTrip() {
                             flexDirection: 'column',
                             justifyContent: 'space-between',
                             maxWidth: '600px',
-                            maxHeight: '750px',
+                            maxHeight: '1050px',
                             padding: '30px',
                             backgroundColor: '#8d868670',
                             boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
                             '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                             '& .MuiButton-root': { m: 1, width: '32ch' },
                         }}
+                        encType="multipart/form-data"
+                        method="post"
+
                         noValidate
                         autoComplete='0ff'
                         onSubmit={handleSubmit(createTripSubmitHandler)}
@@ -333,10 +383,20 @@ export function CreateTrip() {
                         />
 
 
-                        <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message}
+                        <FileUpload
+                            title="Upload images"
+                            multiFile={true}
+                            onFilesChange={handleFilesChange}
+                            onContextReady={(context) => { }}
+                            showPlaceholderImage={false}
+                            maxFilesContainerHeight={157}
+                            sx={{backgroundColor:'#8d868670'}}
                         />
 
+                        <FormInputText name='imageUrl' label='IMAGE URL' control={control} type='text' error={errors.imageUrl?.message}
+                        />
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
+
 
                         <span>
 

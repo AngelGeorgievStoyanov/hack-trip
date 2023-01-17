@@ -55,10 +55,8 @@ export default function EditComment() {
 
         const editComment = { ...data } as any as Comment
 
-        console.log(editComment)
 
         API_COMMENT.update(comment._id, editComment).then((data) => {
-            console.log(data)
             navigate(`/trip/details/${comment._tripId}`)
         }).catch((err) => console.log(err))
 

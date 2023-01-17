@@ -8,7 +8,6 @@ import './Home.css'
 function Home() {
 
     const trips = useLoaderData() as Trip[]
-    console.log(trips)
 
     return (
         <>

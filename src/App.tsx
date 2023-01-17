@@ -1,4 +1,3 @@
-import './App.css';
 import { createBrowserRouter, LoaderFunctionArgs, Outlet, RouterProvider } from 'react-router-dom';
 import Home from './components/Home/Home';
 import { Login } from './components/Login/Login';
@@ -30,6 +29,7 @@ import MyTrips from './components/MyTrips/MyTrips';
 import GuardedRoute from './components/GuardedRoute/GuardedRoute';
 import NotFound from './components/NotFound/NotFound';
 
+import './App.css';
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
 
@@ -49,13 +49,11 @@ export const LoginContext = createContext({} as LoginContext)
 
 
 export async function tripsLoader() {
-  console.log()
 
   return API_TRIP.findAll()
 
 }
 export async function tripsLoaderTop() {
-  console.log()
 
   return API_TRIP.findTopTrips()
 

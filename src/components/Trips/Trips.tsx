@@ -1,9 +1,9 @@
 import { useLoaderData } from "react-router-dom";
 import { Trip } from "../../model/trip";
 import TripList from "./TripsList/TripsList";
+import { Container, Grid } from "@mui/material";
 
 import './Trips.css'
-import { Container, Grid } from "@mui/material";
 
 
 export default function Trips() {

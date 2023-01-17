@@ -59,7 +59,6 @@ export function Login() {
 
         API_CLIENT.login(data.email, data.password)
             .then((user) => {
-                console.log(user)
 
                 sessionStorage.setItem('userId', user._id + '');
                 sessionStorage.setItem('email', user.email);
@@ -71,7 +70,6 @@ export function Login() {
                 }
                 navigate('/')
             }).catch((err) => {
-                console.log(err.message, '-------')
                 setErrprsLogin(err.message)
                 if (err) {
                     setError('email', {

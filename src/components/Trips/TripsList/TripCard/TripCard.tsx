@@ -1,6 +1,6 @@
 
 
-import { Button, Card, CardContent, CardMedia, Typography } from '@mui/material';
+import { Button, Card, CardContent, CardMedia, ImageList, ImageListItem, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Trip } from '../../../../model/trip';
 import './TripCard.css'
@@ -12,10 +12,21 @@ interface TripCardProps {
 }
 
 
+
+
+
+
+
+
 export default function TripCard({ trip }: TripCardProps) {
 
 
+
+
     const userId = sessionStorage.getItem('userId')
+
+
+
 
     return (
         <>
@@ -36,19 +47,41 @@ export default function TripCard({ trip }: TripCardProps) {
                     Destination of the trip :{trip.destination}
                 </Typography>
 
-                {trip.imageUrl ?
-                    <CardMedia
-                        component="img"
-                        height="200"
-                        image={trip.imageUrl}
-                        alt="TRIP"
 
-                    /> :
-                    <Typography gutterBottom component="h6">
-                        There is no image for this trip
-                    </Typography>
+                {trip.imageFile?.length && trip.imageFile.length > 0 ?
+
+
+                    <ImageList sx={{ width: 320, height: 350 }} cols={3} rowHeight={164}>
+                        {trip.imageFile ? trip.imageFile.map((item, i) => (
+                            <ImageListItem key={i}>
+                                <img
+                                    src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
+                                    srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                    alt={item}
+                                    loading="lazy"
+                                />
+                            </ImageListItem>
+                        )) : ''}
+                    </ImageList>
+                    : trip.imageUrl ?
+
+                        <CardMedia
+                            component="img"
+                            height="200"
+                            image={trip.imageUrl}
+                            alt="TRIP"
+
+                        /> :
+                        <Typography gutterBottom component="h6">
+                            There is no image for this trip
+                        </Typography>
+
+
 
                 }
+
+
+
                 <CardContent sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center' }}>
                     {
                         userId !== null ?

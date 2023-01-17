@@ -1,3 +1,4 @@
+import { number } from "yup/lib/locale";
 import { Point } from "../../../model/point";
 import PointCard from "./PointCard/PointCard";
 import './PointList.css'
@@ -10,12 +11,12 @@ interface PointListProps {
 
 export default function PointList({ points }: PointListProps) {
 
-
+    let sortList = points.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
     return (
         <>
-            {points.length > 0 ?
-                points.map((x,i) =>
-                    <PointCard key={x._id} point={x} i={i}/>
+            {sortList.length > 0 ?
+                sortList.map((x, i) =>
+                    <PointCard key={x.pointNumber} id={x._id} point={x} i={i} />
                 )
                 : <h1>ADD YOUR FIRST POINT</h1>}
         </>

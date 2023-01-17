@@ -1,3 +1,4 @@
+import { points } from "../components/TripPoints/PointList/PointCard/PointCard";
 import { Point, PointCreate } from "../model/point";
 import { Identifiable } from "../shared/common-types";
 import { CONNECTIONURL } from "../utils/baseUrl";
@@ -13,6 +14,7 @@ export interface ApiPoint<K, V extends Identifiable<K>> {
     deleteById(id: K): Promise<void>;
     findByPointId(id: K): Promise<V>;
     deleteByTripId(id: K): Promise<void>;
+    editPointPosition(id:K, entity:points):Promise<V>
 
 }
 
@@ -20,6 +22,7 @@ export interface ApiPoint<K, V extends Identifiable<K>> {
 
 export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V> {
     constructor(public apiCollectionSuffix: string) { }
+   
 
     async findAll(): Promise<V[]> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`);
@@ -74,6 +77,28 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
         }
         return await response.json()
     }
+
+   async editPointPosition(id: K, entity: points): Promise<V> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/edit-position/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify(entity)
+                });
+
+        
+                if (response.status >= 400) {
+                    const result = await response.json()
+        
+                    throw new Error(result.message)
+                }
+                return await response.json()
+    }
+
+   
+
+
     async deleteById(id: K): Promise<void> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {

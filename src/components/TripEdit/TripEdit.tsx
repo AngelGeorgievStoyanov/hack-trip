@@ -2,20 +2,22 @@ import { useLoaderData, useNavigate } from "react-router-dom"
 import { Trip, TripTipeOfGroup, TripTransport } from "../../model/trip"
 import { IdType, toIsoDate } from "../../shared/common-types";
 import * as tripService from '../../services/tripService'
-
-import './TripEdit.css'
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
-import React, { BaseSyntheticEvent } from "react";
+import React, { BaseSyntheticEvent, useEffect, useState } from "react";
 import { containerStyle, options } from "../settings";
-import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import FormTextArea from "../FormFields/FormTextArea";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
-
+import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
+import './TripEdit.css'
+import FileUpload from "react-mui-fileuploader";
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
@@ -41,6 +43,7 @@ type FormData = {
     timeEdited?: string | undefined;
     lat: number | undefined;
     lng: number | undefined;
+    imageFile: string[] | undefined;
 
 };
 const TRIP_SELECT_OPTIONS_TRANSPORT: SelectOption[] = Object.keys(TripTransport)
@@ -77,12 +80,24 @@ export default function TripEdit() {
     const trip = useLoaderData() as Trip;
 
 
+    const [images, setImages] = useState<string[]>()
+
+
 
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
     const [initialPoint, setInitialPoint] = React.useState<google.maps.LatLngLiteral>({ lat: Number(trip.lat), lng: Number(trip.lng) } as google.maps.LatLngLiteral)
+    const [fileSelected, setFileSelected] = React.useState<File[]>([])
 
     const [visible, setVisible] = React.useState(true)
     let positionPoint
+
+
+
+    useEffect(() => {
+        API_TRIP.findById(trip._id).then((data) => {
+            setImages(data.imageFile)
+        }).catch((err) => console.log(err))
+    }, [])
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -122,6 +137,15 @@ export default function TripEdit() {
         googleMapsApiKey: googleKey!,
         libraries,
     })
+
+
+    const handleFilesChange = (files: any) => {
+
+        if (!files) return;
+
+        setFileSelected([...files]);
+
+    };
 
 
     const mapRef = React.useRef<google.maps.Map | null>(null)
@@ -209,9 +233,31 @@ export default function TripEdit() {
     if (!isLoaded) return <div>MAP LOADING ...</div>
 
 
-    const editTripSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
+    const editTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
+
+        let formData = new FormData();
 
 
+        if (fileSelected) {
+            fileSelected.forEach((file) => {
+                formData.append('file', file)
+            }
+            )
+        }
+
+
+        const imagesNames = await API_TRIP.sendFile(formData).then((data) => {
+            let imageName = data as unknown as any as any[]
+            return imageName.map((x) => { return x.filename })
+        }).catch((err) => {
+            console.log(err)
+        })
+       
+        if (imagesNames) {
+
+
+            data.imageFile = imagesNames
+        }
 
 
         if (clickedPos?.lat) {
@@ -245,12 +291,44 @@ export default function TripEdit() {
         navigate(-1);
     }
 
+
+
+
+
+    const deleteImage = (e: React.MouseEvent) => {
+
+
+
+        const index = images?.indexOf(e.currentTarget.id)
+        if (index !== undefined) {
+            const editedListImage = images
+
+            editedListImage?.splice(index, 1)
+            if (editedListImage) {
+
+
+                API_TRIP.editImages(trip._id, editedListImage).then((data) => {
+
+                    setImages(data.imageFile)
+                }).catch((err) => {
+                    console.log(err)
+                })
+            }
+
+
+        }
+
+
+
+    }
+
+
     return (
         <>
 
 
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
 
                     <GoogleMap
                         mapContainerStyle={containerStyle}
@@ -287,73 +365,99 @@ export default function TripEdit() {
 
 
                     </Box>
+                    <Box component='div' sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh' }}>
 
-                    <Box component='form'
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            maxWidth: '600px',
-                            maxHeight: '750px',
-                            padding: '30px',
-                            backgroundColor: '#8d868670',
-                            boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
-                            '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
-                            '& .MuiButton-root': { m: 1, width: '32ch' },
-                        }}
-                        noValidate
-                        autoComplete='0ff'
-                        onSubmit={handleSubmit(editTripSubmitHandler)}
-                    >
-                        <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
-                            EDIT TRIP
-                        </Typography>
+                        <Box component='form'
+                            sx={{
+                                margin: '30px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                maxWidth: '420px',
+                                maxHeight: '1100px',
+                                padding: '30px',
+                                backgroundColor: '#8d868670',
+                                boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                                '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+                                '& .MuiButton-root': { m: 1, width: '32ch' },
+                            }}
+                            noValidate
+                            autoComplete='0ff'
+                            onSubmit={handleSubmit(editTripSubmitHandler)}
+                        >
+                            <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
+                                EDIT TRIP
+                            </Typography>
 
-                        <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
-                        />
-
-
-                        <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
-                        />
+                            <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
+                            />
 
 
-                        <FormInputSelect name='transport' label='TRANSPORT' control={control} error={errors.transport?.message}
-                            options={TRIP_SELECT_OPTIONS_TRANSPORT} defaultOptionIndex={1} />
+                            <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
+                            />
 
 
-
-
-                        <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}
-                        />
-
-
-                        <FormInputSelect name='typeOfPeople' label='TYPE OF THE GROUP' control={control} error={errors.typeOfPeople?.message}
-                            options={TRIP_SELECT_OPTIONS_TYPE_GROUPE} defaultOptionIndex={1} />
-
-
-                        <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
-                        />
-
-
-                        <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message}
-                        />
-
-                        <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
-
-                        <span>
-
-                            <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT YOUR TRIP</Button>
-                            <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-
-                        </span>
+                            <FormInputSelect name='transport' label='TRANSPORT' control={control} error={errors.transport?.message}
+                                options={TRIP_SELECT_OPTIONS_TRANSPORT} defaultOptionIndex={1} />
 
 
 
 
+                            <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}
+                            />
+
+
+                            <FormInputSelect name='typeOfPeople' label='TYPE OF THE GROUP' control={control} error={errors.typeOfPeople?.message}
+                                options={TRIP_SELECT_OPTIONS_TYPE_GROUPE} defaultOptionIndex={1} />
+
+
+                            <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
+                            />
+                            <FileUpload
+                                title="Upload images"
+                                multiFile={true}
+                                onFilesChange={handleFilesChange}
+                                onContextReady={(context) => { }}
+                                showPlaceholderImage={false}
+                                maxFilesContainerHeight={157}
+                                sx={{ backgroundColor: '#8d868670' }}
+                            />
+
+                            <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message}
+                            />
+
+                            <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
+
+                            <span>
+
+                                <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT YOUR TRIP</Button>
+                                <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+
+                            </span>
+
+
+
+
+
+
+                        </Box>
+
+                        <ImageList sx={{ width: 520, height: 550, margin: '30px' }} cols={3} rowHeight={164}>
+                            {images ? images.map((item, i) => (
+                                <ImageListItem key={item}   sx={{margin:'10px' , padding:'10px'}}>
+                                    <HighlightOffSharpIcon sx={{cursor:'pointer'}} onClick={deleteImage} id={item} />
+                                    <img
+                                        src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
+                                        srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                        alt={item}
+                                        loading="lazy"
+                                    />
+                                </ImageListItem>
+                            )) : ''}
+                        </ImageList>
 
 
                     </Box>
-
 
                 </Container>
             </Grid>

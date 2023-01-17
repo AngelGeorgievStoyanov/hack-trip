@@ -16,7 +16,7 @@ import * as commentService from '../../services/commentService'
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Box, Button, Card, CardMedia, Container, Grid, Typography } from "@mui/material";
+import { Box, Button, Card, CardMedia, Container, Grid, ImageList, ImageListItem, Typography } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 
 
@@ -39,7 +39,6 @@ export default function TripDetails() {
     const trip = useLoaderData() as Trip;
 
 
-    console.log(trip)
 
     const userId = sessionStorage.getItem('userId') as string
     const navigate = useNavigate()
@@ -354,18 +353,33 @@ export default function TripDetails() {
 
 
                     </Card>
+                    {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
 
-                    <CardMedia
-                        component="img"
+                        <ImageList sx={{ width: 520, height: 500 }} cols={3} rowHeight={164}>
+                            {trip.imageFile ? trip.imageFile.map((item, i) => (
+                                <ImageListItem key={i}>
+                                    <img
+                                        src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
+                                        srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                        alt={item}
+                                        loading="lazy"
+                                    />
+                                </ImageListItem>
+                            )) : ''}
+                        </ImageList> : trip.imageUrl.length > 0 ?
+                            < CardMedia
+                                component="img"
 
-                        height="500px"
-                        width="800"
-                        image={trip.imageUrl}
-                        alt="TRIP"
+                                height="500px"
+                                width="800"
+                                image={trip.imageUrl}
+                                alt="TRIP"
 
-                    />
+                            /> : <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>
 
 
+
+                    }
 
 
                 </Container>

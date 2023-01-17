@@ -10,6 +10,7 @@ export type IdType = number | string ;
 export interface Identifiable<K> {
   
     _id?: K;
+   
 }
 
 

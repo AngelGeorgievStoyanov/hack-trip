@@ -24,11 +24,9 @@ export default function Header() {
         const accessToken = sessionStorage.getItem('accessToken')
 
         if (accessToken) {
-            console.log(accessToken)
 
             API_CLIENT.logout(accessToken)
                 .then((data) => {
-                    console.log(data)
                     sessionStorage.clear()
                     loginContext?.setUserL(null)
 

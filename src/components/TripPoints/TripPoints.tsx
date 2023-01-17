@@ -35,8 +35,8 @@ type FormData = {
     imageUrl?: string;
     lat: string;
     lng: string;
-    _ownerTripId:string
-
+    _ownerTripId: string;
+    pointNumber: IdType;
 };
 
 
@@ -59,9 +59,9 @@ export function TripPoints() {
 
     const idTrip = useParams().tripId
 
-  
 
-    const { control, handleSubmit,  reset, setValue, formState: { errors } } = useForm<FormData>({
+
+    const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
 
 
 
@@ -72,7 +72,7 @@ export function TripPoints() {
         mode: 'onChange',
         resolver: yupResolver(schema),
     });
-  
+
 
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
 
@@ -103,7 +103,6 @@ export function TripPoints() {
         if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
 
             setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
-            console.log(clickedPos)
         }
 
 
@@ -123,8 +122,8 @@ export function TripPoints() {
         } else if (searchRef.current?.value === '') {
             return
         } else {
-            reset({ name: '',description:'',imageUrl:'',lat:'',lng:'',_ownerTripId:'' })
-           
+            reset({ name: '', description: '', imageUrl: '', lat: '', lng: '', _ownerTripId: '' })
+
             findAddress = searchRef.current!.value
             inpName.value = searchRef.current!.value
 
@@ -178,10 +177,10 @@ export function TripPoints() {
 
 
     const createTripSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
-      
-      
-      
-        
+
+        data.pointNumber = points.length + 1
+
+       
 
         if (clickedPos?.lat !== undefined) {
             data.lat = clickedPos.lat + ''
@@ -196,19 +195,17 @@ export function TripPoints() {
 
          const newPoint = { ...data } as PointCreate
 
-       
+
 
         if (newPoint.name.split(',').length > 0) {
             newPoint.name = newPoint.name.split(',')[0]
 
         }
-        console.log(newPoint)
-    
+
 
 
         API_POINT.create(newPoint).then((point) => {
             setClickedPos(undefined)
-            console.log(point)
             reset({ name: '' })
             center = {
                 lat: Number(point.lat),
@@ -228,7 +225,7 @@ export function TripPoints() {
 
     return (
         <>
-          
+
 
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
@@ -280,7 +277,7 @@ export function TripPoints() {
                             }}
                             noValidate
                             autoComplete="off"
-                         onSubmit={handleSubmit(createTripSubmitHandler)}
+                            onSubmit={handleSubmit(createTripSubmitHandler)}
                         >
 
                             <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">

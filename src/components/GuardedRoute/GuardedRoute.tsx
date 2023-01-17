@@ -13,11 +13,9 @@ const GuardedRoute = () => {
 
     const loginContext = useContext(LoginContext)
 
-    console.log(loginContext)
 
 
     const userId = sessionStorage.getItem('userId')
-    console.log(userId)
 
 
     return userId ? <Outlet /> : <Navigate to="/login" />

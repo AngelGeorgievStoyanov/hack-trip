@@ -204,7 +204,6 @@ export default function PointEdit() {
     const createTripSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
 
 
-        console.log(data)
 
 
         data.lat = point.lat
@@ -227,7 +226,6 @@ export default function PointEdit() {
 
         }
 
-        console.log(editedPoint)
 
 
         API_POINT.update(point._id, editedPoint).then((point) => {

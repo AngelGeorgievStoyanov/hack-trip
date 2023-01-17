@@ -63,10 +63,8 @@ export default function CreateComment() {
 
 
         const newComment = { ...data } as any as CommentCreate
-        console.log(newComment)
 
         API_COMMENT.create(newComment).then((data) => {
-            console.log(data)
 
             navigate(`/trip/details/${idTrip}`)
         }).catch((err) => {
