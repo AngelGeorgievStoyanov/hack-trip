@@ -99,7 +99,7 @@ export function CreateTrip() {
 
         defaultValues: {
             title: '', _ownerId: '', countPeoples: undefined, timeCreated: '', lat: undefined, lng: undefined,
-            timeEdited: '', typeOfPeople: '', description: '', destination: '', imageUrl: '', price: undefined, transport: ''
+            timeEdited: '', typeOfPeople: '', description: '', destination: '', imageUrl: '', price: undefined, transport: '',imageFile: undefined
         },
         mode: 'onChange',
         resolver: yupResolver(schema),

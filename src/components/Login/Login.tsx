@@ -60,6 +60,8 @@ export function Login() {
         API_CLIENT.login(data.email, data.password)
             .then((user) => {
 
+                console.log(user)
+
                 sessionStorage.setItem('userId', user._id + '');
                 sessionStorage.setItem('email', user.email);
                 sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');

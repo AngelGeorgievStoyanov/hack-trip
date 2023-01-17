@@ -15,7 +15,7 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
     reportTrip(id: K, entity: Trip): Promise<V>;
     findTopTrips(): Promise<V[]>;
     findAllMyTrips(id: K): Promise<V[]>;
-    sendFile(entityWithoutId: FormData): Promise<V[]>
+    sendFile(entityWithoutId: FormData): Promise<string[]>
     editImages(id: K, data: string[]): Promise<V>
 }
 
@@ -144,7 +144,7 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         return result
     }
 
-    async sendFile(formdata: FormData): Promise<V[]> {
+    async sendFile(formdata: FormData): Promise<string[]> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/upload`, {
 
             method: 'POST',

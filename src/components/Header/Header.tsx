@@ -27,7 +27,11 @@ export default function Header() {
 
             API_CLIENT.logout(accessToken)
                 .then((data) => {
+
                     sessionStorage.clear()
+
+                    console.log(sessionStorage)
+                    console.log(data)
                     loginContext?.setUserL(null)
 
                     navigate('/')

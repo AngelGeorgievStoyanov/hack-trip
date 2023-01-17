@@ -18,6 +18,7 @@ import { useForm } from "react-hook-form";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import './TripEdit.css'
 import FileUpload from "react-mui-fileuploader";
+import { type } from "os";
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
@@ -27,6 +28,8 @@ let center = {
     lat: 42.697866831005435,
     lng: 23.321590139866355
 }
+
+
 
 
 type FormData = {
@@ -79,6 +82,8 @@ export default function TripEdit() {
 
     const trip = useLoaderData() as Trip;
 
+    console.log(trip)
+
 
     const [images, setImages] = useState<string[]>()
 
@@ -96,6 +101,7 @@ export default function TripEdit() {
     useEffect(() => {
         API_TRIP.findById(trip._id).then((data) => {
             setImages(data.imageFile)
+            console.log(images)
         }).catch((err) => console.log(err))
     }, [])
 
@@ -108,7 +114,8 @@ export default function TripEdit() {
             title: trip.title, _ownerId: trip._ownerId, countPeoples: +trip.countPeoples,
             timeCreated: trip.timeCreated, lat: Number(trip.lat), lng: Number(trip.lng),
             timeEdited: trip.timeEdited, typeOfPeople: TripTipeOfGroup[trip.typeOfPeople],
-            description: trip.description, destination: trip.destination, imageUrl: trip.imageUrl, price: +trip.price, transport: TripTransport[trip.transport]
+            description: trip.description, destination: trip.destination, imageUrl: trip.imageUrl, price: +trip.price, transport: TripTransport[trip.transport],
+            imageFile: trip.imageFile
         },
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -241,23 +248,27 @@ export default function TripEdit() {
         if (fileSelected) {
             fileSelected.forEach((file) => {
                 formData.append('file', file)
-            }
-            )
+            })
         }
 
 
-        const imagesNames = await API_TRIP.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[]
+        let imagesNames = await API_TRIP.sendFile(formData).then((data) => {
+            let imageName = data as unknown as any as any[] | []
             return imageName.map((x) => { return x.filename })
         }).catch((err) => {
             console.log(err)
         })
-       
-        if (imagesNames) {
 
 
-            data.imageFile = imagesNames
+
+        let imagesNew = imagesNames as unknown as any as string[]
+
+        if (imagesNew.length > 0) {
+
+
+            data.imageFile = images?.concat(imagesNew)
         }
+
 
 
         if (clickedPos?.lat) {
@@ -444,8 +455,8 @@ export default function TripEdit() {
 
                         <ImageList sx={{ width: 520, height: 550, margin: '30px' }} cols={3} rowHeight={164}>
                             {images ? images.map((item, i) => (
-                                <ImageListItem key={item}   sx={{margin:'10px' , padding:'10px'}}>
-                                    <HighlightOffSharpIcon sx={{cursor:'pointer'}} onClick={deleteImage} id={item} />
+                                <ImageListItem key={item} sx={{ margin: '10px', padding: '10px' }}>
+                                    <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />
                                     <img
                                         src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
                                         srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
