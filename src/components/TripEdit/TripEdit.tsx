@@ -8,7 +8,7 @@ import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, useEffect, useState } from "react";
 import { containerStyle, options } from "../settings";
-import { Box, Button, Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
+import { Box, Button, CardMedia, Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import FormTextArea from "../FormFields/FormTextArea";
@@ -261,10 +261,15 @@ export default function TripEdit() {
 
         let imagesNew = imagesNames as unknown as any as string[]
 
+
+
         if (imagesNew.length > 0) {
 
 
             data.imageFile = images?.concat(imagesNew)
+        } else {
+            data.imageFile = images
+
         }
 
 
@@ -311,10 +316,12 @@ export default function TripEdit() {
         const index = images?.indexOf(e.currentTarget.id)
         if (index !== undefined) {
             const editedListImage = images
+            console.log(editedListImage)
 
             editedListImage?.splice(index, 1)
             if (editedListImage) {
 
+                console.log(editedListImage)
 
                 API_TRIP.editImages(trip._id, editedListImage).then((data) => {
 
@@ -383,6 +390,7 @@ export default function TripEdit() {
                                 flexDirection: 'column',
                                 justifyContent: 'space-between',
                                 maxWidth: '420px',
+                                minHeight: '250px',
                                 maxHeight: '1100px',
                                 padding: '30px',
                                 backgroundColor: '#8d868670',
@@ -451,19 +459,31 @@ export default function TripEdit() {
 
                         </Box>
 
-                        <ImageList sx={{ width: 520, height: 550, margin: '30px' }} cols={3} rowHeight={164}>
-                            {images ? images.map((item, i) => (
-                                <ImageListItem key={item} sx={{ margin: '10px', padding: '10px' }}>
-                                    <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />
-                                    <img
-                                        src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
-                                        srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                                        alt={item}
-                                        loading="lazy"
-                                    />
-                                </ImageListItem>
-                            )) : ''}
-                        </ImageList>
+
+                        {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
+
+                            <ImageList sx={{ width: 520, height: 550, margin: '30px' }} cols={3} rowHeight={164}>
+                                {images ? images.map((item, i) => (
+                                    <ImageListItem key={item} sx={{ margin: '10px', padding: '10px' }}>
+                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />
+                                        <img
+                                            src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
+                                            srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                            alt={item}
+                                            loading="lazy"
+                                        />
+                                    </ImageListItem>
+                                )) : ''}
+                            </ImageList> : trip.imageUrl.length > 0 ?
+                                < CardMedia
+                                    component="img"
+
+                                    height="500px"
+                                    width="800"
+                                    image={trip.imageUrl}
+                                    alt="TRIP"
+
+                                /> : <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>}
 
 
                     </Box>

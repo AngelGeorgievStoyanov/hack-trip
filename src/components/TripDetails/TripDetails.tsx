@@ -43,7 +43,7 @@ export default function TripDetails() {
 
 
     const userId = sessionStorage.getItem('userId') + ''
-  
+
     const navigate = useNavigate()
 
     const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
@@ -272,6 +272,7 @@ export default function TripDetails() {
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: '',
+                        minWidth: '250px',
                         maxWidth: '450px', margin: '20px',
                         padding: '25px', backgroundColor: '#8d868670',
                         boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
@@ -360,20 +361,24 @@ export default function TripDetails() {
 
 
                     </Card>
+                  
+                  
                     {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
-
-                        <ImageList sx={{ width: 520, height: 500 }} cols={3} rowHeight={164}>
-                            {trip.imageFile ? trip.imageFile.map((item, i) => (
-                                <ImageListItem key={i}>
-                                    <img
-                                        src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
-                                        srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                                        alt={item}
-                                        loading="lazy"
-                                    />
-                                </ImageListItem>
-                            )) : ''}
-                        </ImageList> : trip.imageUrl.length > 0 ?
+                        <>
+                            <ImageList sx={{ width: 520, height: 500 }} cols={3} rowHeight={164}>
+                                {trip.imageFile ? trip.imageFile.map((item, i) => (
+                                    <ImageListItem key={i}>
+                                        <img
+                                            src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
+                                            srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                            alt={item}
+                                            loading="lazy"
+                                        />
+                                    </ImageListItem>
+                                )) : ''}
+                            </ImageList>
+                        </>
+                        : trip.imageUrl.length > 0 ?
                             < CardMedia
                                 component="img"
 

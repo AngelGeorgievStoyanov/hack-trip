@@ -101,11 +101,18 @@ export async function pointLoaderById({ params }: LoaderFunctionArgs) {
 }
 
 export async function commentLoaderById({ params }: LoaderFunctionArgs) {
-  if (params.commentId) {
-    return API_COMMENT.findById(params.commentId)
-  } else {
-    throw new Error(`Invalid or missing comment ID`);
 
+  if (params.commentId) {
+
+
+
+    return await API_COMMENT.findById(params.commentId)
+
+    
+
+  } else {
+
+    throw new Error(`Invalid or missing comment ID`);
   }
 }
 
@@ -242,6 +249,7 @@ const router = createBrowserRouter([
         path: '/comments/edit/:commentId',
 
         element: <GuardedRoute />,
+
         children: [
           {
             path: '',
@@ -249,7 +257,8 @@ const router = createBrowserRouter([
             element: <EditComment />,
             errorElement: <NotFound />
           }
-        ]
+        ],
+        errorElement: <NotFound />
 
       },
       {
