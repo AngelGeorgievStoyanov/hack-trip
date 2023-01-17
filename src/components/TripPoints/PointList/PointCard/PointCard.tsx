@@ -9,7 +9,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Card, Typography } from "@mui/material";
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
-import { type } from "@testing-library/user-event/dist/type";
+
+
 interface PointCardProps {
     point: Point;
     i: number;

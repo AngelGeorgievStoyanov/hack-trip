@@ -1,4 +1,3 @@
-import { number } from "yup/lib/locale";
 import { Point } from "../../../model/point";
 import PointCard from "./PointCard/PointCard";
 import './PointList.css'

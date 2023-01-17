@@ -49,7 +49,6 @@ export function Register({ user }: UserProps) {
     const [errorApi, setErrorApi] = useState()
 
 
-    console.log(errorApi)
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -77,11 +76,10 @@ export function Register({ user }: UserProps) {
                 setErrorApi(undefined)
                 navigate('/')
             }).catch((err) => {
-
                 setErrorApi(err.message)
 
                 console.log(err.message)
-                throw new Error(err.message)
+               
             })
 
 

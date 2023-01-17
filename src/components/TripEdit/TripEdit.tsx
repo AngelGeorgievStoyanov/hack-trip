@@ -2,8 +2,6 @@ import { useLoaderData, useNavigate } from "react-router-dom"
 import { Trip, TripTipeOfGroup, TripTransport } from "../../model/trip"
 import { IdType, toIsoDate } from "../../shared/common-types";
 import * as tripService from '../../services/tripService'
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, useEffect, useState } from "react";
@@ -18,7 +16,6 @@ import { useForm } from "react-hook-form";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import './TripEdit.css'
 import FileUpload from "react-mui-fileuploader";
-import { type } from "os";
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
