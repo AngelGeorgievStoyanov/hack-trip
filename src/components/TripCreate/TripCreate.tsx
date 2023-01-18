@@ -7,7 +7,7 @@ import { containerStyle, options } from "../settings";
 import * as tripService from '../../services/tripService'
 import { TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
-import { Box, Button, Container, Grid,TextField, Typography } from "@mui/material";
+import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
@@ -18,6 +18,7 @@ import FormTextArea from "../FormFields/FormTextArea";
 import FileUpload from "react-mui-fileuploader";
 
 import './TripCreate.css';
+import { number } from "yup/lib/locale";
 
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
@@ -32,17 +33,17 @@ const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualiz
 type FormData = {
     _ownerId: string;
     title: string;
-    price: number;
+    price: number | string | undefined;
     transport: string;
-    countPeoples: number;
+    countPeoples: number | string | undefined;
     typeOfPeople: string;
     destination: string;
     description: string;
     imageUrl?: string | undefined;
     timeCreated: string | undefined;
     timeEdited?: string | undefined;
-    lat: number | undefined;
-    lng: number | undefined;
+    lat: number | string | undefined;
+    lng: number | string | undefined;
     imageFile: string[] | undefined;
 
 
@@ -59,8 +60,8 @@ const TRIP_SELECT_OPTIONS_TYPE_GROUPE: SelectOption[] = Object.keys(TripTipeOfGr
 
 const schema = yup.object({
     title: yup.string().required().min(2).max(60),
-    price: yup.number().min(0.1, 'Price must be positive').max(1000000),
-    countPeoples: yup.number().required().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.').max(1000),
+    price: yup.number().transform((value) => (isNaN(value) || value === null || value === undefined) ? 0 : value).required().min(0.0000000000000000000000000000001, 'Price must be positive').max(1000000),
+    countPeoples: yup.number().transform((value) => (isNaN(value) || value === null || value === undefined) ? 0 : value).required().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.').max(1000),
     destination: yup.string().required().min(3, 'Destination is required min length 3 chars.').max(60, 'Max length is 60 chars.'),
     description: yup.string().max(1050, 'Description max length is 1050 chars'),
     imageUrl: yup.string(),
@@ -98,8 +99,8 @@ export function CreateTrip() {
 
 
         defaultValues: {
-            title: '', _ownerId: '', countPeoples: undefined, timeCreated: '', lat: undefined, lng: undefined,
-            timeEdited: '', typeOfPeople: '', description: '', destination: '', imageUrl: '', price: undefined, transport: '',imageFile: undefined
+            title: '', _ownerId: '', countPeoples: '', timeCreated: '', lat: '', lng: '',
+            timeEdited: '', typeOfPeople: TripTipeOfGroup["Another type"] + '', description: '', destination: '', imageUrl: '', price: '', transport: TripTransport["Another type"] + '', imageFile: []
         },
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -246,22 +247,22 @@ export function CreateTrip() {
         data.transport = TripTransport[parseInt(data.transport)]
         const newTrip = { ...data } as any as TripCreate
 
+        console.log(newTrip)
+        // API_TRIP.create(newTrip).then((trip) => {
 
-        API_TRIP.create(newTrip).then((trip) => {
+        //     if (addPoints === true) {
+        //         navigate(`/trip/points/${trip._id}`)
 
-            if (addPoints === true) {
-                navigate(`/trip/points/${trip._id}`)
+        //     } else {
 
-            } else {
-
-                navigate(`/trip/details/${trip._id}`)
-            }
+        //         navigate(`/trip/details/${trip._id}`)
+        //     }
 
 
 
-        }).catch((err) => {
-            console.log(err)
-        })
+        // }).catch((err) => {
+        //     console.log(err)
+        // })
 
 
 
@@ -390,7 +391,7 @@ export function CreateTrip() {
                             onContextReady={(context) => { }}
                             showPlaceholderImage={false}
                             maxFilesContainerHeight={157}
-                            sx={{backgroundColor:'#8d868670'}}
+                            sx={{ backgroundColor: '#8d868670' }}
                         />
 
                         <FormInputText name='imageUrl' label='IMAGE URL' control={control} type='text' error={errors.imageUrl?.message}

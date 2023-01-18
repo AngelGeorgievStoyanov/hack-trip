@@ -16,7 +16,7 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
     findTopTrips(): Promise<V[]>;
     findAllMyTrips(id: K): Promise<V[]>;
     sendFile(entityWithoutId: FormData): Promise<string[]>
-    editImages(id: K, data: string[]): Promise<V>
+    editImages(id: K, oneImage: string[]): Promise<V>
 }
 
 
@@ -161,13 +161,15 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
 
 
 
-    async editImages(id: K, data: string[]) {
+    async editImages(id: K, oneImage: string[]) {
+
+
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/edit-images/${id}`, {
             method: 'PUT',
             headers: {
                 'content-type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(oneImage)
         });
 
         const result = await response.json()

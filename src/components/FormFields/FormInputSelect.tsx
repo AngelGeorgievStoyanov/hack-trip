@@ -21,7 +21,7 @@ interface FormInputSelectProps<TFieldValues extends FieldValues> {
 
 
 function FormInputSelect<TFieldValues extends FieldValues>(
-    { name, control, label, options = [], defaultOptionIndex = 0, rules = {}, disabled = false, size = 'medium', error = undefined }
+    { name, control, label, options = [], defaultOptionIndex = 1, rules = {}, disabled = false, size = 'medium', error = undefined }
         : FormInputSelectProps<TFieldValues>) {
     return (
         (

@@ -312,16 +312,12 @@ export default function TripEdit() {
 
         const index = images?.indexOf(e.currentTarget.id)
         if (index !== undefined) {
-            const editedListImage = images
-            console.log(editedListImage)
+             const deletedImage = images?.slice(index, index + 1) 
 
-            editedListImage?.splice(index, 1)
-            if (editedListImage) {
+            if ( deletedImage) {
 
-                console.log(editedListImage)
 
-                API_TRIP.editImages(trip._id, editedListImage).then((data) => {
-
+                API_TRIP.editImages(trip._id, deletedImage).then((data) => {
                     setImages(data.imageFile)
                 }).catch((err) => {
                     console.log(err)
