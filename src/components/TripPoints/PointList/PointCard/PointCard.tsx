@@ -96,7 +96,7 @@ export default function PointCard({ point, i }: PointCardProps) {
 
 
                 navigate(`/trip/points/${idTrip}`)
-            })
+            }).catch(err => console.log(err))
         }
     }
 
@@ -126,7 +126,7 @@ export default function PointCard({ point, i }: PointCardProps) {
 
 
                 navigate(`/trip/points/${idTrip}`)
-            })
+            }).catch(err => console.log(err))
         }
 
     }

@@ -49,7 +49,7 @@ const schema = yup.object({
 export default function PointEdit() {
 
     const point = useLoaderData() as Point;
- 
+
 
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
 
@@ -137,6 +137,9 @@ export default function PointEdit() {
             findAddress = inpName.value
 
         } else if (searchRef.current?.value === '') {
+
+            setErrorMessageSearch('Plece enter location')
+
             return
         } else {
             reset({ name: '' })
@@ -147,25 +150,37 @@ export default function PointEdit() {
 
             setValue('name', searchRef.current!.value, { shouldValidate: true })
 
+            setErrorMessageSearch('')
+
         }
 
         const geocode = new google.maps.Geocoder()
-        const result = await geocode.geocode({
-            address: findAddress
-        })
+
+        try {
 
 
-        if (result) {
-            let searchPosition = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
-            zoom = 12
-            center = searchPosition
-            setClickedPos(searchPosition)
-            setVisible(true)
-            setInitialPoint(searchPosition)
+            const result = await geocode.geocode({
+                address: findAddress
+            })
 
 
+            if (result) {
+                let searchPosition = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
+                zoom = 12
+                center = searchPosition
+                setClickedPos(searchPosition)
+                setVisible(true)
+                setInitialPoint(searchPosition)
+
+
+            }
+
+        } catch (error: any) {
+
+            setErrorMessageSearch('Plece enter exact name location or choose from suggestions')
+
+            console.log(error.message)
         }
-
 
         if (searchRef.current?.value !== '' && searchRef.current?.value !== null) {
             searchRef.current!.value = ''
@@ -229,7 +244,7 @@ export default function PointEdit() {
 
         }
 
-  
+
 
         API_POINT.update(point._id, editedPoint).then((point) => {
 

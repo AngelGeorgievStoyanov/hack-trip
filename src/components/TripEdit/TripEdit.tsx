@@ -88,6 +88,7 @@ export default function TripEdit() {
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
     const [initialPoint, setInitialPoint] = React.useState<google.maps.LatLngLiteral>({ lat: Number(trip.lat), lng: Number(trip.lng) } as google.maps.LatLngLiteral)
     const [fileSelected, setFileSelected] = React.useState<File[]>([])
+    const [errorMessageSearch, setErrorMessageSearch] = useState('')
 
     const [visible, setVisible] = React.useState(true)
     let positionPoint
@@ -183,29 +184,45 @@ export default function TripEdit() {
     const searchInp = async () => {
 
         if (searchRef.current?.value === '') {
+            setErrorMessageSearch('Plece enter location')
+
+
             return
         }
+
+        setErrorMessageSearch('')
+
         const geocode = new google.maps.Geocoder()
-        const result = await geocode.geocode({
-            address: searchRef.current!.value
-        })
+
+        try {
 
 
-        if (result) {
-            let searchPosition = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
+            const result = await geocode.geocode({
+                address: searchRef.current!.value
+            })
 
 
-            zoom = 16
-            center = searchPosition
-            setClickedPos(searchPosition)
-            setVisible(true)
-            setInitialPoint(searchPosition)
+            if (result) {
+                let searchPosition = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
+
+
+                zoom = 16
+                center = searchPosition
+                setClickedPos(searchPosition)
+                setVisible(true)
+                setInitialPoint(searchPosition)
 
 
 
 
+            }
+
+        } catch (error: any) {
+           
+            setErrorMessageSearch('Plece enter exact name location or choose from suggestions')
+           
+            console.log(error.message)
         }
-
 
         if (searchRef.current?.value !== '' && searchRef.current?.value !== null) {
             searchRef.current!.value = ''
@@ -312,9 +329,9 @@ export default function TripEdit() {
 
         const index = images?.indexOf(e.currentTarget.id)
         if (index !== undefined) {
-             const deletedImage = images?.slice(index, index + 1) 
+            const deletedImage = images?.slice(index, index + 1)
 
-            if ( deletedImage) {
+            if (deletedImage) {
 
 
                 API_TRIP.editImages(trip._id, deletedImage).then((data) => {
@@ -360,7 +377,7 @@ export default function TripEdit() {
 
 
                         <Autocomplete>
-                            <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} />
+                            <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef}  helperText={errorMessageSearch} />
 
                         </Autocomplete>
 

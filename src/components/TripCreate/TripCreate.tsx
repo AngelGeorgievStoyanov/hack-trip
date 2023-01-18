@@ -163,16 +163,25 @@ export function CreateTrip() {
         setErrorMessageSearch('')
 
         const geocode = new google.maps.Geocoder()
-        const result = await geocode.geocode({
-            address: searchRef.current!.value
-        })
+        try {
+
+            const result = await geocode.geocode({
+                address: searchRef.current!.value
+            })
 
 
-        if (result) {
-            zoom = 16
-            center = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
-            setClickedPos({ lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() })
 
+            if (result) {
+                zoom = 16
+                center = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
+                setClickedPos({ lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() })
+
+            }
+        } catch (error: any) {
+
+            setErrorMessageSearch('Plece enter exact name location or choose from suggestions')
+
+            console.log(error.message)
         }
 
 

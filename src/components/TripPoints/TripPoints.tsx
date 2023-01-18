@@ -1,5 +1,5 @@
 import { GoogleMap, Marker, useJsApiLoader, Autocomplete } from "@react-google-maps/api";
-import React, { BaseSyntheticEvent } from "react";
+import React, { BaseSyntheticEvent, useState } from "react";
 import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { containerStyle, options } from "../settings";
 import './TripPoints.css';
@@ -44,7 +44,7 @@ const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualiz
 
 
 const schema = yup.object({
-    name: yup.string().required().min(1).max(50),
+    name: yup.string().required().min(1).max(100),
     description: yup.string().max(1050, 'Description max length is 1050 chars'),
     imageUrl: yup.string(),
 
@@ -58,6 +58,7 @@ export function TripPoints() {
     const points = useLoaderData() as Point[]
 
     const idTrip = useParams().tripId
+    const [errorMessageSearch, setErrorMessageSearch] = useState('')
 
 
 
@@ -120,7 +121,10 @@ export function TripPoints() {
             findAddress = inpName.value
 
         } else if (searchRef.current?.value === '') {
+            setErrorMessageSearch('Plece enter location')
             return
+
+
         } else {
             reset({ name: '', description: '', imageUrl: '', lat: '', lng: '', _ownerTripId: '' })
 
@@ -130,22 +134,34 @@ export function TripPoints() {
 
             setValue('name', searchRef.current!.value, { shouldValidate: true })
 
+            setErrorMessageSearch('')
+
         }
 
 
         const geocode = new google.maps.Geocoder()
-        const result = await geocode.geocode({
-            address: findAddress
-        })
+
+        try {
 
 
-        if (result) {
-            zoom = 16
-            center = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
-            setClickedPos({ lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() })
+            const result = await geocode.geocode({
+                address: findAddress
+            })
 
+
+            if (result) {
+                zoom = 16
+                center = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
+                setClickedPos({ lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() })
+
+            }
+
+        } catch (error: any) {
+
+            setErrorMessageSearch('Plece enter exact name location or choose from suggestions')
+
+            console.log(error.message)
         }
-
 
         if (searchRef.current?.value !== '' && searchRef.current?.value !== null) {
             searchRef.current!.value = ''
@@ -180,7 +196,7 @@ export function TripPoints() {
 
         data.pointNumber = points.length + 1
 
-       
+
 
         if (clickedPos?.lat !== undefined) {
             data.lat = clickedPos.lat + ''
@@ -193,7 +209,7 @@ export function TripPoints() {
 
 
 
-         const newPoint = { ...data } as PointCreate
+        const newPoint = { ...data } as PointCreate
 
 
 
@@ -252,7 +268,7 @@ export function TripPoints() {
 
 
                             <Autocomplete>
-                                <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} />
+                                <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
 
                             </Autocomplete>
 
