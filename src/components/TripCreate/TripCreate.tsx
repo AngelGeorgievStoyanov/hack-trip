@@ -248,21 +248,21 @@ export function CreateTrip() {
         const newTrip = { ...data } as any as TripCreate
 
         console.log(newTrip)
-        // API_TRIP.create(newTrip).then((trip) => {
+        API_TRIP.create(newTrip).then((trip) => {
 
-        //     if (addPoints === true) {
-        //         navigate(`/trip/points/${trip._id}`)
+            if (addPoints === true) {
+                navigate(`/trip/points/${trip._id}`)
 
-        //     } else {
+            } else {
 
-        //         navigate(`/trip/details/${trip._id}`)
-        //     }
+                navigate(`/trip/details/${trip._id}`)
+            }
 
 
 
-        // }).catch((err) => {
-        //     console.log(err)
-        // })
+        }).catch((err) => {
+            console.log(err)
+        })
 
 
 
