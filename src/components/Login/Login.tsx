@@ -38,9 +38,9 @@ export function Login() {
     const navigate = useNavigate();
 
     const loginContext = useContext(LoginContext)
+    const [errorApi, setErrorApi] = useState()
 
-    const [errorsLogin, setErrprsLogin] = useState(undefined)
-    const { control, handleSubmit, setError, formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
         defaultValues: { email: '', password: '' },
         mode: 'onChange',
@@ -60,7 +60,7 @@ export function Login() {
         API_CLIENT.login(data.email, data.password)
             .then((user) => {
 
-          
+
 
                 sessionStorage.setItem('userId', user._id + '');
                 sessionStorage.setItem('email', user.email);
@@ -70,24 +70,34 @@ export function Login() {
 
                     loginContext?.setUserL({ ...user })
                 }
+
+                setErrorApi(undefined)
                 navigate('/')
             }).catch((err) => {
-                setErrprsLogin(err.message)
-                if (err) {
-                    setError('email', {
-                        type: "server",
-                        message: err.message,
-                    });
-                    setError('password', {
-                        type: "server",
-                        message: err.message,
-                    });
+                if (err.message === 'Failed to fetch') {
+                    err.message = 'No internet connection with server.Please try again later.'
                 }
-                throw new Error(err.message)
+                setErrorApi(err.message)
+
+                console.log(err.message)
+
             })
 
 
     }
+
+    if (errorApi) {
+
+        setTimeout(() => {
+            setErrorApi(undefined)
+        }, 5000)
+
+
+    }
+
+  
+
+
 
 
 
@@ -98,8 +108,14 @@ export function Login() {
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
 
-                <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', minWidth: '100vH', padding: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-
+                <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', minWidth: '100vH', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    {errorApi ?
+                        <Box component='div' sx={{ backgroundColor: 'red', color: 'black', padding: '10px 20px', borderRadius: '9px', margin: '20px' }}>
+                            <Typography component='h4'>
+                                {errorApi}
+                            </Typography>
+                        </Box>
+                        : ''}
 
                     <Box component="form" sx={{
                         display: 'flex',

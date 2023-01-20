@@ -108,7 +108,7 @@ export async function commentLoaderById({ params }: LoaderFunctionArgs) {
 
     return await API_COMMENT.findById(params.commentId)
 
-    
+
 
   } else {
 
@@ -144,6 +144,7 @@ const router = createBrowserRouter([
 
   {
     element: <Layout />,
+    errorElement: <h2>No internet connection with server.Please try again later.</h2>,
     children: [
       {
         path: "/",
@@ -292,14 +293,15 @@ function App() {
     <>
 
       <ErrorBoundary>
+        {window.navigator.onLine ?
+
+          <LoginContext.Provider value={{ userL, setUserL }}>
+
+            <RouterProvider router={router} />
+          </LoginContext.Provider>
 
 
-        <LoginContext.Provider value={{ userL, setUserL }}>
-
-          <RouterProvider router={router} />
-        </LoginContext.Provider>
-
-
+          : <h1>No internet connection. Please try again later.</h1>}
       </ErrorBoundary>
     </>
 

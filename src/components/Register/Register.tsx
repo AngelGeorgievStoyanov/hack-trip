@@ -8,7 +8,7 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import './Register.css'
-import {  useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Box, Button, Container, Grid, Typography } from '@mui/material';
 import FormInputText from '../FormFields/FormInputText';
 
@@ -76,22 +76,33 @@ export function Register({ user }: UserProps) {
                 setErrorApi(undefined)
                 navigate('/')
             }).catch((err) => {
+                if (err.message === 'Failed to fetch') {
+                    err.message = 'No internet connection with server.Please try again later.'
+                }
                 setErrorApi(err.message)
 
                 console.log(err.message)
-               
+
             })
 
 
 
 
+    }
 
 
+    if (errorApi) {
 
-
+        setTimeout(() => {
+            setErrorApi(undefined)
+        }, 5000)
 
 
     }
+
+
+
+
 
     return (
         <>
@@ -101,7 +112,7 @@ export function Register({ user }: UserProps) {
 
                 <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', minWidth: '100vH', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     {errorApi ?
-                        <Box component='div' sx={{ backgroundColor: 'red', color: 'black', padding: '10px 20px', borderRadius: '9px', margin:'20px' }}>
+                        <Box component='div' sx={{ backgroundColor: 'red', color: 'black', padding: '10px 20px', borderRadius: '9px', margin: '20px' }}>
                             <Typography component='h4'>
                                 {errorApi}
                             </Typography>
