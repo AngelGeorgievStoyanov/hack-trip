@@ -19,7 +19,12 @@ import CommentCard from "../CommentCard/CommentCard";
 import { Box, Button, Card, CardMedia, Container, Grid, ImageList, ImageListItem, Typography } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 
+let zoom = 8;
 
+let center = {
+    lat: 42.697866831005435,
+    lng: 23.321590139866355
+}
 
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
@@ -29,12 +34,7 @@ const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualiz
 export default function TripDetails() {
 
 
-    let zoom = 8;
-
-    let center = {
-        lat: 42.697866831005435,
-        lng: 23.321590139866355
-    }
+  
 
     const trip = useLoaderData() as Trip;
 
@@ -69,9 +69,10 @@ export default function TripDetails() {
 
         }
 
+
+
     }
     useEffect(() => {
-
 
         API_POINT.findByTripId(trip._id).then((data) => {
 
@@ -103,9 +104,6 @@ export default function TripDetails() {
         }).catch((err) => {
             console.log(err)
         })
-
-
-
 
 
 
@@ -165,8 +163,6 @@ export default function TripDetails() {
 
 
 
-
-
         const currentPoint = points!.filter((x) => x._id + '' === id)
 
 
@@ -174,7 +170,6 @@ export default function TripDetails() {
 
 
             setPointCard(currentPoint[0])
-
 
         }
 
@@ -266,13 +261,16 @@ export default function TripDetails() {
 
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
-                <Container maxWidth={false} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc' }}>
+                <Container maxWidth={false} sx={{
+                    display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc', '@media(max-width: 600px)': {
+                        display: 'flex', flexDirection: 'column-reverse'
+                    }
+                }}>
 
                     <Card sx={{
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: '',
-                        minWidth: '250px',
+                        minWidth: '200px',
                         maxWidth: '450px', margin: '20px',
                         padding: '25px', backgroundColor: '#8d868670',
                         boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
@@ -361,11 +359,11 @@ export default function TripDetails() {
 
 
                     </Card>
-                  
-                  
+
+
                     {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
                         <>
-                            <ImageList sx={{ width: 520, height: 500 }} cols={3} rowHeight={164}>
+                            <ImageList sx={{ width: 520, height: 500, '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
                                 {trip.imageFile ? trip.imageFile.map((item, i) => (
                                     <ImageListItem key={i}>
                                         <img

@@ -35,7 +35,6 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
 
     async findById(id: K): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`);
-        console.log(response.status)
         if (response.status >= 400) {
             const result = await response.json()
 

@@ -15,8 +15,8 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
     reportTrip(id: K, entity: Trip): Promise<V>;
     findTopTrips(): Promise<V[]>;
     findAllMyTrips(id: K): Promise<V[]>;
-    sendFile(entityWithoutId: FormData): Promise<string[]>
-    editImages(id: K, oneImage: string[]): Promise<V>
+    sendFile(entityWithoutId: FormData): Promise<string[]>;
+    editImages(id: K, oneImage: string[]): Promise<V>;
 }
 
 

@@ -48,7 +48,9 @@ export default function Header() {
 
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
-                <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '20px' }}>
+                <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '20px',  '@media(max-width: 600px)' : {
+   display:'flex' ,flexDirection: 'column'
+  } }}>
                     {userL !== null || email !== null ?
                         <>
 

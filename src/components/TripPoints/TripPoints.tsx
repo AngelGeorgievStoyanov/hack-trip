@@ -15,6 +15,7 @@ import FormTextArea from "../FormFields/FormTextArea";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
+import FileUpload from "react-mui-fileuploader";
 
 
 
@@ -37,6 +38,8 @@ type FormData = {
     lng: string;
     _ownerTripId: string;
     pointNumber: IdType;
+    imageFile: string[] | undefined;
+
 };
 
 
@@ -57,7 +60,10 @@ export function TripPoints() {
 
     const points = useLoaderData() as Point[]
 
+
     const idTrip = useParams().tripId
+    const [fileSelected, setFileSelected] = React.useState<File[]>([])
+
     const [errorMessageSearch, setErrorMessageSearch] = useState('')
 
 
@@ -109,7 +115,13 @@ export function TripPoints() {
 
     }
 
+    const handleFilesChange = (files: any) => {
 
+        if (!files) return;
+
+        setFileSelected([...files]);
+
+    };
 
 
     const searchInp = async (e: React.MouseEvent) => {
@@ -192,7 +204,31 @@ export function TripPoints() {
     if (!isLoaded) return <div>MAP LOADING ...</div>
 
 
-    const createTripSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
+    const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
+
+
+        let formData = new FormData();
+
+
+        if (fileSelected) {
+            fileSelected.forEach((file) => {
+                formData.append('file', file)
+            }
+            )
+        }
+        const imagesNames = await API_POINT.sendFile(formData).then((data) => {
+            let imageName = data as unknown as any as any[]
+            return imageName.map((x) => { return x.filename })
+        }).catch((err) => {
+            console.log(err)
+        })
+
+        if (imagesNames) {
+
+
+            data.imageFile = imagesNames
+        }
+
 
         data.pointNumber = points.length + 1
 
@@ -217,7 +253,6 @@ export function TripPoints() {
             newPoint.name = newPoint.name.split(',')[0]
 
         }
-
 
 
         API_POINT.create(newPoint).then((point) => {
@@ -283,7 +318,7 @@ export function TripPoints() {
                                 flexDirection: 'column',
                                 justifyContent: 'space-between',
                                 maxWidth: '600px',
-                                maxHeight: '450px',
+                                maxHeight: '850px',
                                 padding: '30px',
                                 marginTop: '50px',
                                 backgroundColor: '#8d868670',
@@ -310,6 +345,17 @@ export function TripPoints() {
 
                             <Button variant="contained" onClick={findInMap} sx={{ ':hover': { background: '#4daf30' } }}>FIND IN MAP</Button>
                             <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
+
+                            <FileUpload
+                                title="Upload images"
+                                multiFile={true}
+                                onFilesChange={handleFilesChange}
+                                onContextReady={(context) => { }}
+                                showPlaceholderImage={false}
+                                maxFilesContainerHeight={157}
+
+
+                            />
 
                             <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message} />
                             <span>

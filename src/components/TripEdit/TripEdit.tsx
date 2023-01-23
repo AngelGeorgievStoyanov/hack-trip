@@ -218,9 +218,9 @@ export default function TripEdit() {
             }
 
         } catch (error: any) {
-           
+
             setErrorMessageSearch('Plece enter exact name location or choose from suggestions')
-           
+
             console.log(error.message)
         }
 
@@ -372,12 +372,12 @@ export default function TripEdit() {
                     </GoogleMap>
 
 
-                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 
 
                         <Autocomplete>
-                            <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef}  helperText={errorMessageSearch} />
+                            <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
 
                         </Autocomplete>
 
@@ -391,7 +391,11 @@ export default function TripEdit() {
 
 
                     </Box>
-                    <Box component='div' sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh' }}>
+                    <Box component='div' sx={{
+                        display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 600px)': {
+                            display: 'flex', flexDirection: 'column-reverse', width: '100vw'
+                        }
+                    }}>
 
                         <Box component='form'
                             sx={{
@@ -447,7 +451,7 @@ export default function TripEdit() {
                                 onContextReady={(context) => { }}
                                 showPlaceholderImage={false}
                                 maxFilesContainerHeight={157}
-                                sx={{ backgroundColor: '#8d868670' }}
+                                sx={{ '& .MuiPaper-root MuiPaper-outlined MuiPaper-rounded css-ibczwg-MuiPaper-root': { backgroundColor: '#8d868670' } }}
                             />
 
                             <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message}
@@ -472,9 +476,9 @@ export default function TripEdit() {
 
                         {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
 
-                            <ImageList sx={{ width: 520, height: 550, margin: '30px' }} cols={3} rowHeight={164}>
+                            <ImageList sx={{ width: 520, height: 550, margin: '30px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={3} rowHeight={164}>
                                 {images ? images.map((item, i) => (
-                                    <ImageListItem key={item} sx={{ margin: '10px', padding: '10px' }}>
+                                    <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
                                         <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />
                                         <img
                                             src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}

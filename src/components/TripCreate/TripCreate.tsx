@@ -18,7 +18,6 @@ import FormTextArea from "../FormFields/FormTextArea";
 import FileUpload from "react-mui-fileuploader";
 
 import './TripCreate.css';
-import { number } from "yup/lib/locale";
 
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
@@ -28,6 +27,10 @@ const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
+
+interface addPoints {
+    (): void
+}
 
 
 type FormData = {
@@ -93,9 +96,7 @@ export function CreateTrip() {
 
 
     const _ownerId = sessionStorage.getItem('userId')
-    const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
-
-
+    const { control, handleSubmit, formState: { errors , isValid} } = useForm<FormData>({
 
 
         defaultValues: {
@@ -256,7 +257,6 @@ export function CreateTrip() {
         data.transport = TripTransport[parseInt(data.transport)]
         const newTrip = { ...data } as any as TripCreate
 
-        console.log(newTrip)
         API_TRIP.create(newTrip).then((trip) => {
 
             if (addPoints === true) {
@@ -291,9 +291,8 @@ export function CreateTrip() {
 
 
 
-
-        createTripSubmitHandler(data, e, true)
-
+         createTripSubmitHandler(data, e, true) 
+       
     }
 
 
@@ -400,7 +399,8 @@ export function CreateTrip() {
                             onContextReady={(context) => { }}
                             showPlaceholderImage={false}
                             maxFilesContainerHeight={157}
-                            sx={{ backgroundColor: '#8d868670' }}
+
+
                         />
 
                         <FormInputText name='imageUrl' label='IMAGE URL' control={control} type='text' error={errors.imageUrl?.message}
@@ -411,7 +411,7 @@ export function CreateTrip() {
                         <span>
 
                             <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD TRIP</Button>
-                            <Button variant="contained" onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >ADD POINT`S FOR THE TRIP</Button>
+                            <Button variant="contained"  disabled={!isValid} onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}>ADD POINT`S FOR THE TRIP</Button>
 
                         </span>
 

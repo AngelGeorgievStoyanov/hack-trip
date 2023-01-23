@@ -70,29 +70,6 @@
     margin: 0;
 }
 
-@media(max-width:600px) {
-
-    .header {
-        width: 600px;
-
-    }
-
-    .section-details {
-        width: 600px;
-        height: 100%;
-        display: flex;
-        flex-direction: column-reverse;
-        justify-content: flex-end;
-        margin-bottom: 0px;
-        background-color: gray;
-
-    }
-
-    .section-details-img {
-        width: 600px;
-    }
-
-}
 
 @media(max-width:400px) {
 

@@ -14,7 +14,9 @@ export interface ApiPoint<K, V extends Identifiable<K>> {
     deleteById(id: K): Promise<void>;
     findByPointId(id: K): Promise<V>;
     deleteByTripId(id: K): Promise<void>;
-    editPointPosition(id:K, entity:points):Promise<V>
+    editPointPosition(id:K, entity:points):Promise<V>;
+    sendFile(entityWithoutId: FormData): Promise<string[]>;
+    editImages(id: K, oneImage: string[]): Promise<V>;
 
 }
 
@@ -136,6 +138,36 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
         return response.json()
     }
 
+    async sendFile(formdata: FormData): Promise<string[]> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/upload`, {
+
+            method: 'POST',
+            body: formdata,
+            headers: {}
+        });
+
+        const result = await response.json()
+
+        return result
+    }
+
+
+    async editImages(id: K, oneImage: string[]) {
+
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/edit-images/${id}`, {
+            method: 'PUT',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(oneImage)
+        });
+
+        const result = await response.json()
+
+
+        return result
+    }
 
 
 }
