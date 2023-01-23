@@ -28,9 +28,7 @@ const googleKey = process.env.REACT_APP_GOOGLE_KEY
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
 
-interface addPoints {
-    (): void
-}
+
 
 
 type FormData = {

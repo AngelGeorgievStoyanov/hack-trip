@@ -11,10 +11,10 @@ export interface ApiPoint<K, V extends Identifiable<K>> {
     findByTripId(id: K): Promise<V>;
     create(entityWithoutId: PointCreate): Promise<any>;
     update(id: K, entity: Point): Promise<V>;
-    deleteById(id: K): Promise<void>;
+    deleteById(id: K, idTrip: K): Promise<void>;
     findByPointId(id: K): Promise<V>;
     deleteByTripId(id: K): Promise<void>;
-    editPointPosition(id:K, entity:points):Promise<V>;
+    editPointPosition(id: K, entity: points): Promise<V>;
     sendFile(entityWithoutId: FormData): Promise<string[]>;
     editImages(id: K, oneImage: string[]): Promise<V>;
 
@@ -24,7 +24,7 @@ export interface ApiPoint<K, V extends Identifiable<K>> {
 
 export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V> {
     constructor(public apiCollectionSuffix: string) { }
-   
+
 
     async findAll(): Promise<V[]> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`);
@@ -38,7 +38,7 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`);
 
-        const res= await response.json() 
+        const res = await response.json()
         return res
     }
 
@@ -62,7 +62,7 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
         }
         return response.json()
     }
-   
+
     async update(id: K, entity: Point): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'PUT',
@@ -80,34 +80,38 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
         return await response.json()
     }
 
-   async editPointPosition(id: K, entity: points): Promise<V> {
+    async editPointPosition(id: K, entity: points): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/edit-position/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'content-type': 'application/json'
-                    },
-                    body: JSON.stringify(entity)
-                });
+            method: 'PUT',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(entity)
+        });
 
-        
-                if (response.status >= 400) {
-                    const result = await response.json()
-        
-                    throw new Error(result.message)
-                }
-                return await response.json()
+
+        if (response.status >= 400) {
+            const result = await response.json()
+
+            throw new Error(result.message)
+        }
+        return await response.json()
     }
 
-   
 
 
-    async deleteById(id: K): Promise<void> {
 
+    async deleteById(id: K, idTrip: K): Promise<void> {
+        
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'DELETE',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({idTrip})
 
         });
-     
+
         if (response.status >= 400) {
             const result = await response.json()
 
@@ -122,7 +126,7 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
             method: 'DELETE',
 
         });
- 
+
         if (response.status >= 400) {
             const result = await response.json()
 

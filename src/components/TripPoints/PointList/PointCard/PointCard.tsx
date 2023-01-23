@@ -63,7 +63,7 @@ export default function PointCard({ point, i }: PointCardProps) {
     const deleteClickHandler = () => {
 
 
-        API_POINT.deleteById(point._id).then((data) => {
+        API_POINT.deleteById(point._id, idTrip+'').then((data) => {
 
             navigate(`/trip/points/${idTrip}`)
         }).catch((err) => {

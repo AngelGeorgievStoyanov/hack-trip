@@ -56,7 +56,6 @@ const schema = yup.object({
 export default function PointEdit() {
 
     const point = useLoaderData() as Point;
-    console.log(point)
 
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
 
@@ -284,6 +283,15 @@ export default function PointEdit() {
             data.lat = clickedPos.lat + ''
             data.lng = clickedPos.lng + ''
         }
+
+        if(!data.lat){
+            setErrorMessageSearch('Plece enter exact name location or click in map')
+            return
+        }else{
+            setErrorMessageSearch('')
+        }
+
+
         data.pointNumber = point.pointNumber
 
 

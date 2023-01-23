@@ -67,14 +67,13 @@ export function TripPoints() {
     const [errorMessageSearch, setErrorMessageSearch] = useState('')
 
 
-
     const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
 
 
 
 
         defaultValues: {
-            name: '', description: '', imageUrl: ''
+            name: '', description: '', imageUrl: '', imageFile: []
         },
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -119,7 +118,9 @@ export function TripPoints() {
 
         if (!files) return;
 
+
         setFileSelected([...files]);
+
 
     };
 
@@ -239,6 +240,13 @@ export function TripPoints() {
             data.lng = clickedPos.lng + ''
         }
 
+        if (!data.lat) {
+            setErrorMessageSearch('Plece enter exact name location or click in map')
+            return
+        } else {
+            setErrorMessageSearch('')
+        }
+
         if (idTrip) {
             data._ownerTripId = idTrip
         }
@@ -255,15 +263,20 @@ export function TripPoints() {
         }
 
 
+
         API_POINT.create(newPoint).then((point) => {
             setClickedPos(undefined)
-            reset({ name: '' })
+
+
+            reset({ name: '', imageFile: [] })
             center = {
                 lat: Number(point.lat),
                 lng: Number(point.lng)
             }
 
             zoom = 8
+
+
             navigate(`/trip/points/${idTrip}`)
         }).catch((err) => {
             console.log(err)
@@ -353,7 +366,7 @@ export function TripPoints() {
                                 onContextReady={(context) => { }}
                                 showPlaceholderImage={false}
                                 maxFilesContainerHeight={157}
-
+                                maxUploadFiles={9}
 
                             />
 
