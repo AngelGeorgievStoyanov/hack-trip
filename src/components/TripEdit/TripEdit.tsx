@@ -108,8 +108,8 @@ export default function TripEdit() {
 
         defaultValues: {
             title: trip.title, _ownerId: trip._ownerId, countPeoples: +trip.countPeoples,
-            timeCreated: trip.timeCreated, 
-            lat: (trip.lat !== undefined && trip.lat !== null) ? Number(trip.lat) : undefined, 
+            timeCreated: trip.timeCreated,
+            lat: (trip.lat !== undefined && trip.lat !== null) ? Number(trip.lat) : undefined,
             lng: (trip.lng !== undefined && trip.lng !== null) ? Number(trip.lng) : undefined,
             timeEdited: trip.timeEdited, typeOfPeople: TripTipeOfGroup[trip.typeOfPeople],
             description: trip.description, destination: trip.destination, imageUrl: trip.imageUrl, price: +trip.price, transport: TripTransport[trip.transport],
@@ -353,8 +353,19 @@ export default function TripEdit() {
         }
 
 
+    }
+
+
+    const dragMarker = (e: google.maps.MapMouseEvent) => {
+
+
+        if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
+
+            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+        }
 
     }
+
 
 
     return (
@@ -375,7 +386,8 @@ export default function TripEdit() {
 
                     >
 
-                        {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} /> : clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos} /> : null}
+                        {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} draggable onDragEnd={dragMarker} /> :
+                            clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos}  draggable onDragEnd={dragMarker} /> : null}
 
                     </GoogleMap>
 

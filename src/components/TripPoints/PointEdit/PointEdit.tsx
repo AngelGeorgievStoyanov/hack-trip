@@ -283,10 +283,10 @@ export default function PointEdit() {
             data.lng = clickedPos.lng + ''
         }
 
-        if(!data.lat){
+        if (!data.lat) {
             setErrorMessageSearch('Plece enter exact name location or click in map')
             return
-        }else{
+        } else {
             setErrorMessageSearch('')
         }
 
@@ -324,17 +324,13 @@ export default function PointEdit() {
     }
 
 
-
     const deleteImage = (e: React.MouseEvent) => {
-
-
 
         const index = images?.indexOf(e.currentTarget.id)
         if (index !== undefined) {
             const deletedImage = images?.slice(index, index + 1)
 
             if (deletedImage) {
-
 
                 API_POINT.editImages(point._id, deletedImage).then((data) => {
                     setImages(data.imageFile)
@@ -343,10 +339,17 @@ export default function PointEdit() {
                 })
             }
 
-
         }
 
+    }
 
+    const dragMarker = (e: google.maps.MapMouseEvent) => {
+
+
+        if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
+
+            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+        }
 
     }
 
@@ -370,7 +373,8 @@ export default function PointEdit() {
                         onUnmount={onUnmount}
                         onClick={onMapClick}
                     >
-                        {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} /> : clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos} /> : null}
+                        {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} draggable onDragEnd={dragMarker} /> :
+                            clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos} draggable onDragEnd={dragMarker} /> : null}
                     </GoogleMap>
 
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px' }}>

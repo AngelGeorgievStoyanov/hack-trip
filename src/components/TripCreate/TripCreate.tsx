@@ -115,7 +115,7 @@ export function CreateTrip() {
     const handleFilesChange = (files: any) => {
 
         if (!files) return;
-       
+
 
         setFileSelected([...files]);
 
@@ -294,8 +294,16 @@ export function CreateTrip() {
 
     }
 
+    const dragMarker = (e: google.maps.MapMouseEvent) => {
 
-  
+
+        if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
+
+            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+        }
+    }
+
+
 
     return (
         <>
@@ -315,7 +323,7 @@ export function CreateTrip() {
 
                     >
 
-                        {clickedPos?.lat ? <Marker position={clickedPos} /> : null}
+                        {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
                     </GoogleMap>
 
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px' }}>
@@ -399,7 +407,7 @@ export function CreateTrip() {
                             showPlaceholderImage={false}
                             maxFilesContainerHeight={157}
                             maxUploadFiles={fileCount}
-                          
+
 
 
                         />

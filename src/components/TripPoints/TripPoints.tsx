@@ -283,6 +283,15 @@ export function TripPoints() {
     }
 
 
+    const dragMarker = (e: google.maps.MapMouseEvent) => {
+
+
+        if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
+
+            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+        }
+    }
+
 
     return (
         <>
@@ -307,7 +316,7 @@ export function TripPoints() {
                             onUnmount={onUnmount}
                             onClick={onMapClick}
                         >
-                            {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} /> : null}
+                            {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
                         </GoogleMap>
                         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px' }}>
 
