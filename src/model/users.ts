@@ -1,4 +1,4 @@
-import { Identifiable, IdType } from "../shared/common-types";
+import { Identifiable, IdType, toIsoDate } from "../shared/common-types";
 
 
 
@@ -10,8 +10,11 @@ export class User implements Identifiable<IdType> {
         public firstName: string,
         public lastName: string,
         public password: string,
-        public accessToken?: string
-
+        public accessToken?: string,
+        public timeCreated: string = toIsoDate(new Date()),
+        public timeEdited?: string,
+        public lastTimeLogin?: string,
+        public countOfLogs?:string
     ) { }
 }
 
@@ -24,6 +27,10 @@ export class UserRegister implements Omit<User, '_id'>{
         public firstName: string,
         public lastName: string,
         public password: string,
+        public timeCreated: string = toIsoDate(new Date()),
+        public timeEdited?: string,
+        public lastTimeLogin?: string,
+        public countOfLogs?:string
 
     ) { }
 }

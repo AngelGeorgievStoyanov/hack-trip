@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User } from '../../model/users';
 import * as userService from '../../services/userService'
 import { ApiClient } from '../../services/userService';
-import { IdType, Optional } from '../../shared/common-types';
+import { IdType, Optional, toIsoDate } from '../../shared/common-types';
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -28,7 +28,10 @@ type FormData = {
     username: string;
     password: string;
     confirmpass: string;
-
+    timeCreated: string ;
+    timeEdited: string | undefined;
+    lastTimeLogin: string | undefined;
+    countOfLogs: string | undefined;
 };
 
 
@@ -52,7 +55,7 @@ export function Register({ user }: UserProps) {
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
-        defaultValues: { email: '', firstName: '', lastName: '', password: '', confirmpass: '' },
+        defaultValues: { email: '', firstName: '', lastName: '', password: '', confirmpass: '', timeCreated: '', timeEdited: '', lastTimeLogin: '', countOfLogs: '' },
 
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -62,8 +65,12 @@ export function Register({ user }: UserProps) {
     const registerSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
         event?.preventDefault();
 
-        const newUser = { ...data }
+        data.timeCreated = toIsoDate(new Date())
+        data.timeEdited = toIsoDate(new Date())
+        data.lastTimeLogin = toIsoDate(new Date())
+        data.countOfLogs = '1'
 
+        const newUser = { ...data }
 
 
 

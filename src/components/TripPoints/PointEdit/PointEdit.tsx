@@ -28,8 +28,7 @@ let center = {
 const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
-const span = document.getElementById('edit-point-span')
-span?.addEventListener('click', (e) => { console.log(e) })
+
 
 type FormData = {
     name: string;

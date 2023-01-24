@@ -13,8 +13,9 @@ import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 
 interface PointCardProps {
     point: Point;
-    i: number;
-    id: IdType
+   
+    id: IdType;
+    length: number
 }
 
 
@@ -29,7 +30,7 @@ const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType,
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 
-export default function PointCard({ point, i }: PointCardProps) {
+export default function PointCard({ point, length }: PointCardProps) {
 
     const idTrip = useParams().tripId
 
@@ -63,7 +64,7 @@ export default function PointCard({ point, i }: PointCardProps) {
     const deleteClickHandler = () => {
 
 
-        API_POINT.deleteById(point._id, idTrip+'').then((data) => {
+        API_POINT.deleteById(point._id, idTrip + '').then((data) => {
 
             navigate(`/trip/points/${idTrip}`)
         }).catch((err) => {
@@ -134,7 +135,10 @@ export default function PointCard({ point, i }: PointCardProps) {
 
     return (
         <>
-            <ArrowCircleUpIcon onClick={(e) => editPositionUp(e, +point.pointNumber, point._id)} />
+            {point.pointNumber > 1 ?
+                <ArrowCircleUpIcon onClick={(e) => editPositionUp(e, +point.pointNumber, point._id)} /> : <ArrowCircleUpIcon sx={{ display: 'none' }} onClick={(e) => editPositionUp(e, +point.pointNumber, point._id)} />
+
+            }
             <Card
                 id={point._id + ''}
                 sx={{
@@ -182,7 +186,10 @@ export default function PointCard({ point, i }: PointCardProps) {
                 </span>
 
             </Card>
-            <ArrowCircleDownIcon onClick={(e) => editPositionDwn(e, +point.pointNumber, point._id)} />
+            {point.pointNumber < length ?
+                <ArrowCircleDownIcon onClick={(e) => editPositionDwn(e, +point.pointNumber, point._id)} /> :
+                <ArrowCircleDownIcon sx={{ display: 'none' }} onClick={(e) => editPositionDwn(e, +point.pointNumber, point._id)} />
+            }
         </>
     )
 }

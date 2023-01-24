@@ -92,7 +92,6 @@ export function TripPoints() {
         libraries,
     })
 
-
     const mapRef = React.useRef<google.maps.Map | null>(null)
 
     const onLoad = (map: google.maps.Map): void => {
@@ -263,7 +262,6 @@ export function TripPoints() {
         }
 
 
-
         API_POINT.create(newPoint).then((point) => {
             setClickedPos(undefined)
 
@@ -275,15 +273,14 @@ export function TripPoints() {
             }
 
             zoom = 8
-
-
+            const btnRemoveAll = event?.target.children[4].lastChild.lastChild as HTMLButtonElement
+            btnRemoveAll.click()
             navigate(`/trip/points/${idTrip}`)
         }).catch((err) => {
             console.log(err)
         })
 
     }
-
 
 
 

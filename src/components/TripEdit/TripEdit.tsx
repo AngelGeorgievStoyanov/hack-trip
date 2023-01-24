@@ -108,7 +108,9 @@ export default function TripEdit() {
 
         defaultValues: {
             title: trip.title, _ownerId: trip._ownerId, countPeoples: +trip.countPeoples,
-            timeCreated: trip.timeCreated, lat: Number(trip.lat), lng: Number(trip.lng),
+            timeCreated: trip.timeCreated, 
+            lat: (trip.lat !== undefined && trip.lat !== null) ? Number(trip.lat) : undefined, 
+            lng: (trip.lng !== undefined && trip.lng !== null) ? Number(trip.lng) : undefined,
             timeEdited: trip.timeEdited, typeOfPeople: TripTipeOfGroup[trip.typeOfPeople],
             description: trip.description, destination: trip.destination, imageUrl: trip.imageUrl, price: +trip.price, transport: TripTransport[trip.transport],
             imageFile: trip.imageFile
@@ -120,10 +122,11 @@ export default function TripEdit() {
 
 
 
-    if (trip.lng !== undefined && trip.lat !== undefined && (clickedPos?.lat === undefined)) {
+    if ((trip.lng !== undefined && trip.lng !== null) && (trip.lat !== undefined && trip.lat !== null) && (clickedPos?.lat === undefined)) {
 
         positionPoint = { lat: Number(trip.lat), lng: Number(trip.lng) }
         center = { lat: Number(trip.lat), lng: Number(trip.lng) }
+
 
     }
 
@@ -292,9 +295,14 @@ export default function TripEdit() {
 
             data.lat = clickedPos.lat
             data.lng = clickedPos.lng
+
+
         } else {
-            data.lat = Number(trip.lat)
-            data.lng = Number(trip.lng)
+            if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) {
+
+                data.lat = Number(trip.lat)
+                data.lng = Number(trip.lng)
+            }
         }
         data.timeEdited = toIsoDate(new Date())
 

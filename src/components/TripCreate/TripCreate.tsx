@@ -82,7 +82,7 @@ let zoom = 8;
 
 export function CreateTrip() {
 
-
+    const fileCount = 9
     const [errorMessageSearch, setErrorMessageSearch] = useState('')
 
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
@@ -94,7 +94,7 @@ export function CreateTrip() {
 
 
     const _ownerId = sessionStorage.getItem('userId')
-    const { control, handleSubmit, formState: { errors , isValid} } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({
 
 
         defaultValues: {
@@ -115,6 +115,7 @@ export function CreateTrip() {
     const handleFilesChange = (files: any) => {
 
         if (!files) return;
+       
 
         setFileSelected([...files]);
 
@@ -289,12 +290,12 @@ export function CreateTrip() {
 
 
 
-         createTripSubmitHandler(data, e, true) 
-       
+        createTripSubmitHandler(data, e, true)
+
     }
 
 
-
+  
 
     return (
         <>
@@ -397,6 +398,8 @@ export function CreateTrip() {
                             onContextReady={(context) => { }}
                             showPlaceholderImage={false}
                             maxFilesContainerHeight={157}
+                            maxUploadFiles={fileCount}
+                          
 
 
                         />
@@ -409,7 +412,7 @@ export function CreateTrip() {
                         <span>
 
                             <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD TRIP</Button>
-                            <Button variant="contained"  disabled={!isValid} onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}>ADD POINT`S FOR THE TRIP</Button>
+                            <Button variant="contained" disabled={!isValid} onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}>ADD POINT`S FOR THE TRIP</Button>
 
                         </span>
 

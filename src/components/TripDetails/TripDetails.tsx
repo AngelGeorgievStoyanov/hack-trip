@@ -34,10 +34,9 @@ const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualiz
 export default function TripDetails() {
 
 
-  
+
 
     const trip = useLoaderData() as Trip;
-
 
 
 
@@ -57,9 +56,7 @@ export default function TripDetails() {
     const [hide, setHide] = useState<boolean>(false)
     const [pointCard, setPointCard] = useState<Point>()
 
-console.log(points)
-
-    if ((trip.lat !== undefined) && (trip.lng !== undefined)) {
+    if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) {
 
 
         center = {
@@ -68,7 +65,6 @@ console.log(points)
 
 
         }
-
 
 
     }
@@ -413,8 +409,7 @@ console.log(points)
 
                     >
                         {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                        {/* {points ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={i + 1 + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : null} */}
-                        {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.pointNumber+''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber+''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} />}
+                        {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
                     </GoogleMap>
 
 

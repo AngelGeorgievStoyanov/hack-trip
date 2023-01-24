@@ -14,8 +14,8 @@ export default function PointList({ points }: PointListProps) {
     return (
         <>
             {sortList.length > 0 ?
-                sortList.map((x, i) =>
-                    <PointCard key={x.pointNumber} id={x._id} point={x} i={i} />
+                sortList.map((x) =>
+                    <PointCard key={x.pointNumber} id={x._id} point={x}  length={sortList.length} />
                 )
                 : <h1>ADD YOUR FIRST POINT</h1>}
         </>
