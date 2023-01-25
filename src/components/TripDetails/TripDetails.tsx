@@ -16,8 +16,10 @@ import * as commentService from '../../services/commentService'
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Box, Button, Card, CardMedia, Container, Grid, ImageList, ImageListItem, Typography } from "@mui/material";
+import { Box, Button, Card, CardMedia, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
+import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
+import { useTheme } from '@mui/material/styles';
 
 let zoom = 8;
 
@@ -41,6 +43,7 @@ export default function TripDetails() {
 
 
 
+
     const userId = sessionStorage.getItem('userId') + ''
 
     const navigate = useNavigate()
@@ -49,12 +52,13 @@ export default function TripDetails() {
     const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
     const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
 
-
+    const theme = useTheme();
+    const [activeStep, setActiveStep] = React.useState(0);
     const [points, setPoints] = useState<Point[]>([])
     const [comments, setComments] = useState<Comment[]>([])
     const [liked, setLiked] = useState<boolean>(false)
     const [hide, setHide] = useState<boolean>(false)
-    const [pointCard, setPointCard] = useState<Point>()
+    const [pointCard, setPointCard] = useState<Point | null>()
 
     if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) {
 
@@ -68,6 +72,8 @@ export default function TripDetails() {
 
 
     }
+
+
     useEffect(() => {
 
         API_POINT.findByTripId(trip._id).then((data) => {
@@ -155,21 +161,33 @@ export default function TripDetails() {
 
 
 
-    const onMarkerClick = (id: string, i: number) => {
+    const onMarkerClick = (id: string, positionNumber: number) => {
+
+        if (id) {
+            const currentPoint = points!.filter((x) => x._id + '' === id)
+
+            if (currentPoint !== undefined && currentPoint !== null) {
+
+                setPointCard(currentPoint[0])
+
+                setActiveStep((prevActiveStep) => Number(currentPoint[0].pointNumber));
 
 
+            }
 
-        const currentPoint = points!.filter((x) => x._id + '' === id)
+        } else if (positionNumber) {
 
+            const currentPoint = points.filter((x) => Number(x.pointNumber) === positionNumber)
 
-        if (currentPoint !== undefined && currentPoint !== null) {
+            if (currentPoint !== undefined && currentPoint !== null) {
 
+                setPointCard(currentPoint[0])
 
-            setPointCard(currentPoint[0])
+            }
 
+        } else if (positionNumber === 0) {
+            setPointCard(null)
         }
-
-
     }
 
     const onLoadComments = (newCommentArr: Comment[] | undefined) => {
@@ -249,6 +267,24 @@ export default function TripDetails() {
     const goBack = () => {
         navigate(-1);
     }
+
+
+    const handleNext = () => {
+
+
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        let position = activeStep + 1
+        onMarkerClick('', position)
+
+
+    };
+
+    const handleBack = () => {
+
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+        let position = activeStep - 1
+        onMarkerClick('', position)
+    };
 
     return (
         <>
@@ -394,34 +430,72 @@ export default function TripDetails() {
 
                     {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} />) : ''}
                 </Container>
-                <Container maxWidth={false} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px' }} >
-
-
-                    <GoogleMap
-                        mapContainerStyle={containerStyle}
-                        options={options as google.maps.MapOptions}
-                        center={(pathPoints?.length > 0) && (pathPoints !== undefined) ? pathPoints[0] : center}
-                        zoom={zoom}
-                        onLoad={onLoad}
-                        onUnmount={onUnmount}
 
 
 
-                    >
-                        {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                        {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
-                    </GoogleMap>
+                <Container maxWidth={false} sx={{
+                    display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 600px)': {
+                        display: 'flex', flexDirection: 'column'
+                    }
+                }} >
+
+                    <Box component='div' sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <MobileStepper
+                            variant="progress"
+                            steps={points.length + 1}
+                            position="static"
+                            activeStep={activeStep}
+                            sx={{ maxWidth: 600, flexGrow: 1, maxHeight: '25px' }}
+                            nextButton={
+                                <Button size="small" onClick={handleNext} disabled={activeStep === points.length}>
+                                    Next
+                                    {theme.direction === 'rtl' ? (
+                                        <KeyboardArrowLeft />
+                                    ) : (
+                                        <KeyboardArrowRight />
+                                    )}
+                                </Button>
+                            }
+                            backButton={
+                                <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
+                                    {theme.direction === 'rtl' ? (
+                                        <KeyboardArrowRight />
+                                    ) : (
+                                        <KeyboardArrowLeft />
+                                    )}
+                                    Back
+                                </Button>
+                            }
+                        />
+                        <Box sx={{display:'flex', maxWidth:'600px'}}>
+
+                            <GoogleMap
+                                mapContainerStyle={containerStyle}
+                                options={options as google.maps.MapOptions}
+                                center={(pathPoints?.length > 0) && (pathPoints !== undefined) ? pathPoints[0] : center}
+                                zoom={zoom}
+                                onLoad={onLoad}
+                                onUnmount={onUnmount}
 
 
+
+                            >
+                                {pathPoints ? <PolylineF path={pathPoints} /> : null}
+                                {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
+                            </GoogleMap>
+                        </Box>
+                    </Box>
 
 
                     <Box component='section' id="point-section-add">
+
                         {
                             pointCard ? <TripDetailsPointCard point={pointCard} key={pointCard._id} /> : ''
 
                         }
 
                     </Box>
+
                 </Container>
             </Grid>
         </>

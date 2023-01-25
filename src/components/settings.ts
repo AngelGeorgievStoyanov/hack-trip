@@ -2,21 +2,22 @@
 
 export const containerStyle = {
     width: '600px',
-    height: '250px'
+    height: '250px',
+   
 }
 
 
 
 
 export const options = {
- 
-   
+
+
     zoomControl: true,
-   }
+}
 
 
 
-export const optionsPoint={
+export const optionsPoint = {
     zoomControl: false,
     mapTypeControl: false,
     scaleControl: false,
