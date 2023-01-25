@@ -297,16 +297,21 @@ export function TripPoints() {
         <>
 
 
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh','@media(max-width: 600px)': {
+                            display: 'flex', flexDirection: 'column', maxWidth:'100%'} }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
 
-                <Container maxWidth={false} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc' }}>
+                <Container maxWidth={false} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc' ,'@media(max-width: 600px)': {
+                            display: 'flex', flexDirection: 'column', maxWidth:'100%'
+                        }}}>
                     <Box>
                         <PointList points={points} />
 
 
                     </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth:'100%' }}>
+                        <Box sx={{display:'flex', maxWidth:'100%'}}>
+
                         <GoogleMap
                             mapContainerStyle={containerStyle}
                             options={options as google.maps.MapOptions}
@@ -315,10 +320,11 @@ export function TripPoints() {
                             onLoad={onLoad}
                             onUnmount={onUnmount}
                             onClick={onMapClick}
-                        >
+                            >
                             {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
                         </GoogleMap>
-                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px' }}>
+                            </Box>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px' }}>
 
 
                             <Autocomplete>
@@ -338,7 +344,7 @@ export function TripPoints() {
                                 justifyContent: 'space-between',
                                 maxWidth: '600px',
                                 maxHeight: '850px',
-                                padding: '30px',
+                                padding: '20px',
                                 marginTop: '50px',
                                 backgroundColor: '#8d868670',
                                 boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
@@ -377,12 +383,10 @@ export function TripPoints() {
                             />
 
                             <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message} />
+                         
                             <span>
-
                                 <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD POINT</Button>
                                 <Button component={Link} to={`/trip/details/${idTrip}`} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-
-
                             </span>
 
                         </Box>

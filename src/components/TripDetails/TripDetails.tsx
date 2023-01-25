@@ -59,19 +59,23 @@ export default function TripDetails() {
     const [liked, setLiked] = useState<boolean>(false)
     const [hide, setHide] = useState<boolean>(false)
     const [pointCard, setPointCard] = useState<Point | null>()
+    const [mapCenter, setMapCenter] = useState(center)
 
-    if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) {
+
+
+
+    if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (points === undefined)) {
 
 
         center = {
             lat: Number(trip.lat),
             lng: Number(trip.lng)
 
-
         }
 
 
     }
+
 
 
     useEffect(() => {
@@ -83,6 +87,13 @@ export default function TripDetails() {
                 if (typeof data === "object") {
 
                     const arrPoints = data as any as Point[]
+
+                    center = {
+                        lat: Number(arrPoints[0].lat),
+                        lng: Number(arrPoints[0].lng)
+                    }
+
+                    setMapCenter(center)
 
                     setPoints(arrPoints)
                 }
@@ -162,6 +173,7 @@ export default function TripDetails() {
 
 
     const onMarkerClick = (id: string, positionNumber: number) => {
+      
 
         if (id) {
             const currentPoint = points!.filter((x) => x._id + '' === id)
@@ -172,22 +184,45 @@ export default function TripDetails() {
 
                 setActiveStep((prevActiveStep) => Number(currentPoint[0].pointNumber));
 
+                center = {
+                    lat: Number(currentPoint[0].lat),
+                    lng: Number(currentPoint[0].lng)
+                }
 
+                setMapCenter(prev => center)
+                zoom = 10
             }
 
         } else if (positionNumber) {
 
-            const currentPoint = points.filter((x) => Number(x.pointNumber) === positionNumber)
+            const currentPoint: Point[] = points.filter((x) => Number(x.pointNumber) === positionNumber)
+            if (currentPoint[0] !== undefined && currentPoint[0] !== null) {
 
-            if (currentPoint !== undefined && currentPoint !== null) {
+                setPointCard(prev => currentPoint[0])
 
-                setPointCard(currentPoint[0])
+                center = {
+                    lat: Number(currentPoint[0].lat),
+                    lng: Number(currentPoint[0].lng)
+                }
+
+                setMapCenter(prev => center)
+                zoom = 10
+
+          
 
             }
 
         } else if (positionNumber === 0) {
             setPointCard(null)
+
+            center = {
+                lat: Number(points[0].lat),
+                lng: Number(points[0].lng)
+            }
+            setMapCenter(prev => center)
+            zoom = 8
         }
+
     }
 
     const onLoadComments = (newCommentArr: Comment[] | undefined) => {
@@ -467,12 +502,13 @@ export default function TripDetails() {
                                 </Button>
                             }
                         />
-                        <Box sx={{display:'flex', maxWidth:'600px'}}>
+                        <Box sx={{ display: 'flex', maxWidth: '600px' }}>
 
                             <GoogleMap
                                 mapContainerStyle={containerStyle}
                                 options={options as google.maps.MapOptions}
-                                center={(pathPoints?.length > 0) && (pathPoints !== undefined) ? pathPoints[0] : center}
+                                // center={(pathPoints?.length > 0) && (pathPoints !== undefined) ? pathPoints[0] : center}
+                                center={mapCenter !== undefined ? mapCenter : center}
                                 zoom={zoom}
                                 onLoad={onLoad}
                                 onUnmount={onUnmount}
@@ -481,7 +517,7 @@ export default function TripDetails() {
 
                             >
                                 {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                                {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
+                                {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id}  title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
                             </GoogleMap>
                         </Box>
                     </Box>
