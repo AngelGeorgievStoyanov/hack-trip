@@ -244,7 +244,7 @@ export default function TripEdit() {
             lng: 23.321590139866355
         }
         zoom = 8
-        // setClickedPos(center)
+
 
     }
 
@@ -387,7 +387,7 @@ export default function TripEdit() {
                     >
 
                         {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} draggable onDragEnd={dragMarker} /> :
-                            clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos}  draggable onDragEnd={dragMarker} /> : null}
+                            clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos} draggable onDragEnd={dragMarker} /> : null}
 
                     </GoogleMap>
 

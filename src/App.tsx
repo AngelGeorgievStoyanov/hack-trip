@@ -30,6 +30,8 @@ import GuardedRoute from './components/GuardedRoute/GuardedRoute';
 import NotFound from './components/NotFound/NotFound';
 
 import './App.css';
+import Profile from './components/Profile/Profile';
+
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
 
@@ -115,6 +117,7 @@ export async function commentLoaderById({ params }: LoaderFunctionArgs) {
     throw new Error(`Invalid or missing comment ID`);
   }
 }
+
 
 
 
@@ -274,6 +277,16 @@ const router = createBrowserRouter([
 
       },
       {
+        path: '/profile',
+        element: <GuardedRoute />,
+        children: [
+          {
+            path: '',
+            element: <Profile />
+          }
+        ]
+      },
+      {
         path: '*',
         element: <NotFound />
       }
@@ -288,6 +301,8 @@ const router = createBrowserRouter([
 function App() {
 
   const [userL, setUserL] = useState<null | User>(null)
+  const userId = sessionStorage.getItem('userId')
+
 
   return (
     <>

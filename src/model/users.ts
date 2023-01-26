@@ -11,10 +11,12 @@ export class User implements Identifiable<IdType> {
         public lastName: string,
         public password: string,
         public accessToken?: string,
-        public timeCreated: string = toIsoDate(new Date()),
+        public timeCreated?: string,
         public timeEdited?: string,
         public lastTimeLogin?: string,
-        public countOfLogs?:string
+        public countOfLogs?: string,
+        public imageFile?:string
+
     ) { }
 }
 
@@ -27,10 +29,11 @@ export class UserRegister implements Omit<User, '_id'>{
         public firstName: string,
         public lastName: string,
         public password: string,
-        public timeCreated: string = toIsoDate(new Date()),
+        public timeCreated?: string,
         public timeEdited?: string,
         public lastTimeLogin?: string,
-        public countOfLogs?:string
+        public countOfLogs?: string,
+        public imageFile?:string
 
     ) { }
 }

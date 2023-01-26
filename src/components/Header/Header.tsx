@@ -1,6 +1,4 @@
 import { Link, useNavigate } from "react-router-dom";
-// import { Link as RouterLink, LinkProps as RouterLinkProps } from 'react-router-dom';
-// import { LinkProps } from '@mui/material/Link';
 import { LoginContext } from "../../App";
 import { useContext } from 'react'
 import './Header.css'
@@ -8,7 +6,7 @@ import { User } from "../../model/users";
 import { IdType } from "../../shared/common-types";
 import * as userService from '../../services/userService'
 import { ApiClient } from "../../services/userService";
-import { AppBar, Box, Button,  Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users/logout');
 
@@ -19,7 +17,7 @@ export default function Header() {
     const navigate = useNavigate();
 
     const loginContext = useContext(LoginContext)
-
+ 
     const logout = () => {
         const accessToken = sessionStorage.getItem('accessToken')
 
@@ -30,7 +28,7 @@ export default function Header() {
 
                     sessionStorage.clear()
 
-              
+
                     loginContext?.setUserL(null)
 
                     navigate('/')
@@ -48,14 +46,19 @@ export default function Header() {
 
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
-                <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '20px',  '@media(max-width: 600px)' : {
-   display:'flex' ,flexDirection: 'column'
-  } }}>
+                <Toolbar sx={{
+                    display: 'flex', justifyContent: 'space-between', paddingBottom: '20px', '@media(max-width: 600px)': {
+                        display: 'flex', flexDirection: 'column'
+                    }
+                }}>
                     {userL !== null || email !== null ?
                         <>
 
                             <Typography variant="h6" component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                Welcome  {userL !== null ? userL.email : email}
+                                {userL !== null || email !== null ?
+                                    <Button component={Link} to={'/profile'} color="inherit"  >Welcome  {email}</Button> : 'Welcome'
+
+                                }
                             </Typography>
                             <Button component={Link} to={'/'} color="inherit"  >HOME</Button>
                             <Button component={Link} to={'/trips'} color="inherit">TRIPS</Button>
