@@ -19,6 +19,7 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     sendFile(entityWithoutId: FormData): Promise<string[]>;
     updateUser(id: K, entity: UserRegister): Promise<V>;
     changePassword(id: K, password: string): Promise<V>;
+    deleteProfileImage(id: K, image: string): Promise<V>;
 }
 
 
@@ -121,8 +122,7 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
             headers: {}
         });
 
-        const result = await response.json()
-        console.log(result)
+        const result = await response.json();
         return result
     }
 
@@ -156,7 +156,25 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
         if (response.status >= 400) {
             const result = await response.json()
-        
+
+            throw new Error(result)
+        }
+        return await response.json()
+
+    }
+
+    async deleteProfileImage(id: K, image: string): Promise<V> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/delete-image/${id}`, {
+            method: 'PUT',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({ image })
+        })
+
+        if (response.status >= 400) {
+            const result = await response.json()
+
             throw new Error(result)
         }
         return await response.json()

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, CardMedia, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -11,7 +11,7 @@ import { IdType, toIsoDate } from "../../shared/common-types";
 import { User } from "../../model/users";
 import { ApiClient } from "../../services/userService";
 import { MuiFileInput } from "mui-file-input";
-import { options } from "../settings";
+import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 
 
 
@@ -60,7 +60,6 @@ export default function Profile() {
 
     const [user, setUser] = useState<User>()
     const [hide, setHide] = useState<boolean>(false)
-
     const [fileSelected, setFileSelected] = useState<File | undefined>()
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>()
     const navigate = useNavigate()
@@ -81,7 +80,7 @@ export default function Profile() {
 
 
 
-    const { control, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors, isDirty }, reset } = useForm<FormData>({
 
         defaultValues: { email: '', firstName: '', lastName: '', password: '', confirmpass: '' },
 
@@ -102,7 +101,7 @@ export default function Profile() {
 
                 API_CLIENT.changePassword(userId, data.oldpassword).then((data) => {
                     console.log(data)
-                   
+
                 }).catch((err) => {
                     console.log(err.message)
 
@@ -148,8 +147,10 @@ export default function Profile() {
 
 
             API_CLIENT.updateUser(userId, editedUser).then((data) => {
-                console.log(data)
-                setHide(!hide)
+                setUser(prev => data)
+                setFileSelected(undefined)
+                reset({ oldpassword: '', password: '', confirmpass: '' })
+                setHide(false)
             }).catch((err) => console.log(err))
 
         }
@@ -201,16 +202,41 @@ export default function Profile() {
         }
     }
 
+    const deleteImage = (e: React.MouseEvent) => {
+
+        const img = e.currentTarget.id
+        if (userId) {
+
+            API_CLIENT.deleteProfileImage(userId, img).then((data) => {
+                console.log(data)
+                setUser(data)
+            }).catch((err) => console.log(err))
+        }
+    }
+
     return (
 
         <>
-            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px' }}>
+                {user?.imageFile ?
+                    <>
+                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={user.imageFile} />
+                        <CardMedia
+                            component="img"
+                            image={`http://localhost:8001/uploads/${user.imageFile}`}
+                            sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
+                            alt="TRIP"
+
+                        />
+                    </>
+                    : ''}
                 <Box component="form" sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
+                    margin: '20px',
                     maxWidth: '600px',
-                    maxHeight: '500px',
+                    maxHeight: '700px',
                     padding: '30px',
                     backgroundColor: '#8d868670',
                     boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
@@ -222,7 +248,7 @@ export default function Profile() {
                     onSubmit={handleSubmit(editProfileSubmitHandler)}
                 >
                     <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
-                        PROFILE
+                        {user?.firstName}'s  PROFILE
                     </Typography>
                     <FormInputText name='email' label='Email' control={control} error={errors.email?.message}
                         rules={{ required: true, minLength: 5 }} />
