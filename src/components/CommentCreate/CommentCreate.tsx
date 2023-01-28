@@ -1,4 +1,4 @@
-import {  useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import { IdType } from "../../shared/common-types";
@@ -25,7 +25,9 @@ type FormData = {
 
 
 const schema = yup.object({
-    comment: yup.string().required('Comment cannot be empty.').min(1).max(1000, 'Maximum comment length is 1000 characters.'),
+    comment: yup.string().required('Comment cannot be empty.')
+    .min(1).max(1000, 'Maximum comment length is 1000 characters.')
+    .matches(/^(?!\s+$).*/, 'Comment cannot be empty string.'),
 
 
 }).required();
@@ -60,7 +62,7 @@ export default function CreateComment() {
             data._tripId = idTrip + ''
 
         }
-
+        data.comment = data.comment.trim()
 
         const newComment = { ...data } as any as CommentCreate
 

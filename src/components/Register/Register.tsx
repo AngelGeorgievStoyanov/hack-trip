@@ -28,7 +28,7 @@ type FormData = {
     username: string;
     password: string;
     confirmpass: string;
-    timeCreated: string ;
+    timeCreated: string;
     timeEdited: string | undefined;
     lastTimeLogin: string | undefined;
     countOfLogs: string | undefined;
@@ -37,8 +37,8 @@ type FormData = {
 
 const schema = yup.object({
     email: yup.string().required().email(),
-    firstName: yup.string().required().min(2).max(15),
-    lastName: yup.string().required().min(2).max(15),
+    firstName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'First Name cannot be empty string and must contain at least 2 characters .'),
+    lastName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'Last Name cannot be empty string and must contain at least 2 characters .'),
     password: yup.string().required().matches(/^(?=(.*[a-zA-Z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/, 'Must contain 8 characters, at least one digit, and one character different from letter or digit'),
     confirmpass: yup.string().test('passwords-match', 'Passwords must match', function (value) { return this.parent.password === value }),
 
@@ -69,6 +69,11 @@ export function Register({ user }: UserProps) {
         data.timeEdited = toIsoDate(new Date())
         data.lastTimeLogin = toIsoDate(new Date())
         data.countOfLogs = '1'
+
+        data.email = data.email.trim()
+        data.firstName = data.firstName.trim()
+        data.lastName = data.lastName.trim()
+
 
         const newUser = { ...data }
 

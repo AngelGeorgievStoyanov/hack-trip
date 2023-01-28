@@ -29,7 +29,7 @@ export function Login() {
 
     const schema = yup.object({
         email: yup.string().required().email(),
-        password: yup.string().required(),
+        password: yup.string().required().matches(/^(?!\s+$).*/, 'Password cannot be empty string.'),
 
 
     }).required();
@@ -54,7 +54,7 @@ export function Login() {
         event?.preventDefault();
 
 
-
+        data.password = data.password.trim()
 
 
         API_CLIENT.login(data.email, data.password)
@@ -95,7 +95,7 @@ export function Login() {
 
     }
 
-  
+
 
 
 

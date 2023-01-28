@@ -1,5 +1,11 @@
-import { Button, Card, Typography } from "@mui/material";
+import { Avatar, Button, Card, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 import { Comment } from "../../model/comment"
+import { User } from "../../model/users";
+import * as userService from '../../services/userService'
+import { ApiClient } from "../../services/userService";
+import { IdType } from "../../shared/common-types";
+import {stringAvatar} from '../../shared/common-types'
 
 export interface CommentListener {
     (comment: Comment): void;
@@ -11,12 +17,36 @@ interface CommentCardProps {
     onEditCom: CommentListener
 }
 
+
+const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
+
+
 export default function CommentCard({ comment, onDeleteCom, onEditCom }: CommentCardProps) {
 
 
 
 
     const userId = sessionStorage.getItem('userId')
+
+    const [user, setUser] = useState<User>()
+
+
+    const name = user?.firstName+' '+user?.lastName
+
+
+
+    useEffect(() => {
+        if (userId) {
+            API_CLIENT.findById(userId).then((data) => {
+                console.log(data)
+                setUser(data)
+
+            }).catch(err => console.log(err))
+        }
+
+    }, [])
+
+
 
     const handeleDelete = () => {
         onDeleteCom(comment)
@@ -33,12 +63,15 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom }: Comment
             <Card sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
+                alignItems: 'flex-start',
                 maxWidth: '350px', margin: '20px',
 
                 padding: '30px', backgroundColor: '#8d868670',
                 boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
             }}>
+                {user?.imageFile ?
+                    <Avatar alt="Remy Sharp"  src={`http://localhost:8001/uploads/${user.imageFile}`} />
+                    :  <Avatar {...stringAvatar(name)} />}
 
                 <Typography gutterBottom component="h4">
                     Author name: {comment.nameAuthor}

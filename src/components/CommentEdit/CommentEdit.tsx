@@ -1,4 +1,4 @@
-import {  useLoaderData, useNavigate } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import { Comment } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import { IdType } from "../../shared/common-types";
@@ -24,7 +24,9 @@ type FormData = {
 
 
 const schema = yup.object({
-    comment: yup.string().required('Comment cannot be empty.').min(1).max(1000, 'Maximum comment length is 1000 characters.'),
+    comment: yup.string().required('Comment cannot be empty.').min(1)
+        .max(1000, 'Maximum comment length is 1000 characters.')
+        .matches(/^(?!\s+$).*/, 'Comment cannot be empty string.'),
 
 
 }).required();
@@ -52,7 +54,7 @@ export default function EditComment() {
 
     const editCommentSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
 
-
+        data.comment = data.comment.trim()
         const editComment = { ...data } as any as Comment
 
 

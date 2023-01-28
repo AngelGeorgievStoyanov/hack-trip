@@ -21,9 +21,8 @@ const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType
 
 const schema1 = yup.object({
     email: yup.string().required().email(),
-    firstName: yup.string().required().min(2).max(15),
-    lastName: yup.string().required().min(2).max(15),
-
+    firstName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'First Name cannot be empty string and must contain at least 2 characters .'),
+    lastName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'Last Name cannot be empty string and must contain at least 2 characters .'),
     oldpassword: yup.string().required('Old password is required.').matches(/^(?=(.*[a-zA-Z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/, 'Must contain 8 characters, at least one digit, and one character different from letter or digit'),
     password: yup.string().required('New password is required').matches(/^(?=(.*[a-zA-Z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/, 'Must contain 8 characters, at least one digit, and one character different from letter or digit'),
     confirmpass: yup.string().test('passwords-match', 'Passwords must match', function (value) { return this.parent.password === value }),
@@ -34,8 +33,9 @@ const schema1 = yup.object({
 
 const schema2 = yup.object({
     email: yup.string().required().email(),
-    firstName: yup.string().required().min(2).max(15),
-    lastName: yup.string().required().min(2).max(15),
+    firstName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'First Name cannot be empty string and must contain at least 2 characters .'),
+    lastName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'Last Name cannot be empty string and must contain at least 2 characters .'),
+
 
 
 }).required();
@@ -139,8 +139,12 @@ export default function Profile() {
 
 
         data.timeEdited = toIsoDate(new Date())
-
-
+        data.firstName = data.firstName.trim()
+        data.lastName = data.lastName.trim()
+        data.oldpassword = data.oldpassword.trim()
+        data.password = data.password.trim()
+        data.confirmpass = data.confirmpass.trim()
+        
         const editedUser = { ...data }
 
         if (userId) {
@@ -270,7 +274,7 @@ export default function Profile() {
 
                         : ''}
 
-                    <MuiFileInput value={fileSelected ? fileSelected : undefined} name='inpImages' helperText={errorMessageImage} inputProps={{ accept: { 'image/png': ['.png'] } }} onChange={handleFileChange} onClick={(e) => deleteFile(e)} />
+                    <MuiFileInput value={fileSelected ? fileSelected : undefined} name='inpImages' helperText={errorMessageImage} sx={{ '& input.css-152mnda-MuiInputBase-input-MuiOutlinedInput-input': { cursor: 'pointer' } }} onChange={handleFileChange} onClick={(e) => deleteFile(e)} />
 
                     <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>

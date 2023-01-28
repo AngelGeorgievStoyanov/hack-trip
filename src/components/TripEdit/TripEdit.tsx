@@ -57,12 +57,12 @@ const TRIP_SELECT_OPTIONS_TYPE_GROUPE: SelectOption[] = Object.keys(TripTipeOfGr
     .map((ordinal: number) => ({ key: ordinal, value: TripTipeOfGroup[ordinal] }));
 
 const schema = yup.object({
-    title: yup.string().required().min(2).max(60),
+    title: yup.string().required().min(2).max(60).matches(/^(?!\s+$).*(\S{3})/, 'Title cannot be empty string and must contain at least 3 characters .'),
     price: yup.number().min(0.1, 'Price must be positive').max(1000000),
     countPeoples: yup.number().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.').max(1000),
-    destination: yup.string().required().min(3, 'Destination is required min length 3 chars.').max(60, 'Max length is 60 chars.'),
-    description: yup.string().max(1050, 'Description max length is 1050 chars'),
-    imageUrl: yup.string(),
+    destination: yup.string().required().min(3, 'Destination is required min length 3 chars.').max(60, 'Max length is 60 chars.').matches(/^(?!\s+$).*(\S{3})/, 'Destination cannot be empty string and must contain at least 3 characters .'),
+    description: yup.string().max(1050, 'Description max length is 1050 chars').matches(/^(?!\s+$).*/, 'Description cannot be empty string.'),
+    imageUrl: yup.string().matches(/^(?!\s+$).*/, 'Image URL cannot be empty string.'),
 
 
 
@@ -304,6 +304,15 @@ export default function TripEdit() {
                 data.lng = Number(trip.lng)
             }
         }
+
+
+        data.title = data.title.trim();
+        data.destination = data.destination.trim();
+        data.imageUrl = data.imageUrl?.trim();
+        data.description = data.description.trim();
+
+
+
         data.timeEdited = toIsoDate(new Date())
 
         data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)]
@@ -471,6 +480,8 @@ export default function TripEdit() {
                                 onContextReady={(context) => { }}
                                 showPlaceholderImage={false}
                                 maxFilesContainerHeight={157}
+                                allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
+
                                 sx={{ '& .MuiPaper-root MuiPaper-outlined MuiPaper-rounded css-ibczwg-MuiPaper-root': { backgroundColor: '#8d868670' } }}
                             />
 

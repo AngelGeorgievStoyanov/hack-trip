@@ -43,9 +43,9 @@ type FormData = {
 };
 
 const schema = yup.object({
-    name: yup.string().required().min(1).max(50),
-    description: yup.string().max(1050, 'Description max length is 1050 chars'),
-    imageUrl: yup.string(),
+    name: yup.string().required().min(1).max(50).matches(/^(?!\s+$).*/, 'Name cannot be empty string.'),
+    description: yup.string().matches(/^(?!\s+$).*/, 'Description cannot be empty string.').max(1050, 'Description max length is 1050 chars'),
+    imageUrl: yup.string().matches(/^(?!\s+$).*/, 'Image URL cannot be empty string.'),
 
 
 
@@ -293,7 +293,9 @@ export default function PointEdit() {
 
         data.pointNumber = point.pointNumber
 
-
+        data.name = data.name.trim();
+        data.description = data.description.trim();
+        data.imageUrl = data.imageUrl?.trim();
 
         const editedPoint = { ...data } as Point;
 
@@ -436,6 +438,7 @@ export default function PointEdit() {
                                 onContextReady={(context) => { }}
                                 showPlaceholderImage={false}
                                 maxFilesContainerHeight={157}
+                                allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
                                 sx={{ '& .MuiPaper-root MuiPaper-outlined MuiPaper-rounded css-ibczwg-MuiPaper-root': { backgroundColor: '#8d868670' } }}
                             />
                             <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message} />

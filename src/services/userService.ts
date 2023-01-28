@@ -10,10 +10,8 @@ const baseUrl = CONNECTIONURL;
 export interface ApiClient<K, V extends Identifiable<K>> {
 
 
-    // deleteById(id: K): Promise<void>;
     register(entityWithoutId: UserRegister): Promise<V>
     login(email: K, password: K): Promise<V>;
-    // findByUsername(username: any): any;
     logout(accessToken: string): Promise<V>;
     findById(id: K): Promise<V>;
     sendFile(entityWithoutId: FormData): Promise<string[]>;
@@ -28,22 +26,6 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     constructor(public apiCollectionSuffix: string) { }
 
 
-    // async findByUsername(username: any) {
-
-    //     const exsisting = await this.handleJsonRequest<any>(`${baseUrl}/${this.apiCollectionSuffix}/?username=${username}`);
-    //     if (exsisting.length > 0) {
-    //         throw new Error('Username is taken')
-    //     }
-
-    // }
-
-
-
-    // async deleteById(id: K): Promise<void> {
-    //     await this.handleJsonRequest<V>(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
-    //         method: 'DELETE',
-    //     });
-    // }
 
     async login(email: K, password: K): Promise<V> {
 
@@ -182,20 +164,7 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     }
 
 
-    // private async handleJsonRequest<V>(url: string, options?: RequestInit): Promise<V> {
-
-    //     try {
-    //         const postsResp = await fetch(url, options);
-    //         if (postsResp.status >= 400) {
-    //             throw new Error(await postsResp.json())
-
-    //         }
-    //         return postsResp.json() as Promise<V>;
-    //     } catch (err) {
-
-    //         return Promise.reject(err);
-    //     }
-    // }
+  
 }
 
 

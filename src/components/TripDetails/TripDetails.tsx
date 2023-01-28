@@ -173,7 +173,7 @@ export default function TripDetails() {
 
 
     const onMarkerClick = (id: string, positionNumber: number) => {
-      
+
 
         if (id) {
             const currentPoint = points!.filter((x) => x._id + '' === id)
@@ -208,7 +208,7 @@ export default function TripDetails() {
                 setMapCenter(prev => center)
                 zoom = 10
 
-          
+
 
             }
 
@@ -475,33 +475,35 @@ export default function TripDetails() {
                 }} >
 
                     <Box component='div' sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <MobileStepper
-                            variant="progress"
-                            steps={points.length + 1}
-                            position="static"
-                            activeStep={activeStep}
-                            sx={{ maxWidth: 600, flexGrow: 1, maxHeight: '25px' }}
-                            nextButton={
-                                <Button size="small" onClick={handleNext} disabled={activeStep === points.length}>
-                                    Next
-                                    {theme.direction === 'rtl' ? (
-                                        <KeyboardArrowLeft />
-                                    ) : (
-                                        <KeyboardArrowRight />
-                                    )}
-                                </Button>
-                            }
-                            backButton={
-                                <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
-                                    {theme.direction === 'rtl' ? (
-                                        <KeyboardArrowRight />
-                                    ) : (
-                                        <KeyboardArrowLeft />
-                                    )}
-                                    Back
-                                </Button>
-                            }
-                        />
+                        {points?.length > 0 ?
+                            <MobileStepper
+                                variant="progress"
+                                steps={points.length + 1}
+                                position="static"
+                                activeStep={activeStep}
+                                sx={{ maxWidth: 600, flexGrow: 1, maxHeight: '25px' }}
+                                nextButton={
+                                    <Button size="small" onClick={handleNext} disabled={activeStep === points.length}>
+                                        Next
+                                        {theme.direction === 'rtl' ? (
+                                            <KeyboardArrowLeft />
+                                        ) : (
+                                            <KeyboardArrowRight />
+                                        )}
+                                    </Button>
+                                }
+                                backButton={
+                                    <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
+                                        {theme.direction === 'rtl' ? (
+                                            <KeyboardArrowRight />
+                                        ) : (
+                                            <KeyboardArrowLeft />
+                                        )}
+                                        Back
+                                    </Button>
+                                }
+                            />
+                            : ''}
                         <Box sx={{ display: 'flex', maxWidth: '600px' }}>
 
                             <GoogleMap
@@ -517,7 +519,7 @@ export default function TripDetails() {
 
                             >
                                 {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                                {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id}  title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
+                                {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
                             </GoogleMap>
                         </Box>
                     </Box>
