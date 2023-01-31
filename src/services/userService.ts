@@ -1,4 +1,4 @@
-import { User, UserRegister } from "../model/users";
+import { User, UserEditAdmin, UserRegister } from "../model/users";
 import { Identifiable } from "../shared/common-types";
 import { CONNECTIONURL } from "../utils/baseUrl";
 
@@ -18,6 +18,8 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     updateUser(id: K, entity: UserRegister): Promise<V>;
     changePassword(id: K, password: string): Promise<V>;
     deleteProfileImage(id: K, image: string): Promise<V>;
+    findAll(): Promise<V>;
+    updateUserAdmin(id:K, entity:UserEditAdmin ):Promise<V>
 }
 
 
@@ -108,6 +110,28 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         return result
     }
 
+    
+
+    async updateUserAdmin(id: K, entity: UserEditAdmin): Promise<V> {
+
+        
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/edit/${id}`, {
+            method: 'PUT',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(entity)
+        });
+
+        if (response.status >= 400) {
+            const result = await response.json()
+
+            throw new Error(result.message)
+        }
+        return await response.json()
+    }
+
 
     async updateUser(id: K, entity: User): Promise<V> {
 
@@ -162,9 +186,18 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         return await response.json()
 
     }
+    async findAll(): Promise<V> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin`)
 
 
-  
+        if (response.status >= 400) {
+            const result = await response.json()
+            throw new Error(result)
+        }
+        return response.json()
+    }
+
+
 }
 
 

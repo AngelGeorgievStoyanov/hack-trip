@@ -27,10 +27,11 @@ export class Trip implements Identifiable<IdType> {
         public lat: string,
         public lng: string,
         public timeCreated: string = toIsoDate(new Date()),
+        public favorites: string[],
         public timeEdited?: string,
         public reportTrip?: string[],
-        public imageFile? : string[]
-    ) { }
+        public imageFile?: string[],
+        ) { }
 
 }
 
@@ -53,9 +54,10 @@ export class TripCreate implements Omit<Trip, '_id'>{
         public lat: string,
         public lng: string,
         public timeCreated: string = toIsoDate(new Date()),
+        public favorites: string[],
         public timeEdited?: string,
         public reportTrip?: string[],
-        public imageFile? : string[]
+        public imageFile?: string[],
 
 
     ) { }

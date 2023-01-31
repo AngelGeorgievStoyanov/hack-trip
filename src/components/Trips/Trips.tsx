@@ -3,7 +3,6 @@ import { Trip } from "../../model/trip";
 import TripList from "./TripsList/TripsList";
 import {  Grid } from "@mui/material";
 
-import './Trips.css'
 
 
 export default function Trips() {

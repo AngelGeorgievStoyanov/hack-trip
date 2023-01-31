@@ -31,6 +31,14 @@ import NotFound from './components/NotFound/NotFound';
 
 import './App.css';
 import Profile from './components/Profile/Profile';
+import Admin from './components/Admin/Admin';
+import * as userService from './services/userService'
+import { ApiClient } from './services/userService';
+import AdminEdit from './components/Admin/AdminEdit';
+import GuardedRouteAdmin from './components/GuardedRouteAdmin/GuardedRouteAdmin';
+import AdminTripDetails from './components/Admin/AdminTripDetails';
+import AdminTripEdit from './components/Admin/AdminTripEdit';
+import MyFavorites from './components/MyFavorites/MyFavorites';
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
@@ -39,6 +47,7 @@ const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType,
 
 const API_COMMENT: ApiComment<IdType, Comment> = new commentService.ApiCommentImpl<IdType, Comment>('data/comments')
 
+const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
 
 
@@ -120,9 +129,32 @@ export async function commentLoaderById({ params }: LoaderFunctionArgs) {
 
 
 
+export async function userLoader() {
+
+  try {
+
+    return await API_CLIENT.findAll()
+  } catch (err: any) {
+    throw new Error(err.message)
+  }
+
+
+}
+export async function userIdLoader({ params }: LoaderFunctionArgs) {
+
+  if (params.userId) {
 
 
 
+    return await API_CLIENT.findById(params.userId)
+
+
+
+  } else {
+
+    throw new Error(`Invalid or missing comment ID`);
+  }
+}
 
 
 
@@ -287,6 +319,61 @@ const router = createBrowserRouter([
         ]
       },
       {
+        path: '/admin',
+        element: <GuardedRouteAdmin />,
+        children: [
+          {
+            path: '',
+            loader: userLoader,
+            element: <Admin />
+          }
+        ]
+      },
+      {
+        path: '/admin/edit/:userId',
+        element: <GuardedRouteAdmin />,
+        children: [
+          {
+            path: '',
+            loader: userIdLoader,
+            element: <AdminEdit />
+          }
+        ]
+      },
+      {
+        path: '/admin/trip/details/:tripId',
+        element: <GuardedRouteAdmin />,
+        children: [
+          {
+            path: '',
+            loader: tripLoader,
+            element: <AdminTripDetails />
+          }
+        ]
+      },
+      {
+        path: '/admin/trip/edit/:tripId',
+        element: <GuardedRouteAdmin />,
+        children: [
+          {
+            path: '',
+            loader: tripLoader,
+            element: <AdminTripEdit />
+          }
+        ]
+      },
+      {
+        path: '/favorites',
+        element: <GuardedRoute />,
+        children: [
+          {
+            path: '',
+            element: <MyFavorites />
+          }
+        ]
+
+      },
+      {
         path: '*',
         element: <NotFound />
       }
@@ -301,7 +388,6 @@ const router = createBrowserRouter([
 function App() {
 
   const [userL, setUserL] = useState<null | User>(null)
-  const userId = sessionStorage.getItem('userId')
 
 
   return (

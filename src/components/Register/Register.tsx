@@ -1,6 +1,6 @@
 import { BaseSyntheticEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User } from '../../model/users';
+import { User, UserRole, UserStatus } from '../../model/users';
 import * as userService from '../../services/userService'
 import { ApiClient } from '../../services/userService';
 import { IdType, Optional, toIsoDate } from '../../shared/common-types';
@@ -32,6 +32,8 @@ type FormData = {
     timeEdited: string | undefined;
     lastTimeLogin: string | undefined;
     countOfLogs: string | undefined;
+    status: UserStatus.ACTIVE;
+    role: UserRole.user
 };
 
 
@@ -55,7 +57,7 @@ export function Register({ user }: UserProps) {
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
-        defaultValues: { email: '', firstName: '', lastName: '', password: '', confirmpass: '', timeCreated: '', timeEdited: '', lastTimeLogin: '', countOfLogs: '' },
+        defaultValues: { email: '', firstName: '', lastName: '', password: '', confirmpass: '', timeCreated: '', timeEdited: '', lastTimeLogin: '', countOfLogs: '', status: UserStatus.ACTIVE, role: UserRole.user },
 
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -76,7 +78,6 @@ export function Register({ user }: UserProps) {
 
 
         const newUser = { ...data }
-
 
 
         API_CLIENT.register({ ...newUser })

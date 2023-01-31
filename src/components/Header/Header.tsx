@@ -7,17 +7,46 @@ import { IdType } from "../../shared/common-types";
 import * as userService from '../../services/userService'
 import { ApiClient } from "../../services/userService";
 import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
+import jwt_decode from "jwt-decode";
+
+
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users/logout');
+
+
+type decode = {
+    _id: string,
+    email: string,
+    firstName: string,
+    lastName: string,
+    role: string
+}
+
+
+
 
 export default function Header() {
 
     const email = sessionStorage.getItem('email')
     const { userL, setUserL } = useContext(LoginContext)
+
+
+
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+
+    let role = 'user'
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken)
+        role = decode.role
+
+    }
+
+
     const navigate = useNavigate();
 
     const loginContext = useContext(LoginContext)
- 
+
     const logout = () => {
         const accessToken = sessionStorage.getItem('accessToken')
 
@@ -64,6 +93,8 @@ export default function Header() {
                             <Button component={Link} to={'/trips'} color="inherit">TRIPS</Button>
                             <Button component={Link} to={'/create-trip'} color="inherit">CREATE TRIPS</Button>
                             <Button component={Link} to={'/my-trips'} color="inherit">MY TRIPS</Button>
+                            <Button component={Link} to={'/favorites'} color="inherit">MY FAVOTITES</Button>
+                            {((role === 'admin') || (role === 'manager')) ? <Button component={Link} to={'/admin'} color="inherit">ADMIN</Button> : ''}
                             <Button onClick={logout} color="inherit">LOGOUT</Button>
                         </>
                         :

@@ -1,13 +1,13 @@
+
 import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
 import { IdType } from "../../shared/common-types";
 import * as tripService from '../../services/tripService'
 import * as pointService from '../../services/pointService'
-import './TripDetails.css'
 import { Point } from "../../model/point";
 import { ApiPoint } from "../../services/pointService";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { GoogleMap, MarkerF, PolylineF, useJsApiLoader } from "@react-google-maps/api";
 import React from "react";
 import { containerStyle, options } from "../settings";
@@ -16,16 +16,25 @@ import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
 import { Box, Button, Card, CardMedia, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography } from "@mui/material";
-import TripDetailsPointCard from "./TripDetailsPoint";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { useTheme } from '@mui/material/styles';
-import Tooltip from '@mui/material/Tooltip';
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import ReportGmailerrorredIcon from '@mui/icons-material/ReportGmailerrorred';
-import ReportOffIcon from '@mui/icons-material/ReportOff';
-import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
-import BookmarkRemoveOutlinedIcon from '@mui/icons-material/BookmarkRemoveOutlined';
+import { LoginContext } from "../../App";
+import jwt_decode from "jwt-decode";
+import TripDetailsPointCard from "../TripDetails/TripDetailsPoint";
+
+
+
+
+
+
+
+type decode = {
+    _id: string,
+    email: string,
+    firstName: string,
+    lastName: string,
+    role: string
+}
 
 let zoom = 8;
 
@@ -39,7 +48,7 @@ const googleKey = process.env.REACT_APP_GOOGLE_KEY
 
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
-export default function TripDetails() {
+export default function AdminTripDetails() {
 
 
 
@@ -66,9 +75,8 @@ export default function TripDetails() {
     const [hide, setHide] = useState<boolean>(false)
     const [pointCard, setPointCard] = useState<Point | null>()
     const [mapCenter, setMapCenter] = useState(center)
-    const [reported, setReported] = useState<boolean>(false)
-    const [updatedTrip, setUpdatedTrip] = useState<Trip>()
-    const [favorite, setFavorite] = useState<boolean>(false)
+    const [tripReports, setTripReports] = useState<Trip>()
+
 
 
     if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (points === undefined)) {
@@ -84,6 +92,27 @@ export default function TripDetails() {
     }
 
 
+
+
+
+    const { userL, setUserL } = useContext(LoginContext)
+
+
+
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+
+    let role = 'user'
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken)
+        role = decode.role
+
+
+    }
+
+
+
+
     useEffect(() => {
 
         API_POINT.findByTripId(trip._id).then((data) => {
@@ -92,6 +121,8 @@ export default function TripDetails() {
                 if (typeof data === "object") {
 
                     const arrPoints = data as any as Point[]
+
+
 
                     if (arrPoints !== undefined && arrPoints.length > 0) {
                         center = {
@@ -128,7 +159,9 @@ export default function TripDetails() {
 
 
 
+
     }, [])
+
 
 
 
@@ -272,13 +305,13 @@ export default function TripDetails() {
 
     const onLikeTrip = () => {
 
+        setLiked(true)
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
             trip.likes.push(userId)
 
 
             API_TRIP.updateLikes(trip._id, trip).then((data) => {
-                setUpdatedTrip(data)
-                setLiked(true)
+
 
             }).catch((err) => {
                 console.log(err)
@@ -287,106 +320,22 @@ export default function TripDetails() {
         }
 
     }
-    const onFavoriteClickHandler = () => {
+
+    const deleteReportClickHandler = () => {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+            const reports: [] = []
 
-            trip?.favorites.push(userId)
-
-            API_TRIP.updateFavorites(trip._id, trip).then((data) => {
-                setUpdatedTrip(data)
-                setFavorite(true)
-            }).catch((err) => {
-                console.log(err)
-            })
-
-        }
-
-    }
-
-
-
-
-    const onRemoveFavoriteClickHandler = () => {
-
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
-
-            const index = trip.favorites.indexOf(userId)
-
-            trip.favorites.splice(index, 1)
-
-            API_TRIP.updateFavorites(trip._id, trip).then((data) => {
-                setUpdatedTrip(data)
-                setFavorite(false)
-            }).catch((err) => {
-                console.log(err)
-            })
-
-        }
-
-    }
-    const onUnLikeTrip = () => {
-
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
-
-            const index = trip.likes.indexOf(userId)
-
-            trip.likes.splice(index, 1)
-
-            API_TRIP.updateLikes(trip._id, trip).then((data) => {
-                setUpdatedTrip(data)
-
-                setLiked(false)
-            }).catch((err) => {
-                console.log(err)
-            })
-
-        }
-
-    }
-
-    const reportClickHandler = () => {
-
-
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
-            trip.reportTrip?.push(userId)
-
-
-            API_TRIP.reportTrip(trip._id, trip).then((data) => {
-
-                setUpdatedTrip(data)
-                setReported(true)
-
+            API_TRIP.deleteReportTrip(trip._id, reports).then((data) => {
+                setTripReports(data)
             }).catch((err) => {
                 console.log(err)
             })
 
         }
     }
-    const unReportClickHandler = () => {
 
 
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
-
-            if (trip.reportTrip !== undefined) {
-
-                const index = trip.reportTrip.indexOf(userId)
-
-                trip.reportTrip.splice(index, 1)
-
-
-                API_TRIP.reportTrip(trip._id, trip).then((data) => {
-
-                    setUpdatedTrip(data)
-                    setReported(false)
-
-                }).catch((err) => {
-                    console.log(err)
-                })
-
-            }
-        }
-    }
     const goBack = () => {
         navigate(-1);
     }
@@ -409,70 +358,6 @@ export default function TripDetails() {
         onMarkerClick('', position)
     };
 
-
-
-    const MuiTooltipUnlike = () => {
-        return (
-            <Tooltip title='UN LIKE' arrow>
-
-                <ThumbUpIcon color="primary" onClick={onUnLikeTrip} fontSize="large" sx={{ ':hover': { cursor: 'pointer' }, margin: '5px' }} />
-            </Tooltip>
-        )
-    }
-
-
-
-    const MuiTooltipLike = () => {
-        return (
-            <Tooltip title='LIKE' arrow>
-                < ThumbUpOffAltIcon color="primary" onClick={onLikeTrip} fontSize="large" sx={{ ':hover': { cursor: 'pointer' }, margin: '5px' }} />
-
-            </Tooltip>
-        )
-    }
-
-    const MuiTooltiReport = () => {
-        return (
-            <Tooltip title='REPORT TRIP' arrow>
-                <ReportGmailerrorredIcon color="primary" onClick={reportClickHandler} fontSize="large" sx={{ ':hover': { cursor: 'pointer', color: 'red' }, margin: '5px' }} />
-
-            </Tooltip>
-        )
-    }
-
-
-
-    const MuiTooltiUnReport = () => {
-        return (
-            <Tooltip title='UN REPORT TRIP' arrow>
-                <ReportOffIcon color="primary" onClick={unReportClickHandler} fontSize="large" sx={{ ':hover': { cursor: 'pointer', color: 'red' }, margin: '5px' }} />
-
-            </Tooltip>
-        )
-    }
-
-
-    const MuiToolBookmark = () => {
-        return (
-            <Tooltip title='ADD TO FAVORITE' arrow>
-                <BookmarkAddOutlinedIcon color="primary" onClick={onFavoriteClickHandler} fontSize="large" sx={{ ':hover': { cursor: 'pointer' }, margin: '5px' }} />
-
-            </Tooltip>
-        )
-    }
-
-
-    const MuiToolBookmarkRemove = () => {
-        return (
-            <Tooltip title='REMOVE FROM FAVORITE' arrow>
-                <BookmarkRemoveOutlinedIcon color="primary" onClick={onRemoveFavoriteClickHandler} fontSize="large" sx={{ ':hover': { cursor: 'pointer', color: 'red' }, margin: '5px' }} />
-
-            </Tooltip>
-        )
-    }
-
-
-
     return (
         <>
 
@@ -494,17 +379,9 @@ export default function TripDetails() {
                         padding: '25px', backgroundColor: '#8d868670',
                         boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
                     }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                            <>
-                                <Typography gutterBottom variant="h5" component="div">
-                                    TRIP NAME : {trip?.title}
-                                </Typography>
-                                {((trip.favorites?.some((x) => x === userId)) || (favorite === true)) ?
-                                    <MuiToolBookmarkRemove />
-                                    : <MuiToolBookmark />
-                                }
-                            </>
-                        </Box>
+                        <Typography gutterBottom variant="h5" component="div">
+                            TRIP NAME : {trip?.title}
+                        </Typography>
                         <Typography gutterBottom variant="subtitle1" component="h5">
                             PRICE OF THE TRIP: {trip?.price ? trip.price + 'euro' : 'missing price'}
                         </Typography>
@@ -541,15 +418,34 @@ export default function TripDetails() {
 
                         <Button component={Link} to={`/comments/add-comment/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD COMMENT</Button>
 
-                        {(trip._ownerId === userId) ?
+                        {((trip._ownerId === userId) || ((role === 'admin') || (role === 'manager'))) ?
                             <>
-                                <Button component={Link} to={`/trip/edit/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>EDIT TRIP</Button>
+                                <Button component={Link} to={`/admin/trip/edit/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>EDIT TRIP</Button>
                                 <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE TRIP</Button>
                             </>
 
                             : ''}
+                        <Button variant="contained" onClick={deleteReportClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE {tripReports !== undefined ? tripReports.reportTrip?.length : trip.reportTrip?.length} REPORTS TRIP</Button>
+
 
                         <Button onClick={goBack} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >BACK</Button>
+
+                        {trip._ownerId !== userId ?
+                            <>
+                                {
+                                    trip.likes.some((x) => x === userId) || (liked === true) ?
+
+                                        <Button disabled variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >YOU LIKED THIS TRIP</Button>
+                                        :
+
+                                        <Button onClick={onLikeTrip} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >LIKE TRIP</Button>
+                                }
+                            </>
+                            : ''}
+
+
+
+
                         {comments?.length ?
 
                             <Button onClick={() => onLoadComments(undefined)} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >FOR THIS TRIP HAVE {comments?.length} COMMENTS, SEE ALL COMMENTS</Button>
@@ -564,34 +460,6 @@ export default function TripDetails() {
                             <Button onClick={onHideComments} className="btn-hide" variant="contained" sx={{ display: hide ? 'block' : 'none', ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >HIDE COMMENTS</Button>
                             : ''
                         }
-
-
-
-                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around' }}>
-
-
-                            {((trip.reportTrip?.some((x) => x === userId)) || (reported === true)) ?
-                                <MuiTooltiUnReport />
-                                :
-                                <MuiTooltiReport />
-                            }
-
-                            {trip._ownerId !== userId ?
-                                <>
-                                    {
-                                        trip.likes.some((x) => x === userId) || (liked === true) ?
-                                            <MuiTooltipUnlike />
-                                            :
-                                            <MuiTooltipLike />
-                                    }
-                                </>
-                                : ''}
-
-                        </Box>
-
-
-
-
 
 
                     </Card>

@@ -1,113 +1,127 @@
-import { useNavigate } from "react-router-dom";
-import { Box, Button, CardMedia, Typography } from "@mui/material";
-import FormInputText from "../FormFields/FormInputText";
+import { Box, Button, CardMedia, Typography } from "@mui/material"
+import { MuiFileInput } from "mui-file-input"
+import { useLoaderData, useNavigate } from "react-router-dom"
+import FormInputText from "../FormFields/FormInputText"
+import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
+import { User, UserRole, UserStatus } from "../../model/users";
+import { BaseSyntheticEvent, useContext, useState } from "react";
+import { IdType, toIsoDate } from "../../shared/common-types";
+import { ApiClient } from "../../services/userService";
+import * as userService from '../../services/userService'
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
-import React, { BaseSyntheticEvent, useEffect, useState } from "react";
-
-import * as userService from '../../services/userService'
-import { IdType, toIsoDate } from "../../shared/common-types";
-import { User } from "../../model/users";
-import { ApiClient } from "../../services/userService";
-import { MuiFileInput } from "mui-file-input";
-import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
-
-
-
-
+import { LoginContext } from "../../App";
+import jwt_decode from "jwt-decode";
+import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
-const schema1 = yup.object({
-    email: yup.string().required().email(),
-    firstName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'First Name cannot be empty string and must contain at least 2 characters .'),
-    lastName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'Last Name cannot be empty string and must contain at least 2 characters .'),
-    oldpassword: yup.string().required('Old password is required.').matches(/^(?=(.*[a-zA-Z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/, 'Must contain 8 characters, at least one digit, and one character different from letter or digit'),
-    password: yup.string().required('New password is required').matches(/^(?=(.*[a-zA-Z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/, 'Must contain 8 characters, at least one digit, and one character different from letter or digit'),
-    confirmpass: yup.string().test('passwords-match', 'Passwords must match', function (value) { return this.parent.password === value }),
-
-
-}).required();
-
-
-const schema2 = yup.object({
-    email: yup.string().required().email(),
-    firstName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'First Name cannot be empty string and must contain at least 2 characters .'),
-    lastName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'Last Name cannot be empty string and must contain at least 2 characters .'),
+const USER_SELECT_OPTIONS_STATUS: SelectOption[] = Object.keys(UserStatus)
+    .filter((item) => !isNaN(Number(item)))
+    .map((ordinal: string) => parseInt(ordinal))
+    .map((ordinal: number) => ({ key: ordinal, value: UserStatus[ordinal] }));
 
 
 
-}).required();
+const USER_SELECT_OPTIONS_ROLE: SelectOption[] = Object.keys(UserRole)
+    .filter((item) => !isNaN(Number(item)))
+    .map((ordinal: string) => parseInt(ordinal))
+    .map((ordinal: number) => ({ key: ordinal, value: UserRole[ordinal] }));
+
+
+
+type decode = {
+    _id: string,
+    email: string,
+    firstName: string,
+    lastName: string,
+    role: string
+}
 
 
 
 type FormData = {
+    _id: string,
     email: string
     firstName: string;
     lastName: string;
-    oldpassword: string;
-    password: string;
-    confirmpass: string;
     imageFile: string | undefined;
-
     timeCreated: string | undefined;
     timeEdited: string;
-
+    role: string;
+    status: string;
 };
 
-export default function Profile() {
 
-    const [user, setUser] = useState<User>()
-    const [hide, setHide] = useState<boolean>(false)
+
+const schema = yup.object({
+    email: yup.string().required().email(),
+    firstName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'First Name cannot be empty string and must contain at least 2 characters .'),
+    lastName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'Last Name cannot be empty string and must contain at least 2 characters .'),
+
+
+
+}).required();
+
+
+
+export default function AdminEdit() {
+
+    const userEdit = useLoaderData() as User
+
     const [fileSelected, setFileSelected] = useState<File | undefined>()
-    const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>()
+    const [user, setUser] = useState<User>()
     const navigate = useNavigate()
-    const userId = sessionStorage.getItem('userId')
+    const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>()
 
 
 
-    useEffect(() => {
-        if (userId) {
-            API_CLIENT.findById(userId).then((data) => {
-                setUser(data)
-
-            }).catch(err => console.log(err))
-        }
-
-    }, [])
+    const { userL, setUserL } = useContext(LoginContext)
 
 
 
-    const { control, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
 
-        defaultValues: { email: '', firstName: '', lastName: '', password: '', confirmpass: '' },
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
 
-        values: { email: user?.email!, firstName: user?.firstName!, lastName: user?.lastName!, oldpassword: '', password: '', confirmpass: '', imageFile: '', timeEdited: '', timeCreated: '' },
+    let role = 'user'
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken)
+        role = decode.role
+
+    }
+
+
+
+
+
+
+    const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
+
+        defaultValues: {
+            _id: userEdit._id + '', email: userEdit.email,
+            firstName: user?.firstName ? user.firstName : userEdit.firstName,
+            lastName: user?.lastName ? user.lastName : userEdit.lastName, imageFile: '',
+            timeCreated: '', timeEdited: '',
+            role: UserRole[userEdit.role],
+            status: UserStatus[userEdit.status]
+        },
+
+        values: {
+            _id: userEdit?._id + '', email: user?.email ? user.email : userEdit.email,
+            firstName: user?.firstName ? user.firstName : userEdit.firstName,
+            lastName: user?.lastName ? user.lastName : userEdit.lastName, imageFile: '', timeEdited: '',
+            timeCreated: '', role: UserRole[userEdit.role], status: UserStatus[userEdit.status]
+        },
 
         mode: 'onChange',
-        resolver: yupResolver(hide === true ? schema1 : schema2),
+        resolver: yupResolver(schema),
     });
+
 
 
     const editProfileSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
 
-
-        if (data.oldpassword.length > 0 && data.password.length > 0 && data.confirmpass.length > 0) {
-
-            if (userId) {
-
-
-                API_CLIENT.changePassword(userId, data.oldpassword).then((data) => {
-
-                }).catch((err) => {
-                    console.log(err.message)
-
-                    return
-                })
-
-            }
-        }
 
 
         let formData = new FormData();
@@ -139,20 +153,27 @@ export default function Profile() {
         data.timeEdited = toIsoDate(new Date())
         data.firstName = data.firstName.trim()
         data.lastName = data.lastName.trim()
-        data.oldpassword = data.oldpassword.trim()
-        data.password = data.password.trim()
-        data.confirmpass = data.confirmpass.trim()
-        
+        data.status = UserStatus[parseInt(data.status)];
+        data.role = UserRole[parseInt(data.role)];
+
+        const userEditRole = userEdit.role as any as string
+
+        if (userEditRole === 'admin') {
+            data.status = UserStatus[UserStatus.ACTIVE]
+            data.role = UserRole[UserRole.admin]
+        }
+
         const editedUser = { ...data } as any
 
-        if (userId) {
+
+        if (userEdit._id) {
 
 
-            API_CLIENT.updateUser(userId, editedUser).then((data) => {
+            API_CLIENT.updateUserAdmin(userEdit._id, editedUser).then((data) => {
+
                 setUser(prev => data)
                 setFileSelected(undefined)
-                reset({ oldpassword: '', password: '', confirmpass: '' })
-                setHide(false)
+
             }).catch((err) => console.log(err))
 
         }
@@ -166,14 +187,6 @@ export default function Profile() {
 
     }
 
-
-    const changePass = () => {
-        setHide(!hide)
-        if (hide === true) {
-
-            reset({ oldpassword: '', password: '', confirmpass: '' })
-        }
-    }
 
     const handleFileChange = (file: any) => {
 
@@ -207,15 +220,18 @@ export default function Profile() {
     const deleteImage = (e: React.MouseEvent) => {
 
         const img = e.currentTarget.id
-        if (userId) {
+        if (userEdit._id) {
 
-            API_CLIENT.deleteProfileImage(userId, img).then((data) => {
+            API_CLIENT.deleteProfileImage(userEdit._id + '', img).then((data) => {
                 setUser(data)
             }).catch((err) => console.log(err))
         }
     }
 
+
     return (
+
+
 
         <>
             <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px' }}>
@@ -249,7 +265,10 @@ export default function Profile() {
                     onSubmit={handleSubmit(editProfileSubmitHandler)}
                 >
                     <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
-                        {user?.firstName}'s  PROFILE
+                        {user?.firstName ? user.firstName : userEdit.firstName}'s  PROFILE
+                    </Typography>
+                    <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
+                        User ID:   {userEdit._id}
                     </Typography>
                     <FormInputText name='email' label='Email' control={control} error={errors.email?.message}
                         rules={{ required: true, minLength: 5 }} />
@@ -258,25 +277,25 @@ export default function Profile() {
 
                     <FormInputText name='lastName' label='Last Name' control={control} error={errors.lastName?.message}
                         rules={{ required: true, minLength: 2, maxLength: 15 }} />
-                    {hide === true ?
+
+
+                    {role === 'admin' ?
                         <>
-                            <FormInputText name='oldpassword' label='Old Password' type='password' control={control} error={errors.oldpassword?.message}
-                                rules={{ required: true }} />
-                            <FormInputText name='password' label='Password' type='password' control={control} error={errors.password?.message}
-                                rules={{ required: true }} />
+                            <FormInputSelect name='role' label='role' control={control} error={errors.role?.message}
+                                options={USER_SELECT_OPTIONS_ROLE} />
+                            <FormInputSelect name='status' label='status' control={control} error={errors.status?.message}
+                                options={USER_SELECT_OPTIONS_STATUS} defaultOptionIndex={1} />
 
-                            <FormInputText name='confirmpass' label='Confirm Password' type='password' control={control} error={errors.confirmpass?.message}
-                                rules={{ required: true }} />
+
                         </>
-
                         : ''}
+
 
                     <MuiFileInput value={fileSelected ? fileSelected : undefined} name='inpImages' helperText={errorMessageImage} sx={{ '& input.css-152mnda-MuiInputBase-input-MuiOutlinedInput-input': { cursor: 'pointer' } }} onChange={handleFileChange} onClick={(e) => deleteFile(e)} />
 
                     <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
                         <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-                        <Button variant="contained" onClick={changePass} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >CHANGE PASSWORD</Button>
 
                     </Box >
 

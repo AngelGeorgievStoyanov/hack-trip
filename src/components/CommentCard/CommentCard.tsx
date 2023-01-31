@@ -5,7 +5,7 @@ import { User } from "../../model/users";
 import * as userService from '../../services/userService'
 import { ApiClient } from "../../services/userService";
 import { IdType } from "../../shared/common-types";
-import {stringAvatar} from '../../shared/common-types'
+import { stringAvatar } from '../../shared/common-types'
 
 export interface CommentListener {
     (comment: Comment): void;
@@ -31,14 +31,13 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom }: Comment
     const [user, setUser] = useState<User>()
 
 
-    const name = user?.firstName+' '+user?.lastName
+    const name = user?.firstName + ' ' + user?.lastName
 
 
 
     useEffect(() => {
         if (userId) {
             API_CLIENT.findById(userId).then((data) => {
-                console.log(data)
                 setUser(data)
 
             }).catch(err => console.log(err))
@@ -65,13 +64,13 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom }: Comment
                 flexDirection: 'column',
                 alignItems: 'flex-start',
                 maxWidth: '350px', margin: '20px',
-
+                height: 'fit-content',
                 padding: '30px', backgroundColor: '#8d868670',
                 boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
             }}>
                 {user?.imageFile ?
-                    <Avatar alt="Remy Sharp"  src={`http://localhost:8001/uploads/${user.imageFile}`} />
-                    :  <Avatar {...stringAvatar(name)} />}
+                    <Avatar alt="Remy Sharp" src={`http://localhost:8001/uploads/${user.imageFile}`} />
+                    : <Avatar {...stringAvatar(name)} />}
 
                 <Typography gutterBottom component="h4">
                     Author name: {comment.nameAuthor}
