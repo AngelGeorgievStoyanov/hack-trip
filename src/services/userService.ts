@@ -19,7 +19,8 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     changePassword(id: K, password: string): Promise<V>;
     deleteProfileImage(id: K, image: string): Promise<V>;
     findAll(): Promise<V>;
-    updateUserAdmin(id:K, entity:UserEditAdmin ):Promise<V>
+    updateUserAdmin(id: K, entity: UserEditAdmin): Promise<V>;
+    guardedRoute(id: K, role: string): Promise<boolean>;
 }
 
 
@@ -110,11 +111,11 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         return result
     }
 
-    
+
 
     async updateUserAdmin(id: K, entity: UserEditAdmin): Promise<V> {
 
-        
+
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/edit/${id}`, {
             method: 'PUT',
@@ -197,6 +198,26 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         return response.json()
     }
 
+
+    async guardedRoute(id: K, role: string): Promise<boolean> {
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/guard`, {
+            method: 'POST',
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({ id, role })
+        })
+
+
+        if (response.status >= 400) {
+            const result = await response.json()
+            throw new Error(result)
+        }
+
+        return response.json()
+
+    }
 
 }
 

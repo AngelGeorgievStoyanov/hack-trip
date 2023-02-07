@@ -6,7 +6,7 @@ const baseUrl = CONNECTIONURL;
 
 
 export interface ApiTrip<K, V extends Identifiable<K>> {
-    findAll(): Promise<V[]>;
+    findAll(search: string, typeOfGroup: string, typeOfTransportSelect: string): Promise<K>;
     findById(id: K): Promise<V>;
     create(entityWithoutId: TripCreate): Promise<any>;
     update(id: K, entity: Trip): Promise<V>;
@@ -21,6 +21,7 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
     deleteReportTrip(id: K, entity: []): Promise<V>;
     updateFavorites(id: K, entity: Trip): Promise<V>;
     findAllMyFavorites(id: K): Promise<V[]>;
+    findAllPagination(page: K, search: string, typeOfGroup: string, typeOfTransportSelect: string): Promise<V[]>;
 
 }
 
@@ -30,11 +31,20 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
 export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> {
     constructor(public apiCollectionSuffix: string) { }
 
-    async findAll(): Promise<V[]> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`);
+    async findAll(search: string, typeOfGroup: string, typeOfTransportSelect: string): Promise<K> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/?search=${search}&typegroup=${typeOfGroup}&typetransport=${typeOfTransportSelect}`);
 
 
         return response.json()
+    }
+
+
+    async findAllPagination(page: K, search: string, typeOfGroup: string, typeOfTransportSelect: string): Promise<V[]> {
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/paginate/?page=${page}&search=${search}&typegroup=${typeOfGroup}&typetransport=${typeOfTransportSelect}`);
+
+
+        return await response.json()
     }
 
     async findAllMyTrips(id: K): Promise<V[]> {

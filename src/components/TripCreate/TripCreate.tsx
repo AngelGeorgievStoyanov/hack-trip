@@ -82,7 +82,6 @@ let zoom = 8;
 
 export function CreateTrip() {
 
-    const fileCount = 9
     const [errorMessageSearch, setErrorMessageSearch] = useState('')
 
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
@@ -411,9 +410,9 @@ export function CreateTrip() {
                             onContextReady={(context) => { }}
                             showPlaceholderImage={false}
                             maxFilesContainerHeight={157}
-                            maxUploadFiles={fileCount}
+                            maxUploadFiles={9}
                             allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
-
+                            
                         />
 
                         {errorMessageImage ? <p>{errorMessageImage}</p> : ''}

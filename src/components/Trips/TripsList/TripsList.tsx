@@ -19,7 +19,15 @@ export default function TripList({ trips }: TripsListProps) {
 
             {trips.length > 0 ?
                 trips.map(x => <TripCard key={x._id} trip={x} />)
-                : <h1>WELCOME!</h1>}
+                :
+                <>
+                    <div>
+                        <h1>WELCOME!</h1>
+                        <h4>No trips found!</h4>
+                    </div>
+
+                </>
+            }
         </>
     )
 }

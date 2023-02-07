@@ -1,9 +1,12 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { LoginContext } from '../../App';
 import { Outlet } from 'react-router-dom';
 import jwt_decode from "jwt-decode";
 import NotFound from '../NotFound/NotFound';
-
+import * as userService from '../../services/userService'
+import { User } from '../../model/users';
+import { IdType } from '../../shared/common-types';
+import { ApiClient } from '../../services/userService';
 
 
 type decode = {
@@ -14,26 +17,40 @@ type decode = {
     role: string
 }
 
+const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
 
 const GuardedRouteAdmin = () => {
 
-
+    const [guard, setGuard] = useState<boolean>(false)
     const { userL, setUserL } = useContext(LoginContext)
-
-    const userId = userL?._id ? userL._id : sessionStorage.getItem('userId') ? sessionStorage.getItem('userId') : undefined
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
 
     let role = 'user'
+    let userId: IdType;
+
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken)
         role = decode.role
+        userId = decode._id
 
-        console.log(role)
 
     }
 
-    return ((role === 'admin') || (role === 'manager')) ? <Outlet /> : <NotFound />
+
+
+    useEffect(() => {
+
+        API_CLIENT.guardedRoute(userId, role).then((data) => {
+            setGuard(data)
+        })
+
+
+    }, [])
+
+
+
+    return (((role === 'admin') || (role === 'manager')) && (guard === true)) ? <Outlet /> : <NotFound />
 
 }
 export default GuardedRouteAdmin

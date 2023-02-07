@@ -49,7 +49,6 @@ export default function TripDetails() {
 
 
 
-
     const userId = sessionStorage.getItem('userId') + ''
 
     const navigate = useNavigate()
@@ -71,7 +70,7 @@ export default function TripDetails() {
     const [favorite, setFavorite] = useState<boolean>(false)
 
 
-    if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (points === undefined)) {
+    if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (Array.from(points).length === 0)) {
 
 
         center = {
@@ -79,7 +78,6 @@ export default function TripDetails() {
             lng: Number(trip.lng)
 
         }
-
 
     }
 
@@ -200,8 +198,8 @@ export default function TripDetails() {
             }
 
         } else if (positionNumber) {
-
             const currentPoint: Point[] = points.filter((x) => Number(x.pointNumber) === positionNumber)
+
             if (currentPoint[0] !== undefined && currentPoint[0] !== null) {
 
                 setPointCard(prev => currentPoint[0])

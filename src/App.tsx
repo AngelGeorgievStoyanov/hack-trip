@@ -59,11 +59,7 @@ type LoginContext = {
 export const LoginContext = createContext({} as LoginContext)
 
 
-export async function tripsLoader() {
 
-  return API_TRIP.findAll()
-
-}
 export async function tripsLoaderTop() {
 
   return API_TRIP.findTopTrips()
@@ -173,7 +169,6 @@ const Layout = () => (
 
 
 
-
 const router = createBrowserRouter([
 
 
@@ -196,7 +191,6 @@ const router = createBrowserRouter([
       },
       {
         path: '/trips',
-        loader: tripsLoader,
         element: <Trips />,
         errorElement: <NotFound />
 
