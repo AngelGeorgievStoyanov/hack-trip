@@ -1,10 +1,8 @@
-
 import { Comment, CommentCreate } from "../model/comment";
 import { Identifiable } from "../shared/common-types";
 import { CONNECTIONURL } from "../utils/baseUrl";
 
 const baseUrl = CONNECTIONURL;
-
 
 export interface ApiComment<K, V extends Identifiable<K>> {
     findAll(): Promise<V[]>;
@@ -15,8 +13,6 @@ export interface ApiComment<K, V extends Identifiable<K>> {
     findByPointId(id: K): Promise<V>;
     deleteByTripId(id: K): Promise<void>;
     findById(id: K): Promise<V>;
-
-
 }
 
 
@@ -28,19 +24,18 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
     async findByTripId(id: K): Promise<V> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trip/${id}`);
-
         const res = await response.json()
-        return res
+        return res;
     }
 
     async findById(id: K): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`);
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return response.json()
+        return response.json();
     }
 
     async create(entityWithoutId: CommentCreate): Promise<any> {
@@ -54,11 +49,11 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
 
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return response.json()
+        return response.json();
     }
 
     async update(id: K, entity: Comment): Promise<V> {
@@ -87,11 +82,11 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
         });
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return await response.json()
+        return await response.json();
     }
 
 
@@ -106,12 +101,10 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
         });
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return await response.json()
+        return await response.json();
     }
-
-
 }

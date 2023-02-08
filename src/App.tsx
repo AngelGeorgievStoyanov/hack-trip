@@ -8,7 +8,7 @@ import ErrorBoundary from './utils/ErrorBoundary';
 import Footer from './components/Footer/Footer';
 import CreateTrip from './components/TripCreate/TripCreate';
 import { Trip } from './model/trip';
-import * as tripService from './services/tripService'
+import * as tripService from './services/tripService';
 import { ApiTrip } from './services/tripService';
 import TripDetails from './components/TripDetails/TripDetails';
 import { IdType } from './shared/common-types';
@@ -28,11 +28,10 @@ import { User } from './model/users';
 import MyTrips from './components/MyTrips/MyTrips';
 import GuardedRoute from './components/GuardedRoute/GuardedRoute';
 import NotFound from './components/NotFound/NotFound';
-
 import './App.css';
 import Profile from './components/Profile/Profile';
 import Admin from './components/Admin/Admin';
-import * as userService from './services/userService'
+import * as userService from './services/userService';
 import { ApiClient } from './services/userService';
 import AdminEdit from './components/Admin/AdminEdit';
 import GuardedRouteAdmin from './components/GuardedRouteAdmin/GuardedRouteAdmin';
@@ -56,13 +55,13 @@ type LoginContext = {
   setUserL: React.Dispatch<React.SetStateAction<User | null>>
 }
 
-export const LoginContext = createContext({} as LoginContext)
+export const LoginContext = createContext({} as LoginContext);
 
 
 
 export async function tripsLoaderTop() {
 
-  return API_TRIP.findTopTrips()
+  return API_TRIP.findTopTrips();
 
 }
 
@@ -89,7 +88,7 @@ export async function tripLoader({ params }: LoaderFunctionArgs) {
 export async function pointsLoader({ params }: LoaderFunctionArgs) {
   if (params.tripId) {
 
-    return API_POINT.findByTripId(params.tripId)
+    return API_POINT.findByTripId(params.tripId);
   } else {
     throw new Error(`Invalid or missing points ID`);
   }
@@ -100,7 +99,7 @@ export async function pointsLoader({ params }: LoaderFunctionArgs) {
 export async function pointLoaderById({ params }: LoaderFunctionArgs) {
   if (params.pointId) {
 
-    return API_POINT.findByPointId(params.pointId)
+    return API_POINT.findByPointId(params.pointId);
   } else {
     throw new Error(`Invalid or missing point ID`);
   }
@@ -111,11 +110,7 @@ export async function commentLoaderById({ params }: LoaderFunctionArgs) {
 
   if (params.commentId) {
 
-
-
     return await API_COMMENT.findById(params.commentId)
-
-
 
   } else {
 
@@ -129,9 +124,9 @@ export async function userLoader() {
 
   try {
 
-    return await API_CLIENT.findAll()
+    return await API_CLIENT.findAll();
   } catch (err: any) {
-    throw new Error(err.message)
+    throw new Error(err.message);
   }
 
 
@@ -140,11 +135,7 @@ export async function userIdLoader({ params }: LoaderFunctionArgs) {
 
   if (params.userId) {
 
-
-
-    return await API_CLIENT.findById(params.userId)
-
-
+    return await API_CLIENT.findById(params.userId);
 
   } else {
 
@@ -156,8 +147,6 @@ export async function userIdLoader({ params }: LoaderFunctionArgs) {
 
 const Layout = () => (
   <>
-
-
     <Header />
 
     <Outlet />
@@ -170,7 +159,6 @@ const Layout = () => (
 
 
 const router = createBrowserRouter([
-
 
   {
     element: <Layout />,
@@ -193,7 +181,6 @@ const router = createBrowserRouter([
         path: '/trips',
         element: <Trips />,
         errorElement: <NotFound />
-
       },
       {
         path: '/create-trip',
@@ -205,13 +192,10 @@ const router = createBrowserRouter([
             errorElement: <NotFound />
           }
         ]
-
-
       },
       {
         path: '/trip/details/:tripId',
         element: <GuardedRoute />,
-
         children: [
           {
             path: '',
@@ -223,7 +207,6 @@ const router = createBrowserRouter([
             path: '*'
           }
         ]
-
       },
       {
         path: '/trip/edit/:tripId',
@@ -236,7 +219,6 @@ const router = createBrowserRouter([
             errorElement: <NotFound />
           }
         ]
-
       },
       {
         path: '/trip/points/:tripId',
@@ -249,7 +231,6 @@ const router = createBrowserRouter([
             errorElement: <NotFound />
           }
         ]
-
       },
       {
         path: '/points/edit/:pointId',
@@ -262,7 +243,6 @@ const router = createBrowserRouter([
             errorElement: <NotFound />
           }
         ]
-
       },
       {
         path: '/comments/add-comment/:tripId',
@@ -273,13 +253,10 @@ const router = createBrowserRouter([
             element: <CreateComment />
           }
         ]
-
       },
       {
         path: '/comments/edit/:commentId',
-
         element: <GuardedRoute />,
-
         children: [
           {
             path: '',
@@ -289,7 +266,6 @@ const router = createBrowserRouter([
           }
         ],
         errorElement: <NotFound />
-
       },
       {
         path: '/my-trips',
@@ -300,7 +276,6 @@ const router = createBrowserRouter([
             element: <MyTrips />
           }
         ]
-
       },
       {
         path: '/profile',
@@ -365,7 +340,6 @@ const router = createBrowserRouter([
             element: <MyFavorites />
           }
         ]
-
       },
       {
         path: '*',
@@ -373,33 +347,23 @@ const router = createBrowserRouter([
       }
     ]
   }
-
-
-])
-
+]);
 
 
 function App() {
 
   const [userL, setUserL] = useState<null | User>(null)
 
-
   return (
     <>
-
       <ErrorBoundary>
         {window.navigator.onLine ?
-
           <LoginContext.Provider value={{ userL, setUserL }}>
-
             <RouterProvider router={router} />
           </LoginContext.Provider>
-
-
           : <h1>No internet connection. Please try again later.</h1>}
       </ErrorBoundary>
     </>
-
   );
 }
 

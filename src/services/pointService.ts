@@ -28,9 +28,7 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
 
     async findAll(): Promise<V[]> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`);
-
-
-        return response.json()
+        return response.json();
     }
 
 
@@ -38,8 +36,8 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`);
 
-        const res = await response.json()
-        return res
+        const res = await response.json();
+        return res;
     }
 
 
@@ -56,11 +54,11 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
 
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return response.json()
+        return response.json();
     }
 
     async update(id: K, entity: Point): Promise<V> {
@@ -73,11 +71,11 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
         });
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return await response.json()
+        return await response.json();
     }
 
     async editPointPosition(id: K, entity: points): Promise<V> {
@@ -91,11 +89,11 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
 
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return await response.json()
+        return await response.json();
     }
 
 
@@ -113,11 +111,11 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
         });
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return await response.json()
+        return await response.json();
     }
 
     async deleteByTripId(id: K): Promise<void> {
@@ -128,18 +126,18 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
         });
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return await response.json()
+        return await response.json();
     }
 
 
     async findByPointId(id: K): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/edit/${id}`);
 
-        return response.json()
+        return response.json();
     }
 
     async sendFile(formdata: FormData): Promise<string[]> {
@@ -150,9 +148,9 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
             headers: {}
         });
 
-        const result = await response.json()
+        const result = await response.json();
 
-        return result
+        return result;
     }
 
 
@@ -167,10 +165,8 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
             body: JSON.stringify(oneImage)
         });
 
-        const result = await response.json()
-
-
-        return result
+        const result = await response.json();
+        return result;
     }
 
 

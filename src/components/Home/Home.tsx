@@ -1,13 +1,12 @@
-import { Grid } from '@mui/material'
-import { useLoaderData } from 'react-router-dom'
-import { Trip } from '../../model/trip'
-import TripList from '../Trips/TripsList/TripsList'
-import './Home.css'
+import { Grid } from '@mui/material';
+import { useLoaderData } from 'react-router-dom';
+import { Trip } from '../../model/trip';
+import TripList from '../Trips/TripsList/TripsList';
 
 
 function Home() {
 
-    const trips = useLoaderData() as Trip[]
+    const trips = useLoaderData() as Trip[];
 
     return (
         <>

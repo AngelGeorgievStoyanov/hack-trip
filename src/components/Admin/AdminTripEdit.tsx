@@ -1,7 +1,7 @@
-import { useLoaderData, useNavigate } from "react-router-dom"
-import { Trip, TripTipeOfGroup, TripTransport } from "../../model/trip"
+import { useLoaderData, useNavigate } from "react-router-dom";
+import { Trip, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
-import * as tripService from '../../services/tripService'
+import * as tripService from '../../services/tripService';
 import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, useEffect, useState } from "react";
@@ -15,7 +15,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import FileUpload from "react-mui-fileuploader";
-const googleKey = process.env.REACT_APP_GOOGLE_KEY
+const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
 let zoom = 8;
@@ -78,19 +78,14 @@ export default function AdminTripEdit() {
 
     const trip = useLoaderData() as Trip;
 
+    const [images, setImages] = useState<string[]>();
+    const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral);
+    const [initialPoint, setInitialPoint] = React.useState<google.maps.LatLngLiteral>({ lat: Number(trip.lat), lng: Number(trip.lng) } as google.maps.LatLngLiteral);
+    const [fileSelected, setFileSelected] = React.useState<File[]>([]);
+    const [errorMessageSearch, setErrorMessageSearch] = useState('');
 
-
-    const [images, setImages] = useState<string[]>()
-
-
-
-    const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
-    const [initialPoint, setInitialPoint] = React.useState<google.maps.LatLngLiteral>({ lat: Number(trip.lat), lng: Number(trip.lng) } as google.maps.LatLngLiteral)
-    const [fileSelected, setFileSelected] = React.useState<File[]>([])
-    const [errorMessageSearch, setErrorMessageSearch] = useState('')
-
-    const [visible, setVisible] = React.useState(true)
-    let positionPoint
+    const [visible, setVisible] = React.useState(true);
+    let positionPoint;
 
 
 
@@ -101,8 +96,6 @@ export default function AdminTripEdit() {
     }, [])
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
-
-
 
 
         defaultValues: {
@@ -130,9 +123,9 @@ export default function AdminTripEdit() {
     }
 
 
-    const searchRef = React.useRef<HTMLInputElement | null>(null)
+    const searchRef = React.useRef<HTMLInputElement | null>(null);
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
 
@@ -153,14 +146,14 @@ export default function AdminTripEdit() {
     };
 
 
-    const mapRef = React.useRef<google.maps.Map | null>(null)
+    const mapRef = React.useRef<google.maps.Map | null>(null);
 
     const onLoad = (map: google.maps.Map): void => {
-        mapRef.current = map
+        mapRef.current = map;
     }
 
     const onUnmount = (): void => {
-        mapRef.current = null
+        mapRef.current = null;
     }
 
 
@@ -170,81 +163,65 @@ export default function AdminTripEdit() {
 
 
         if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number') && (e.latLng?.lat() !== null)) {
-            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
-            setVisible(true)
-
-            setInitialPoint({ lat: e.latLng.lat(), lng: e.latLng.lng() })
-
+            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+            setVisible(true);
+            setInitialPoint({ lat: e.latLng.lat(), lng: e.latLng.lng() });
 
         }
-
-
 
     }
 
 
     const searchInp = async () => {
-
         if (searchRef.current?.value === '') {
-            setErrorMessageSearch('Plece enter location')
-
-
-            return
+            setErrorMessageSearch('Plece enter location');
+            return;
         }
 
-        setErrorMessageSearch('')
+        setErrorMessageSearch('');
 
-        const geocode = new google.maps.Geocoder()
+        const geocode = new google.maps.Geocoder();
 
         try {
 
-
             const result = await geocode.geocode({
                 address: searchRef.current!.value
-            })
+            });
 
 
             if (result) {
                 let searchPosition = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
-
-
-                zoom = 16
-                center = searchPosition
-                setClickedPos(searchPosition)
-                setVisible(true)
-                setInitialPoint(searchPosition)
-
-
-
+                zoom = 16;
+                center = searchPosition;
+                setClickedPos(searchPosition);
+                setVisible(true);
+                setInitialPoint(searchPosition);
 
             }
 
         } catch (error: any) {
 
-            setErrorMessageSearch('Plece enter exact name location or choose from suggestions')
+            setErrorMessageSearch('Plece enter exact name location or choose from suggestions');
 
-            console.log(error.message)
+            console.log(error.message);
         }
 
         if (searchRef.current?.value !== '' && searchRef.current?.value !== null) {
-            searchRef.current!.value = ''
+            searchRef.current!.value = '';
         }
     }
 
 
     const removeMarker = () => {
 
-        setClickedPos(undefined)
-        setVisible(false)
-
+        setClickedPos(undefined);
+        setVisible(false);
 
         center = {
             lat: 42.697866831005435,
             lng: 23.321590139866355
         }
-        zoom = 8
-
-
+        zoom = 8;
     }
 
 
@@ -261,30 +238,27 @@ export default function AdminTripEdit() {
 
         if (fileSelected) {
             fileSelected.forEach((file) => {
-                formData.append('file', file)
+                formData.append('file', file);
             })
         }
 
 
         let imagesNames = await API_TRIP.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[] | []
-            return imageName.map((x) => { return x.filename })
+            let imageName = data as unknown as any as any[] | [];
+            return imageName.map((x) => { return x.filename });
         }).catch((err) => {
-            console.log(err)
+            console.log(err);
         })
 
 
 
-        let imagesNew = imagesNames as unknown as any as string[]
-
+        let imagesNew = imagesNames as unknown as any as string[];
 
 
         if (imagesNew.length > 0) {
-
-
-            data.imageFile = images?.concat(imagesNew)
+            data.imageFile = images?.concat(imagesNew);
         } else {
-            data.imageFile = images
+            data.imageFile = images;
 
         }
 
@@ -292,15 +266,15 @@ export default function AdminTripEdit() {
 
         if (clickedPos?.lat) {
 
-            data.lat = clickedPos.lat
-            data.lng = clickedPos.lng
+            data.lat = clickedPos.lat;
+            data.lng = clickedPos.lng;
 
 
         } else {
             if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) {
 
-                data.lat = Number(trip.lat)
-                data.lng = Number(trip.lng)
+                data.lat = Number(trip.lat);
+                data.lng = Number(trip.lng);
             }
         }
 
@@ -312,21 +286,19 @@ export default function AdminTripEdit() {
 
 
 
-        data.timeEdited = toIsoDate(new Date())
+        data.timeEdited = toIsoDate(new Date());
 
-        data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)]
-        data.transport = TripTransport[parseInt(data.transport)]
-        const editTrip = { ...data } as any
+        data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)];
+        data.transport = TripTransport[parseInt(data.transport)];
+        const editTrip = { ...data } as any;
 
-        editTrip.id = trip._id as any as Trip
+        editTrip.id = trip._id as any as Trip;
 
         API_TRIP.update(trip._id, editTrip).then((data) => {
-            navigate(-1)
+            navigate(-1);
         }).catch((err) => {
-            console.log(err)
+            console.log(err);
         })
-
-
 
 
     }
@@ -341,26 +313,20 @@ export default function AdminTripEdit() {
 
     const deleteImage = (e: React.MouseEvent) => {
 
-
-
         const index = images?.indexOf(e.currentTarget.id)
         if (index !== undefined) {
-            const deletedImage = images?.slice(index, index + 1)
+            const deletedImage = images?.slice(index, index + 1);
 
             if (deletedImage) {
 
 
                 API_TRIP.editImages(trip._id, deletedImage).then((data) => {
-                    setImages(data.imageFile)
+                    setImages(data.imageFile);
                 }).catch((err) => {
-                    console.log(err)
-                })
+                    console.log(err);
+                });
             }
-
-
         }
-
-
     }
 
 
@@ -369,7 +335,7 @@ export default function AdminTripEdit() {
 
         if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
 
-            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
         }
 
     }
@@ -378,8 +344,6 @@ export default function AdminTripEdit() {
 
     return (
         <>
-
-
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
 
@@ -402,21 +366,14 @@ export default function AdminTripEdit() {
 
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
-
-
                         <Autocomplete>
                             <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
 
                         </Autocomplete>
 
-
-
-
-
                         <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
 
                         <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
-
 
                     </Box>
                     <Box component='div' sx={{
@@ -459,16 +416,11 @@ export default function AdminTripEdit() {
                             <FormInputSelect name='transport' label='TRANSPORT' control={control} error={errors.transport?.message}
                                 options={TRIP_SELECT_OPTIONS_TRANSPORT} defaultOptionIndex={1} />
 
-
-
-
                             <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}
                             />
 
-
                             <FormInputSelect name='typeOfPeople' label='TYPE OF THE GROUP' control={control} error={errors.typeOfPeople?.message}
                                 options={TRIP_SELECT_OPTIONS_TYPE_GROUPE} defaultOptionIndex={1} />
-
 
                             <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
                             />
@@ -479,6 +431,10 @@ export default function AdminTripEdit() {
                                 onContextReady={(context) => { }}
                                 showPlaceholderImage={false}
                                 maxFilesContainerHeight={157}
+                                buttonLabel='Click here for upload images'
+                                rightLabel={''}
+                                maxUploadFiles={9}
+                                header={'Drag to drop'}
                                 allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
 
                                 sx={{ '& .MuiPaper-root MuiPaper-outlined MuiPaper-rounded css-ibczwg-MuiPaper-root': { backgroundColor: '#8d868670' } }}
@@ -496,11 +452,6 @@ export default function AdminTripEdit() {
 
                             </span>
 
-
-
-
-
-
                         </Box>
 
 
@@ -511,8 +462,9 @@ export default function AdminTripEdit() {
                                     <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
                                         <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />
                                         <img
-                                            src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
-                                            srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                            src={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
+                                            srcSet={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+
                                             alt={item}
                                             loading="lazy"
                                         />
@@ -528,10 +480,7 @@ export default function AdminTripEdit() {
                                     alt="TRIP"
 
                                 /> : <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>}
-
-
                     </Box>
-
                 </Container>
             </Grid>
         </>

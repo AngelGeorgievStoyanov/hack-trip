@@ -1,9 +1,9 @@
-import { Box, Button } from "@mui/material"
+import { Box, Button } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useLoaderData } from "react-router-dom"
-import { User } from "../../model/users"
+import { useLoaderData } from "react-router-dom";
+import { User } from "../../model/users";
 import UsersList from "../UsersList/UsersList";
-import * as tripService from '../../services/tripService'
+import * as tripService from '../../services/tripService';
 import { IdType } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
 import { Trip, TripCreate } from "../../model/trip";
@@ -13,43 +13,32 @@ import TripList from "../Trips/TripsList/TripsList";
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
 
-
-
-
 export default function Admin() {
 
-    const users = useLoaderData() as User[]
+    const users = useLoaderData() as User[];
 
-    const [trips, setTrips] = useState<Trip[]>()
-    const [hideUsersList, setHideUsersList] = useState<boolean>(true)
-    const [hideTripsList, setHideTripsList] = useState<boolean>(true)
-
-
-   
-
-
-
-
+    const [trips, setTrips] = useState<Trip[]>();
+    const [hideUsersList, setHideUsersList] = useState<boolean>(true);
+    const [hideTripsList, setHideTripsList] = useState<boolean>(true);
 
 
     useEffect(() => {
 
         API_TRIP.getAllReportTrips().then((data) => {
-            setTrips(data)
-        }).catch(err => console.log(err))
+            setTrips(data);
+        }).catch(err => console.log(err));
     }, [])
 
 
     const hideUsers = () => {
 
-        setHideUsersList(!hideUsersList)
-
+        setHideUsersList(!hideUsersList);
 
     }
 
 
     const hideTrips = () => {
-        setHideTripsList(!hideTripsList)
+        setHideTripsList(!hideTripsList);
     }
 
 

@@ -1,11 +1,9 @@
 import { Identifiable, IdType } from "../shared/common-types";
 
 
-
 export enum UserStatus {
     ACTIVE = 1, SUSPENDED, DEACTIVATED
 }
-
 
 
 export enum UserRole {
@@ -15,7 +13,6 @@ export enum UserRole {
 
 export class User implements Identifiable<IdType> {
     constructor(
-
         public _id: IdType,
         public email: string,
         public firstName: string,
@@ -29,8 +26,6 @@ export class User implements Identifiable<IdType> {
         public lastTimeLogin?: string,
         public countOfLogs?: string,
         public imageFile?: string,
-
-
     ) { }
 }
 
@@ -38,7 +33,6 @@ export class User implements Identifiable<IdType> {
 
 export class UserRegister implements Omit<User, '_id'>{
     constructor(
-
         public email: string,
         public firstName: string,
         public lastName: string,
@@ -50,8 +44,6 @@ export class UserRegister implements Omit<User, '_id'>{
         public lastTimeLogin?: string,
         public countOfLogs?: string,
         public imageFile?: string,
-
-
     ) { }
 }
 
@@ -59,7 +51,6 @@ export class UserRegister implements Omit<User, '_id'>{
 
 export class UserEditAdmin implements Identifiable<IdType> {
     constructor(
-
         public _id: IdType,
         public email: string,
         public firstName: string,
@@ -71,7 +62,5 @@ export class UserEditAdmin implements Identifiable<IdType> {
         public lastTimeLogin?: string,
         public countOfLogs?: string,
         public imageFile?: string,
-
-
     ) { }
 }

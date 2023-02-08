@@ -1,12 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { Box, Button, Container, Grid, Typography } from '@mui/material';
-
 import { Link, useNavigate } from 'react-router-dom';
 import FormInputText from '../FormFields/FormInputText';
-import * as userService from '../../services/userService'
+import * as userService from '../../services/userService';
 import * as yup from "yup";
-
-import './Login.css'
 import { BaseSyntheticEvent, useContext, useState } from 'react';
 import { ApiClient } from '../../services/userService';
 import { IdType } from '../../shared/common-types';
@@ -19,7 +16,7 @@ const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType
 
 
 type FormData = {
-    email: string
+    email: string;
     password: string;
 
 };
@@ -37,8 +34,8 @@ export function Login() {
 
     const navigate = useNavigate();
 
-    const loginContext = useContext(LoginContext)
-    const [errorApi, setErrorApi] = useState()
+    const loginContext = useContext(LoginContext);
+    const [errorApi, setErrorApi] = useState();
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -53,14 +50,10 @@ export function Login() {
     const loginSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
         event?.preventDefault();
 
-
-        data.password = data.password.trim()
-
+        data.password = data.password.trim();
 
         API_CLIENT.login(data.email, data.password)
             .then((user) => {
-
-
 
                 sessionStorage.setItem('userId', user._id + '');
                 sessionStorage.setItem('email', user.email);
@@ -68,20 +61,20 @@ export function Login() {
                 if (user !== undefined) {
 
 
-                    loginContext?.setUserL({ ...user })
+                    loginContext?.setUserL({ ...user });
                 }
 
-                setErrorApi(undefined)
-                navigate('/')
+                setErrorApi(undefined);
+                navigate('/');
             }).catch((err) => {
                 if (err.message === 'Failed to fetch') {
                     err.message = 'No internet connection with server.Please try again later.'
                 }
-                setErrorApi(err.message)
+                setErrorApi(err.message);
 
-                console.log(err.message)
+                console.log(err.message);
 
-            })
+            });
 
 
     }
@@ -94,12 +87,6 @@ export function Login() {
 
 
     }
-
-
-
-
-
-
 
 
     return (

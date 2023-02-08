@@ -3,15 +3,15 @@ import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
 import { IdType } from "../../shared/common-types";
-import * as tripService from '../../services/tripService'
-import * as pointService from '../../services/pointService'
+import * as tripService from '../../services/tripService';
+import * as pointService from '../../services/pointService';
 import { Point } from "../../model/point";
 import { ApiPoint } from "../../services/pointService";
 import { useContext, useEffect, useState } from "react";
 import { GoogleMap, MarkerF, PolylineF, useJsApiLoader } from "@react-google-maps/api";
 import React from "react";
 import { containerStyle, options } from "../settings";
-import * as commentService from '../../services/commentService'
+import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
@@ -21,9 +21,6 @@ import { useTheme } from '@mui/material/styles';
 import { LoginContext } from "../../App";
 import jwt_decode from "jwt-decode";
 import TripDetailsPointCard from "../TripDetails/TripDetailsPoint";
-
-
-
 
 
 
@@ -44,7 +41,7 @@ let center = {
 }
 
 
-const googleKey = process.env.REACT_APP_GOOGLE_KEY
+const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
@@ -61,7 +58,7 @@ export default function AdminTripDetails() {
 
     const userId = sessionStorage.getItem('userId') + ''
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
     const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
@@ -69,45 +66,33 @@ export default function AdminTripDetails() {
 
     const theme = useTheme();
     const [activeStep, setActiveStep] = React.useState(0);
-    const [points, setPoints] = useState<Point[]>([])
-    const [comments, setComments] = useState<Comment[]>([])
-    const [liked, setLiked] = useState<boolean>(false)
-    const [hide, setHide] = useState<boolean>(false)
-    const [pointCard, setPointCard] = useState<Point | null>()
-    const [mapCenter, setMapCenter] = useState(center)
-    const [tripReports, setTripReports] = useState<Trip>()
+    const [points, setPoints] = useState<Point[]>([]);
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [liked, setLiked] = useState<boolean>(false);
+    const [hide, setHide] = useState<boolean>(false);
+    const [pointCard, setPointCard] = useState<Point | null>();
+    const [mapCenter, setMapCenter] = useState(center);
+    const [tripReports, setTripReports] = useState<Trip>();
 
 
 
     if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (points === undefined)) {
 
-
         center = {
             lat: Number(trip.lat),
             lng: Number(trip.lng)
-
         }
-
-
     }
-
-
-
 
 
     const { userL, setUserL } = useContext(LoginContext)
 
-
-
-
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
 
-    let role = 'user'
+    let role = 'user';
     if (accessToken) {
-        const decode: decode = jwt_decode(accessToken)
-        role = decode.role
-
-
+        const decode: decode = jwt_decode(accessToken);
+        role = decode.role;
     }
 
 
@@ -120,9 +105,7 @@ export default function AdminTripDetails() {
             if (data) {
                 if (typeof data === "object") {
 
-                    const arrPoints = data as any as Point[]
-
-
+                    const arrPoints = data as any as Point[];
 
                     if (arrPoints !== undefined && arrPoints.length > 0) {
                         center = {
@@ -130,15 +113,14 @@ export default function AdminTripDetails() {
                             lng: Number(arrPoints[0].lng)
                         }
 
-                        setMapCenter(center)
-
-                        setPoints(arrPoints)
+                        setMapCenter(center);
+                        setPoints(arrPoints);
                     }
 
                 }
             }
         }).catch((err) => {
-            console.log(err)
+            console.log(err);
         })
 
         API_COMMENT.findByTripId(trip._id).then(async (data) => {
@@ -146,21 +128,18 @@ export default function AdminTripDetails() {
 
                 if (typeof data === "object") {
 
-                    const arrComments = data as any as Comment[]
+                    const arrComments = data as any as Comment[];
 
-                    setComments(arrComments)
+                    setComments(arrComments);
                 }
             }
 
 
         }).catch((err) => {
-            console.log(err)
+            console.log(err);
         })
 
-
-
-
-    }, [])
+    }, []);
 
 
 
@@ -173,14 +152,14 @@ export default function AdminTripDetails() {
                 API_COMMENT.deleteByTripId(trip._id).then((data) => {
 
                 }).catch((err) => {
-                    console.log(err)
+                    console.log(err);
                 })
             }).catch((err) => {
-                console.log(err)
+                console.log(err);
             })
-            navigate('/trips')
+            navigate('/admin');
         }).catch((err) => {
-            console.log(err)
+            console.log(err);
         })
 
 
@@ -195,17 +174,17 @@ export default function AdminTripDetails() {
     })
 
 
-    const mapRef = React.useRef<google.maps.Map | null>(null)
+    const mapRef = React.useRef<google.maps.Map | null>(null);
 
     const pathPoints = (points?.length) && (points !== undefined) ? points?.map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : []
     const onLoad = (map: google.maps.Map): void => {
-        mapRef.current = map
+        mapRef.current = map;
 
 
     }
 
     const onUnmount = (): void => {
-        mapRef.current = null
+        mapRef.current = null;
     }
     if (!isLoaded) return <div>MAP LOADING ...</div>
 
@@ -219,7 +198,7 @@ export default function AdminTripDetails() {
 
             if (currentPoint !== undefined && currentPoint !== null) {
 
-                setPointCard(currentPoint[0])
+                setPointCard(currentPoint[0]);
 
                 setActiveStep((prevActiveStep) => Number(currentPoint[0].pointNumber));
 
@@ -228,51 +207,48 @@ export default function AdminTripDetails() {
                     lng: Number(currentPoint[0].lng)
                 }
 
-                setMapCenter(prev => center)
-                zoom = 10
+                setMapCenter(prev => center);
+                zoom = 10;
             }
 
         } else if (positionNumber) {
 
-            const currentPoint: Point[] = points.filter((x) => Number(x.pointNumber) === positionNumber)
+            const currentPoint: Point[] = points.filter((x) => Number(x.pointNumber) === positionNumber);
             if (currentPoint[0] !== undefined && currentPoint[0] !== null) {
 
-                setPointCard(prev => currentPoint[0])
+                setPointCard(prev => currentPoint[0]);
 
                 center = {
                     lat: Number(currentPoint[0].lat),
                     lng: Number(currentPoint[0].lng)
                 }
 
-                setMapCenter(prev => center)
-                zoom = 10
-
-
-
+                setMapCenter(prev => center);
+                zoom = 10;
             }
 
         } else if (positionNumber === 0) {
-            setPointCard(null)
+            setPointCard(null);
 
             center = {
                 lat: Number(points[0].lat),
                 lng: Number(points[0].lng)
             }
-            setMapCenter(prev => center)
-            zoom = 8
+            setMapCenter(prev => center);
+            zoom = 8;
         }
 
     }
 
     const onLoadComments = (newCommentArr: Comment[] | undefined) => {
 
-        setHide(true)
+        setHide(true);
 
     }
 
     const onHideComments = () => {
 
-        setHide(false)
+        setHide(false);
     }
 
     const onDeleteComment = async (comment: Comment) => {
@@ -282,40 +258,40 @@ export default function AdminTripDetails() {
             if (data !== undefined) {
 
 
-                const copyComments = [...comments]
+                const copyComments = [...comments];
                 const index = copyComments.findIndex(cmt => {
                     return cmt._id === comment._id;
                 });
 
-                copyComments.splice(index, 1)
+                copyComments.splice(index, 1);
 
-                setComments(copyComments)
+                setComments(copyComments);
 
             }
-        }).catch((err) => console.log(err))
+        }).catch((err) => console.log(err));
 
 
 
     }
     const onEditComment = async (comment: Comment) => {
-        navigate(`/comments/edit/${comment._id}`)
+        navigate(`/comments/edit/${comment._id}`);
 
 
     }
 
     const onLikeTrip = () => {
 
-        setLiked(true)
+        setLiked(true);
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
-            trip.likes.push(userId)
+            trip.likes.push(userId);
 
 
             API_TRIP.updateLikes(trip._id, trip).then((data) => {
 
 
             }).catch((err) => {
-                console.log(err)
-            })
+                console.log(err);
+            });
 
         }
 
@@ -324,13 +300,13 @@ export default function AdminTripDetails() {
     const deleteReportClickHandler = () => {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
-            const reports: [] = []
+            const reports: [] = [];
 
             API_TRIP.deleteReportTrip(trip._id, reports).then((data) => {
-                setTripReports(data)
+                setTripReports(data);
             }).catch((err) => {
-                console.log(err)
-            })
+                console.log(err);
+            });
 
         }
     }
@@ -345,8 +321,8 @@ export default function AdminTripDetails() {
 
 
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
-        let position = activeStep + 1
-        onMarkerClick('', position)
+        let position = activeStep + 1;
+        onMarkerClick('', position);
 
 
     };
@@ -354,14 +330,12 @@ export default function AdminTripDetails() {
     const handleBack = () => {
 
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
-        let position = activeStep - 1
-        onMarkerClick('', position)
-    };
+        let position = activeStep - 1;
+        onMarkerClick('', position);
+    }
 
     return (
         <>
-
-
 
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
@@ -471,8 +445,9 @@ export default function AdminTripDetails() {
                                 {trip.imageFile ? trip.imageFile.map((item, i) => (
                                     <ImageListItem key={i}>
                                         <img
-                                            src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
-                                            srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                            src={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
+                                            srcSet={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+
                                             alt={item}
                                             loading="lazy"
                                         />
@@ -546,7 +521,6 @@ export default function AdminTripDetails() {
                             <GoogleMap
                                 mapContainerStyle={containerStyle}
                                 options={options as google.maps.MapOptions}
-                                // center={(pathPoints?.length > 0) && (pathPoints !== undefined) ? pathPoints[0] : center}
                                 center={mapCenter !== undefined ? mapCenter : center}
                                 zoom={zoom}
                                 onLoad={onLoad}

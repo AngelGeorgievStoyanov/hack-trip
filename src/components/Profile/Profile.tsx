@@ -5,15 +5,12 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import React, { BaseSyntheticEvent, useEffect, useState } from "react";
-
-import * as userService from '../../services/userService'
+import * as userService from '../../services/userService';
 import { IdType, toIsoDate } from "../../shared/common-types";
 import { User } from "../../model/users";
 import { ApiClient } from "../../services/userService";
 import { MuiFileInput } from "mui-file-input";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
-
-
 
 
 
@@ -58,24 +55,24 @@ type FormData = {
 
 export default function Profile() {
 
-    const [user, setUser] = useState<User>()
-    const [hide, setHide] = useState<boolean>(false)
-    const [fileSelected, setFileSelected] = useState<File | undefined>()
-    const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>()
-    const navigate = useNavigate()
-    const userId = sessionStorage.getItem('userId')
-
+    const [user, setUser] = useState<User>();
+    const [hide, setHide] = useState<boolean>(false);
+    const [fileSelected, setFileSelected] = useState<File | undefined>();
+    const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
+    const navigate = useNavigate();
+    const userId = sessionStorage.getItem('userId');
+    ;
 
 
     useEffect(() => {
         if (userId) {
             API_CLIENT.findById(userId).then((data) => {
-                setUser(data)
+                setUser(data);
 
-            }).catch(err => console.log(err))
+            }).catch(err => console.log(err));
         }
 
-    }, [])
+    }, []);
 
 
 
@@ -101,10 +98,10 @@ export default function Profile() {
                 API_CLIENT.changePassword(userId, data.oldpassword).then((data) => {
 
                 }).catch((err) => {
-                    console.log(err.message)
+                    console.log(err.message);
 
-                    return
-                })
+                    return;
+                });
 
             }
         }
@@ -115,45 +112,43 @@ export default function Profile() {
 
         if (fileSelected) {
 
-            formData.append('file', fileSelected)
-
-
+            formData.append('file', fileSelected);
         }
 
 
         const imagesNames = await API_CLIENT.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[]
-            return imageName.map((x) => { return x.filename })
+            let imageName = data as unknown as any as any[];
+            return imageName.map((x) => {
+                return x.destination;
+            });
         }).catch((err) => {
-            console.log(err)
-        })
+            console.log(err);
+        });
 
 
         if (imagesNames) {
-
-
-            data.imageFile = imagesNames[0]
+            data.imageFile = imagesNames[0];
         }
 
 
-        data.timeEdited = toIsoDate(new Date())
-        data.firstName = data.firstName.trim()
-        data.lastName = data.lastName.trim()
-        data.oldpassword = data.oldpassword.trim()
-        data.password = data.password.trim()
-        data.confirmpass = data.confirmpass.trim()
-        
-        const editedUser = { ...data } as any
+        data.timeEdited = toIsoDate(new Date());
+        data.firstName = data.firstName.trim();
+        data.lastName = data.lastName.trim();
+        data.oldpassword = data.oldpassword.trim();
+        data.password = data.password.trim();
+        data.confirmpass = data.confirmpass.trim();
+
+        const editedUser = { ...data } as any;
 
         if (userId) {
 
 
             API_CLIENT.updateUser(userId, editedUser).then((data) => {
-                setUser(prev => data)
-                setFileSelected(undefined)
-                reset({ oldpassword: '', password: '', confirmpass: '' })
-                setHide(false)
-            }).catch((err) => console.log(err))
+                setUser(prev => data);
+                setFileSelected(undefined);
+                reset({ oldpassword: '', password: '', confirmpass: '' });
+                setHide(false);
+            }).catch((err) => console.log(err));
 
         }
 
@@ -168,10 +163,10 @@ export default function Profile() {
 
 
     const changePass = () => {
-        setHide(!hide)
+        setHide(!hide);
         if (hide === true) {
 
-            reset({ oldpassword: '', password: '', confirmpass: '' })
+            reset({ oldpassword: '', password: '', confirmpass: '' });
         }
     }
 
@@ -182,11 +177,10 @@ export default function Profile() {
             if (!file.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
                 setErrorMessageImage('Please select valid file image');
 
-
                 return;
             }
             if (file.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
-                setErrorMessageImage(undefined)
+                setErrorMessageImage(undefined);
             }
         }
         setFileSelected(prev => file);
@@ -195,23 +189,22 @@ export default function Profile() {
 
     const deleteFile = (e: React.MouseEvent) => {
 
-
         let svg = e.target as HTMLElement
 
         if (svg.tagName === 'svg') {
 
-            setFileSelected(undefined)
+            setFileSelected(undefined);
         }
     }
 
     const deleteImage = (e: React.MouseEvent) => {
 
-        const img = e.currentTarget.id
+        const img = e.currentTarget.id;
         if (userId) {
 
             API_CLIENT.deleteProfileImage(userId, img).then((data) => {
-                setUser(data)
-            }).catch((err) => console.log(err))
+                setUser(data);
+            }).catch((err) => console.log(err));
         }
     }
 
@@ -224,9 +217,9 @@ export default function Profile() {
                         <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={user.imageFile} />
                         <CardMedia
                             component="img"
-                            image={`http://localhost:8001/uploads/${user.imageFile}`}
+                            image={`https://storage.cloud.google.com/hack-trip/${user.imageFile}`}
                             sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
-                            alt="TRIP"
+                            alt="USER"
 
                         />
                     </>

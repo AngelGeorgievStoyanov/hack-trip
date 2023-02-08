@@ -33,9 +33,7 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
 
     async findAll(search: string, typeOfGroup: string, typeOfTransportSelect: string): Promise<K> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/?search=${search}&typegroup=${typeOfGroup}&typetransport=${typeOfTransportSelect}`);
-
-
-        return response.json()
+        return response.json();
     }
 
 
@@ -44,28 +42,27 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/paginate/?page=${page}&search=${search}&typegroup=${typeOfGroup}&typetransport=${typeOfTransportSelect}`);
 
 
-        return await response.json()
+        return await response.json();
     }
+
 
     async findAllMyTrips(id: K): Promise<V[]> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/my-trips/${id}`);
-
-
-        return response.json()
+        return response.json();
     }
+
 
     async findAllMyFavorites(id: K): Promise<V[]> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/favorites/${id}`);
-
-
-        return response.json()
+        return response.json();
     }
+
+
     async findTopTrips(): Promise<V[]> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/top`);
-
-
-        return response.json()
+        return response.json();
     }
+
 
     async create(entityWithoutId: TripCreate): Promise<any> {
 
@@ -79,11 +76,11 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
 
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return response.json()
+        return response.json();
     }
 
     async findById(id: K): Promise<V> {
@@ -91,16 +88,14 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`);
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return await response.json()
+        return await response.json();
     }
 
     async deleteById(id: K): Promise<void> {
-
-
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'DELETE',
@@ -108,12 +103,10 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         });
 
         if (response.status >= 400) {
-            const result = await response.json()
-
-            throw new Error(result.message)
+            const result = await response.json();
+            throw new Error(result.message);
         }
-        return await response.json()
-
+        return await response.json();
     }
 
 
@@ -128,12 +121,14 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         });
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return await response.json()
+        return await response.json();
     }
+
+
 
     async updateLikes(id: K, entity: Trip): Promise<V> {
 
@@ -145,11 +140,12 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
             body: JSON.stringify(entity)
         });
 
-        const result = await response.json()
-
-
-        return result
+        const result = await response.json();
+        return result;
     }
+
+
+
     async reportTrip(id: K, entity: Trip): Promise<V> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/report/${id}`, {
@@ -160,10 +156,10 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
             body: JSON.stringify(entity)
         });
 
-        const result = await response.json()
+        const result = await response.json();
 
 
-        return result
+        return result;
     }
     async deleteReportTrip(id: K, entity: []): Promise<V> {
 
@@ -175,10 +171,9 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
             body: JSON.stringify(entity)
         });
 
-        const result = await response.json()
+        const result = await response.json();
 
-
-        return result
+        return result;
     }
 
     async sendFile(formdata: FormData): Promise<string[]> {
@@ -189,17 +184,13 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
             headers: {}
         });
 
-        const result = await response.json()
-
-        return result
+        const result = await response.json();
+        return result;
     }
 
 
 
-
-
     async editImages(id: K, oneImage: string[]) {
-
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/edit-images/${id}`, {
             method: 'PUT',
@@ -209,22 +200,15 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
             body: JSON.stringify(oneImage)
         });
 
-        const result = await response.json()
-
-
-        return result
+        const result = await response.json();
+        return result;
     }
-
-
 
 
     async getAllReportTrips(): Promise<V[]> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/reports`);
-
-
-        return response.json()
+        return response.json();
     }
-
 
 
     async updateFavorites(id: K, entity: Trip): Promise<V> {
@@ -237,10 +221,8 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
             body: JSON.stringify(entity)
         });
 
-        const result = await response.json()
-
-
-        return result
+        const result = await response.json();
+        return result;
     }
 
 }

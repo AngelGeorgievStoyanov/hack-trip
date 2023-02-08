@@ -1,5 +1,4 @@
 
-
 export const containerStyle = {
     width: '600px',
     height: '250px',
@@ -10,11 +9,8 @@ export const containerStyle = {
 
 
 export const options = {
-
-
     zoomControl: true,
 }
-
 
 
 export const optionsPoint = {

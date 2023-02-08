@@ -1,10 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
 import { LoginContext } from "../../App";
-import { useContext } from 'react'
-import './Header.css'
+import { useContext } from 'react';
 import { User } from "../../model/users";
 import { IdType } from "../../shared/common-types";
-import * as userService from '../../services/userService'
+import * as userService from '../../services/userService';
 import { ApiClient } from "../../services/userService";
 import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
 import jwt_decode from "jwt-decode";
@@ -27,51 +26,45 @@ type decode = {
 
 export default function Header() {
 
-    const email = sessionStorage.getItem('email')
-    const { userL, setUserL } = useContext(LoginContext)
+    const email = sessionStorage.getItem('email');
+    const { userL, setUserL } = useContext(LoginContext);
 
-
-
-
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
 
     let role = 'user'
     if (accessToken) {
-        const decode: decode = jwt_decode(accessToken)
-        role = decode.role
+        const decode: decode = jwt_decode(accessToken);
+        role = decode.role;
 
     }
 
 
     const navigate = useNavigate();
 
-    const loginContext = useContext(LoginContext)
+    const loginContext = useContext(LoginContext);
 
     const logout = () => {
-        const accessToken = sessionStorage.getItem('accessToken')
+        const accessToken = sessionStorage.getItem('accessToken');
 
         if (accessToken) {
 
             API_CLIENT.logout(accessToken)
                 .then((data) => {
 
-                    sessionStorage.clear()
+                    sessionStorage.clear();
 
 
-                    loginContext?.setUserL(null)
+                    loginContext?.setUserL(null);
 
-                    navigate('/')
+                    navigate('/');
                 }).catch((err) => {
-                    console.log(err)
-                })
+                    console.log(err);
+                });
 
         }
     }
 
     return (
-
-
-
 
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
@@ -105,8 +98,6 @@ export default function Header() {
                             <Button component={Link} to={'/register'} color="inherit">REGISTER</Button>
 
                         </>
-
-
 
                     }
                 </Toolbar>

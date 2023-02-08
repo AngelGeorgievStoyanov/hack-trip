@@ -1,6 +1,5 @@
 import { Point } from "../../../model/point";
 import PointCard from "./PointCard/PointCard";
-import './PointList.css'
 
 
 interface PointListProps {
@@ -10,7 +9,7 @@ interface PointListProps {
 
 export default function PointList({ points }: PointListProps) {
 
-    let sortList = points.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
+    let sortList = points.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber));
     return (
         <>
             {sortList.length > 0 ?
@@ -19,8 +18,6 @@ export default function PointList({ points }: PointListProps) {
                 )
                 : <h1>ADD YOUR FIRST POINT</h1>}
         </>
-
-
     )
 }
 

@@ -1,5 +1,5 @@
 export function toIsoDate(date: Date) {
-    return date.toJSON()
+    return date.toJSON();
 }
 
 

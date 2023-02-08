@@ -11,7 +11,7 @@
 * YUP
 * Google Maps
 * HTML & CSS
-* MongoDB + Mongoose 
+
 
 ### Functionality
 * Guest users can see Home page with TOP 5 TRIPS (HOME PAGE) most liked trips and page with ALL TRIPS, they wont't be able to see any comments.  
@@ -28,10 +28,6 @@
 * To run client app cd client and npm start
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.2.6.
 
-# REST API MONGODB - https://github.com/AngelGeorgievStoyanov/REST-API-MONGODB
-* To run server npm start
-* To run client app cd client and npm start
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.2.6.
 
 # Getting Started with Create React App
 

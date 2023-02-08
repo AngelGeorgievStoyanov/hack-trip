@@ -1,11 +1,9 @@
 import { Button, Card, CardMedia, Typography } from "@mui/material";
-import { User, UserRole } from "../../../model/users";
+import { User } from "../../../model/users";
 import { Link } from 'react-router-dom';
 import { useContext } from "react";
 import { LoginContext } from "../../../App";
 import jwt_decode from "jwt-decode";
-
-
 
 
 type decode = {
@@ -30,33 +28,26 @@ export default function UserCard({ user }: UserCardProps) {
         const timeH = timeCreated.split('T')[1];
         timeData = timeData.split('-').reverse().join('-');
         const currentDataCreated = timeH + ' / ' + timeData;
-        return currentDataCreated
+        return currentDataCreated;
     }
 
 
-    const { userL, setUserL } = useContext(LoginContext)
+    const { userL, setUserL } = useContext(LoginContext);
 
 
-    const userRole = user.role as any as string
+    const userRole = user.role as any as string;
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
 
-
-    let role = 'user'
+    let role = 'user';
     if (accessToken) {
-        const decode: decode = jwt_decode(accessToken)
-        role = decode.role
-
-       
+        const decode: decode = jwt_decode(accessToken);
+        role = decode.role;
     }
-
-
 
     return (
         <>
-
             {(role === 'admin') ?
-
                 <Card sx={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -75,19 +66,14 @@ export default function UserCard({ user }: UserCardProps) {
                     <Typography gutterBottom variant="h5" component="div">
                         Last Name: {user.lastName}
                     </Typography>
-
                     {user.imageFile ?
-
-
                         <CardMedia
                             component="img"
                             height="200"
-                            image={`http://localhost:8001/uploads/${user.imageFile}`}
-                            alt="TRIP"
-
+                            image={`https://storage.cloud.google.com/hack-trip/${user.imageFile}`}
+                            alt="USER"
                         />
                         : ''}
-
                     <Typography gutterBottom variant="h5" component="div">
                         Email: {user.email}
                     </Typography> <Typography gutterBottom variant="subtitle1" component="div">
@@ -99,21 +85,13 @@ export default function UserCard({ user }: UserCardProps) {
                     </Typography> <Typography gutterBottom variant="subtitle1" component="div">
                         Last Login: {dateFormat(user.lastTimeLogin!)}
                     </Typography>
-
-
                     {((user._id !== null) && (role === 'admin')) ?
                         <>
                             <Button component={Link} to={`/admin/edit/${user._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>EDIT USER</Button>
                         </>
-
                         : ''}
-
-
-
-
                 </Card>
                 : ((role === 'manager') && (userRole !== 'admin')) ?
-
                     <Card sx={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -132,19 +110,14 @@ export default function UserCard({ user }: UserCardProps) {
                         <Typography gutterBottom variant="h5" component="div">
                             Last Name: {user.lastName}
                         </Typography>
-
                         {user.imageFile ?
-
-
                             <CardMedia
                                 component="img"
                                 height="200"
-                                image={`http://localhost:8001/uploads/${user.imageFile}`}
-                                alt="TRIP"
-
+                                image={`https://storage.cloud.google.com/hack-trip/${user.imageFile}`}
+                                alt="USER"
                             />
                             : ''}
-
                         <Typography gutterBottom variant="h5" component="div">
                             Email: {user.email}
                         </Typography> <Typography gutterBottom variant="subtitle1" component="div">
@@ -156,8 +129,6 @@ export default function UserCard({ user }: UserCardProps) {
                         </Typography> <Typography gutterBottom variant="subtitle1" component="div">
                             Last Login: {dateFormat(user.lastTimeLogin!)}
                         </Typography>
-
-
                         {((user._id !== null) && (role === 'manager')) ?
                             <>
                                 <Button component={Link} to={`/admin/edit/${user._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>EDIT USER</Button>
@@ -165,11 +136,7 @@ export default function UserCard({ user }: UserCardProps) {
 
                             : ''}
 
-
-
-
                     </Card>
-
                     : ''}
         </>
     )

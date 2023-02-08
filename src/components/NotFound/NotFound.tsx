@@ -1,33 +1,22 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import './NotFound.css'
+import './NotFound.css';
 
 
 export default function NotFound() {
 
 
-
-
-
-
-
-    let internalSec: ReturnType<typeof setInterval>
-    let internal: ReturnType<typeof setTimeout>
+    let internalSec: ReturnType<typeof setInterval>;
+    let internal: ReturnType<typeof setTimeout>;
     const initalState = 10;
     const [count, setCount] = useState(initalState);
     const counterRef = useRef(initalState);
+    const navigate = useNavigate();
 
     useEffect(() => {
         counterRef.current = count;
-    })
-
-
-
-
-    const navigate = useNavigate()
-
-
+    });
 
 
     useEffect(() => {
@@ -58,10 +47,7 @@ export default function NotFound() {
 
     return (
         <Box component='div' className="not-found" >
-
-
-
-            <Box component='div'   className="div-not-found">
+            <Box component='div' className="div-not-found">
                 <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h3">
                     PAGE NOT FOUND 404
                 </Typography>
@@ -72,14 +58,11 @@ export default function NotFound() {
             <Box component='div' className="div-time-out">
                 <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h3">
 
-
                     {count}  SECONDS OR CLICK
-                    <Button onClick={goHome}  sx={{ color:'white',background:'black', ':hover': { background: 'white', color:'black' }, padding: '10px 30px', margin: '25px' }}  >HOME</Button>
-
+                    <Button onClick={goHome} sx={{ color: 'white', background: 'black', ':hover': { background: 'white', color: 'black' }, padding: '10px 30px', margin: '25px' }}  >HOME</Button>
 
                 </Typography>
-              
             </Box>
-    </Box >
+        </Box >
     )
 }

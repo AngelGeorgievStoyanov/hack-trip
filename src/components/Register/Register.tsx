@@ -6,12 +6,9 @@ import { ApiClient } from '../../services/userService';
 import { IdType, Optional, toIsoDate } from '../../shared/common-types';
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
-
-import './Register.css'
 import { useForm } from 'react-hook-form';
 import { Box, Button, Container, Grid, Typography } from '@mui/material';
 import FormInputText from '../FormFields/FormInputText';
-
 
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users/register');
@@ -22,7 +19,7 @@ interface UserProps {
 
 }
 type FormData = {
-    email: string
+    email: string;
     firstName: string;
     lastName: string;
     username: string;
@@ -33,7 +30,7 @@ type FormData = {
     lastTimeLogin: string | undefined;
     countOfLogs: string | undefined;
     status: UserStatus.ACTIVE;
-    role: UserRole.user
+    role: UserRole.user;
 };
 
 
@@ -51,7 +48,7 @@ const schema = yup.object({
 export function Register({ user }: UserProps) {
     const navigate = useNavigate();
 
-    const [errorApi, setErrorApi] = useState()
+    const [errorApi, setErrorApi] = useState();
 
 
 
@@ -67,17 +64,16 @@ export function Register({ user }: UserProps) {
     const registerSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
         event?.preventDefault();
 
-        data.timeCreated = toIsoDate(new Date())
-        data.timeEdited = toIsoDate(new Date())
-        data.lastTimeLogin = toIsoDate(new Date())
-        data.countOfLogs = '1'
+        data.timeCreated = toIsoDate(new Date());
+        data.timeEdited = toIsoDate(new Date());
+        data.lastTimeLogin = toIsoDate(new Date());
+        data.countOfLogs = '1';
+        data.email = data.email.trim();
+        data.firstName = data.firstName.trim();
+        data.lastName = data.lastName.trim();
 
-        data.email = data.email.trim()
-        data.firstName = data.firstName.trim()
-        data.lastName = data.lastName.trim()
 
-
-        const newUser = { ...data }
+        const newUser = { ...data };
 
 
         API_CLIENT.register({ ...newUser })
@@ -86,17 +82,16 @@ export function Register({ user }: UserProps) {
                 sessionStorage.setItem('userId', user._id + '');
                 sessionStorage.setItem('email', user.email);
                 sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
-                setErrorApi(undefined)
-                navigate('/')
+                setErrorApi(undefined);
+                navigate('/');
             }).catch((err) => {
                 if (err.message === 'Failed to fetch') {
-                    err.message = 'No internet connection with server.Please try again later.'
+                    err.message = 'No internet connection with server.Please try again later.';
                 }
-                setErrorApi(err.message)
+                setErrorApi(err.message);
+                console.log(err.message);
 
-                console.log(err.message)
-
-            })
+            });
 
 
 
@@ -107,21 +102,16 @@ export function Register({ user }: UserProps) {
     if (errorApi) {
 
         setTimeout(() => {
-            setErrorApi(undefined)
+            setErrorApi(undefined);
         }, 5000)
 
 
     }
 
 
-
-
-
     return (
         <>
-
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-
 
                 <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', minWidth: '100vH', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     {errorApi ?

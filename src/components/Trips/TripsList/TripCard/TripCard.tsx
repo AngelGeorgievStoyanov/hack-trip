@@ -1,14 +1,10 @@
 
-
 import { Button, Card, CardContent, CardMedia, ImageList, ImageListItem, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Trip } from '../../../../model/trip';
-import './TripCard.css'
 import jwt_decode from "jwt-decode";
 import { LoginContext } from '../../../../App';
-import { useContext } from 'react'
-
-
+import { useContext } from 'react';
 
 
 
@@ -28,45 +24,27 @@ interface TripCardProps {
 
 
 
-
-
-
-
-
 export default function TripCard({ trip }: TripCardProps) {
 
 
+    const userId = sessionStorage.getItem('userId');
 
 
-    const userId = sessionStorage.getItem('userId')
+    const { userL, setUserL } = useContext(LoginContext);
 
 
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
 
-
-
-
-
-
-    const { userL, setUserL } = useContext(LoginContext)
-
-
-
-
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
-
-    let role = 'user'
+    let role = 'user';
     if (accessToken) {
-        const decode: decode = jwt_decode(accessToken)
-        role = decode.role
-
-
+        const decode: decode = jwt_decode(accessToken);
+        role = decode.role;
     }
 
 
 
     return (
         <>
-
             {(((trip.reportTrip !== undefined) && (trip.reportTrip !== null) && (trip.reportTrip.length >= 5)) && (role === 'user')) ? '' :
                 <Card sx={{
                     display: 'flex',
@@ -83,17 +61,13 @@ export default function TripCard({ trip }: TripCardProps) {
                     <Typography gutterBottom variant="h6" component="div">
                         Destination of the trip :{trip.destination}
                     </Typography>
-
-
                     {trip.imageFile?.length && trip.imageFile.length > 0 ?
-
-
                         <ImageList sx={{ width: 320, height: 350 }} cols={3} rowHeight={164}>
                             {trip.imageFile ? trip.imageFile.map((item, i) => (
                                 <ImageListItem key={i}>
                                     <img
-                                        src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
-                                        srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                        src={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
+                                        srcSet={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
                                         alt={item}
                                         loading="lazy"
                                     />
@@ -101,24 +75,16 @@ export default function TripCard({ trip }: TripCardProps) {
                             )) : ''}
                         </ImageList>
                         : trip.imageUrl ?
-
                             <CardMedia
                                 component="img"
                                 height="200"
                                 image={trip.imageUrl}
                                 alt="TRIP"
-
                             /> :
                             <Typography gutterBottom component="h6">
                                 There is no image for this trip
                             </Typography>
-
-
-
                     }
-
-
-
                     <CardContent sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center' }}>
                         {
                             (((role === 'admin') || (role === 'manager')) && ((trip.reportTrip !== undefined) && (trip.reportTrip?.length > 0))) ?
@@ -139,7 +105,6 @@ export default function TripCard({ trip }: TripCardProps) {
                 </Card>
             }
         </>
-
 
     )
 }

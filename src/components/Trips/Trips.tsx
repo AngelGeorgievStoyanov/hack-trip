@@ -1,60 +1,55 @@
 import { Trip, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import TripList from "./TripsList/TripsList";
-import { alpha, AppBar, Box, FormControl, Grid, InputLabel, 
-    MenuItem, Pagination, Select, SelectChangeEvent, styled,  Toolbar } from "@mui/material";
+import {
+    alpha, AppBar, Box, FormControl, Grid, InputLabel,
+    MenuItem, Pagination, Select, SelectChangeEvent, styled, Toolbar
+} from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import * as tripService from '../../services/tripService'
+import * as tripService from '../../services/tripService';
 import { IdType } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
 import SearchIcon from '@mui/icons-material/Search';
 import InputBase from '@mui/material/InputBase';
 
-
-
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
-
 
 
 export default function Trips() {
 
     const [page, setPage] = useState(1);
-    const [trips, setTrips] = useState<Trip[]>()
-    const [allPageNumber, setAllPageNumber] = useState<number | IdType>()
-    const [searchInput, setSearchInput] = useState<string>('')
-    const [typeOfPeopleSelect, setTypeOfPeopleSelect] = useState<string>('')
-    const [typeOfTransportSelect, setTypeOfTransportSelect] = useState<string>('')
+    const [trips, setTrips] = useState<Trip[]>();
+    const [allPageNumber, setAllPageNumber] = useState<number | IdType>();
+    const [searchInput, setSearchInput] = useState<string>('');
+    const [typeOfPeopleSelect, setTypeOfPeopleSelect] = useState<string>('');
+    const [typeOfTransportSelect, setTypeOfTransportSelect] = useState<string>('');
 
 
 
-    const searchRef = useRef<HTMLInputElement | null>(null)
+    const searchRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
 
         API_TRIP.findAllPagination(page, searchInput, typeOfPeopleSelect, typeOfTransportSelect).then((data) => {
-            setTrips(data)
+            setTrips(data);
 
             API_TRIP.findAll(searchInput, typeOfPeopleSelect, typeOfTransportSelect).then((data) => {
-                setAllPageNumber(data)
+                setAllPageNumber(data);
             })
-        }).catch(err => console.log(err))
+        }).catch(err => console.log(err));
 
-    }, [page, searchInput, typeOfPeopleSelect, typeOfTransportSelect])
-
+    }, [page, searchInput, typeOfPeopleSelect, typeOfTransportSelect]);
 
 
 
     const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
 
-
-        setPage(prev => value)
-
+        setPage(prev => value);
 
         API_TRIP.findAllPagination(page, searchInput, typeOfPeopleSelect, typeOfTransportSelect).then((data) => {
 
-            setTrips(prev => data)
+            setTrips(prev => data);
 
-
-        }).catch(err => console.log(err))
+        }).catch(err => console.log(err));
 
     }
 
@@ -90,7 +85,6 @@ export default function Trips() {
         color: 'inherit',
         '& .MuiInputBase-input': {
             padding: theme.spacing(1, 1, 1, 0),
-            // vertical padding + font size from searchIcon
             paddingLeft: `calc(1em + ${theme.spacing(4)})`,
             transition: theme.transitions.create('width'),
             width: '100%',
@@ -101,42 +95,34 @@ export default function Trips() {
     }));
 
 
-
-
-
     const changeHandlerSearch = (event: React.MouseEvent) => {
-        const inputSrch = searchRef.current?.children[0] as HTMLInputElement
-
+        const inputSrch = searchRef.current?.children[0] as HTMLInputElement;
 
         if (inputSrch.value !== undefined) {
-            setSearchInput(prev => inputSrch.value)
+            setSearchInput(prev => inputSrch.value);
         }
     }
 
 
     const handleChangeTypeOfPeople = (event: SelectChangeEvent<string>) => {
-        const selectPeople = event.target as HTMLSelectElement
+        const selectPeople = event.target as HTMLSelectElement;
         setTypeOfPeopleSelect(prev => selectPeople.value);
+    }
 
-
-    };
     const handleChangeTypeOfTransport = (event: SelectChangeEvent<string>) => {
-        const selectTransport = event.target as HTMLSelectElement
+        const selectTransport = event.target as HTMLSelectElement;
         setTypeOfTransportSelect(prev => selectTransport.value);
+    }
 
 
-    };
     return (
         <>
-
-
             <AppBar position="sticky" sx={{ marginTop: '-25px' }}>
                 <Toolbar sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', '@media(max-width: 600px)': {
                         display: 'flex', flexDirection: 'column'
                     }
                 }}>
-
                     <Box sx={{ minWidth: 220 }}>
                         <FormControl fullWidth>
                             <InputLabel >TYPE OF GROUP</InputLabel>
@@ -173,11 +159,9 @@ export default function Trips() {
                             </Select>
                         </FormControl>
                     </Box>
-                  
 
-
-                    <Search   >
-                        <SearchIconWrapper   >
+                    <Search>
+                        <SearchIconWrapper>
                             <SearchIcon />
                         </SearchIconWrapper>
                         <StyledInputBase
@@ -185,20 +169,13 @@ export default function Trips() {
                             inputProps={{ 'aria-label': 'search' }} ref={searchRef}
                             onClick={changeHandlerSearch}
                         />
-
                     </Search>
                 </Toolbar>
             </AppBar>
-
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-
-
                 {trips !== undefined ?
-
                     <TripList trips={trips} />
                     : ''}
-
-
             </Grid>
             <Box component='div' sx={{ display: 'flex', bgcolor: '#cfe8fc', justifyContent: 'center' }}>
                 {allPageNumber !== undefined ?

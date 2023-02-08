@@ -3,7 +3,6 @@ import React, { BaseSyntheticEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiTrip } from "../../services/tripService";
 import { containerStyle, options } from "../settings";
-
 import * as tripService from '../../services/tripService'
 import { TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
@@ -11,13 +10,10 @@ import { Box, Button, Container, Grid, TextField, Typography } from "@mui/materi
 import { useForm } from "react-hook-form";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
-
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormTextArea from "../FormFields/FormTextArea";
 import FileUpload from "react-mui-fileuploader";
-
-import './TripCreate.css';
 
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
@@ -26,8 +22,6 @@ const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
-
-
 
 
 
@@ -82,18 +76,12 @@ let zoom = 8;
 
 export function CreateTrip() {
 
-    const [errorMessageSearch, setErrorMessageSearch] = useState('')
+    const [errorMessageSearch, setErrorMessageSearch] = useState('');
+    const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral);
+    const [fileSelected, setFileSelected] = React.useState<File[]>([]);
 
-    const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral)
+    const _ownerId = sessionStorage.getItem('userId');
 
-    const [fileSelected, setFileSelected] = React.useState<File[]>([])
-    const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>()
-
-
-
-
-
-    const _ownerId = sessionStorage.getItem('userId')
     const { control, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({
 
 
@@ -106,16 +94,14 @@ export function CreateTrip() {
     });
 
 
-    const navigate = useNavigate()
-    const searchRef = React.useRef<HTMLInputElement | null>(null)
-
+    const navigate = useNavigate();
+    const searchRef = React.useRef<HTMLInputElement | null>(null);
 
 
 
     const handleFilesChange = (files: any) => {
 
         if (!files) return;
-
 
         setFileSelected([...files]);
 
@@ -131,11 +117,11 @@ export function CreateTrip() {
     const mapRef = React.useRef<google.maps.Map | null>(null)
 
     const onLoad = (map: google.maps.Map): void => {
-        mapRef.current = map
+        mapRef.current = map;
     }
 
     const onUnmount = (): void => {
-        mapRef.current = null
+        mapRef.current = null;
     }
 
     const onMapClick = (e: google.maps.MapMouseEvent) => {
@@ -143,33 +129,27 @@ export function CreateTrip() {
 
         if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
 
-            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
         }
-
-
     }
 
 
 
     const searchInp = async () => {
 
-
-
         if (!searchRef.current?.value) {
 
-            setErrorMessageSearch('Plece enter location')
-            return
+            setErrorMessageSearch('Plece enter location');
+            return;
         }
-        setErrorMessageSearch('')
+        setErrorMessageSearch('');
 
-        const geocode = new google.maps.Geocoder()
+        const geocode = new google.maps.Geocoder();
         try {
 
             const result = await geocode.geocode({
                 address: searchRef.current!.value
-            })
-
-
+            });
 
             if (result) {
                 zoom = 16
@@ -178,26 +158,24 @@ export function CreateTrip() {
 
             }
         } catch (error: any) {
-
-            setErrorMessageSearch('Plece enter exact name location or choose from suggestions')
-
-            console.log(error.message)
+            setErrorMessageSearch('Plece enter exact name location or choose from suggestions');
+            console.log(error.message);
         }
 
 
         if (searchRef.current?.value !== '' && searchRef.current?.value !== null) {
-            searchRef.current!.value = ''
+            searchRef.current!.value = '';
         }
     }
 
 
     const removeMarker = () => {
-        setClickedPos(undefined)
+        setClickedPos(undefined);
         center = {
             lat: 42.697866831005435,
             lng: 23.321590139866355
         }
-        zoom = 8
+        zoom = 8;
     }
 
 
@@ -210,43 +188,40 @@ export function CreateTrip() {
 
 
     const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined, addPoints?: boolean) => {
-        event?.preventDefault()
+        event?.preventDefault();
 
         let formData = new FormData();
 
 
         if (fileSelected) {
             fileSelected.forEach((file) => {
-                formData.append('file', file)
+                formData.append('file', file);
             }
-            )
+            );
         }
 
 
         const imagesNames = await API_TRIP.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[]
-            return imageName.map((x) => { return x.filename })
+            let imageName = data as unknown as any as any[];
+            return imageName.map((x) => {
+                return x.destination;
+            })
         }).catch((err) => {
-            console.log(err)
-        })
+            console.log(err);
+        });
 
         if (imagesNames) {
-
-
-            data.imageFile = imagesNames
+            data.imageFile = imagesNames;
         }
 
-
-
-
         if (clickedPos) {
-            data.lat = clickedPos.lat
-            data.lng = clickedPos.lng
+            data.lat = clickedPos.lat;
+            data.lng = clickedPos.lng;
         }
 
 
         if (_ownerId) {
-            data._ownerId = _ownerId
+            data._ownerId = _ownerId;
         }
 
         data.title = data.title.trim();
@@ -262,47 +237,39 @@ export function CreateTrip() {
         API_TRIP.create(newTrip).then((trip) => {
 
             if (addPoints === true) {
-                navigate(`/trip/points/${trip._id}`)
+                navigate(`/trip/points/${trip._id}`);
 
             } else {
 
-                navigate(`/trip/details/${trip._id}`)
+                navigate(`/trip/details/${trip._id}`);
             }
 
 
 
         }).catch((err) => {
-            console.log(err)
+            console.log(err);
         })
-
-
-
-
-
     }
 
 
     const addPoints = (e: React.MouseEvent) => {
-        e.preventDefault()
+        e.preventDefault();
 
 
-        const target = e.currentTarget.parentElement?.parentElement as HTMLFormElement
-        const data = Object.fromEntries(new FormData(target)) as any as FormData
+        const target = e.currentTarget.parentElement?.parentElement as HTMLFormElement;
+        const data = Object.fromEntries(new FormData(target)) as any as FormData;
 
         e as any as BaseSyntheticEvent<HTMLFormElement>
 
-
-
-        createTripSubmitHandler(data, e, true)
+        createTripSubmitHandler(data, e, true);
 
     }
 
     const dragMarker = (e: google.maps.MapMouseEvent) => {
 
-
         if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
 
-            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
         }
     }
 
@@ -332,16 +299,10 @@ export function CreateTrip() {
 
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px' }}>
 
-
-
                         <Autocomplete>
                             <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
 
                         </Autocomplete>
-
-
-
-
 
                         <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
 
@@ -349,7 +310,6 @@ export function CreateTrip() {
 
 
                     </Box>
-
 
                     <Box component='form'
                         sx={{
@@ -389,8 +349,6 @@ export function CreateTrip() {
                             options={TRIP_SELECT_OPTIONS_TRANSPORT} defaultOptionIndex={1} />
 
 
-
-
                         <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}
                         />
 
@@ -402,7 +360,6 @@ export function CreateTrip() {
                         <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
                         />
 
-
                         <FileUpload
                             title="Upload images"
                             multiFile={true}
@@ -410,12 +367,14 @@ export function CreateTrip() {
                             onContextReady={(context) => { }}
                             showPlaceholderImage={false}
                             maxFilesContainerHeight={157}
+                            buttonLabel='Click here for upload images'
+                            rightLabel={''}
                             maxUploadFiles={9}
+                            header={'Drag to drop'}
                             allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
-                            
+
                         />
 
-                        {errorMessageImage ? <p>{errorMessageImage}</p> : ''}
 
                         <FormInputText name='imageUrl' label='IMAGE URL' control={control} type='text' error={errors.imageUrl?.message}
                         />
@@ -428,10 +387,6 @@ export function CreateTrip() {
                             <Button variant="contained" disabled={!isValid} onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}>ADD POINT`S FOR THE TRIP</Button>
 
                         </span>
-
-
-
-
 
 
                     </Box>

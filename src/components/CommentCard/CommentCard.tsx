@@ -1,11 +1,11 @@
 import { Avatar, Button, Card, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Comment } from "../../model/comment"
+import { Comment } from "../../model/comment";
 import { User } from "../../model/users";
-import * as userService from '../../services/userService'
+import * as userService from '../../services/userService';
 import { ApiClient } from "../../services/userService";
 import { IdType } from "../../shared/common-types";
-import { stringAvatar } from '../../shared/common-types'
+import { stringAvatar } from '../../shared/common-types';
 
 export interface CommentListener {
     (comment: Comment): void;
@@ -13,8 +13,8 @@ export interface CommentListener {
 
 interface CommentCardProps {
     comment: Comment;
-    onDeleteCom: CommentListener
-    onEditCom: CommentListener
+    onDeleteCom: CommentListener;
+    onEditCom: CommentListener;
 }
 
 
@@ -23,42 +23,37 @@ const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType
 
 export default function CommentCard({ comment, onDeleteCom, onEditCom }: CommentCardProps) {
 
+    const userId = sessionStorage.getItem('userId');
+
+    const [user, setUser] = useState<User>();
 
 
-
-    const userId = sessionStorage.getItem('userId')
-
-    const [user, setUser] = useState<User>()
-
-
-    const name = user?.firstName + ' ' + user?.lastName
+    const name = user?.firstName + ' ' + user?.lastName;
 
 
 
     useEffect(() => {
         if (userId) {
             API_CLIENT.findById(userId).then((data) => {
-                setUser(data)
+                setUser(data);
 
-            }).catch(err => console.log(err))
+            }).catch(err => console.log(err));
         }
 
-    }, [])
+    }, []);
 
 
 
     const handeleDelete = () => {
-        onDeleteCom(comment)
+        onDeleteCom(comment);
     }
 
     const handeleEdit = () => {
-        onEditCom(comment)
+        onEditCom(comment);
     }
 
     return (
         <>
-
-
             <Card sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -69,7 +64,7 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom }: Comment
                 boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
             }}>
                 {user?.imageFile ?
-                    <Avatar alt="Remy Sharp" src={`http://localhost:8001/uploads/${user.imageFile}`} />
+                    <Avatar alt="Remy Sharp" src={`https://storage.cloud.google.com/hack-trip/${user.imageFile}`} />
                     : <Avatar {...stringAvatar(name)} />}
 
                 <Typography gutterBottom component="h4">

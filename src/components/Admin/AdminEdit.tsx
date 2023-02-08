@@ -1,7 +1,7 @@
-import { Box, Button, CardMedia, Typography } from "@mui/material"
-import { MuiFileInput } from "mui-file-input"
-import { useLoaderData, useNavigate } from "react-router-dom"
-import FormInputText from "../FormFields/FormInputText"
+import { Box, Button, CardMedia, Typography } from "@mui/material";
+import { MuiFileInput } from "mui-file-input";
+import { useLoaderData, useNavigate } from "react-router-dom";
+import FormInputText from "../FormFields/FormInputText";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import { User, UserRole, UserStatus } from "../../model/users";
 import { BaseSyntheticEvent, useContext, useState } from "react";
@@ -68,32 +68,27 @@ const schema = yup.object({
 
 export default function AdminEdit() {
 
-    const userEdit = useLoaderData() as User
+    const userEdit = useLoaderData() as User;
+   
 
-    const [fileSelected, setFileSelected] = useState<File | undefined>()
-    const [user, setUser] = useState<User>()
-    const navigate = useNavigate()
-    const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>()
-
-
-
-    const { userL, setUserL } = useContext(LoginContext)
+    const [fileSelected, setFileSelected] = useState<File | undefined>();
+    const [user, setUser] = useState<User>();
+    const navigate = useNavigate();
+    const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
 
 
+
+    const { userL, setUserL } = useContext(LoginContext);
 
 
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
 
-    let role = 'user'
+    let role = 'user';
     if (accessToken) {
-        const decode: decode = jwt_decode(accessToken)
-        role = decode.role
+        const decode: decode = jwt_decode(accessToken);
+        role = decode.role;
 
     }
-
-
-
-
 
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
@@ -123,47 +118,60 @@ export default function AdminEdit() {
     const editProfileSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
 
 
-
         let formData = new FormData();
-
 
         if (fileSelected) {
 
-            formData.append('file', fileSelected)
-
+            formData.append('file', fileSelected);
 
         }
 
 
         const imagesNames = await API_CLIENT.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[]
-            return imageName.map((x) => { return x.filename })
+            let imageName = data as unknown as any as any[];
+            return imageName.map((x) => {
+                return x.destination;
+            })
         }).catch((err) => {
-            console.log(err)
+            console.log(err);
         })
 
 
         if (imagesNames) {
 
-
-            data.imageFile = imagesNames[0]
+            data.imageFile = imagesNames[0];
         }
 
 
-        data.timeEdited = toIsoDate(new Date())
-        data.firstName = data.firstName.trim()
-        data.lastName = data.lastName.trim()
+        data.timeEdited = toIsoDate(new Date());
+        data.firstName = data.firstName.trim();
+        data.lastName = data.lastName.trim();
         data.status = UserStatus[parseInt(data.status)];
+
+        if (data.status === undefined) {
+            if ((user !== undefined) && (user.status !== undefined)) {
+                data.status = user.status + '';
+            }
+        }
+
         data.role = UserRole[parseInt(data.role)];
 
-        const userEditRole = userEdit.role as any as string
 
-        if (userEditRole === 'admin') {
-            data.status = UserStatus[UserStatus.ACTIVE]
-            data.role = UserRole[UserRole.admin]
+        if (data.role === undefined) {
+            if ((user !== undefined) && (user.role !== undefined)) {
+                data.role = user.role + '';
+            }
         }
 
-        const editedUser = { ...data } as any
+
+        const userEditRole = userEdit.role as any as string;
+
+        if (userEditRole === 'admin') {
+            data.status = UserStatus[UserStatus.ACTIVE];
+            data.role = UserRole[UserRole.admin];
+        }
+
+        const editedUser = { ...data } as any;
 
 
         if (userEdit._id) {
@@ -171,10 +179,10 @@ export default function AdminEdit() {
 
             API_CLIENT.updateUserAdmin(userEdit._id, editedUser).then((data) => {
 
-                setUser(prev => data)
-                setFileSelected(undefined)
+                setUser(prev => data);
+                setFileSelected(undefined);
 
-            }).catch((err) => console.log(err))
+            }).catch((err) => console.log(err));
 
         }
 
@@ -209,29 +217,27 @@ export default function AdminEdit() {
     const deleteFile = (e: React.MouseEvent) => {
 
 
-        let svg = e.target as HTMLElement
+        let svg = e.target as HTMLElement;
 
         if (svg.tagName === 'svg') {
 
-            setFileSelected(undefined)
+            setFileSelected(undefined);
         }
     }
 
     const deleteImage = (e: React.MouseEvent) => {
 
-        const img = e.currentTarget.id
+        const img = e.currentTarget.id;
         if (userEdit._id) {
 
             API_CLIENT.deleteProfileImage(userEdit._id + '', img).then((data) => {
-                setUser(data)
-            }).catch((err) => console.log(err))
+                setUser(data);
+            }).catch((err) => console.log(err));
         }
     }
 
 
     return (
-
-
 
         <>
             <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px' }}>
@@ -240,7 +246,7 @@ export default function AdminEdit() {
                         <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={user.imageFile} />
                         <CardMedia
                             component="img"
-                            image={`http://localhost:8001/uploads/${user.imageFile}`}
+                            image={`https://storage.cloud.google.com/hack-trip/${user.imageFile}`}
                             sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
                             alt="TRIP"
 

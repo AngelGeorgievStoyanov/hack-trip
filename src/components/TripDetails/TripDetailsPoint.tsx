@@ -1,5 +1,5 @@
 import { Card, CardMedia, ImageList, ImageListItem, Typography } from "@mui/material";
-import { Point } from "../../model/point"
+import { Point } from "../../model/point";
 
 
 interface PointCardProps {
@@ -13,8 +13,6 @@ export default function TripDetailsPointCard({ point }: PointCardProps) {
 
     return (
         <>
-
-
             <Card sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -32,32 +30,33 @@ export default function TripDetailsPointCard({ point }: PointCardProps) {
 
 
                 {(point.imageFile?.length && point.imageFile?.length > 0) ?
-                        <>
-                            <ImageList sx={{ width: 500, height: 500, '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
-                                {point.imageFile ? point.imageFile.map((item, i) => (
-                                    <ImageListItem key={i}>
-                                        <img
-                                            src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
-                                            srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                                            alt={item}
-                                            loading="lazy"
-                                        />
-                                    </ImageListItem>
-                                )) : ''}
-                            </ImageList>
-                        </>
-                        : point.imageUrl.length > 0 ?
-                            < CardMedia
-                                component="img"
+                    <>
+                        <ImageList sx={{ width: 500, height: 500, '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
+                            {point.imageFile ? point.imageFile.map((item, i) => (
+                                <ImageListItem key={i}>
+                                    <img
+                                        src={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
+                                        srcSet={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
 
-                                height="500px"
-                                width="800"
-                                image={point.imageUrl}
-                                alt="TRIP"
+                                        alt={item}
+                                        loading="lazy"
+                                    />
+                                </ImageListItem>
+                            )) : ''}
+                        </ImageList>
+                    </>
+                    : point.imageUrl.length > 0 ?
+                        < CardMedia
+                            component="img"
 
-                            /> : <h4>FOR THIS POINT DON'T HAVE IMAGES</h4>
-                                }
- 
+                            height="500px"
+                            width="800"
+                            image={point.imageUrl}
+                            alt="TRIP"
+
+                        /> : <h4>FOR THIS POINT DON'T HAVE IMAGES</h4>
+                }
+
             </Card>
 
 

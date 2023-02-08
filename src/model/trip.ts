@@ -11,7 +11,6 @@ export enum TripTipeOfGroup {
 
 export class Trip implements Identifiable<IdType> {
     constructor(
-
         public _id: IdType,
         public title: string,
         public description: string,
@@ -58,7 +57,5 @@ export class TripCreate implements Omit<Trip, '_id'>{
         public timeEdited?: string,
         public reportTrip?: string[],
         public imageFile?: string[],
-
-
     ) { }
 }

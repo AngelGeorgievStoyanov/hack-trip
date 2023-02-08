@@ -38,15 +38,15 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
                 "content-type": "application/json"
             },
             body: JSON.stringify({ email, password })
-        })
+        });
 
 
         if (response.status >= 400) {
-            const result = await response.json()
-            throw new Error(result)
+            const result = await response.json();
+            throw new Error(result);
         }
 
-        return response.json()
+        return response.json();
     }
 
 
@@ -58,13 +58,13 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
                 'content-type': 'application/json'
             },
             body: JSON.stringify(entityWithoutId)
-        })
+        });
 
         if (response.status >= 400) {
-            const result = await response.json()
-            throw new Error(result)
+            const result = await response.json();
+            throw new Error(result);
         }
-        return response.json()
+        return response.json();
     }
 
     async logout(accessToken: string) {
@@ -75,27 +75,24 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
                 'X-Authorization': accessToken
             }
 
-        })
+        });
 
         if (response.status === 204) {
 
-
-            return response.json()
+            return response.json();
         }
-
-
-
     }
 
-    async findById(id: K): Promise<V> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/profile/${id}`)
 
+
+    async findById(id: K): Promise<V> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/profile/${id}`);
 
         if (response.status >= 400) {
-            const result = await response.json()
-            throw new Error(result)
+            const result = await response.json();
+            throw new Error(result);
         }
-        return response.json()
+        return response.json();
     }
 
 
@@ -108,14 +105,12 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         });
 
         const result = await response.json();
-        return result
+        return result;
     }
 
 
 
     async updateUserAdmin(id: K, entity: UserEditAdmin): Promise<V> {
-
-
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/edit/${id}`, {
             method: 'PUT',
@@ -126,11 +121,11 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         });
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return await response.json()
+        return await response.json();
     }
 
 
@@ -145,12 +140,14 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         });
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
-        return await response.json()
+        return await response.json();
     }
+
+
 
     async changePassword(id: K, password: string): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/confirmpassword/${id}`, {
@@ -162,13 +159,14 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         });
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result)
+            throw new Error(result);
         }
-        return await response.json()
-
+        return await response.json();
     }
+
+
 
     async deleteProfileImage(id: K, image: string): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/delete-image/${id}`, {
@@ -180,22 +178,24 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         })
 
         if (response.status >= 400) {
-            const result = await response.json()
+            const result = await response.json();
 
-            throw new Error(result)
+            throw new Error(result);
         }
-        return await response.json()
+        return await response.json();
 
     }
-    async findAll(): Promise<V> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin`)
 
+
+
+    async findAll(): Promise<V> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin`);
 
         if (response.status >= 400) {
-            const result = await response.json()
-            throw new Error(result)
+            const result = await response.json();
+            throw new Error(result);
         }
-        return response.json()
+        return response.json();
     }
 
 
@@ -207,16 +207,15 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
                 "content-type": "application/json"
             },
             body: JSON.stringify({ id, role })
-        })
+        });
 
 
         if (response.status >= 400) {
-            const result = await response.json()
-            throw new Error(result)
+            const result = await response.json();
+            throw new Error(result);
         }
 
-        return response.json()
-
+        return response.json();
     }
 
 }

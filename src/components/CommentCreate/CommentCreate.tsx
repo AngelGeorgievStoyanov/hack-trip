@@ -1,11 +1,8 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom";
 import { CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import { IdType } from "../../shared/common-types";
-
 import * as commentService from '../../services/commentService'
-
-import './CommentCreate.css'
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { BaseSyntheticEvent } from "react";
@@ -34,15 +31,12 @@ const schema = yup.object({
 
 export default function CreateComment() {
 
-    const idTrip = useParams().tripId
-    const userId = sessionStorage.getItem('userId')
-    const nameAuthor = sessionStorage.getItem('email')
+    const idTrip = useParams().tripId;
+    const userId = sessionStorage.getItem('userId');
+    const nameAuthor = sessionStorage.getItem('email');
 
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
-
-
-
 
         defaultValues: { comment: '', nameAuthor: '', _ownerId: '', _tripId: '' },
         mode: 'onChange',
@@ -50,31 +44,25 @@ export default function CreateComment() {
     });
 
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const createCommentSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
 
-
-
-
         if (userId !== undefined && nameAuthor !== undefined) {
-            data.nameAuthor = nameAuthor + ''
-            data._ownerId = userId + ''
-            data._tripId = idTrip + ''
+            data.nameAuthor = nameAuthor + '';
+            data._ownerId = userId + '';
+            data._tripId = idTrip + '';
 
         }
-        data.comment = data.comment.trim()
+        data.comment = data.comment.trim();
 
-        const newComment = { ...data } as any as CommentCreate
+        const newComment = { ...data } as any as CommentCreate;
 
         API_COMMENT.create(newComment).then((data) => {
 
-            navigate(`/trip/details/${idTrip}`)
+            navigate(`/trip/details/${idTrip}`);
         }).catch((err) => {
-            console.log(err)
-        })
-
-
-
+            console.log(err);
+        });
 
     }
 

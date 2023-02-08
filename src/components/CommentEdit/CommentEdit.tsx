@@ -2,19 +2,16 @@ import { useLoaderData, useNavigate } from "react-router-dom";
 import { Comment } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import { IdType } from "../../shared/common-types";
-import * as commentService from '../../services/commentService'
-
-import './CommentEdit.css'
+import * as commentService from '../../services/commentService';
 import { Box, Button, Grid, Typography } from "@mui/material";
 import FormTextArea from "../FormFields/FormTextArea";
-
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
 import { BaseSyntheticEvent } from "react";
 
 
-const API_COMMENT: ApiComment<IdType, Comment> = new commentService.ApiCommentImpl<IdType, Comment>('data/comments')
+const API_COMMENT: ApiComment<IdType, Comment> = new commentService.ApiCommentImpl<IdType, Comment>('data/comments');
 
 
 type FormData = {
@@ -36,13 +33,10 @@ const schema = yup.object({
 export default function EditComment() {
 
     const comment = useLoaderData() as Comment;
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
-
-
-
 
         defaultValues: { comment: comment.comment, },
         mode: 'onChange',
@@ -54,13 +48,12 @@ export default function EditComment() {
 
     const editCommentSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
 
-        data.comment = data.comment.trim()
-        const editComment = { ...data } as any as Comment
-
+        data.comment = data.comment.trim();
+        const editComment = { ...data } as any as Comment;
 
         API_COMMENT.update(comment._id, editComment).then((data) => {
-            navigate(`/trip/details/${comment._tripId}`)
-        }).catch((err) => console.log(err))
+            navigate(`/trip/details/${comment._tripId}`);
+        }).catch((err) => console.log(err));
 
     }
 

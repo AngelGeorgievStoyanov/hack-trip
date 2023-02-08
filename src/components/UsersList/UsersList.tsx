@@ -12,11 +12,8 @@ interface UsersListProps {
 export default function UsersList({ users }: UsersListProps) {
 
 
-
     return (
-
         <>
-
             {users!==undefined && users.length > 0 ?
                 users.map(x => <UserCard key={x._id} user={x} />)
                 : <h1>WELCOME!</h1>}

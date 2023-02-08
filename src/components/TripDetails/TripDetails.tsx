@@ -2,16 +2,15 @@ import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
 import { IdType } from "../../shared/common-types";
-import * as tripService from '../../services/tripService'
-import * as pointService from '../../services/pointService'
-import './TripDetails.css'
+import * as tripService from '../../services/tripService';
+import * as pointService from '../../services/pointService';
 import { Point } from "../../model/point";
 import { ApiPoint } from "../../services/pointService";
 import { useEffect, useState } from "react";
 import { GoogleMap, MarkerF, PolylineF, useJsApiLoader } from "@react-google-maps/api";
 import React from "react";
 import { containerStyle, options } from "../settings";
-import * as commentService from '../../services/commentService'
+import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
@@ -35,23 +34,16 @@ let center = {
 }
 
 
-const googleKey = process.env.REACT_APP_GOOGLE_KEY
+const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
 export default function TripDetails() {
 
-
-
-
     const trip = useLoaderData() as Trip;
 
-
-
-
     const userId = sessionStorage.getItem('userId') + ''
-
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
     const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
@@ -59,26 +51,22 @@ export default function TripDetails() {
 
     const theme = useTheme();
     const [activeStep, setActiveStep] = React.useState(0);
-    const [points, setPoints] = useState<Point[]>([])
-    const [comments, setComments] = useState<Comment[]>([])
-    const [liked, setLiked] = useState<boolean>(false)
-    const [hide, setHide] = useState<boolean>(false)
-    const [pointCard, setPointCard] = useState<Point | null>()
-    const [mapCenter, setMapCenter] = useState(center)
-    const [reported, setReported] = useState<boolean>(false)
-    const [updatedTrip, setUpdatedTrip] = useState<Trip>()
-    const [favorite, setFavorite] = useState<boolean>(false)
+    const [points, setPoints] = useState<Point[]>([]);
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [liked, setLiked] = useState<boolean>(false);
+    const [hide, setHide] = useState<boolean>(false);
+    const [pointCard, setPointCard] = useState<Point | null>();
+    const [mapCenter, setMapCenter] = useState(center);
+    const [reported, setReported] = useState<boolean>(false);
+    const [favorite, setFavorite] = useState<boolean>(false);
 
 
     if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (Array.from(points).length === 0)) {
 
-
         center = {
             lat: Number(trip.lat),
             lng: Number(trip.lng)
-
         }
-
     }
 
 
@@ -89,7 +77,7 @@ export default function TripDetails() {
             if (data) {
                 if (typeof data === "object") {
 
-                    const arrPoints = data as any as Point[]
+                    const arrPoints = data as any as Point[];
 
                     if (arrPoints !== undefined && arrPoints.length > 0) {
                         center = {
@@ -97,36 +85,36 @@ export default function TripDetails() {
                             lng: Number(arrPoints[0].lng)
                         }
 
-                        setMapCenter(center)
+                        setMapCenter(center);
 
-                        setPoints(arrPoints)
+                        setPoints(arrPoints);
                     }
 
                 }
             }
         }).catch((err) => {
-            console.log(err)
-        })
+            console.log(err);
+        });
 
         API_COMMENT.findByTripId(trip._id).then(async (data) => {
             if (data) {
 
                 if (typeof data === "object") {
 
-                    const arrComments = data as any as Comment[]
+                    const arrComments = data as any as Comment[];
 
-                    setComments(arrComments)
+                    setComments(arrComments);
                 }
             }
 
 
         }).catch((err) => {
-            console.log(err)
-        })
+            console.log(err);
+        });
 
 
 
-    }, [])
+    }, []);
 
 
 
@@ -138,17 +126,15 @@ export default function TripDetails() {
                 API_COMMENT.deleteByTripId(trip._id).then((data) => {
 
                 }).catch((err) => {
-                    console.log(err)
-                })
+                    console.log(err);
+                });
             }).catch((err) => {
-                console.log(err)
-            })
+                console.log(err);
+            });
             navigate('/trips')
         }).catch((err) => {
-            console.log(err)
-        })
-
-
+            console.log(err);
+        });
     }
 
 
@@ -157,20 +143,18 @@ export default function TripDetails() {
 
         googleMapsApiKey: googleKey!,
         libraries,
-    })
+    });
 
 
-    const mapRef = React.useRef<google.maps.Map | null>(null)
+    const mapRef = React.useRef<google.maps.Map | null>(null);
 
-    const pathPoints = (points?.length) && (points !== undefined) ? points?.map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : []
+    const pathPoints = (points?.length) && (points !== undefined) ? points?.map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : [];
     const onLoad = (map: google.maps.Map): void => {
-        mapRef.current = map
-
-
+        mapRef.current = map;
     }
 
     const onUnmount = (): void => {
-        mapRef.current = null
+        mapRef.current = null;
     }
     if (!isLoaded) return <div>MAP LOADING ...</div>
 
@@ -178,13 +162,12 @@ export default function TripDetails() {
 
     const onMarkerClick = (id: string, positionNumber: number) => {
 
-
         if (id) {
-            const currentPoint = points!.filter((x) => x._id + '' === id)
+            const currentPoint = points!.filter((x) => x._id + '' === id);
 
             if (currentPoint !== undefined && currentPoint !== null) {
 
-                setPointCard(currentPoint[0])
+                setPointCard(currentPoint[0]);
 
                 setActiveStep((prevActiveStep) => Number(currentPoint[0].pointNumber));
 
@@ -193,51 +176,48 @@ export default function TripDetails() {
                     lng: Number(currentPoint[0].lng)
                 }
 
-                setMapCenter(prev => center)
-                zoom = 10
+                setMapCenter(prev => center);
+                zoom = 10;
             }
 
         } else if (positionNumber) {
-            const currentPoint: Point[] = points.filter((x) => Number(x.pointNumber) === positionNumber)
+            const currentPoint: Point[] = points.filter((x) => Number(x.pointNumber) === positionNumber);
 
             if (currentPoint[0] !== undefined && currentPoint[0] !== null) {
 
-                setPointCard(prev => currentPoint[0])
+                setPointCard(prev => currentPoint[0]);
 
                 center = {
                     lat: Number(currentPoint[0].lat),
                     lng: Number(currentPoint[0].lng)
                 }
 
-                setMapCenter(prev => center)
-                zoom = 10
-
-
-
+                setMapCenter(prev => center);
+                zoom = 10;
             }
 
         } else if (positionNumber === 0) {
-            setPointCard(null)
+            setPointCard(null);
 
             center = {
                 lat: Number(points[0].lat),
                 lng: Number(points[0].lng)
             }
-            setMapCenter(prev => center)
-            zoom = 8
+            setMapCenter(prev => center);
+            zoom = 8;
         }
 
     }
 
     const onLoadComments = (newCommentArr: Comment[] | undefined) => {
 
-        setHide(true)
+        setHide(true);
 
     }
 
     const onHideComments = () => {
 
-        setHide(false)
+        setHide(false);
     }
 
     const onDeleteComment = async (comment: Comment) => {
@@ -247,23 +227,23 @@ export default function TripDetails() {
             if (data !== undefined) {
 
 
-                const copyComments = [...comments]
+                const copyComments = [...comments];
                 const index = copyComments.findIndex(cmt => {
                     return cmt._id === comment._id;
                 });
 
-                copyComments.splice(index, 1)
+                copyComments.splice(index, 1);
 
-                setComments(copyComments)
+                setComments(copyComments);
 
             }
-        }).catch((err) => console.log(err))
+        }).catch((err) => console.log(err));
 
 
 
     }
     const onEditComment = async (comment: Comment) => {
-        navigate(`/comments/edit/${comment._id}`)
+        navigate(`/comments/edit/${comment._id}`);
 
 
     }
@@ -271,16 +251,16 @@ export default function TripDetails() {
     const onLikeTrip = () => {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
-            trip.likes.push(userId)
+            trip.likes.push(userId);
 
 
             API_TRIP.updateLikes(trip._id, trip).then((data) => {
-                setUpdatedTrip(data)
-                setLiked(true)
+               
+                setLiked(true);
 
             }).catch((err) => {
-                console.log(err)
-            })
+                console.log(err);
+            });
 
         }
 
@@ -289,36 +269,34 @@ export default function TripDetails() {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
 
-            trip?.favorites.push(userId)
+            trip?.favorites.push(userId);
 
             API_TRIP.updateFavorites(trip._id, trip).then((data) => {
-                setUpdatedTrip(data)
-                setFavorite(true)
+               
+                setFavorite(true);
             }).catch((err) => {
-                console.log(err)
-            })
+                console.log(err);
+            });
 
         }
 
     }
 
 
-
-
     const onRemoveFavoriteClickHandler = () => {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
 
-            const index = trip.favorites.indexOf(userId)
+            const index = trip.favorites.indexOf(userId);
 
-            trip.favorites.splice(index, 1)
+            trip.favorites.splice(index, 1);
 
             API_TRIP.updateFavorites(trip._id, trip).then((data) => {
-                setUpdatedTrip(data)
-                setFavorite(false)
+               
+                setFavorite(false);
             }).catch((err) => {
-                console.log(err)
-            })
+                console.log(err);
+            });
 
         }
 
@@ -327,17 +305,17 @@ export default function TripDetails() {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
 
-            const index = trip.likes.indexOf(userId)
+            const index = trip.likes.indexOf(userId);
 
-            trip.likes.splice(index, 1)
+            trip.likes.splice(index, 1);
 
             API_TRIP.updateLikes(trip._id, trip).then((data) => {
-                setUpdatedTrip(data)
+               
 
-                setLiked(false)
+                setLiked(false);
             }).catch((err) => {
-                console.log(err)
-            })
+                console.log(err);
+            });
 
         }
 
@@ -347,17 +325,17 @@ export default function TripDetails() {
 
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
-            trip.reportTrip?.push(userId)
+            trip.reportTrip?.push(userId);
 
 
             API_TRIP.reportTrip(trip._id, trip).then((data) => {
 
-                setUpdatedTrip(data)
-                setReported(true)
+               
+                setReported(true);
 
             }).catch((err) => {
-                console.log(err)
-            })
+                console.log(err);
+            });
 
         }
     }
@@ -368,19 +346,19 @@ export default function TripDetails() {
 
             if (trip.reportTrip !== undefined) {
 
-                const index = trip.reportTrip.indexOf(userId)
+                const index = trip.reportTrip.indexOf(userId);
 
-                trip.reportTrip.splice(index, 1)
+                trip.reportTrip.splice(index, 1);
 
 
                 API_TRIP.reportTrip(trip._id, trip).then((data) => {
 
-                    setUpdatedTrip(data)
-                    setReported(false)
+                   
+                    setReported(false);
 
                 }).catch((err) => {
-                    console.log(err)
-                })
+                    console.log(err);
+                });
 
             }
         }
@@ -394,17 +372,17 @@ export default function TripDetails() {
 
 
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
-        let position = activeStep + 1
-        onMarkerClick('', position)
+        let position = activeStep + 1;
+        onMarkerClick('', position);
 
 
-    };
+    }
 
     const handleBack = () => {
 
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
-        let position = activeStep - 1
-        onMarkerClick('', position)
+        let position = activeStep - 1;
+        onMarkerClick('', position);
     };
 
 
@@ -473,9 +451,6 @@ export default function TripDetails() {
 
     return (
         <>
-
-
-
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                 <Container maxWidth={false} sx={{
@@ -563,10 +538,7 @@ export default function TripDetails() {
                             : ''
                         }
 
-
-
                         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around' }}>
-
 
                             {((trip.reportTrip?.some((x) => x === userId)) || (reported === true)) ?
                                 <MuiTooltiUnReport />
@@ -584,14 +556,7 @@ export default function TripDetails() {
                                     }
                                 </>
                                 : ''}
-
                         </Box>
-
-
-
-
-
-
                     </Card>
 
 
@@ -601,8 +566,9 @@ export default function TripDetails() {
                                 {trip.imageFile ? trip.imageFile.map((item, i) => (
                                     <ImageListItem key={i}>
                                         <img
-                                            src={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format`}
-                                            srcSet={`http://localhost:8001/uploads/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                            src={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
+                                            srcSet={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+
                                             alt={item}
                                             loading="lazy"
                                         />
@@ -621,26 +587,17 @@ export default function TripDetails() {
 
                             /> : <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>
 
-
-
                     }
-
 
                 </Container>
                 <Container maxWidth={false} sx={{ display: hide ? 'flex' : 'none', flexWrap: 'wrap' }} >
-
-
                     {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} />) : ''}
                 </Container>
-
-
-
                 <Container maxWidth={false} sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 600px)': {
                         display: 'flex', flexDirection: 'column'
                     }
                 }} >
-
                     <Box component='div' sx={{ display: 'flex', flexDirection: 'column' }}>
                         {points?.length > 0 ?
                             <MobileStepper
@@ -676,14 +633,10 @@ export default function TripDetails() {
                             <GoogleMap
                                 mapContainerStyle={containerStyle}
                                 options={options as google.maps.MapOptions}
-                                // center={(pathPoints?.length > 0) && (pathPoints !== undefined) ? pathPoints[0] : center}
                                 center={mapCenter !== undefined ? mapCenter : center}
                                 zoom={zoom}
                                 onLoad={onLoad}
                                 onUnmount={onUnmount}
-
-
-
                             >
                                 {pathPoints ? <PolylineF path={pathPoints} /> : null}
                                 {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
@@ -691,16 +644,12 @@ export default function TripDetails() {
                         </Box>
                     </Box>
 
-
                     <Box component='section' id="point-section-add">
-
                         {
                             pointCard ? <TripDetailsPointCard point={pointCard} key={pointCard._id} /> : ''
 
                         }
-
                     </Box>
-
                 </Container>
             </Grid>
         </>
