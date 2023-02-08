@@ -23,8 +23,8 @@ type FormData = {
 
 const schema = yup.object({
     comment: yup.string().required('Comment cannot be empty.')
-    .min(1).max(1000, 'Maximum comment length is 1000 characters.')
-    .matches(/^(?!\s+$).*/, 'Comment cannot be empty string.'),
+        .min(1).max(1000, 'Maximum comment length is 1000 characters.')
+        .matches(/^(?!\s+$).*/, 'Comment cannot be empty string.'),
 
 
 }).required();
@@ -74,20 +74,21 @@ export default function CreateComment() {
     return (
         <>
 
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 600px)': { display: 'flex', padding: '50px'} }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box component='form'
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
                         maxWidth: '600px',
-                        maxHeight: '250px',
+                        maxHeight: '280px',
                         padding: '30px',
                         marginTop: '50px',
                         backgroundColor: '#8d868670',
                         boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                         '& .MuiButton-root': { m: 1, width: '32ch' },
+
                     }}
                     noValidate
                     autoComplete='0ff'

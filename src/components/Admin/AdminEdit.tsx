@@ -264,7 +264,7 @@ export default function AdminEdit() {
                     backgroundColor: '#8d868670',
                     boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
                     '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
-                    '& .MuiButton-root': { m: 1, width: '32ch' },
+                    '@media(max-width: 600px)': { display: 'flex', maxWidth:'95%'}
                 }}
                     noValidate
                     autoComplete='0ff'

@@ -113,7 +113,7 @@ export function Register({ user }: UserProps) {
         <>
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
-                <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', minWidth: '100vH', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     {errorApi ?
                         <Box component='div' sx={{ backgroundColor: 'red', color: 'black', padding: '10px 20px', borderRadius: '9px', margin: '20px' }}>
                             <Typography component='h4'>
@@ -131,7 +131,8 @@ export function Register({ user }: UserProps) {
                         backgroundColor: '#8d868670',
                         boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
-                        '& .MuiButton-root': { m: 1, width: '32ch' },
+                        '@media(max-width: 600px)': { display: 'flex' },
+                        '@media(min-width: 600px)': { '& .MuiButton-root': { m: 1, width: '32ch' } }
                     }}
                         noValidate
                         autoComplete='0ff'

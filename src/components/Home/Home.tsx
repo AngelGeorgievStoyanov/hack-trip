@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { useLoaderData } from 'react-router-dom';
 import { Trip } from '../../model/trip';
 import TripList from '../Trips/TripsList/TripsList';
@@ -10,20 +10,17 @@ function Home() {
 
     return (
         <>
-
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-
-                <section className="home-section">
-                    <div className="div-h1">
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <h1>Welcome TRAVELERS or future TRAVELERS!</h1>
                         <h1>This is an APP where you can share your trips or get valuable tips for your future trips.</h1>
                         <h1>These are our TOP 5 most liked TRIPS!</h1>
-
-                    </div>
-                    <article className="top-trips">
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <TripList trips={trips} />
-                    </article>
-                </section>
+                    </Box>
+                </Box>
             </Grid>
         </>
     )

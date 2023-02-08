@@ -359,7 +359,6 @@ export function CreateTrip() {
 
                         <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
                         />
-
                         <FileUpload
                             title="Upload images"
                             multiFile={true}
@@ -374,24 +373,15 @@ export function CreateTrip() {
                             allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
 
                         />
-
-
                         <FormInputText name='imageUrl' label='IMAGE URL' control={control} type='text' error={errors.imageUrl?.message}
                         />
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
-
-
                         <span>
-
                             <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD TRIP</Button>
                             <Button variant="contained" disabled={!isValid} onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}>ADD POINT`S FOR THE TRIP</Button>
 
                         </span>
-
-
                     </Box>
-
-
                 </Container>
             </Grid>
         </>

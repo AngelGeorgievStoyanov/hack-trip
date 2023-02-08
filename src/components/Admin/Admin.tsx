@@ -44,7 +44,7 @@ export default function Admin() {
 
     return (
         <>
-            <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px', maxWidth: '100vW' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px' }}>
 
                     <Button variant="contained" onClick={hideUsers} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hideUsersList ? 'HIDE USERS' : 'SHOW USERS'} </Button>
@@ -53,7 +53,7 @@ export default function Admin() {
                         : 'NO TRIPS REPORTED'}
                 </Box>
 
-                <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'row', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', maxWidth: '95%' } }}>
 
 
                     {hideUsersList ?

@@ -46,7 +46,6 @@ const schema = yup.object({
     name: yup.string().required().min(1).max(100).matches(/^(?!\s+$).*/, 'Name cannot be empty string.'),
     description: yup.string().matches(/^(?!\s+$).*/, 'Description cannot be empty string.').max(1050, 'Description max length is 1050 chars'),
     imageUrl: yup.string().matches(/^(?!\s+$).*/, 'Image URL cannot be empty string.')
-
 }).required();
 
 
@@ -56,7 +55,6 @@ export function TripPoints() {
 
     const idTrip = useParams().tripId;
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
-
     const [errorMessageSearch, setErrorMessageSearch] = useState('');
 
 
@@ -114,6 +112,8 @@ export function TripPoints() {
         let findAddress = '';
         const inpName = document.getElementById('inputAddPointName') as HTMLInputElement;
         const btnFind = e.target as HTMLElement;
+
+
         if (btnFind.textContent === 'FIND IN MAP') {
             findAddress = inpName.value;
 
@@ -123,8 +123,17 @@ export function TripPoints() {
 
         } else {
             reset({ name: '', description: '', imageUrl: '', lat: '', lng: '', _ownerTripId: '' });
-            findAddress = searchRef.current!.value;
-            inpName.value = searchRef.current!.value;
+
+            if (searchRef.current!.value.split(',').length > 1) {
+                findAddress = searchRef.current!.value.split(',')[0];
+                inpName.value = searchRef.current!.value.split(',')[0];
+            } else if (searchRef.current!.value.split('-').length > 1) {
+                findAddress = searchRef.current!.value.split('-')[0];
+                inpName.value = searchRef.current!.value.split('-')[0];
+            } else {
+                findAddress = searchRef.current!.value;
+                inpName.value = searchRef.current!.value;
+            }
 
             setValue('name', searchRef.current!.value, { shouldValidate: true });
 
@@ -232,10 +241,12 @@ export function TripPoints() {
         data.imageUrl = data.imageUrl?.trim();
 
         const newPoint = { ...data } as PointCreate;
+       
 
-        if (newPoint.name.split(',').length > 0) {
+        if (newPoint.name.split(',').length > 1) {
             newPoint.name = newPoint.name.split(',')[0];
-
+        } else if (newPoint.name.split('-').length > 1) {
+            newPoint.name = newPoint.name.split('-')[0];
         }
 
 
@@ -341,7 +352,10 @@ export function TripPoints() {
                                 onContextReady={(context) => { }}
                                 showPlaceholderImage={false}
                                 maxFilesContainerHeight={157}
+                                buttonLabel='Click here for upload images'
+                                rightLabel={''}
                                 maxUploadFiles={9}
+                                header={'Drag to drop'}
                                 allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
                             />
 

@@ -346,23 +346,21 @@ export default function AdminTripEdit() {
         <>
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
+                    <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
+                        <GoogleMap
+                            mapContainerStyle={containerStyle}
+                            options={options as google.maps.MapOptions}
+                            center={center}
+                            zoom={zoom}
+                            onLoad={onLoad}
+                            onUnmount={onUnmount}
+                            onClick={onMapClick}
+                        >
+                            {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} draggable onDragEnd={dragMarker} /> :
+                                clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos} draggable onDragEnd={dragMarker} /> : null}
 
-                    <GoogleMap
-                        mapContainerStyle={containerStyle}
-                        options={options as google.maps.MapOptions}
-                        center={center}
-                        zoom={zoom}
-                        onLoad={onLoad}
-                        onUnmount={onUnmount}
-                        onClick={onMapClick}
-
-                    >
-
-                        {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} draggable onDragEnd={dragMarker} /> :
-                            clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos} draggable onDragEnd={dragMarker} /> : null}
-
-                    </GoogleMap>
-
+                        </GoogleMap>
+                    </Box>
 
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 

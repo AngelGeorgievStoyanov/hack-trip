@@ -32,14 +32,9 @@ export default function MyTrips() {
 
     return (
         <>
-
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-
                 {trips.length === 0 ?
-
-
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-
                         <Typography gutterBottom variant="h4" component="div">
                             You dont't have a published trip yet.
                         </Typography>
@@ -47,7 +42,6 @@ export default function MyTrips() {
                     </Box>
                     :
                     <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-
                         <Typography gutterBottom sx={{ margin: '50px' }} variant="h4" component="div">
                             These are your trips
                         </Typography>
@@ -57,11 +51,8 @@ export default function MyTrips() {
 
                         </Grid>
                     </Grid>
-
                 }
-
             </Grid>
-
         </>
     )
 }
