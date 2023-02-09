@@ -17,6 +17,7 @@ export default function TripDetailsPointCard({ point }: PointCardProps) {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                height: 'auto',
                 maxWidth: '500px', margin: '0 20px',
                 padding: '25px', backgroundColor: '#8d868670',
                 boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
@@ -31,7 +32,7 @@ export default function TripDetailsPointCard({ point }: PointCardProps) {
 
                 {(point.imageFile?.length && point.imageFile?.length > 0) ?
                     <>
-                        <ImageList sx={{ width: 500, height: 500, '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
+                        <ImageList sx={{ width: 'auto', height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
                             {point.imageFile ? point.imageFile.map((item, i) => (
                                 <ImageListItem key={i}>
                                     <img
@@ -45,21 +46,10 @@ export default function TripDetailsPointCard({ point }: PointCardProps) {
                             )) : ''}
                         </ImageList>
                     </>
-                    : point.imageUrl.length > 0 ?
-                        < CardMedia
-                            component="img"
-
-                            height="500px"
-                            width="800"
-                            image={point.imageUrl}
-                            alt="TRIP"
-
-                        /> : <h4>FOR THIS POINT DON'T HAVE IMAGES</h4>
+                    :
+                    <h4>FOR THIS POINT DON'T HAVE IMAGES</h4>
                 }
-
             </Card>
-
-
         </>
     )
 }

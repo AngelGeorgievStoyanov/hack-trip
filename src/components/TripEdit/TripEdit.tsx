@@ -38,7 +38,6 @@ type FormData = {
     typeOfPeople: string;
     destination: string;
     description: string;
-    imageUrl?: string;
     timeCreated: string | undefined;
     timeEdited?: string | undefined;
     lat: number | undefined;
@@ -62,7 +61,6 @@ const schema = yup.object({
     countPeoples: yup.number().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.').max(1000),
     destination: yup.string().required().min(3, 'Destination is required min length 3 chars.').max(60, 'Max length is 60 chars.').matches(/^(?!\s+$).*(\S{3})/, 'Destination cannot be empty string and must contain at least 3 characters .'),
     description: yup.string().max(1050, 'Description max length is 1050 chars').matches(/^(?!\s+$).*/, 'Description cannot be empty string.'),
-    imageUrl: yup.string().matches(/^(?!\s+$).*/, 'Image URL cannot be empty string.'),
 
 }).required();
 
@@ -97,7 +95,8 @@ export default function TripEdit() {
             lat: (trip.lat !== undefined && trip.lat !== null) ? Number(trip.lat) : undefined,
             lng: (trip.lng !== undefined && trip.lng !== null) ? Number(trip.lng) : undefined,
             timeEdited: trip.timeEdited, typeOfPeople: TripTipeOfGroup[trip.typeOfPeople],
-            description: trip.description, destination: trip.destination, imageUrl: trip.imageUrl, price: +trip.price, transport: TripTransport[trip.transport],
+            description: trip.description, destination: trip.destination,
+            price: +trip.price, transport: TripTransport[trip.transport],
             imageFile: trip.imageFile
         },
         mode: 'onChange',
@@ -271,11 +270,7 @@ export default function TripEdit() {
 
         data.title = data.title.trim();
         data.destination = data.destination.trim();
-        data.imageUrl = data.imageUrl?.trim();
         data.description = data.description.trim();
-
-
-
         data.timeEdited = toIsoDate(new Date());
         data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)];
         data.transport = TripTransport[parseInt(data.transport)];
@@ -326,7 +321,7 @@ export default function TripEdit() {
         <>
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
-                    <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 600px)': {maxWidth:'97%'} }} >
+                    <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
                         <GoogleMap
                             mapContainerStyle={containerStyle}
                             options={options as google.maps.MapOptions}
@@ -341,121 +336,102 @@ export default function TripEdit() {
 
                         </GoogleMap>
                     </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
-                    <Autocomplete>
-                        <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+                        <Autocomplete>
+                            <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
 
-                    </Autocomplete>
+                        </Autocomplete>
 
-                    <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
-                    <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
-
-                </Box>
-                <Box component='div' sx={{
-                    display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 600px)': {
-                        display: 'flex', flexDirection: 'column-reverse', width: '100vw'
-                    }
-                }}>
-                    <Box component='form'
-                        sx={{
-                            margin: '30px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            maxWidth: '420px',
-                            minHeight: '250px',
-                            maxHeight: '1100px',
-                            padding: '30px',
-                            backgroundColor: '#8d868670',
-                            boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
-                            '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
-                            '& .MuiButton-root': { m: 1, width: '32ch' },
-                        }}
-                        noValidate
-                        autoComplete='0ff'
-                        onSubmit={handleSubmit(editTripSubmitHandler)}
-                    >
-                        <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
-                            EDIT TRIP
-                        </Typography>
-
-                        <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
-                        />
-
-                        <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
-                        />
-
-
-                        <FormInputSelect name='transport' label='TRANSPORT' control={control} error={errors.transport?.message}
-                            options={TRIP_SELECT_OPTIONS_TRANSPORT} defaultOptionIndex={1} />
-
-                        <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}
-                        />
-
-                        <FormInputSelect name='typeOfPeople' label='TYPE OF THE GROUP' control={control} error={errors.typeOfPeople?.message}
-                            options={TRIP_SELECT_OPTIONS_TYPE_GROUPE} defaultOptionIndex={1} />
-
-                        <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
-                        />
-                        <FileUpload
-                            title="Upload images"
-                            multiFile={true}
-                            onFilesChange={handleFilesChange}
-                            onContextReady={(context) => { }}
-                            showPlaceholderImage={false}
-                            maxFilesContainerHeight={157}
-                            buttonLabel='Click here for upload images'
-                            rightLabel={''}
-                            maxUploadFiles={9}
-                            header={'Drag to drop'}
-                            allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
-
-                            sx={{ '& .MuiPaper-root MuiPaper-outlined MuiPaper-rounded css-ibczwg-MuiPaper-root': { backgroundColor: '#8d868670' } }}
-                        />
-
-                        <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message}
-                        />
-
-                        <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
-
-                        <span>
-
-                            <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT YOUR TRIP</Button>
-                            <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-
-                        </span>
+                        <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
+                        <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
 
                     </Box>
+                    <Box component='div' sx={{
+                        display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 600px)': {
+                            display: 'flex', flexDirection: 'column-reverse', width: '100vw'
+                        }
+                    }}>
+                        <Box component='form'
+                            sx={{
+                                margin: '30px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                maxWidth: '430px',
+                                minHeight: '250px',
+                                maxHeight: '1100px',
+                                padding: '30px',
+                                backgroundColor: '#8d868670',
+                                boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                                '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+                                '& .MuiButton-root': { m: 1, width: '32ch' },
+                            }}
+                            noValidate
+                            autoComplete='0ff'
+                            onSubmit={handleSubmit(editTripSubmitHandler)}
+                        >
+                            <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
+                                EDIT TRIP
+                            </Typography>
 
-                    {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
+                            <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
+                            />
+                            <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
+                            />
+                            <FormInputSelect name='transport' label='TRANSPORT' control={control} error={errors.transport?.message}
+                                options={TRIP_SELECT_OPTIONS_TRANSPORT} defaultOptionIndex={1} />
 
-                        <ImageList sx={{ width: 520, height: 550, margin: '30px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={3} rowHeight={164}>
-                            {images ? images.map((item, i) => (
-                                <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
-                                    <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />
-                                    <img
-                                        src={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
-                                        srcSet={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                            <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}
+                            />
 
-                                        alt={item}
-                                        loading="lazy"
-                                    />
-                                </ImageListItem>
-                            )) : ''}
-                        </ImageList> : trip.imageUrl.length > 0 ?
-                            < CardMedia
-                                component="img"
+                            <FormInputSelect name='typeOfPeople' label='TYPE OF THE GROUP' control={control} error={errors.typeOfPeople?.message}
+                                options={TRIP_SELECT_OPTIONS_TYPE_GROUPE} defaultOptionIndex={1} />
 
-                                height="500px"
-                                width="800"
-                                image={trip.imageUrl}
-                                alt="TRIP"
+                            <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
+                            />
+                            <FileUpload
+                                title="Upload images"
+                                multiFile={true}
+                                onFilesChange={handleFilesChange}
+                                onContextReady={(context) => { }}
+                                showPlaceholderImage={false}
+                                maxFilesContainerHeight={157}
+                                buttonLabel='Click here for upload images'
+                                rightLabel={''}
+                                maxUploadFiles={9}
+                                header={'Drag to drop'}
+                                allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
 
-                            /> : <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>}
-                </Box>
-            </Container>
-        </Grid>
+                                sx={{ '& .MuiPaper-root MuiPaper-outlined MuiPaper-rounded css-ibczwg-MuiPaper-root': { backgroundColor: '#8d868670' } }}
+                            />
+                            <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
+                            <span>
+                                <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT YOUR TRIP</Button>
+                                <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                            </span>
+                        </Box>
+
+                        {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
+
+                            <ImageList sx={{ width: 520, height: 'auto', margin: '30px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={3} rowHeight={164}>
+                                {images ? images.map((item, i) => (
+                                    <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
+                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />
+                                        <img
+                                            src={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
+                                            srcSet={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+
+                                            alt={item}
+                                            loading="lazy"
+                                        />
+                                    </ImageListItem>
+                                )) : ''}
+                            </ImageList> :
+                            <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>}
+                    </Box>
+                </Container>
+            </Grid>
         </>
     )
 }

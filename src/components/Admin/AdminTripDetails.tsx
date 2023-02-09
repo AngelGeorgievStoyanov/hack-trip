@@ -441,7 +441,7 @@ export default function AdminTripDetails() {
 
                     {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
                         <>
-                            <ImageList sx={{ width: 520, height: 500, '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
+                            <ImageList sx={{ width: 520, height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
                                 {trip.imageFile ? trip.imageFile.map((item, i) => (
                                     <ImageListItem key={i}>
                                         <img
@@ -455,18 +455,7 @@ export default function AdminTripDetails() {
                                 )) : ''}
                             </ImageList>
                         </>
-                        : trip.imageUrl.length > 0 ?
-                            < CardMedia
-                                component="img"
-
-                                height="500px"
-                                width="800"
-                                image={trip.imageUrl}
-                                alt="TRIP"
-
-                            /> : <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>
-
-
+                        : <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>
 
                     }
 

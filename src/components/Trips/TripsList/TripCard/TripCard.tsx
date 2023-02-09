@@ -74,13 +74,7 @@ export default function TripCard({ trip }: TripCardProps) {
                                 </ImageListItem>
                             )) : ''}
                         </ImageList>
-                        : trip.imageUrl ?
-                            <CardMedia
-                                component="img"
-                                height="200"
-                                image={trip.imageUrl}
-                                alt="TRIP"
-                            /> :
+                        : 
                             <Typography gutterBottom component="h6">
                                 There is no image for this trip
                             </Typography>

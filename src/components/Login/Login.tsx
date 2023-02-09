@@ -51,6 +51,7 @@ export function Login() {
         event?.preventDefault();
 
         data.password = data.password.trim();
+        console.log(data)
 
         API_CLIENT.login(data.email, data.password)
             .then((user) => {

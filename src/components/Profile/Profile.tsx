@@ -211,7 +211,7 @@ export default function Profile() {
     return (
 
         <>
-            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px', '@media(max-width: 600px)': { display: 'flex', padding: '20px', maxWidth:'100vW' } }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px', '@media(max-width: 600px)': { display: 'flex', padding: '20px', maxWidth: '100vW' } }}>
                 {user?.imageFile ?
                     <>
                         <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={user.imageFile} />
@@ -224,57 +224,56 @@ export default function Profile() {
                         />
                     </>
                     : ''}
-                    <Box component="form"
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            margin: '20px',
-                            maxWidth: '600px',
-                            maxHeight: '700px',
-                            padding: '30px',
-                            backgroundColor: '#8d868670',
-                            boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
-                            '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
-                            '@media(max-width: 600px)': { display: 'flex', width: '90%' }
-                        }}
-                        noValidate
-                        autoComplete='0ff'
-                        onSubmit={handleSubmit(editProfileSubmitHandler)}
-                    >
-                        <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
-                            {user?.firstName}'s  PROFILE
-                        </Typography>
-                        <FormInputText name='email' label='Email' control={control} error={errors.email?.message}
-                            rules={{ required: true, minLength: 5 }} />
-                        <FormInputText name='firstName' label='First Name' control={control} error={errors.firstName?.message}
-                            rules={{ required: true, minLength: 2, maxLength: 15 }} />
+                <Box component="form"
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        margin: '20px',
+                        maxWidth: '600px',
+                        maxHeight: '700px',
+                        padding: '30px',
+                        backgroundColor: '#8d868670',
+                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                        '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+                        '@media(max-width: 600px)': { display: 'flex', width: '90%' }
+                    }}
+                    noValidate
+                    autoComplete='0ff'
+                    onSubmit={handleSubmit(editProfileSubmitHandler)}
+                >
+                    <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
+                        {user?.firstName}'s  PROFILE
+                    </Typography>
+                    <FormInputText name='email' label='Email' control={control} error={errors.email?.message}
+                        rules={{ required: true, minLength: 5 }} />
+                    <FormInputText name='firstName' label='First Name' control={control} error={errors.firstName?.message}
+                        rules={{ required: true, minLength: 2, maxLength: 15 }} />
 
-                        <FormInputText name='lastName' label='Last Name' control={control} error={errors.lastName?.message}
-                            rules={{ required: true, minLength: 2, maxLength: 15 }} />
-                        {hide === true ?
-                            <>
-                                <FormInputText name='oldpassword' label='Old Password' type='password' control={control} error={errors.oldpassword?.message}
-                                    rules={{ required: true }} />
-                                <FormInputText name='password' label='Password' type='password' control={control} error={errors.password?.message}
-                                    rules={{ required: true }} />
+                    <FormInputText name='lastName' label='Last Name' control={control} error={errors.lastName?.message}
+                        rules={{ required: true, minLength: 2, maxLength: 15 }} />
+                    {hide === true ?
+                        <>
+                            <FormInputText name='oldpassword' label='Old Password' type='password' control={control} error={errors.oldpassword?.message}
+                                rules={{ required: true }} />
+                            <FormInputText name='password' label='Password' type='password' control={control} error={errors.password?.message}
+                                rules={{ required: true }} />
 
-                                <FormInputText name='confirmpass' label='Confirm Password' type='password' control={control} error={errors.confirmpass?.message}
-                                    rules={{ required: true }} />
-                            </>
+                            <FormInputText name='confirmpass' label='Confirm Password' type='password' control={control} error={errors.confirmpass?.message}
+                                rules={{ required: true }} />
+                        </>
 
-                            : ''}
+                        : ''}
 
-                        <MuiFileInput value={fileSelected ? fileSelected : undefined} name='inpImages' helperText={errorMessageImage} sx={{ '& input.css-152mnda-MuiInputBase-input-MuiOutlinedInput-input': { cursor: 'pointer' } }} onChange={handleFileChange} onClick={(e) => deleteFile(e)} />
+                    <MuiFileInput value={fileSelected ? fileSelected : undefined} name='inpImages' helperText={errorMessageImage} sx={{ '& input.css-152mnda-MuiInputBase-input-MuiOutlinedInput-input': { cursor: 'pointer' } }} onChange={handleFileChange} onClick={(e) => deleteFile(e)} />
 
-                        <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
-                            <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-                            <Button variant="contained" onClick={changePass} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >CHANGE PASSWORD</Button>
-
-                        </Box >
-                    </Box>
+                    <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
+                        <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                        <Button variant="contained" onClick={changePass} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hide ? 'HIDE CHANGE PASSWORD' : 'CHANGE PASSWORD'}</Button>
+                    </Box >
                 </Box>
+            </Box>
         </>
     )
 }

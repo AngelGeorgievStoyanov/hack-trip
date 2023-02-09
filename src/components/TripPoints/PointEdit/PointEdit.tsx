@@ -33,7 +33,6 @@ const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 type FormData = {
     name: string;
     description: string;
-    imageUrl?: string;
     lat: string;
     lng: string;
     pointNumber: IdType;
@@ -43,7 +42,6 @@ type FormData = {
 const schema = yup.object({
     name: yup.string().required().min(1).max(50).matches(/^(?!\s+$).*/, 'Name cannot be empty string.'),
     description: yup.string().matches(/^(?!\s+$).*/, 'Description cannot be empty string.').max(1050, 'Description max length is 1050 chars'),
-    imageUrl: yup.string().matches(/^(?!\s+$).*/, 'Image URL cannot be empty string.'),
 
 }).required();
 
@@ -72,8 +70,8 @@ export default function PointEdit() {
 
 
         defaultValues: {
-
-            name: point.name, description: point.description, imageUrl: point.imageUrl, pointNumber: Number(point.pointNumber)
+            name: point.name, description: point.description,
+            pointNumber: Number(point.pointNumber)
         },
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -244,10 +242,9 @@ export default function PointEdit() {
             setErrorMessageSearch('');
         }
 
-        ; data.pointNumber = point.pointNumber;
+        data.pointNumber = point.pointNumber;
         data.name = data.name.trim();
         data.description = data.description.trim();
-        data.imageUrl = data.imageUrl?.trim();
 
         const editedPoint = { ...data } as Point;
 
@@ -352,15 +349,12 @@ export default function PointEdit() {
                             autoComplete="off"
                             onSubmit={handleSubmit(createTripSubmitHandler)}
                         >
-
                             <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h4">
                                 EDIT POINT
                             </Typography>
                             <span >
-
                                 <FormInputText name='name' type="search" label='NEME OF CITY,PLACE,LANDMARK OR ANOTHER' control={control} error={errors.name?.message} id='inputAddPointName'
                                 />
-
                             </span>
                             <Button variant="contained" onClick={findInMap} sx={{ ':hover': { background: '#4daf30' } }}>FIND IN MAP</Button>
                             <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
@@ -378,7 +372,6 @@ export default function PointEdit() {
                                 allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
                                 sx={{ '& .MuiPaper-root MuiPaper-outlined MuiPaper-rounded css-ibczwg-MuiPaper-root': { backgroundColor: '#8d868670' } }}
                             />
-                            <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message} />
                             <span>
                                 <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT POINT</Button>
                                 <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
@@ -387,7 +380,7 @@ export default function PointEdit() {
 
                         {(point.imageFile?.length && point.imageFile?.length > 0) ?
 
-                            <ImageList sx={{ width: 520, height: 550, margin: '30px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={3} rowHeight={164}>
+                            <ImageList sx={{ width: 520, height: 'auto', margin: '20px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={3} rowHeight={164}>
                                 {images ? images.map((item, i) => (
                                     <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
                                         <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />
@@ -400,16 +393,8 @@ export default function PointEdit() {
                                         />
                                     </ImageListItem>
                                 )) : ''}
-                            </ImageList> : point.imageUrl.length > 0 ?
-                                < CardMedia
-                                    component="img"
-
-                                    height="500px"
-                                    width="800"
-                                    image={point.imageUrl}
-                                    alt="TRIP"
-
-                                /> : <h4>FOR THIS POINT DON'T HAVE IMAGES</h4>}
+                            </ImageList> :
+                            <h4>FOR THIS POINT DON'T HAVE IMAGES</h4>}
                     </Box>
                 </Container>
             </Grid>

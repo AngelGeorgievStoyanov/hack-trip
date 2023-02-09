@@ -255,7 +255,7 @@ export default function TripDetails() {
 
 
             API_TRIP.updateLikes(trip._id, trip).then((data) => {
-               
+
                 setLiked(true);
 
             }).catch((err) => {
@@ -272,7 +272,7 @@ export default function TripDetails() {
             trip?.favorites.push(userId);
 
             API_TRIP.updateFavorites(trip._id, trip).then((data) => {
-               
+
                 setFavorite(true);
             }).catch((err) => {
                 console.log(err);
@@ -292,7 +292,7 @@ export default function TripDetails() {
             trip.favorites.splice(index, 1);
 
             API_TRIP.updateFavorites(trip._id, trip).then((data) => {
-               
+
                 setFavorite(false);
             }).catch((err) => {
                 console.log(err);
@@ -310,7 +310,7 @@ export default function TripDetails() {
             trip.likes.splice(index, 1);
 
             API_TRIP.updateLikes(trip._id, trip).then((data) => {
-               
+
 
                 setLiked(false);
             }).catch((err) => {
@@ -330,7 +330,7 @@ export default function TripDetails() {
 
             API_TRIP.reportTrip(trip._id, trip).then((data) => {
 
-               
+
                 setReported(true);
 
             }).catch((err) => {
@@ -353,7 +353,7 @@ export default function TripDetails() {
 
                 API_TRIP.reportTrip(trip._id, trip).then((data) => {
 
-                   
+
                     setReported(false);
 
                 }).catch((err) => {
@@ -497,7 +497,6 @@ export default function TripDetails() {
                             DESCRIPTION : {trip?.description}
                         </Typography>
 
-
                         {trip._ownerId === userId ?
                             <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
 
@@ -559,10 +558,9 @@ export default function TripDetails() {
                         </Box>
                     </Card>
 
-
                     {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
                         <>
-                            <ImageList sx={{ width: 520, height: 500, '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
+                            <ImageList sx={{ width: 520, height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
                                 {trip.imageFile ? trip.imageFile.map((item, i) => (
                                     <ImageListItem key={i}>
                                         <img
@@ -576,19 +574,9 @@ export default function TripDetails() {
                                 )) : ''}
                             </ImageList>
                         </>
-                        : trip.imageUrl.length > 0 ?
-                            < CardMedia
-                                component="img"
-
-                                height="500px"
-                                width="800"
-                                image={trip.imageUrl}
-                                alt="TRIP"
-
-                            /> : <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>
-
+                        :
+                        <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>
                     }
-
                 </Container>
                 <Container maxWidth={false} sx={{ display: hide ? 'flex' : 'none', flexWrap: 'wrap' }} >
                     {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} />) : ''}

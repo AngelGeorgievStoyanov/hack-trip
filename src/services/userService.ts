@@ -39,7 +39,7 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
             },
             body: JSON.stringify({ email, password })
         });
-
+        console.log(await response)
 
         if (response.status >= 400) {
             const result = await response.json();

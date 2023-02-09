@@ -34,7 +34,6 @@ type FormData = {
     typeOfPeople: string;
     destination: string;
     description: string;
-    imageUrl?: string | undefined;
     timeCreated: string | undefined;
     timeEdited?: string | undefined;
     lat: number | string | undefined;
@@ -59,9 +58,6 @@ const schema = yup.object({
     countPeoples: yup.number().transform((value) => (isNaN(value) || value === null || value === undefined) ? 0 : value).required().min(1, 'Count of people cannot be 0.').integer('Count of peoples must be intiger.').max(1000),
     destination: yup.string().required().min(3, 'Destination is required min length 3 chars.').max(60, 'Max length is 60 chars.').matches(/^(?!\s+$).*(\S{3})/, 'Destination cannot be empty string and must contain at least 3 characters .'),
     description: yup.string().max(1050, 'Description max length is 1050 chars').matches(/^(?!\s+$).*/, 'Description cannot be empty string.'),
-    imageUrl: yup.string().matches(/^(?!\s+$).*/, 'Image URL cannot be empty string.'),
-
-
 
 }).required();
 
@@ -87,7 +83,8 @@ export function CreateTrip() {
 
         defaultValues: {
             title: '', _ownerId: '', countPeoples: '', timeCreated: '', lat: '', lng: '',
-            timeEdited: '', typeOfPeople: TripTipeOfGroup["Another type"] + '', description: '', destination: '', imageUrl: '', price: '', transport: TripTransport["Another type"] + '', imageFile: []
+            timeEdited: '', typeOfPeople: TripTipeOfGroup["Another type"] + '', description: '', destination: '', 
+            price: '', transport: TripTransport["Another type"] + '', imageFile: []
         },
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -226,7 +223,6 @@ export function CreateTrip() {
 
         data.title = data.title.trim();
         data.destination = data.destination.trim();
-        data.imageUrl = data.imageUrl?.trim();
         data.description = data.description.trim();
 
         data.timeCreated = toIsoDate(new Date());
@@ -339,23 +335,14 @@ export function CreateTrip() {
 
                         <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
                         />
-
-
                         <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
                         />
-
-
                         <FormInputSelect name='transport' label='TRANSPORT' control={control} error={errors.transport?.message}
                             options={TRIP_SELECT_OPTIONS_TRANSPORT} defaultOptionIndex={1} />
-
-
                         <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}
                         />
-
-
                         <FormInputSelect name='typeOfPeople' label='TYPE OF THE GROUP' control={control} error={errors.typeOfPeople?.message}
                             options={TRIP_SELECT_OPTIONS_TYPE_GROUPE} defaultOptionIndex={1} />
-
 
                         <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
                         />
@@ -372,8 +359,6 @@ export function CreateTrip() {
                             header={'Drag to drop'}
                             allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
 
-                        />
-                        <FormInputText name='imageUrl' label='IMAGE URL' control={control} type='text' error={errors.imageUrl?.message}
                         />
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
                         <span>

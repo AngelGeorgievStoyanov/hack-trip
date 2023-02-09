@@ -29,7 +29,6 @@ let center = {
 type FormData = {
     name: string;
     description: string;
-    imageUrl?: string;
     lat: string;
     lng: string;
     _ownerTripId: string;
@@ -45,7 +44,7 @@ const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualiz
 const schema = yup.object({
     name: yup.string().required().min(1).max(100).matches(/^(?!\s+$).*/, 'Name cannot be empty string.'),
     description: yup.string().matches(/^(?!\s+$).*/, 'Description cannot be empty string.').max(1050, 'Description max length is 1050 chars'),
-    imageUrl: yup.string().matches(/^(?!\s+$).*/, 'Image URL cannot be empty string.')
+
 }).required();
 
 
@@ -62,7 +61,7 @@ export function TripPoints() {
 
 
         defaultValues: {
-            name: '', description: '', imageUrl: '', imageFile: []
+            name: '', description: '', imageFile: []
         },
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -122,7 +121,9 @@ export function TripPoints() {
             return;
 
         } else {
-            reset({ name: '', description: '', imageUrl: '', lat: '', lng: '', _ownerTripId: '' });
+            reset({
+                name: '', description: '', lat: '', lng: '', _ownerTripId: ''
+            });
 
             if (searchRef.current!.value.split(',').length > 1) {
                 findAddress = searchRef.current!.value.split(',')[0];
@@ -238,10 +239,9 @@ export function TripPoints() {
 
         data.name = data.name.trim();
         data.description = data.description.trim();
-        data.imageUrl = data.imageUrl?.trim();
 
         const newPoint = { ...data } as PointCreate;
-       
+
 
         if (newPoint.name.split(',').length > 1) {
             newPoint.name = newPoint.name.split(',')[0];
@@ -359,7 +359,6 @@ export function TripPoints() {
                                 allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
                             />
 
-                            <FormInputText name='imageUrl' label='IMAGE URL' control={control} error={errors.imageUrl?.message} />
                             <span>
                                 <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD POINT</Button>
                                 <Button component={Link} to={`/trip/details/${idTrip}`} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
