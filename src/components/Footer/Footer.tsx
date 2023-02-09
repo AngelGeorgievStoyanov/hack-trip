@@ -5,7 +5,7 @@ export default function Footer() {
     return (
 
         <footer className="footer">
-            <h4 className='h4-footer'>HACK-TRIP  ANGEL STOYANOV: AKKODIS Fullstack React Academy II 2022-2023</h4>
+            <h4 className='h4-footer'>{"Copyright © "} 2022 - 2023  "HACK-TRIP" by Angel Stoyanov.  All rights reserved.</h4>
         </footer>
     )
 }

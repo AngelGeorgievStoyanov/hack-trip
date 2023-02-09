@@ -1,7 +1,6 @@
 # HACK-TRIP - https://github.com/AngelGeorgievStoyanov/hack-trip
 
-## React-TypeSript project for AKKODIS react-typescript-academy-2022 by Trayan Iliev-iproduct
-
+## Author: Angel Stoyanov
 ### Technologies used:
 * React-TypeSript
 * MySQL 
@@ -26,7 +25,6 @@
 # REST API MySQL - https://github.com/AngelGeorgievStoyanov/REST-API-MYSQL
 * To run server npm start
 * To run client app cd client and npm start
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.2.6.
 
 
 # Getting Started with Create React App
