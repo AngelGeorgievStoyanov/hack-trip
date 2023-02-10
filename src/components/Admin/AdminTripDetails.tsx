@@ -15,13 +15,14 @@ import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Box, Button, Card, CardMedia, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography } from "@mui/material";
+import { Box, Button, Card, CardMedia, Container, Grid, ImageList, ImageListItem, MobileStepper, Tooltip, Typography } from "@mui/material";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { useTheme } from '@mui/material/styles';
 import { LoginContext } from "../../App";
 import jwt_decode from "jwt-decode";
 import TripDetailsPointCard from "../TripDetails/TripDetailsPoint";
-
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 
 
 
@@ -67,12 +68,13 @@ export default function AdminTripDetails() {
     const theme = useTheme();
     const [activeStep, setActiveStep] = React.useState(0);
     const [points, setPoints] = useState<Point[]>([]);
-    const [comments, setComments] = useState<Comment[]>([]);
+    const [comments, setComments] = useState<CommentCreate[]>([]);
     const [liked, setLiked] = useState<boolean>(false);
     const [hide, setHide] = useState<boolean>(false);
     const [pointCard, setPointCard] = useState<Point | null>();
     const [mapCenter, setMapCenter] = useState(center);
     const [tripReports, setTripReports] = useState<Trip>();
+    const [reportedComment, setReportedComment] = useState<boolean>(false);
 
 
 
@@ -128,9 +130,7 @@ export default function AdminTripDetails() {
 
                 if (typeof data === "object") {
 
-                    const arrComments = data as any as Comment[];
-
-                    setComments(arrComments);
+                    setComments(data);
                 }
             }
 
@@ -297,6 +297,27 @@ export default function AdminTripDetails() {
 
     }
 
+    const onUnLikeTrip = () => {
+
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+
+            const index = trip.likes.indexOf(userId);
+
+            trip.likes.splice(index, 1);
+
+            API_TRIP.updateLikes(trip._id, trip).then((data) => {
+
+
+                setLiked(false);
+            }).catch((err) => {
+                console.log(err);
+            });
+
+        }
+
+    }
+
+
     const deleteReportClickHandler = () => {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
@@ -334,6 +355,67 @@ export default function AdminTripDetails() {
         onMarkerClick('', position);
     }
 
+
+    const MuiTooltipUnlike = () => {
+        return (
+            <Tooltip title='UN LIKE' arrow>
+
+                <ThumbUpIcon color="primary" onClick={onUnLikeTrip} fontSize="large" sx={{ ':hover': { cursor: 'pointer' }, margin: '5px' }} />
+            </Tooltip>
+        )
+    }
+
+
+
+    const MuiTooltipLike = () => {
+        return (
+            <Tooltip title='LIKE' arrow>
+                < ThumbUpOffAltIcon color="primary" onClick={onLikeTrip} fontSize="large" sx={{ ':hover': { cursor: 'pointer' }, margin: '5px' }} />
+
+            </Tooltip>
+        )
+    }
+
+
+    const reportClickHandlerComment = (comment: Comment) => {
+        if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
+            comment.reportComment?.push(userId);
+
+            API_COMMENT.reportComment(comment._id, comment).then((data) => {
+
+                setReportedComment(true);
+
+                setComments(data)
+
+            }).catch((err) => {
+                console.log(err);
+            });
+
+        }
+    }
+
+
+    const unReportClickHandlerComment = (comment: Comment) => {
+
+        if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
+
+            if (comment.reportComment !== undefined) {
+
+                const index = comment.reportComment.indexOf(userId);
+
+                comment.reportComment.splice(index, 1);
+
+                API_COMMENT.reportComment(comment._id, comment).then((data) => {
+
+                    setReportedComment(false);
+                    setComments(data)
+                }).catch((err) => {
+                    console.log(err);
+                });
+
+            }
+        }
+    }
     return (
         <>
 
@@ -374,7 +456,9 @@ export default function AdminTripDetails() {
                         <Typography gutterBottom variant="subtitle1" component="div">
                             DESCRIPTION : {trip?.description}
                         </Typography>
-
+                        <Typography gutterBottom variant="subtitle1" component="div">
+                            Reported by IDs : {trip?.reportTrip?.join(', ')}
+                        </Typography>
 
                         {trip._ownerId === userId ?
                             <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
@@ -399,6 +483,8 @@ export default function AdminTripDetails() {
                             </>
 
                             : ''}
+
+
                         <Button variant="contained" onClick={deleteReportClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE {tripReports !== undefined ? tripReports.reportTrip?.length : trip.reportTrip?.length} REPORTS TRIP</Button>
 
 
@@ -408,16 +494,12 @@ export default function AdminTripDetails() {
                             <>
                                 {
                                     trip.likes.some((x) => x === userId) || (liked === true) ?
-
-                                        <Button disabled variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >YOU LIKED THIS TRIP</Button>
+                                        <MuiTooltipUnlike />
                                         :
-
-                                        <Button onClick={onLikeTrip} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >LIKE TRIP</Button>
+                                        <MuiTooltipLike />
                                 }
                             </>
                             : ''}
-
-
 
 
                         {comments?.length ?
@@ -464,7 +546,9 @@ export default function AdminTripDetails() {
                 <Container maxWidth={false} sx={{ display: hide ? 'flex' : 'none', flexWrap: 'wrap' }} >
 
 
-                    {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} />) : ''}
+                    {/* {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} />) : ''} */}
+                    {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} onUnReportClickHandlerComment={unReportClickHandlerComment} onReportClickHandlerComment={reportClickHandlerComment} reportedComment={reportedComment} userId={userId} />) : ''}
+
                 </Container>
 
 

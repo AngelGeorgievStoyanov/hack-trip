@@ -1,5 +1,5 @@
 import { GoogleMap, Marker, useJsApiLoader, Autocomplete } from "@react-google-maps/api";
-import React, { BaseSyntheticEvent, useState } from "react";
+import React, { BaseSyntheticEvent, useContext, useState } from "react";
 import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { containerStyle, options } from "../settings";
 import { IdType } from "../../shared/common-types";
@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import FileUpload from "react-mui-fileuploader";
+import { LoginContext } from "../../App";
 
 
 const API_POINT: ApiPoint<IdType, PointCreate> = new pointService.ApiPointImpl<IdType, PointCreate>('data/points');
@@ -34,6 +35,8 @@ type FormData = {
     _ownerTripId: string;
     pointNumber: IdType;
     imageFile: string[] | undefined;
+    _ownerId: string,
+
 
 };
 
@@ -51,11 +54,14 @@ const schema = yup.object({
 export function TripPoints() {
 
     const points = useLoaderData() as Point[]
+    const { userL, setUserL } = useContext(LoginContext);
 
     const idTrip = useParams().tripId;
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
     const [errorMessageSearch, setErrorMessageSearch] = useState('');
 
+
+    const userId = userL?._id ? userL._id : sessionStorage.getItem('userId') !== null ? sessionStorage.getItem('userId') : ''
 
     const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
 
@@ -239,6 +245,10 @@ export function TripPoints() {
 
         data.name = data.name.trim();
         data.description = data.description.trim();
+        if (userId !== null) {
+            data._ownerId = userId+''
+        }
+
 
         const newPoint = { ...data } as PointCreate;
 

@@ -161,6 +161,7 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
 
         return result;
     }
+    
     async deleteReportTrip(id: K, entity: []): Promise<V> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/delete-report/${id}`, {

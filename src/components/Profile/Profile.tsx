@@ -20,8 +20,8 @@ const schema1 = yup.object({
     email: yup.string().required().email(),
     firstName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'First Name cannot be empty string and must contain at least 2 characters .'),
     lastName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'Last Name cannot be empty string and must contain at least 2 characters .'),
-    oldpassword: yup.string().required('Old password is required.').matches(/^(?=(.*[a-zA-Z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/, 'Must contain 8 characters, at least one digit, and one character different from letter or digit'),
-    password: yup.string().required('New password is required').matches(/^(?=(.*[a-zA-Z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/, 'Must contain 8 characters, at least one digit, and one character different from letter or digit'),
+    oldpassword: yup.string().required('Old password is required.').matches(/^(?=(.*[a-zA-Z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/, 'Password must contain 8 characters, at least one digit, and one character different from letter or digit'),
+    password: yup.string().required('New password is required').matches(/^(?=(.*[a-zA-Z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/, 'New password must contain 8 characters, at least one digit, and one character different from letter or digit'),
     confirmpass: yup.string().test('passwords-match', 'Passwords must match', function (value) { return this.parent.password === value }),
 
 
@@ -93,8 +93,6 @@ export default function Profile() {
         if (data.oldpassword.length > 0 && data.password.length > 0 && data.confirmpass.length > 0) {
 
             if (userId) {
-
-
                 API_CLIENT.changePassword(userId, data.oldpassword).then((data) => {
 
                 }).catch((err) => {
@@ -111,7 +109,6 @@ export default function Profile() {
 
 
         if (fileSelected) {
-
             formData.append('file', fileSelected);
         }
 
@@ -126,8 +123,14 @@ export default function Profile() {
         });
 
 
-        if (imagesNames) {
+        if (imagesNames !== undefined && imagesNames.length > 0) {
             data.imageFile = imagesNames[0];
+
+        } else {
+            if ((user?.imageFile !== undefined) && (user.imageFile !== null)&& (user.imageFile !=='')) {
+                data.imageFile = user?.imageFile
+            }
+
         }
 
 

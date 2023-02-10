@@ -30,11 +30,14 @@ const schema = yup.object({
 
 
 
-export default function EditComment() {
+export default function AdminCommentEdit() {
+
+
+
+    const userId = sessionStorage.getItem('userId')
 
     const comment = useLoaderData() as Comment;
     const navigate = useNavigate();
-
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -52,7 +55,7 @@ export default function EditComment() {
         const editComment = { ...data } as any as Comment;
 
         API_COMMENT.update(comment._id, editComment).then((data) => {
-            navigate(`/trip/details/${comment._tripId}`);
+            navigate(-1);
         }).catch((err) => console.log(err));
 
     }
@@ -62,6 +65,35 @@ export default function EditComment() {
     const goBack = () => {
         navigate(-1);
     }
+
+    const handeleDelete = () => {
+
+        API_COMMENT.deleteById(comment._id).then((data) => {
+
+            navigate(-1)
+
+        }).catch((err) => console.log(err));
+
+
+
+    }
+
+    const handeleDeleteReports = () => {
+
+        if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
+            const reports: [] = [];
+
+            API_COMMENT.deleteReportComment(comment._id, reports).then((data) => {
+                navigate(-1)
+
+            }).catch((err) => {
+                console.log(err);
+            });
+
+        }
+
+    }
+
 
 
     return (
@@ -74,7 +106,7 @@ export default function EditComment() {
                         flexDirection: 'column',
                         justifyContent: 'space-between',
                         maxWidth: '600px',
-                        maxHeight: '280px',
+                        maxHeight: '380px',
                         padding: '30px',
                         marginTop: '50px',
                         backgroundColor: '#8d868670',
@@ -90,10 +122,14 @@ export default function EditComment() {
                         EDIT A COMMENT
                     </Typography>
                     <FormTextArea name="comment" label="Comment" control={control} error={errors.comment?.message} multiline={true} rows={4} />
-
+                    <Typography gutterBottom variant="subtitle1" component="div">
+                        Reported by IDs : {comment?.reportComment?.join(', ')}
+                    </Typography>
                     <span>
 
-                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT COMMENT</Button>
+                        <Button variant="contained" onClick={handeleDeleteReports} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE REPORTS COMMENT</Button>
+                        <Button variant="contained" onClick={handeleDelete} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE COMMENT</Button>
+                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADMIN EDIT COMMENT</Button>
                         <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                     </span>
 

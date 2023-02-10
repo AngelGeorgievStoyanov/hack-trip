@@ -38,6 +38,10 @@ import GuardedRouteAdmin from './components/GuardedRouteAdmin/GuardedRouteAdmin'
 import AdminTripDetails from './components/Admin/AdminTripDetails';
 import AdminTripEdit from './components/Admin/AdminTripEdit';
 import MyFavorites from './components/MyFavorites/MyFavorites';
+import AdminCommentEdit from './components/Admin/AdminCommentEdit';
+import GuardedRouteTrip from './components/GuardedRouteTrip/GuardedRouteTrip';
+import GuardedRoutePoint from './components/GuardedRoutePoints/GuardedRoutePoints';
+import GuardedRouteComment from './components/GuardedRouteComment/GuardedRouteComment';
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
@@ -202,15 +206,13 @@ const router = createBrowserRouter([
             loader: tripLoader,
             element: <TripDetails />,
             errorElement: <NotFound />
-          },
-          {
-            path: '*'
           }
         ]
       },
       {
         path: '/trip/edit/:tripId',
-        element: <GuardedRoute />,
+        loader: tripLoader,
+        element: <GuardedRouteTrip />,
         children: [
           {
             path: '',
@@ -222,7 +224,8 @@ const router = createBrowserRouter([
       },
       {
         path: '/trip/points/:tripId',
-        element: <GuardedRoute />,
+        loader: tripLoader,
+        element: <GuardedRouteTrip />,
         children: [
           {
             path: '',
@@ -234,7 +237,8 @@ const router = createBrowserRouter([
       },
       {
         path: '/points/edit/:pointId',
-        element: <GuardedRoute />,
+        loader: pointLoaderById,
+        element: <GuardedRoutePoint />,
         children: [
           {
             path: '',
@@ -256,7 +260,8 @@ const router = createBrowserRouter([
       },
       {
         path: '/comments/edit/:commentId',
-        element: <GuardedRoute />,
+        loader: commentLoaderById,
+        element: <GuardedRouteComment />,
         children: [
           {
             path: '',
@@ -328,6 +333,17 @@ const router = createBrowserRouter([
             path: '',
             loader: tripLoader,
             element: <AdminTripEdit />
+          }
+        ]
+      },
+      {
+        path: '/admin/comment/edit/:commentId',
+        element: <GuardedRouteAdmin />,
+        children: [
+          {
+            path: '',
+            loader: commentLoaderById,
+            element: <AdminCommentEdit />
           }
         ]
       },

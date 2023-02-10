@@ -58,6 +58,7 @@ export default function TripDetails() {
     const [pointCard, setPointCard] = useState<Point | null>();
     const [mapCenter, setMapCenter] = useState(center);
     const [reported, setReported] = useState<boolean>(false);
+    const [reportedComment, setReportedComment] = useState<boolean>(false);
     const [favorite, setFavorite] = useState<boolean>(false);
 
 
@@ -101,9 +102,7 @@ export default function TripDetails() {
 
                 if (typeof data === "object") {
 
-                    const arrComments = data as any as Comment[];
-
-                    setComments(arrComments);
+                    setComments(data);
                 }
             }
 
@@ -114,7 +113,7 @@ export default function TripDetails() {
 
 
 
-    }, []);
+    }, [favorite]);
 
 
 
@@ -242,6 +241,8 @@ export default function TripDetails() {
 
 
     }
+
+
     const onEditComment = async (comment: Comment) => {
         navigate(`/comments/edit/${comment._id}`);
 
@@ -265,6 +266,8 @@ export default function TripDetails() {
         }
 
     }
+
+
     const onFavoriteClickHandler = () => {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
@@ -292,8 +295,8 @@ export default function TripDetails() {
             trip.favorites.splice(index, 1);
 
             API_TRIP.updateFavorites(trip._id, trip).then((data) => {
-
-                setFavorite(false);
+                console.log(data)
+                setFavorite(prev => false);
             }).catch((err) => {
                 console.log(err);
             });
@@ -301,6 +304,7 @@ export default function TripDetails() {
         }
 
     }
+
     const onUnLikeTrip = () => {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
@@ -339,6 +343,7 @@ export default function TripDetails() {
 
         }
     }
+
     const unReportClickHandler = () => {
 
 
@@ -363,6 +368,8 @@ export default function TripDetails() {
             }
         }
     }
+
+
     const goBack = () => {
         navigate(-1);
     }
@@ -370,12 +377,9 @@ export default function TripDetails() {
 
     const handleNext = () => {
 
-
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
         let position = activeStep + 1;
         onMarkerClick('', position);
-
-
     }
 
     const handleBack = () => {
@@ -416,8 +420,6 @@ export default function TripDetails() {
         )
     }
 
-
-
     const MuiTooltiUnReport = () => {
         return (
             <Tooltip title='UN REPORT TRIP' arrow>
@@ -426,7 +428,6 @@ export default function TripDetails() {
             </Tooltip>
         )
     }
-
 
     const MuiToolBookmark = () => {
         return (
@@ -437,7 +438,6 @@ export default function TripDetails() {
         )
     }
 
-
     const MuiToolBookmarkRemove = () => {
         return (
             <Tooltip title='REMOVE FROM FAVORITE' arrow>
@@ -447,6 +447,46 @@ export default function TripDetails() {
         )
     }
 
+    const reportClickHandlerComment = (comment: Comment) => {
+
+        if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
+            comment.reportComment?.push(userId);
+
+            API_COMMENT.reportComment(comment._id, comment).then((data) => {
+
+                setReportedComment(true);
+
+                setComments(data)
+
+            }).catch((err) => {
+                console.log(err);
+            });
+
+        }
+    }
+
+
+    const unReportClickHandlerComment = (comment: Comment) => {
+
+        if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
+
+            if (comment.reportComment !== undefined) {
+
+                const index = comment.reportComment.indexOf(userId);
+
+                comment.reportComment.splice(index, 1);
+
+                API_COMMENT.reportComment(comment._id, comment).then((data) => {
+
+                    setReportedComment(false);
+                    setComments(data)
+                }).catch((err) => {
+                    console.log(err);
+                });
+
+            }
+        }
+    }
 
 
     return (
@@ -472,7 +512,7 @@ export default function TripDetails() {
                                 <Typography gutterBottom variant="h5" component="div">
                                     TRIP NAME : {trip?.title}
                                 </Typography>
-                                {((trip.favorites?.some((x) => x === userId)) || (favorite === true)) ?
+                                {((trip.favorites?.some((x) => x === userId)) && (favorite === true)) ?
                                     <MuiToolBookmarkRemove />
                                     : <MuiToolBookmark />
                                 }
@@ -579,7 +619,7 @@ export default function TripDetails() {
                     }
                 </Container>
                 <Container maxWidth={false} sx={{ display: hide ? 'flex' : 'none', flexWrap: 'wrap' }} >
-                    {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} />) : ''}
+                    {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} onUnReportClickHandlerComment={unReportClickHandlerComment} onReportClickHandlerComment={reportClickHandlerComment} reportedComment={reportedComment} userId={userId} />) : ''}
                 </Container>
                 <Container maxWidth={false} sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 600px)': {

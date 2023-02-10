@@ -7,6 +7,7 @@ export class Comment implements Identifiable<IdType> {
         public comment: string,
         public _ownerId: string,
         public _tripId: string,
+        public reportComment?: string[],
 
     ) { }
 }
@@ -19,6 +20,8 @@ export class CommentCreate implements Omit<Comment, '_id'> {
         public comment: string,
         public _ownerId: string,
         public _tripId: string,
+        public reportComment?: string[],
+
     ) { }
 
 }

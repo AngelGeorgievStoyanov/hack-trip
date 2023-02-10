@@ -9,7 +9,9 @@ export class Point implements Identifiable<IdType> {
         public lat: string,
         public lng: string,
         public pointNumber: IdType,
-        public imageFile? : string[]
+        public imageFile? : string[],
+        public _ownerId?: string,
+
     ) { }
 }
 
@@ -23,7 +25,8 @@ export class PointCreate implements Omit<Point, '_id'> {
         public lat: string,
         public lng: string,
         public pointNumber: IdType,
-        public imageFile? : string[]
+        public imageFile? : string[],
+        public _ownerId?: string,
 
     ) { }
 

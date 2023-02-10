@@ -100,13 +100,13 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
 
 
     async deleteById(id: K, idTrip: K): Promise<void> {
-        
+
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'DELETE',
             headers: {
                 'content-type': 'application/json'
             },
-            body: JSON.stringify({idTrip})
+            body: JSON.stringify({ idTrip })
 
         });
 
@@ -124,6 +124,8 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
             method: 'DELETE',
 
         });
+
+        console.log(await response)
 
         if (response.status >= 400) {
             const result = await response.json();
