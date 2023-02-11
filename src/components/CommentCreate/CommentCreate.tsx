@@ -5,10 +5,11 @@ import { IdType } from "../../shared/common-types";
 import * as commentService from '../../services/commentService'
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { BaseSyntheticEvent } from "react";
+import { BaseSyntheticEvent, useState } from "react";
 import FormTextArea from "../FormFields/FormTextArea";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
+import LoadingButton from "@mui/lab/LoadingButton";
 
 
 const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
@@ -34,7 +35,8 @@ export default function CreateComment() {
     const idTrip = useParams().tripId;
     const userId = sessionStorage.getItem('userId');
     const nameAuthor = sessionStorage.getItem('email');
-
+    const [loading, setLoading] = useState<boolean>(true);
+    const [buttonAdd, setButtonAdd] = useState<boolean>(true)
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -46,7 +48,7 @@ export default function CreateComment() {
 
     const navigate = useNavigate();
     const createCommentSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
-
+        setButtonAdd(false)
         if (userId !== undefined && nameAuthor !== undefined) {
             data.nameAuthor = nameAuthor + '';
             data._ownerId = userId + '';
@@ -58,7 +60,7 @@ export default function CreateComment() {
         const newComment = { ...data } as any as CommentCreate;
 
         API_COMMENT.create(newComment).then((data) => {
-
+            setButtonAdd(true)
             navigate(`/trip/details/${idTrip}`);
         }).catch((err) => {
             console.log(err);
@@ -74,7 +76,7 @@ export default function CreateComment() {
     return (
         <>
 
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 600px)': { display: 'flex', padding: '50px'} }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 600px)': { display: 'flex', padding: '50px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box component='form'
                     sx={{
                         display: 'flex',
@@ -101,8 +103,13 @@ export default function CreateComment() {
                     <FormTextArea name="comment" label="Comment" control={control} error={errors.comment?.message} multiline={true} rows={4} />
 
                     <span>
+                        {buttonAdd === true ?
+                            <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD COMMENT</Button>
+                            : <LoadingButton variant="contained" loading={loading}   >
+                                <span>disabled</span>
+                            </LoadingButton>
+                        }
 
-                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD COMMENT</Button>
                         <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                     </span>
 

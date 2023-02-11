@@ -125,7 +125,6 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
 
         });
 
-        console.log(await response)
 
         if (response.status >= 400) {
             const result = await response.json();

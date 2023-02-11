@@ -119,10 +119,10 @@ export default function TripDetails() {
 
     const deleteClickHandler = () => {
 
-
-        API_TRIP.deleteById(trip._id).then((data) => {
-            API_POINT.deleteByTripId(trip._id).then((data) => {
-                API_COMMENT.deleteByTripId(trip._id).then((data) => {
+        const tripId = trip._id
+        API_TRIP.deleteById(tripId).then((data) => {
+            API_POINT.deleteByTripId(tripId).then((data) => {
+                API_COMMENT.deleteByTripId(tripId).then((data) => {
 
                 }).catch((err) => {
                     console.log(err);
@@ -295,7 +295,6 @@ export default function TripDetails() {
             trip.favorites.splice(index, 1);
 
             API_TRIP.updateFavorites(trip._id, trip).then((data) => {
-                console.log(data)
                 setFavorite(prev => false);
             }).catch((err) => {
                 console.log(err);

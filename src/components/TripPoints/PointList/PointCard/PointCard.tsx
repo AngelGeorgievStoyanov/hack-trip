@@ -19,9 +19,9 @@ interface PointCardProps {
 
 
 export interface points {
-    currentCardId: number;
+    currentCardId: string;
     currentIdNewPosition: number;
-    upCurrentCardId: number;
+    upCurrentCardId: string;
     upCurrentCardNewPosition: number
 }
 
@@ -32,6 +32,7 @@ const googleKey = process.env.REACT_APP_GOOGLE_KEY
 export default function PointCard({ point, length }: PointCardProps) {
 
     const idTrip = useParams().tripId;
+
 
     const navigate = useNavigate();
     let center = {
@@ -73,12 +74,11 @@ export default function PointCard({ point, length }: PointCardProps) {
 
         let card = e.currentTarget.parentElement?.children[(pointPosition * 3) - 5];
         let idCardUp = card?.getAttribute('id');
-
         if (idCardUp !== null && idCardUp !== undefined) {
 
-            let currentCardId = +id;
+            let currentCardId = id;
             let currentIdNewPosition = pointPosition - 1;
-            let upCurrentCardId = +idCardUp;
+            let upCurrentCardId = idCardUp;
             let upCurrentCardNewPosition = +pointPosition;
 
             let points = {
@@ -87,7 +87,6 @@ export default function PointCard({ point, length }: PointCardProps) {
                 upCurrentCardId,
                 upCurrentCardNewPosition
             } as points;
-
 
             await API_POINT.editPointPosition(id, points).then((data) => {
 
@@ -103,11 +102,12 @@ export default function PointCard({ point, length }: PointCardProps) {
         let card = e.currentTarget.parentElement?.children[(pointPosition * 3) + 1];
         let idCardUp = card?.getAttribute('id');
 
+
         if (idCardUp !== null && idCardUp !== undefined) {
 
-            let currentCardId = +id;
+            let currentCardId = id;
             let currentIdNewPosition = pointPosition + 1;
-            let upCurrentCardId = +idCardUp;
+            let upCurrentCardId = idCardUp;
             let upCurrentCardNewPosition = +pointPosition;
 
             let points = {

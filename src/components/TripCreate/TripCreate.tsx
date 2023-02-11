@@ -14,8 +14,7 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormTextArea from "../FormFields/FormTextArea";
 import FileUpload from "react-mui-fileuploader";
-
-
+import LoadingButton from '@mui/lab/LoadingButton';
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
 
 
@@ -75,7 +74,8 @@ export function CreateTrip() {
     const [errorMessageSearch, setErrorMessageSearch] = useState('');
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral);
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
-
+    const [loading, setLoading] = useState<boolean>(true);
+    const [buttonAdd, setButtonAdd] = useState<boolean>(true)
     const _ownerId = sessionStorage.getItem('userId');
 
     const { control, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({
@@ -83,7 +83,7 @@ export function CreateTrip() {
 
         defaultValues: {
             title: '', _ownerId: '', countPeoples: '', timeCreated: '', lat: '', lng: '',
-            timeEdited: '', typeOfPeople: TripTipeOfGroup["Another type"] + '', description: '', destination: '', 
+            timeEdited: '', typeOfPeople: TripTipeOfGroup["Another type"] + '', description: '', destination: '',
             price: '', transport: TripTransport["Another type"] + '', imageFile: []
         },
         mode: 'onChange',
@@ -122,7 +122,6 @@ export function CreateTrip() {
     }
 
     const onMapClick = (e: google.maps.MapMouseEvent) => {
-
 
         if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
 
@@ -185,6 +184,8 @@ export function CreateTrip() {
 
 
     const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined, addPoints?: boolean) => {
+
+        setButtonAdd(false)
         event?.preventDefault();
 
         let formData = new FormData();
@@ -231,7 +232,7 @@ export function CreateTrip() {
         const newTrip = { ...data } as any as TripCreate;
 
         API_TRIP.create(newTrip).then((trip) => {
-
+            setButtonAdd(true)
             if (addPoints === true) {
                 navigate(`/trip/points/${trip._id}`);
 
@@ -356,13 +357,18 @@ export function CreateTrip() {
                             buttonLabel='Click here for upload images'
                             rightLabel={''}
                             maxUploadFiles={9}
-                            header={'Drag to drop'}
+                            header={'Drag and drop'}
                             allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
 
                         />
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
                         <span>
-                            <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD TRIP</Button>
+                            {buttonAdd === true ?
+                                <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD TRIP</Button>
+                                : <LoadingButton variant="contained" loading={loading}   >
+                                    <span>disabled</span>
+                                </LoadingButton>
+                            }
                             <Button variant="contained" disabled={!isValid} onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}>ADD POINT`S FOR THE TRIP</Button>
 
                         </span>

@@ -1,4 +1,4 @@
-import { Card, CardMedia, ImageList, ImageListItem, Typography } from "@mui/material";
+import { Card, ImageList, ImageListItem, Typography } from "@mui/material";
 import { Point } from "../../model/point";
 
 

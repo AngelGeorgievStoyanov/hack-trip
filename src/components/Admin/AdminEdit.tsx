@@ -69,7 +69,7 @@ const schema = yup.object({
 export default function AdminEdit() {
 
     const userEdit = useLoaderData() as User;
-   
+
 
     const [fileSelected, setFileSelected] = useState<File | undefined>();
     const [user, setUser] = useState<User>();
@@ -137,9 +137,14 @@ export default function AdminEdit() {
         })
 
 
-        if (imagesNames) {
-
+        if (imagesNames !== undefined && imagesNames.length > 0) {
             data.imageFile = imagesNames[0];
+
+        } else {
+            if ((user?.imageFile !== undefined) && (user.imageFile !== null) && (user.imageFile !== '')) {
+                data.imageFile = user?.imageFile
+            }
+
         }
 
 
@@ -236,23 +241,34 @@ export default function AdminEdit() {
         }
     }
 
-
     return (
 
         <>
             <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px' }}>
-                {user?.imageFile ?
+                {(user !== undefined && user?.imageFile !== null && user.imageFile !== undefined && user.imageFile.length > 0) ?
                     <>
                         <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={user.imageFile} />
                         <CardMedia
                             component="img"
                             image={`https://storage.cloud.google.com/hack-trip/${user.imageFile}`}
                             sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
-                            alt="TRIP"
+                            alt="USER"
 
                         />
                     </>
-                    : ''}
+                    :
+                    (userEdit !== undefined && userEdit.imageFile !== null && userEdit.imageFile !== undefined && userEdit.imageFile.length > 0) ?
+                        <>
+                            <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={userEdit.imageFile} />
+                            <CardMedia
+                                component="img"
+                                image={`https://storage.cloud.google.com/hack-trip/${userEdit.imageFile}`}
+                                sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
+                                alt="USEREDit"
+
+                            />
+                        </>
+                        : ''}
                 <Box component="form" sx={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -264,7 +280,7 @@ export default function AdminEdit() {
                     backgroundColor: '#8d868670',
                     boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
                     '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
-                    '@media(max-width: 600px)': { display: 'flex', maxWidth:'95%'}
+                    '@media(max-width: 600px)': { display: 'flex', maxWidth: '95%' }
                 }}
                     noValidate
                     autoComplete='0ff'

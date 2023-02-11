@@ -15,6 +15,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import FileUpload from "react-mui-fileuploader";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 
 
@@ -77,6 +78,9 @@ export default function TripEdit() {
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
     const [errorMessageSearch, setErrorMessageSearch] = useState('');
     const [visible, setVisible] = React.useState(true);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [buttonAdd, setButtonAdd] = useState<boolean>(true)
+
     let positionPoint;
 
 
@@ -218,7 +222,7 @@ export default function TripEdit() {
 
 
     const editTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
-
+        setButtonAdd(false)
         let formData = new FormData();
 
 
@@ -239,29 +243,21 @@ export default function TripEdit() {
         });
 
 
-
         let imagesNew = imagesNames as unknown as any as string[];
-
-
 
         if (imagesNew.length > 0) {
             data.imageFile = images?.concat(imagesNew);
         } else {
             data.imageFile = images;
-
         }
 
 
 
         if (clickedPos?.lat) {
-
             data.lat = clickedPos.lat;
             data.lng = clickedPos.lng;
-
-
         } else {
             if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) {
-
                 data.lat = Number(trip.lat);
                 data.lng = Number(trip.lng);
             }
@@ -279,6 +275,7 @@ export default function TripEdit() {
         editTrip.id = trip._id as any as Trip;
 
         API_TRIP.update(trip._id, editTrip).then((data) => {
+            setButtonAdd(true)
             navigate(`/trip/details/${trip._id}`);
         }).catch((err) => {
             console.log(err);
@@ -400,14 +397,20 @@ export default function TripEdit() {
                                 buttonLabel='Click here for upload images'
                                 rightLabel={''}
                                 maxUploadFiles={9}
-                                header={'Drag to drop'}
+                                header={'Drag and drop'}
                                 allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
 
                                 sx={{ '& .MuiPaper-root MuiPaper-outlined MuiPaper-rounded css-ibczwg-MuiPaper-root': { backgroundColor: '#8d868670' } }}
                             />
                             <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
                             <span>
-                                <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT YOUR TRIP</Button>
+                                {buttonAdd === true ?
+                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT YOUR TRIP</Button>
+                                    : <LoadingButton variant="contained" loading={loading}   >
+                                        <span>disabled</span>
+                                    </LoadingButton>
+                                }
+
                                 <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                             </span>
                         </Box>

@@ -15,6 +15,7 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import FileUpload from "react-mui-fileuploader";
 import { LoginContext } from "../../App";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 
 const API_POINT: ApiPoint<IdType, PointCreate> = new pointService.ApiPointImpl<IdType, PointCreate>('data/points');
@@ -54,12 +55,14 @@ const schema = yup.object({
 export function TripPoints() {
 
     const points = useLoaderData() as Point[]
+
     const { userL, setUserL } = useContext(LoginContext);
 
     const idTrip = useParams().tripId;
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
     const [errorMessageSearch, setErrorMessageSearch] = useState('');
-
+    const [loading, setLoading] = useState<boolean>(true);
+    const [buttonAdd, setButtonAdd] = useState<boolean>(true)
 
     const userId = userL?._id ? userL._id : sessionStorage.getItem('userId') !== null ? sessionStorage.getItem('userId') : ''
 
@@ -200,7 +203,7 @@ export function TripPoints() {
 
 
     const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
-
+        setButtonAdd(false)
         let formData = new FormData();
 
 
@@ -246,7 +249,7 @@ export function TripPoints() {
         data.name = data.name.trim();
         data.description = data.description.trim();
         if (userId !== null) {
-            data._ownerId = userId+''
+            data._ownerId = userId + ''
         }
 
 
@@ -262,7 +265,7 @@ export function TripPoints() {
 
         API_POINT.create(newPoint).then((point) => {
             setClickedPos(undefined);
-
+            setButtonAdd(true)
             reset({ name: '', imageFile: [] });
             center = {
                 lat: Number(point.lat),
@@ -365,12 +368,17 @@ export function TripPoints() {
                                 buttonLabel='Click here for upload images'
                                 rightLabel={''}
                                 maxUploadFiles={9}
-                                header={'Drag to drop'}
+                                header={'Drag and drop'}
                                 allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
                             />
 
                             <span>
-                                <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD POINT</Button>
+                                {buttonAdd === true ?
+                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD POINT</Button>
+                                    : <LoadingButton variant="contained" loading={loading}   >
+                                        <span>disabled</span>
+                                    </LoadingButton>}
+
                                 <Button component={Link} to={`/trip/details/${idTrip}`} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                             </span>
                         </Box>

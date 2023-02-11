@@ -419,7 +419,7 @@ export default function AdminTripEdit() {
                                 buttonLabel='Click here for upload images'
                                 rightLabel={''}
                                 maxUploadFiles={9}
-                                header={'Drag to drop'}
+                                header={'Drag and drop'}
                                 allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
 
                                 sx={{ '& .MuiPaper-root MuiPaper-outlined MuiPaper-rounded css-ibczwg-MuiPaper-root': { backgroundColor: '#8d868670' } }}

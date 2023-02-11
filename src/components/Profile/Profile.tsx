@@ -122,12 +122,11 @@ export default function Profile() {
             console.log(err);
         });
 
-
         if (imagesNames !== undefined && imagesNames.length > 0) {
             data.imageFile = imagesNames[0];
 
         } else {
-            if ((user?.imageFile !== undefined) && (user.imageFile !== null)&& (user.imageFile !=='')) {
+            if ((user?.imageFile !== undefined) && (user.imageFile !== null) && (user.imageFile !== '')) {
                 data.imageFile = user?.imageFile
             }
 
@@ -140,11 +139,10 @@ export default function Profile() {
         data.oldpassword = data.oldpassword.trim();
         data.password = data.password.trim();
         data.confirmpass = data.confirmpass.trim();
-
+       
         const editedUser = { ...data } as any;
 
         if (userId) {
-
 
             API_CLIENT.updateUser(userId, editedUser).then((data) => {
                 setUser(prev => data);

@@ -8,7 +8,8 @@ import FormTextArea from "../FormFields/FormTextArea";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
-import { BaseSyntheticEvent } from "react";
+import { BaseSyntheticEvent, useState } from "react";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 
 const API_COMMENT: ApiComment<IdType, Comment> = new commentService.ApiCommentImpl<IdType, Comment>('data/comments');
@@ -34,7 +35,8 @@ export default function EditComment() {
 
     const comment = useLoaderData() as Comment;
     const navigate = useNavigate();
-
+    const [loading, setLoading] = useState<boolean>(true);
+    const [buttonAdd, setButtonAdd] = useState<boolean>(true)
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -47,11 +49,12 @@ export default function EditComment() {
 
 
     const editCommentSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
-
+        setButtonAdd(false)
         data.comment = data.comment.trim();
         const editComment = { ...data } as any as Comment;
 
         API_COMMENT.update(comment._id, editComment).then((data) => {
+            setButtonAdd(true)
             navigate(`/trip/details/${comment._tripId}`);
         }).catch((err) => console.log(err));
 
@@ -92,8 +95,13 @@ export default function EditComment() {
                     <FormTextArea name="comment" label="Comment" control={control} error={errors.comment?.message} multiline={true} rows={4} />
 
                     <span>
+                        {buttonAdd === true ?
+                            <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT COMMENT</Button>
+                            : <LoadingButton variant="contained" loading={loading}   >
+                                <span>disabled</span>
+                            </LoadingButton>
+                        }
 
-                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT COMMENT</Button>
                         <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                     </span>
 
