@@ -277,24 +277,26 @@ export function CreateTrip() {
         <>
 
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
+                    <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
 
 
-                    <GoogleMap
-                        mapContainerStyle={containerStyle}
-                        options={options as google.maps.MapOptions}
-                        center={center}
-                        zoom={zoom}
-                        onLoad={onLoad}
-                        onUnmount={onUnmount}
-                        onClick={onMapClick}
+                        <GoogleMap
+                            mapContainerStyle={containerStyle}
+                            options={options as google.maps.MapOptions}
+                            center={center}
+                            zoom={zoom}
+                            onLoad={onLoad}
+                            onUnmount={onUnmount}
+                            onClick={onMapClick}
 
-                    >
+                        >
 
-                        {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
-                    </GoogleMap>
+                            {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
+                        </GoogleMap>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
-                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px' }}>
 
                         <Autocomplete>
                             <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />

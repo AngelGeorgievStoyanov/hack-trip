@@ -294,8 +294,8 @@ export function TripPoints() {
     return (
         <>
             <Grid container sx={{
-                justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 600px)': {
-                    display: 'flex', flexDirection: 'column', maxWidth: '100%'
+                justifyContent: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', '@media(max-width: 600px)': {
+                    display: 'flex', flexDirection: 'column'
                 }
             }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
@@ -308,81 +308,84 @@ export function TripPoints() {
                         <PointList points={points} />
 
                     </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '100%' }}>
-                        <Box sx={{ display: 'flex', maxWidth: '100%' }}>
-                            <GoogleMap
-                                mapContainerStyle={containerStyle}
-                                options={options as google.maps.MapOptions}
-                                center={center}
-                                zoom={zoom}
-                                onLoad={onLoad}
-                                onUnmount={onUnmount}
-                                onClick={onMapClick}
-                            >
-                                {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
-                            </GoogleMap>
-                        </Box>
-                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px' }}>
+                    <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
 
-                            <Autocomplete>
-                                <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
-                            </Autocomplete>
-                            <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
-                            <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
-                        </Box>
-                        <Box component='form'
-                            sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'space-between',
-                                maxWidth: '600px',
-                                maxHeight: '850px',
-                                padding: '20px',
-                                marginTop: '50px',
-                                backgroundColor: '#8d868670',
-                                boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
-                                '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
-                                '& .MuiButton-root': { m: 1, width: '32ch' },
-                            }}
-                            noValidate
-                            autoComplete="off"
-                            onSubmit={handleSubmit(createTripSubmitHandler)}
+
+                        <GoogleMap
+                            mapContainerStyle={containerStyle}
+                            options={options as google.maps.MapOptions}
+                            center={center}
+                            zoom={zoom}
+                            onLoad={onLoad}
+                            onUnmount={onUnmount}
+                            onClick={onMapClick}
                         >
-
-                            <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
-                                ADD POINT
-                            </Typography>
-                            <span >
-                                <FormInputText name='name' type="search" label='NEME OF CITY,PLACE,LANDMARK OR ANOTHER' control={control} error={errors.name?.message} id='inputAddPointName'
-                                />
-                            </span>
-                            <Button variant="contained" onClick={findInMap} sx={{ ':hover': { background: '#4daf30' } }}>FIND IN MAP</Button>
-                            <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
-                            <FileUpload
-                                title="Upload images"
-                                multiFile={true}
-                                onFilesChange={handleFilesChange}
-                                onContextReady={(context) => { }}
-                                showPlaceholderImage={false}
-                                maxFilesContainerHeight={157}
-                                buttonLabel='Click here for upload images'
-                                rightLabel={''}
-                                maxUploadFiles={9}
-                                header={'Drag and drop'}
-                                allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
-                            />
-
-                            <span>
-                                {buttonAdd === true ?
-                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD POINT</Button>
-                                    : <LoadingButton variant="contained" loading={loading}   >
-                                        <span>disabled</span>
-                                    </LoadingButton>}
-
-                                <Button component={Link} to={`/trip/details/${idTrip}`} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-                            </span>
-                        </Box>
+                            {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
+                        </GoogleMap>
                     </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+
+
+                        <Autocomplete>
+                            <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+                        </Autocomplete>
+                        <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
+                        <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
+                    </Box>
+                    <Box component='form'
+                        sx={{
+                            margin: '30px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            maxWidth: '430px',
+                            minHeight: '250px',
+                            maxHeight: '1100px',
+                            padding: '30px',
+                            backgroundColor: '#8d868670',
+                            boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                            '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+                            '& .MuiButton-root': { m: 1, width: '32ch' },
+                        }}
+                        noValidate
+                        autoComplete="off"
+                        onSubmit={handleSubmit(createTripSubmitHandler)}
+                    >
+
+                        <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
+                            ADD POINT
+                        </Typography>
+                        <span >
+                            <FormInputText name='name' type="search" label='NEME OF CITY,PLACE,LANDMARK OR ANOTHER' control={control} error={errors.name?.message} id='inputAddPointName'
+                            />
+                        </span>
+                        <Button variant="contained" onClick={findInMap} sx={{ ':hover': { background: '#4daf30' } }}>FIND IN MAP</Button>
+                        <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
+                        <FileUpload
+                            title="Upload images"
+                            multiFile={true}
+                            onFilesChange={handleFilesChange}
+                            onContextReady={(context) => { }}
+                            showPlaceholderImage={false}
+                            maxFilesContainerHeight={157}
+                            buttonLabel='Click here for upload images'
+                            rightLabel={''}
+                            maxUploadFiles={9}
+                            header={'Drag and drop'}
+                            allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
+                        />
+
+                        <span>
+                            {buttonAdd === true ?
+                                <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD POINT</Button>
+                                : <LoadingButton variant="contained" loading={loading}   >
+                                    <span>disabled</span>
+                                </LoadingButton>}
+
+                            <Button component={Link} to={`/trip/details/${idTrip}`} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                        </span>
+                    </Box>
+
                 </Container>
             </Grid>
         </>

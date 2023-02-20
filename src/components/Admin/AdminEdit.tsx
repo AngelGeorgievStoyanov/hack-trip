@@ -250,7 +250,7 @@ export default function AdminEdit() {
                         <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={user.imageFile} />
                         <CardMedia
                             component="img"
-                            image={`https://storage.cloud.google.com/hack-trip/${user.imageFile}`}
+                            image={`https://storage.googleapis.com/hack-trip/${user.imageFile}`}
                             sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
                             alt="USER"
 
@@ -262,7 +262,7 @@ export default function AdminEdit() {
                             <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={userEdit.imageFile} />
                             <CardMedia
                                 component="img"
-                                image={`https://storage.cloud.google.com/hack-trip/${userEdit.imageFile}`}
+                                image={`https://storage.googleapis.com/hack-trip/${userEdit.imageFile}`}
                                 sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
                                 alt="USEREDit"
 

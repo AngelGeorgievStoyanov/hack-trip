@@ -123,7 +123,7 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom, onReportC
                 boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
             }}>
                 {user?.imageFile ?
-                    <Avatar alt="Remy Sharp" src={`https://storage.cloud.google.com/hack-trip/${user.imageFile}`} />
+                    <Avatar alt="Remy Sharp" src={`https://storage.googleapis.com/hack-trip/${user.imageFile}`} />
                     : <Avatar {...stringAvatar(name)} />}
 
                 <Typography gutterBottom component="h4">

@@ -1,7 +1,7 @@
-export const MONGODB='http://localhost:3030'
-export const MYSQLDB='http://localhost:8080'
 
 
+const API_URL = 'https://www.api-hack-trip.com'
+// const API_URL = 'http://185.228.26.119'
 
-//  export const CONNECTIONURL = MONGODB
-export const CONNECTIONURL = MYSQLDB
+
+export const CONNECTIONURL = API_URL

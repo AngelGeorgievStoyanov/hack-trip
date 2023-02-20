@@ -15,7 +15,7 @@ import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Box, Button, Card, CardMedia, Container, Grid, ImageList, ImageListItem, MobileStepper, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Card, Container, Grid, ImageList, ImageListItem, MobileStepper, Tooltip, Typography } from "@mui/material";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { useTheme } from '@mui/material/styles';
 import { LoginContext } from "../../App";
@@ -464,14 +464,17 @@ export default function AdminTripDetails() {
                             <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
 
                             :
-                            (points !== undefined && points.length > 0) ?
-                                <Typography gutterBottom variant="subtitle1" component="div">
-                                    FOR THIS TRIP HAVE {points.length} POINTS
-                                </Typography>
-                                :
-                                <Typography gutterBottom variant="subtitle1" component="div">
-                                    FOR THIS TRIP DONT HAVE POINTS
-                                </Typography>
+                            (role === 'admin' || role === 'manager') ?
+                                <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
+
+                                : (points !== undefined && points.length > 0) ?
+                                    <Typography gutterBottom variant="subtitle1" component="div">
+                                        FOR THIS TRIP HAVE {points.length} POINTS
+                                    </Typography>
+                                    :
+                                    <Typography gutterBottom variant="subtitle1" component="div">
+                                        FOR THIS TRIP DONT HAVE POINTS
+                                    </Typography>
                         }
 
                         <Button component={Link} to={`/comments/add-comment/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD COMMENT</Button>
@@ -527,8 +530,8 @@ export default function AdminTripDetails() {
                                 {trip.imageFile ? trip.imageFile.map((item, i) => (
                                     <ImageListItem key={i}>
                                         <img
-                                            src={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
-                                            srcSet={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                            src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
+                                            srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
 
                                             alt={item}
                                             loading="lazy"

@@ -307,20 +307,24 @@ export default function PointEdit() {
 
         <>
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <GoogleMap
-                        mapContainerStyle={containerStyle}
-                        options={options as google.maps.MapOptions}
-                        center={center}
-                        zoom={zoom}
-                        onLoad={onLoad}
-                        onUnmount={onUnmount}
-                        onClick={onMapClick}
-                    >
-                        {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} draggable onDragEnd={dragMarker} /> :
-                            clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos} draggable onDragEnd={dragMarker} /> : null}
-                    </GoogleMap>
-                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px' }}>
+                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
+                    <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
+
+                        <GoogleMap
+                            mapContainerStyle={containerStyle}
+                            options={options as google.maps.MapOptions}
+                            center={center}
+                            zoom={zoom}
+                            onLoad={onLoad}
+                            onUnmount={onUnmount}
+                            onClick={onMapClick}
+                        >
+                            {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} draggable onDragEnd={dragMarker} /> :
+                                clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos} draggable onDragEnd={dragMarker} /> : null}
+                        </GoogleMap>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+
 
                         <Autocomplete>
                             <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
@@ -336,13 +340,14 @@ export default function PointEdit() {
 
                         <Box component='form'
                             sx={{
+                                margin: '30px',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'space-between',
-                                maxWidth: '600px',
-                                maxHeight: '850px',
+                                maxWidth: '430px',
+                                minHeight: '250px',
+                                maxHeight: '1100px',
                                 padding: '30px',
-                                marginTop: '50px',
                                 backgroundColor: '#8d868670',
                                 boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
                                 '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
@@ -392,8 +397,8 @@ export default function PointEdit() {
                                     <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
                                         <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />
                                         <img
-                                            src={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
-                                            srcSet={`https://storage.cloud.google.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                            src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
+                                            srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
 
                                             alt={item}
                                             loading="lazy"

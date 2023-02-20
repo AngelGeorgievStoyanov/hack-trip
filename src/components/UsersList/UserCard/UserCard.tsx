@@ -70,7 +70,7 @@ export default function UserCard({ user }: UserCardProps) {
                         <CardMedia
                             component="img"
                             height="200"
-                            image={`https://storage.cloud.google.com/hack-trip/${user.imageFile}`}
+                            image={`https://storage.googleapis.com/hack-trip/${user.imageFile}`}
                             alt="USER"
                         />
                         : ''}
@@ -114,7 +114,7 @@ export default function UserCard({ user }: UserCardProps) {
                             <CardMedia
                                 component="img"
                                 height="200"
-                                image={`https://storage.cloud.google.com/hack-trip/${user.imageFile}`}
+                                image={`https://storage.googleapis.com/hack-trip/${user.imageFile}`}
                                 alt="USER"
                             />
                             : ''}

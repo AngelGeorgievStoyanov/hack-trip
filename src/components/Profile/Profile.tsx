@@ -218,7 +218,7 @@ export default function Profile() {
                         <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={user.imageFile} />
                         <CardMedia
                             component="img"
-                            image={`https://storage.cloud.google.com/hack-trip/${user.imageFile}`}
+                            image={`https://storage.googleapis.com/hack-trip/${user.imageFile}`}
                             sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
                             alt="USER"
 
