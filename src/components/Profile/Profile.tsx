@@ -190,15 +190,19 @@ export default function Profile() {
 
         if (file.size > 10000) {
             const options = {
-                maxSizeMB: 0.2,
-                maxWidthOrHeight: 920
+                maxSizeMB: 0.1,
+                maxWidthOrHeight: 520,
+                fileType: file.type,
+                name: file.name ? file.name : 'IMG' + (Math.random() * 3).toString(),
+
             }
+
             try {
                 const compressedFile = await imageCompression(file, options);
 
                 if (compressedFile !== undefined) {
-
-                    setFileSelected(prev => compressedFile);
+                    let compFile = new File([compressedFile], file.name, { type: file.type })
+                    setFileSelected(prev => compFile);
                 }
 
             } catch (error) {

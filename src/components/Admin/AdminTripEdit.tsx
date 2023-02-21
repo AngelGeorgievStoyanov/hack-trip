@@ -254,7 +254,7 @@ export default function AdminTripEdit() {
         let imagesNew = imagesNames as unknown as any as string[];
 
 
-        if (imagesNew.length > 0) {
+        if (imagesNew !== undefined && imagesNew.length > 0) {
             data.imageFile = images?.concat(imagesNew);
         } else {
             data.imageFile = images;
