@@ -16,6 +16,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import FileUpload from "react-mui-fileuploader";
 import { LoginContext } from "../../App";
 import LoadingButton from "@mui/lab/LoadingButton";
+import imageCompression from "browser-image-compression";
 
 
 const API_POINT: ApiPoint<IdType, PointCreate> = new pointService.ApiPointImpl<IdType, PointCreate>('data/points');
@@ -108,10 +109,33 @@ export function TripPoints() {
         }
     }
 
-    const handleFilesChange = (files: any) => {
+    const handleFilesChange = async(files: any) => {
 
         if (!files) return;
-        setFileSelected([...files]);
+       
+        let compress = await files.map(async (x: File) => {
+            if (x.size > 10000) {
+                const options = {
+                    maxSizeMB: 0.2,
+                    maxWidthOrHeight: 920
+                }
+                try {
+                    const compressedFile = await imageCompression(x, options);
+                    return compressedFile
+
+                } catch (error) {
+                    console.log(error);
+                }
+            } else {
+                return x
+            }
+        })
+
+        compress.map((x: Promise<File>) => {
+            x.then((data) => {
+                setFileSelected(prev => [...prev, data]);
+            })
+        })
     }
 
 

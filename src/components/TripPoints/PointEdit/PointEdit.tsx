@@ -15,6 +15,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import FileUpload from "react-mui-fileuploader";
 import LoadingButton from "@mui/lab/LoadingButton";
+import imageCompression from "browser-image-compression";
 
 
 
@@ -195,11 +196,37 @@ export default function PointEdit() {
 
 
     if (!isLoaded) return <div>MAP LOADING ...</div>
-    const handleFilesChange = (files: any) => {
+
+
+    const handleFilesChange = async (files: any) => {
 
         if (!files) return;
 
-        setFileSelected([...files]);
+
+        let compress = await files.map(async (x: File) => {
+            if (x.size > 10000) {
+                const options = {
+                    maxSizeMB: 0.2,
+                    maxWidthOrHeight: 920
+                }
+                try {
+                    const compressedFile = await imageCompression(x, options);
+                    return compressedFile
+
+                } catch (error) {
+                    console.log(error);
+                }
+            } else {
+                return x
+            }
+        })
+
+        compress.map((x: Promise<File>) => {
+            x.then((data) => {
+                setFileSelected(prev => [...prev, data]);
+            })
+        })
+
     };
 
     const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {

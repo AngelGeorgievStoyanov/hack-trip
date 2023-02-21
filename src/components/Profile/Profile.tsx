@@ -11,6 +11,7 @@ import { User } from "../../model/users";
 import { ApiClient } from "../../services/userService";
 import { MuiFileInput } from "mui-file-input";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
+import imageCompression from "browser-image-compression";
 
 
 
@@ -139,7 +140,7 @@ export default function Profile() {
         data.oldpassword = data.oldpassword.trim();
         data.password = data.password.trim();
         data.confirmpass = data.confirmpass.trim();
-       
+
         const editedUser = { ...data } as any;
 
         if (userId) {
@@ -171,7 +172,7 @@ export default function Profile() {
         }
     }
 
-    const handleFileChange = (file: any) => {
+    const handleFileChange = async (file: any) => {
 
         if (file !== null) {
 
@@ -184,7 +185,30 @@ export default function Profile() {
                 setErrorMessageImage(undefined);
             }
         }
-        setFileSelected(prev => file);
+
+
+
+        if (file.size > 10000) {
+            const options = {
+                maxSizeMB: 0.2,
+                maxWidthOrHeight: 920
+            }
+            try {
+                const compressedFile = await imageCompression(file, options);
+
+                if (compressedFile !== undefined) {
+
+                    setFileSelected(prev => compressedFile);
+                }
+
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
+
+            setFileSelected(prev => file);
+        }
+
 
     };
 

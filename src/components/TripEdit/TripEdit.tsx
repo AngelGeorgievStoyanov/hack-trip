@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import FileUpload from "react-mui-fileuploader";
 import LoadingButton from "@mui/lab/LoadingButton";
+import imageCompression from "browser-image-compression";
 
 
 
@@ -131,11 +132,33 @@ export default function TripEdit() {
     });
 
 
-    const handleFilesChange = (files: any) => {
+    const handleFilesChange = async (files: any) => {
 
         if (!files) return;
 
-        setFileSelected([...files]);
+        let compress = await files.map(async (x: File) => {
+            if (x.size > 10000) {
+                const options = {
+                    maxSizeMB: 0.2,
+                    maxWidthOrHeight: 920
+                }
+                try {
+                    const compressedFile = await imageCompression(x, options);
+                    return compressedFile
+
+                } catch (error) {
+                    console.log(error);
+                }
+            } else {
+                return x
+            }
+        })
+
+        compress.map((x: Promise<File>) => {
+            x.then((data) => {
+                setFileSelected(prev => [...prev, data]);
+            })
+        })
 
     };
 
