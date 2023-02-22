@@ -37,11 +37,15 @@ export default function Admin() {
 
         API_TRIP.getAllReportTrips().then((data) => {
             setTrips(data);
-        }).catch(err => console.log(err));
+        }).catch(err => {
+            console.log(err)
+        });
 
         API_COMMENT.getAllReportComments().then((data) => {
             setComments(data)
-        }).catch(err => console.log(err));
+        }).catch(err => {
+            console.log(err)
+        });
 
     }, [])
 
@@ -116,7 +120,9 @@ export default function Admin() {
                     setComments(copyComments);
                 }
 
-            }).catch((err) => console.log(err));
+            }).catch((err) => {
+                console.log(err)
+            });
         }
 
     }

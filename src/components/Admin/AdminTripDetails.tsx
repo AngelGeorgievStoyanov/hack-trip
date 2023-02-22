@@ -268,7 +268,9 @@ export default function AdminTripDetails() {
                 setComments(copyComments);
 
             }
-        }).catch((err) => console.log(err));
+        }).catch((err) => {
+            console.log(err)
+        });
 
 
 

@@ -56,7 +56,9 @@ export default function EditComment() {
         API_COMMENT.update(comment._id, editComment).then((data) => {
             setButtonAdd(true)
             navigate(`/trip/details/${comment._tripId}`);
-        }).catch((err) => console.log(err));
+        }).catch((err) => {
+            console.log(err)
+        });
 
     }
 

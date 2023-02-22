@@ -6,7 +6,7 @@ import { IdType } from "../../../shared/common-types";
 import { containerStyle, options } from "../../settings";
 import * as pointService from '../../../services/pointService';
 import { ApiPoint } from "../../../services/pointService";
-import { Box, Button, CardMedia, Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
+import { Box, Button,  Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
 import FormInputText from "../../FormFields/FormInputText";
 import { useForm } from "react-hook-form";
 import FormTextArea from "../../FormFields/FormTextArea";
@@ -64,7 +64,9 @@ export default function PointEdit() {
     useEffect(() => {
         API_POINT.findByPointId(point._id).then((data) => {
             setImages(data.imageFile);
-        }).catch((err) => console.log(err));
+        }).catch((err) => {
+            console.log(err)
+        });
     }, []);
 
 
@@ -161,11 +163,11 @@ export default function PointEdit() {
                 setInitialPoint(searchPosition);
             }
 
-        } catch (error: any) {
+        } catch (err: any) {
 
             setErrorMessageSearch('Plece enter exact name location or choose from suggestions');
 
-            console.log(error.message);
+            console.log(err.message);
         }
 
         if (searchRef.current?.value !== '' && searchRef.current?.value !== null) {
@@ -217,8 +219,8 @@ export default function PointEdit() {
                     const compressedFile = await imageCompression(x, options)
                     return new File([compressedFile], x.name, { type: x.type })
 
-                } catch (error) {
-                    console.log(error);
+                } catch (err) {
+                    console.log(err);
                 }
             } else {
                 return x
@@ -226,7 +228,6 @@ export default function PointEdit() {
         })
 
         Promise.all(compress).then((data) => {
-            console.log(data)
             setFileSelected(data)
         })
 

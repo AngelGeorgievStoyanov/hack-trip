@@ -67,7 +67,9 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom, onReportC
             API_CLIENT.findById(userId).then((data) => {
                 setUser(data);
 
-            }).catch(err => console.log(err));
+            }).catch(err => {
+                console.log(err)
+            });
         }
 
     }, []);

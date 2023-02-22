@@ -6,7 +6,7 @@ import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, useEffect, useState } from "react";
 import { containerStyle, options } from "../settings";
-import { Box, Button,  Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import FormTextArea from "../FormFields/FormTextArea";
@@ -88,7 +88,9 @@ export default function TripEdit() {
     useEffect(() => {
         API_TRIP.findById(trip._id).then((data) => {
             setImages(data.imageFile);
-        }).catch((err) => console.log(err));
+        }).catch((err) => {
+            console.log(err)
+        });
     }, []);
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
@@ -150,18 +152,17 @@ export default function TripEdit() {
                     const compressedFile = await imageCompression(x, options)
                     return new File([compressedFile], x.name, { type: x.type })
 
-                } catch (error) {
-                    console.log(error);
+                } catch (err) {
+                    console.log(err);
                 }
             } else {
                 return x
             }
         })
 
-     
+
 
         Promise.all(compress).then((data) => {
-            console.log(data)
             setFileSelected(data)
         })
 
@@ -217,11 +218,11 @@ export default function TripEdit() {
                 setInitialPoint(searchPosition);
             }
 
-        } catch (error: any) {
+        } catch (err: any) {
 
             setErrorMessageSearch('Plece enter exact name location or choose from suggestions');
 
-            console.log(error.message);
+            console.log(err.message);
         }
 
         if (searchRef.current?.value !== '' && searchRef.current?.value !== null) {

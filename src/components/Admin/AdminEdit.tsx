@@ -188,7 +188,9 @@ export default function AdminEdit() {
                 setUser(prev => data);
                 setFileSelected(undefined);
 
-            }).catch((err) => console.log(err));
+            }).catch((err) => {
+                console.log(err)
+            });
 
         }
 
@@ -235,8 +237,8 @@ export default function AdminEdit() {
                     setFileSelected(prev => compFile);
                 }
 
-            } catch (error) {
-                console.log(error);
+            } catch (err) {
+                console.log(err);
             }
         } else {
 
@@ -264,7 +266,9 @@ export default function AdminEdit() {
 
             API_CLIENT.deleteProfileImage(userEdit._id + '', img).then((data) => {
                 setUser(data);
-            }).catch((err) => console.log(err));
+            }).catch((err) => {
+                console.log(err)
+            });
         }
     }
 

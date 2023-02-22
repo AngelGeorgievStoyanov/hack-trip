@@ -235,7 +235,9 @@ export default function TripDetails() {
                 setComments(copyComments);
 
             }
-        }).catch((err) => console.log(err));
+        }).catch((err) => {
+            console.log(err)
+        });
 
 
 

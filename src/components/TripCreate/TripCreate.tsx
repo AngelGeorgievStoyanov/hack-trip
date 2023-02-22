@@ -118,8 +118,8 @@ export function CreateTrip() {
                     const compressedFile = await imageCompression(x, options)
                     return new File([compressedFile], x.name, { type: x.type })
 
-                } catch (error) {
-                    console.log(error);
+                } catch (err) {
+                    console.log(err);
                 }
             } else {
                 return x
@@ -127,7 +127,6 @@ export function CreateTrip() {
         })
 
         Promise.all(compress).then((data) => {
-            console.log(data)
             setFileSelected(data)
         })
 
@@ -185,9 +184,9 @@ export function CreateTrip() {
                 setClickedPos({ lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() })
 
             }
-        } catch (error: any) {
+        } catch (err: any) {
             setErrorMessageSearch('Plece enter exact name location or choose from suggestions');
-            console.log(error.message);
+            console.log(err.message);
         }
 
 

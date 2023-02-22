@@ -56,7 +56,9 @@ export default function AdminCommentEdit() {
 
         API_COMMENT.update(comment._id, editComment).then((data) => {
             navigate(-1);
-        }).catch((err) => console.log(err));
+        }).catch((err) => {
+            console.log(err)
+        });
 
     }
 
@@ -72,7 +74,9 @@ export default function AdminCommentEdit() {
 
             navigate(-1)
 
-        }).catch((err) => console.log(err));
+        }).catch((err) => {
+            console.log(err)
+        });
 
 
 

@@ -35,7 +35,9 @@ export default function Trips() {
             API_TRIP.findAll(searchInput, typeOfPeopleSelect, typeOfTransportSelect).then((data) => {
                 setAllPageNumber(data);
             })
-        }).catch(err => console.log(err));
+        }).catch(err => {
+            console.log(err)
+        });
 
     }, [page, searchInput, typeOfPeopleSelect, typeOfTransportSelect]);
 
@@ -49,7 +51,9 @@ export default function Trips() {
 
             setTrips(prev => data);
 
-        }).catch(err => console.log(err));
+        }).catch(err => {
+            console.log(err)
+        });
 
     }
 

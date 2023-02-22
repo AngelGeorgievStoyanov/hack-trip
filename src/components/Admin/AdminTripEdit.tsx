@@ -93,7 +93,9 @@ export default function AdminTripEdit() {
     useEffect(() => {
         API_TRIP.findById(trip._id).then((data) => {
             setImages(data.imageFile)
-        }).catch((err) => console.log(err))
+        }).catch((err) => {
+            console.log(err)
+        })
     }, [])
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
@@ -142,7 +144,6 @@ export default function AdminTripEdit() {
     const handleFilesChange = async (files: any) => {
 
         if (!files) return;
-        console.log(files)
         let compress = await files.map(async (x: File) => {
 
             if (x.size > 10000) {
@@ -168,7 +169,6 @@ export default function AdminTripEdit() {
 
 
         Promise.all(compress).then((data) => {
-            console.log(data)
             setFileSelected(data)
         })
 
@@ -229,11 +229,11 @@ export default function AdminTripEdit() {
 
             }
 
-        } catch (error: any) {
+        } catch (err: any) {
 
             setErrorMessageSearch('Plece enter exact name location or choose from suggestions');
 
-            console.log(error.message);
+            console.log(err.message);
         }
 
         if (searchRef.current?.value !== '' && searchRef.current?.value !== null) {
@@ -280,7 +280,6 @@ export default function AdminTripEdit() {
             console.log(err);
         })
 
-        console.log(imagesNames)
 
         let imagesNew = imagesNames as unknown as any as string[];
 

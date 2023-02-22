@@ -70,7 +70,9 @@ export default function Profile() {
             API_CLIENT.findById(userId).then((data) => {
                 setUser(data);
 
-            }).catch(err => console.log(err));
+            }).catch(err => {
+                console.log(err)
+            });
         }
 
     }, []);
@@ -150,7 +152,9 @@ export default function Profile() {
                 setFileSelected(undefined);
                 reset({ oldpassword: '', password: '', confirmpass: '' });
                 setHide(false);
-            }).catch((err) => console.log(err));
+            }).catch((err) => {
+                console.log(err)
+            });
 
         }
 
@@ -205,8 +209,8 @@ export default function Profile() {
                     setFileSelected(prev => compFile);
                 }
 
-            } catch (error) {
-                console.log(error);
+            } catch (err) {
+                console.log(err);
             }
         } else {
 
@@ -233,7 +237,9 @@ export default function Profile() {
 
             API_CLIENT.deleteProfileImage(userId, img).then((data) => {
                 setUser(data);
-            }).catch((err) => console.log(err));
+            }).catch((err) => {
+                console.log(err)
+            });
         }
     }
 

@@ -91,7 +91,9 @@ export default function PointCard({ point, length }: PointCardProps) {
             await API_POINT.editPointPosition(id, points).then((data) => {
 
                 navigate(`/trip/points/${idTrip}`);
-            }).catch(err => console.log(err));
+            }).catch(err => {
+                console.log(err)
+            });
         }
     }
 
@@ -120,7 +122,9 @@ export default function PointCard({ point, length }: PointCardProps) {
 
             await API_POINT.editPointPosition(id, points).then((data) => {
                 navigate(`/trip/points/${idTrip}`);
-            }).catch(err => console.log(err));
+            }).catch(err => {
+                console.log(err)
+            });
         }
 
     }

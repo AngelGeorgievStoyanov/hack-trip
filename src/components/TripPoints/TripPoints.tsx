@@ -127,8 +127,8 @@ export function TripPoints() {
                     const compressedFile = await imageCompression(x, options)
                     return new File([compressedFile], x.name, { type: x.type })
 
-                } catch (error) {
-                    console.log(error);
+                } catch (err) {
+                    console.log(err);
                 }
             } else {
                 return x
@@ -136,7 +136,6 @@ export function TripPoints() {
         })
 
         Promise.all(compress).then((data) => {
-            console.log(data)
             setFileSelected(data)
         })
 
@@ -194,11 +193,11 @@ export function TripPoints() {
 
             }
 
-        } catch (error: any) {
+        } catch (err: any) {
 
             setErrorMessageSearch('Plece enter exact name location or choose from suggestions');
 
-            console.log(error.message);
+            console.log(err.message);
         }
 
         if (searchRef.current?.value !== '' && searchRef.current?.value !== null) {
