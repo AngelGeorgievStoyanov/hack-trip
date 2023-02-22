@@ -6,7 +6,7 @@ import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, useEffect, useState } from "react";
 import { containerStyle, options } from "../settings";
-import { Box, Button, CardMedia, Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import FormTextArea from "../FormFields/FormTextArea";
@@ -15,6 +15,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import FileUpload from "react-mui-fileuploader";
+import imageCompression from "browser-image-compression";
+
+
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
@@ -136,11 +139,39 @@ export default function AdminTripEdit() {
     })
 
 
-    const handleFilesChange = (files: any) => {
+    const handleFilesChange = async (files: any) => {
 
         if (!files) return;
+        console.log(files)
+        let compress = await files.map(async (x: File) => {
 
-        setFileSelected([...files]);
+            if (x.size > 10000) {
+                const options = {
+                    maxSizeMB: 0.1,
+                    maxWidthOrHeight: 520,
+                    fileType: x.type,
+                    name: x.name ? x.name : 'IMG' + (Math.random() * 3).toString(),
+
+                }
+                try {
+                    const compressedFile = await imageCompression(x, options)
+                    return new File([compressedFile], x.name, { type: x.type })
+
+                } catch (error) {
+                    console.log(error);
+                }
+            } else {
+                return x
+            }
+        })
+
+
+
+        Promise.all(compress).then((data) => {
+            console.log(data)
+            setFileSelected(data)
+        })
+
 
     };
 
@@ -244,12 +275,12 @@ export default function AdminTripEdit() {
 
         let imagesNames = await API_TRIP.sendFile(formData).then((data) => {
             let imageName = data as unknown as any as any[] | [];
-            return imageName.map((x) => { return x.filename });
+            return imageName.map((x) => { return x.destination });
         }).catch((err) => {
             console.log(err);
         })
 
-
+        console.log(imagesNames)
 
         let imagesNew = imagesNames as unknown as any as string[];
 
@@ -281,11 +312,7 @@ export default function AdminTripEdit() {
         data.title = data.title.trim();
         data.destination = data.destination.trim();
         data.description = data.description.trim();
-
-
-
         data.timeEdited = toIsoDate(new Date());
-
         data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)];
         data.transport = TripTransport[parseInt(data.transport)];
         const editTrip = { ...data } as any;

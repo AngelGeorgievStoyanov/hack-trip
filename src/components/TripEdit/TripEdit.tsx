@@ -6,7 +6,7 @@ import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, useEffect, useState } from "react";
 import { containerStyle, options } from "../settings";
-import { Box, Button, CardMedia, Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
+import { Box, Button,  Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import FormTextArea from "../FormFields/FormTextArea";

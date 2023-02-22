@@ -77,7 +77,6 @@ export default function TripDetails() {
 
             if (data) {
                 if (typeof data === "object") {
-
                     const arrPoints = data as any as Point[];
 
                     if (arrPoints !== undefined && arrPoints.length > 0) {
@@ -147,7 +146,7 @@ export default function TripDetails() {
 
     const mapRef = React.useRef<google.maps.Map | null>(null);
 
-    const pathPoints = (points?.length) && (points !== undefined) ? points?.map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : [];
+    const pathPoints = (points?.length) && (points !== undefined) ? points?.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber)).map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : [];
     const onLoad = (map: google.maps.Map): void => {
         mapRef.current = map;
     }

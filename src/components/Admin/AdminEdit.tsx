@@ -14,6 +14,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginContext } from "../../App";
 import jwt_decode from "jwt-decode";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
+import imageCompression from "browser-image-compression";
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
@@ -201,7 +202,7 @@ export default function AdminEdit() {
     }
 
 
-    const handleFileChange = (file: any) => {
+    const handleFileChange = async (file: any) => {
 
         if (file !== null) {
 
@@ -215,7 +216,33 @@ export default function AdminEdit() {
                 setErrorMessageImage(undefined)
             }
         }
-        setFileSelected(prev => file);
+
+
+        if (file.size > 10000) {
+            const options = {
+                maxSizeMB: 0.1,
+                maxWidthOrHeight: 520,
+                fileType: file.type,
+                name: file.name ? file.name : 'IMG' + (Math.random() * 3).toString(),
+
+            }
+
+            try {
+                const compressedFile = await imageCompression(file, options);
+
+                if (compressedFile !== undefined) {
+                    let compFile = new File([compressedFile], file.name, { type: file.type })
+                    setFileSelected(prev => compFile);
+                }
+
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
+
+            setFileSelected(prev => file);
+        }
+
 
     };
 

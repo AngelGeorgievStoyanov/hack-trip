@@ -176,7 +176,7 @@ export default function AdminTripDetails() {
 
     const mapRef = React.useRef<google.maps.Map | null>(null);
 
-    const pathPoints = (points?.length) && (points !== undefined) ? points?.map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : []
+    const pathPoints = (points?.length) && (points !== undefined) ? points?.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber)).map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : []
     const onLoad = (map: google.maps.Map): void => {
         mapRef.current = map;
 
