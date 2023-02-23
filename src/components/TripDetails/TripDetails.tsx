@@ -14,7 +14,7 @@ import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Box, Button, Card, CardMedia, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography } from "@mui/material";
+import { Box, Button, Card, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { useTheme } from '@mui/material/styles';
@@ -57,9 +57,9 @@ export default function TripDetails() {
     const [hide, setHide] = useState<boolean>(false);
     const [pointCard, setPointCard] = useState<Point | null>();
     const [mapCenter, setMapCenter] = useState(center);
-    const [reported, setReported] = useState<boolean>(false);
+    const [reported, setReported] = useState<boolean>();
     const [reportedComment, setReportedComment] = useState<boolean>(false);
-    const [favorite, setFavorite] = useState<boolean>(false);
+    const [favorite, setFavorite] = useState<boolean>();
 
 
     if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (Array.from(points).length === 0)) {
@@ -68,6 +68,7 @@ export default function TripDetails() {
             lat: Number(trip.lat),
             lng: Number(trip.lng)
         }
+
     }
 
 
@@ -80,10 +81,13 @@ export default function TripDetails() {
                     const arrPoints = data as any as Point[];
 
                     if (arrPoints !== undefined && arrPoints.length > 0) {
+                        arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
+
                         center = {
                             lat: Number(arrPoints[0].lat),
                             lng: Number(arrPoints[0].lng)
                         }
+
 
                         setMapCenter(center);
 
@@ -275,6 +279,7 @@ export default function TripDetails() {
 
             trip?.favorites.push(userId);
 
+
             API_TRIP.updateFavorites(trip._id, trip).then((data) => {
 
                 setFavorite(true);
@@ -296,7 +301,7 @@ export default function TripDetails() {
             trip.favorites.splice(index, 1);
 
             API_TRIP.updateFavorites(trip._id, trip).then((data) => {
-                setFavorite(prev => false);
+                setFavorite(false);
             }).catch((err) => {
                 console.log(err);
             });
@@ -512,7 +517,7 @@ export default function TripDetails() {
                                 <Typography gutterBottom variant="h5" component="div">
                                     TRIP NAME : {trip?.title}
                                 </Typography>
-                                {((trip.favorites?.some((x) => x === userId)) && (favorite === true)) ?
+                                {((trip.favorites?.some((x) => x === userId)) || (favorite === true)) ?
                                     <MuiToolBookmarkRemove />
                                     : <MuiToolBookmark />
                                 }

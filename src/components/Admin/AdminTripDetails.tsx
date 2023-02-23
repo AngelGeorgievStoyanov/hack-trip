@@ -110,6 +110,8 @@ export default function AdminTripDetails() {
                     const arrPoints = data as any as Point[];
 
                     if (arrPoints !== undefined && arrPoints.length > 0) {
+                        arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
+
                         center = {
                             lat: Number(arrPoints[0].lat),
                             lng: Number(arrPoints[0].lng)
