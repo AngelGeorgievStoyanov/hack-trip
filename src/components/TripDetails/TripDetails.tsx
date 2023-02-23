@@ -53,7 +53,7 @@ export default function TripDetails() {
     const [activeStep, setActiveStep] = React.useState(0);
     const [points, setPoints] = useState<Point[]>([]);
     const [comments, setComments] = useState<Comment[]>([]);
-    const [liked, setLiked] = useState<boolean>(false);
+    const [liked, setLiked] = useState<boolean>();
     const [hide, setHide] = useState<boolean>(false);
     const [pointCard, setPointCard] = useState<Point | null>();
     const [mapCenter, setMapCenter] = useState(center);
