@@ -69,6 +69,7 @@ export default function TripDetails() {
             lng: Number(trip.lng)
         }
 
+
     }
 
 
@@ -81,7 +82,9 @@ export default function TripDetails() {
                     const arrPoints = data as any as Point[];
 
                     if (arrPoints !== undefined && arrPoints.length > 0) {
+
                         arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
+
 
                         center = {
                             lat: Number(arrPoints[0].lat),
@@ -89,13 +92,13 @@ export default function TripDetails() {
                         }
 
 
-                        setMapCenter(center);
 
                         setPoints(arrPoints);
                     }
 
                 }
             }
+            setMapCenter(center);
         }).catch((err) => {
             console.log(err);
         });
