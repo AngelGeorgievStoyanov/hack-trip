@@ -139,27 +139,30 @@ export default function TripEdit() {
         if (!files) return;
 
         let compress = await files.map(async (x: File) => {
-
             if (x.size > 10000) {
+
                 const options = {
                     maxSizeMB: 0.1,
                     maxWidthOrHeight: 520,
                     fileType: x.type,
-                    name: x.name ? x.name : 'IMG' + (Math.random() * 3).toString(),
-
+                    name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
+                        x.name.split(/[,\s]+/).length > 0 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
                 }
                 try {
                     const compressedFile = await imageCompression(x, options)
-                    return new File([compressedFile], x.name, { type: x.type })
+                    return new File([compressedFile], options.name, { type: x.type })
 
                 } catch (err) {
                     console.log(err);
                 }
             } else {
-                return x
+                const options = {
+                    name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
+                        x.name.split(/[,\s]+/).length > 0 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
+                }
+                return new File([x], options.name, { type: x.type })
             }
         })
-
 
 
         Promise.all(compress).then((data) => {

@@ -62,7 +62,7 @@ export default function Profile() {
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const navigate = useNavigate();
     const userId = sessionStorage.getItem('userId');
-    ;
+
 
 
     useEffect(() => {
@@ -76,7 +76,6 @@ export default function Profile() {
         }
 
     }, []);
-
 
 
     const { control, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
@@ -197,7 +196,8 @@ export default function Profile() {
                 maxSizeMB: 0.1,
                 maxWidthOrHeight: 520,
                 fileType: file.type,
-                name: file.name ? file.name : 'IMG' + (Math.random() * 3).toString(),
+                name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
+                    file.name.split(/[,\s]+/).length > 0 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
 
             }
 
@@ -205,7 +205,7 @@ export default function Profile() {
                 const compressedFile = await imageCompression(file, options);
 
                 if (compressedFile !== undefined) {
-                    let compFile = new File([compressedFile], file.name, { type: file.type })
+                    let compFile = new File([compressedFile], options.name, { type: file.type })
                     setFileSelected(prev => compFile);
                 }
 
@@ -214,7 +214,13 @@ export default function Profile() {
             }
         } else {
 
-            setFileSelected(prev => file);
+            const options = {
+                name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
+                    file.name.split(/[,\s]+/).length > 0 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
+            }
+            let newFile = new File([file], options.name, { type: file.type })
+
+            setFileSelected(prev => newFile);
         }
 
 
