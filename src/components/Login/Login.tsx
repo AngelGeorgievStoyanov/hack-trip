@@ -133,7 +133,7 @@ export function Login() {
                         <FormInputText name='email' label='Email' control={control} error={errors.email?.message}
                             rules={{ required: true, minLength: 5 }} />
 
-                        <FormInputText name='password' label='Password' control={control} error={errors.password?.message}
+                        <FormInputText name='password'  type='password' label='Password' control={control} error={errors.password?.message}
                             rules={{ required: true }} />
 
 
