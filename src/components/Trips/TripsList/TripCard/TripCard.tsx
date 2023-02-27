@@ -1,10 +1,14 @@
 
-import { Button, Card, CardContent,  ImageList, ImageListItem, Typography } from '@mui/material';
+import { Button, Card, CardContent, ImageList, ImageListItem, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Trip } from '../../../../model/trip';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from '../../../../App';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
+import { IdType } from '../../../../shared/common-types';
+import { User } from '../../../../model/users';
+import * as userService from '../../../../services/userService';
+import { ApiClient } from '../../../../services/userService';
 
 
 
@@ -22,12 +26,15 @@ interface TripCardProps {
 
 }
 
+const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
 
 export default function TripCard({ trip }: TripCardProps) {
 
 
-    const userId = sessionStorage.getItem('userId');
+    const [userVerId, setUserVerId] = useState<boolean>(false)
+
+    let userId = null;
 
 
     const { userL, setUserL } = useContext(LoginContext);
@@ -39,7 +46,20 @@ export default function TripCard({ trip }: TripCardProps) {
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         role = decode.role;
+        userId = decode._id
     }
+
+
+    if (userId !== undefined && userId !== null) {
+        API_CLIENT.findUserId(userId).then((data) => {
+
+            setUserVerId(data)
+        }).catch((err) => {
+            console.log(err)
+        })
+    }
+
+
 
 
 
@@ -74,17 +94,17 @@ export default function TripCard({ trip }: TripCardProps) {
                                 </ImageListItem>
                             )) : ''}
                         </ImageList>
-                        : 
-                            <Typography gutterBottom component="h6">
-                                There is no image for this trip
-                            </Typography>
+                        :
+                        <Typography gutterBottom component="h6">
+                            There is no image for this trip
+                        </Typography>
                     }
                     <CardContent sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center' }}>
                         {
                             (((role === 'admin') || (role === 'manager')) && ((trip.reportTrip !== undefined) && (trip.reportTrip?.length > 0))) ?
                                 <Button component={Link} to={`/admin/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
                                 :
-                                (userId !== null) ?
+                                (userVerId === true) ?
                                     <Button component={Link} to={`/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
                                     :
                                     ''}

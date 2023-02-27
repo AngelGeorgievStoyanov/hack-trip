@@ -21,6 +21,7 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     findAll(): Promise<V>;
     updateUserAdmin(id: K, entity: UserEditAdmin): Promise<V>;
     guardedRoute(id: K, role: string): Promise<boolean>;
+    findUserId(id: K): Promise<boolean>;
 }
 
 
@@ -87,6 +88,16 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     async findById(id: K): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/profile/${id}`);
 
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
+        return response.json();
+    }
+
+    async findUserId(id: K): Promise<boolean> {
+        
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/userId/${id}`);
         if (response.status >= 400) {
             const result = await response.json();
             throw new Error(result);
