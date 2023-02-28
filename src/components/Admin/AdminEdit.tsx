@@ -217,39 +217,41 @@ export default function AdminEdit() {
             if (file.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
                 setErrorMessageImage(undefined)
             }
-        }
 
 
-        if (file.size > 10000) {
-            const options = {
-                maxSizeMB: 0.1,
-                maxWidthOrHeight: 520,
-                fileType: file.type,
-                name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
-                    file.name.split(/[,\s]+/).length > 0 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
 
-            }
+            if (file.size > 10000) {
+                const options = {
+                    maxSizeMB: 0.1,
+                    maxWidthOrHeight: 520,
+                    fileType: file.type,
+                    name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
+                        file.name.split(/[,\s]+/).length > 1 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
 
-            try {
-                const compressedFile = await imageCompression(file, options);
-
-                if (compressedFile !== undefined) {
-                    let compFile = new File([compressedFile], options.name, { type: file.type })
-                    setFileSelected(prev => compFile);
                 }
 
-            } catch (err) {
-                console.log(err);
-            }
-        } else {
+                try {
+                    const compressedFile = await imageCompression(file, options);
 
-            const options = {
-                name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
-                    file.name.split(/[,\s]+/).length > 0 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
-            }
-            let newFile = new File([file], options.name, { type: file.type })
+                    if (compressedFile !== undefined) {
+                        let compFile = new File([compressedFile], options.name, { type: file.type })
+                        setFileSelected(prev => compFile);
+                    }
 
-            setFileSelected(prev => newFile);
+                } catch (err) {
+                    console.log(err);
+                }
+            } else {
+
+                const options = {
+                    name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
+                        file.name.split(/[,\s]+/).length > 1 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
+                }
+                let newFile = new File([file], options.name, { type: file.type })
+
+                setFileSelected(prev => newFile);
+            }
+
         }
 
 

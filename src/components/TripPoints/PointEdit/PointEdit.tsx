@@ -213,7 +213,7 @@ export default function PointEdit() {
                     maxWidthOrHeight: 520,
                     fileType: x.type,
                     name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
-                        x.name.split(/[,\s]+/).length > 0 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
+                        x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
                 }
                 try {
                     const compressedFile = await imageCompression(x, options)
@@ -225,7 +225,7 @@ export default function PointEdit() {
             } else {
                 const options = {
                     name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
-                        x.name.split(/[,\s]+/).length > 0 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
+                        x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
                 }
                 return new File([x], options.name, { type: x.type })
             }

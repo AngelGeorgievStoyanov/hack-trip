@@ -58,7 +58,7 @@ export default function Profile() {
 
     const [user, setUser] = useState<User>();
     const [hide, setHide] = useState<boolean>(false);
-    const [fileSelected, setFileSelected] = useState<File | undefined>();
+    const [fileSelected, setFileSelected] = useState<File | null>(null);
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const navigate = useNavigate();
     const userId = sessionStorage.getItem('userId');
@@ -148,7 +148,7 @@ export default function Profile() {
 
             API_CLIENT.updateUser(userId, editedUser).then((data) => {
                 setUser(prev => data);
-                setFileSelected(undefined);
+                setFileSelected(null);
                 reset({ oldpassword: '', password: '', confirmpass: '' });
                 setHide(false);
             }).catch((err) => {
@@ -177,7 +177,11 @@ export default function Profile() {
 
     const handleFileChange = async (file: any) => {
 
+
+
         if (file !== null) {
+
+          
 
             if (!file.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
                 setErrorMessageImage('Please select valid file image');
@@ -187,40 +191,45 @@ export default function Profile() {
             if (file.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
                 setErrorMessageImage(undefined);
             }
-        }
 
 
 
-        if (file.size > 10000) {
-            const options = {
-                maxSizeMB: 0.1,
-                maxWidthOrHeight: 520,
-                fileType: file.type,
-                name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
-                    file.name.split(/[,\s]+/).length > 0 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
 
-            }
+            if (file.size > 10000) {
+                const options = {
+                    maxSizeMB: 0.1,
+                    maxWidthOrHeight: 520,
+                    fileType: file.type,
+                    name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
+                        file.name.split(/[,\s]+/).length > 1 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
 
-            try {
-                const compressedFile = await imageCompression(file, options);
-
-                if (compressedFile !== undefined) {
-                    let compFile = new File([compressedFile], options.name, { type: file.type })
-                    setFileSelected(prev => compFile);
                 }
 
-            } catch (err) {
-                console.log(err);
-            }
-        } else {
+                console.log(options)
 
-            const options = {
-                name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
-                    file.name.split(/[,\s]+/).length > 0 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
-            }
-            let newFile = new File([file], options.name, { type: file.type })
+                try {
+                    const compressedFile = await imageCompression(file, options);
 
-            setFileSelected(prev => newFile);
+                    if (compressedFile !== undefined) {
+                        let compFile = new File([compressedFile], options.name, { type: file.type })
+                        setFileSelected(prev => compFile);
+                    }
+
+                } catch (err) {
+                    console.log(err);
+                }
+            } else {
+
+                const options = {
+                    name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
+                        file.name.split(/[,\s]+/).length > 1 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
+                }
+                let newFile = new File([file], options.name, { type: file.type })
+
+                setFileSelected(prev => newFile);
+            }
+
+
         }
 
 
@@ -232,7 +241,7 @@ export default function Profile() {
 
         if (svg.tagName === 'svg') {
 
-            setFileSelected(undefined);
+            setFileSelected(prev => null);
         }
     }
 
@@ -311,7 +320,7 @@ export default function Profile() {
                     <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
                         <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-                        <Button variant="contained" onClick={changePass} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hide ? 'HIDE CHANGE PASSWORD' : 'CHANGE PASSWORD'}</Button>
+                        <Button variant="contained" onClick={changePass} disabled={user?.email === 'test@abv.bg' ? true : false} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hide ? 'HIDE CHANGE PASSWORD' : 'CHANGE PASSWORD'}</Button>
                     </Box >
                 </Box>
             </Box>
