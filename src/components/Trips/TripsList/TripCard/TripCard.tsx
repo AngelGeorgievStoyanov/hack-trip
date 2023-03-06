@@ -15,9 +15,6 @@ import { ApiClient } from '../../../../services/userService';
 
 type decode = {
     _id: string,
-    email: string,
-    firstName: string,
-    lastName: string,
     role: string
 }
 
@@ -28,16 +25,15 @@ interface TripCardProps {
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
+let userId: string | undefined;
 
 export default function TripCard({ trip }: TripCardProps) {
 
-
     const [userVerId, setUserVerId] = useState<boolean>(false)
 
-    let userId = null;
 
 
-    const { userL, setUserL } = useContext(LoginContext);
+    const { userL } = useContext(LoginContext);
 
 
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
@@ -52,7 +48,7 @@ export default function TripCard({ trip }: TripCardProps) {
 
     if (userId !== undefined && userId !== null) {
         API_CLIENT.findUserId(userId).then((data) => {
-
+          
             setUserVerId(data)
         }).catch((err) => {
             console.log(err)
@@ -61,28 +57,26 @@ export default function TripCard({ trip }: TripCardProps) {
 
 
 
-
-
     return (
         <>
-            {(((trip.reportTrip !== undefined) && (trip.reportTrip !== null) && (trip.reportTrip.length >= 5)) && (role === 'user')) ? '' :
+            {(((trip.reportTrip !== undefined) && (trip.reportTrip !== null) && (Number(trip.reportTrip)) >= 5) && (role === 'user')) ? '' :
                 <Card sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     maxWidth: '300px', margin: '20px',
                     height: 'fit-content',
-                    padding: '25px', backgroundColor: '#8d868670',
-                    boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
+                    padding: '25px 0px 0px 0px', backgroundColor: '#8d868670',
+                    boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
                 }}>
-                    <Typography gutterBottom variant="h5" component="div">
-                        Title of the trip :{trip.title}
+                    <Typography gutterBottom variant="h5" component="div" sx={{ padding: '0px 15px' }}>
+                        Title of the trip: {trip.title}
                     </Typography>
-                    <Typography gutterBottom variant="h6" component="div">
-                        Destination of the trip :{trip.destination}
+                    <Typography gutterBottom variant="h6" component="div" sx={{ padding: '0px 15px' }}>
+                        Destination of the trip: {trip.destination}
                     </Typography>
                     {trip.imageFile?.length && trip.imageFile.length > 0 ?
-                        <ImageList sx={{ width: 320, height: 350 }} cols={3} rowHeight={164}>
+                        <ImageList sx={{ maxWidth: 320, maxHeight: 350 }} cols={trip.imageFile.length > 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : 'auto'}>
                             {trip.imageFile ? trip.imageFile.map((item, i) => (
                                 <ImageListItem key={i}>
                                     <img
@@ -101,17 +95,17 @@ export default function TripCard({ trip }: TripCardProps) {
                     }
                     <CardContent sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center' }}>
                         {
-                            (((role === 'admin') || (role === 'manager')) && ((trip.reportTrip !== undefined) && (trip.reportTrip?.length > 0))) ?
-                                <Button component={Link} to={`/admin/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
+                            (((role === 'admin') || (role === 'manager')) && (Number(trip.reportTrip) > 0) && (userVerId === true)) ?
+                                <Button href={`/admin/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
                                 :
                                 (userVerId === true) ?
-                                    <Button component={Link} to={`/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
+                                    <Button href={`/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
                                     :
                                     ''}
 
-                        {trip.likes.length > 0 ?
+                        {Number(trip.likes) > 0 ?
                             < Typography sx={{ margin: '10px' }} gutterBottom variant="h6" component="div">
-                                LIKES :{trip.likes.length}
+                                LIKES: {Number(trip.likes[0])}
                             </Typography> : ''
                         }
 

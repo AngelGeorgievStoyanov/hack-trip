@@ -4,7 +4,7 @@ import FormInputText from "../FormFields/FormInputText";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
-import React, { BaseSyntheticEvent, useEffect, useState } from "react";
+import React, { BaseSyntheticEvent, useContext, useEffect, useState } from "react";
 import * as userService from '../../services/userService';
 import { IdType, toIsoDate } from "../../shared/common-types";
 import { User } from "../../model/users";
@@ -12,6 +12,8 @@ import { ApiClient } from "../../services/userService";
 import { MuiFileInput } from "mui-file-input";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import imageCompression from "browser-image-compression";
+import { LoginContext } from "../../App";
+import jwt_decode from "jwt-decode";
 
 
 
@@ -48,12 +50,18 @@ type FormData = {
     password: string;
     confirmpass: string;
     imageFile: string | undefined;
-
     timeCreated: string | undefined;
     timeEdited: string;
 
 };
 
+
+type decode = {
+    _id: string,
+}
+
+
+let userId: string | undefined;
 export default function Profile() {
 
     const [user, setUser] = useState<User>();
@@ -61,12 +69,22 @@ export default function Profile() {
     const [fileSelected, setFileSelected] = useState<File | null>(null);
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const navigate = useNavigate();
-    const userId = sessionStorage.getItem('userId');
+
+    const { userL } = useContext(LoginContext);
+
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
+
+    }
 
 
 
     useEffect(() => {
-        if (userId) {
+        if (userId !== undefined) {
             API_CLIENT.findById(userId).then((data) => {
                 setUser(data);
 
@@ -109,21 +127,21 @@ export default function Profile() {
 
         let formData = new FormData();
 
-
+        let imagesNames
         if (fileSelected) {
             formData.append('file', fileSelected);
-        }
 
 
-        const imagesNames = await API_CLIENT.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[];
-            return imageName.map((x) => {
-                return x.destination;
+
+            imagesNames = await API_CLIENT.sendFile(formData).then((data) => {
+                let imageName = data as unknown as any as any[];
+                return imageName.map((x) => {
+                    return x.destination;
+                });
+            }).catch((err) => {
+                console.log(err);
             });
-        }).catch((err) => {
-            console.log(err);
-        });
-
+        }
         if (imagesNames !== undefined && imagesNames.length > 0) {
             data.imageFile = imagesNames[0];
 
@@ -181,7 +199,7 @@ export default function Profile() {
 
         if (file !== null) {
 
-          
+
 
             if (!file.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
                 setErrorMessageImage('Please select valid file image');
@@ -205,7 +223,7 @@ export default function Profile() {
 
                 }
 
-                console.log(options)
+
 
                 try {
                     const compressedFile = await imageCompression(file, options);
@@ -284,7 +302,7 @@ export default function Profile() {
                         maxHeight: '700px',
                         padding: '30px',
                         backgroundColor: '#8d868670',
-                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                        boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                         '@media(max-width: 600px)': { display: 'flex', width: '90%' }
                     }}

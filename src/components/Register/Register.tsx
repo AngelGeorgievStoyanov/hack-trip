@@ -9,7 +9,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 import { Box, Button, Container, Grid, Typography } from '@mui/material';
 import FormInputText from '../FormFields/FormInputText';
-
+import { LoginContext } from '../../App';
+import { useContext } from 'react';
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users/register');
 
@@ -50,6 +51,7 @@ export function Register({ user }: UserProps) {
 
     const [errorApi, setErrorApi] = useState();
 
+    const loginContext = useContext(LoginContext);
 
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
@@ -80,8 +82,10 @@ export function Register({ user }: UserProps) {
             .then((user) => {
 
                 sessionStorage.setItem('userId', user._id + '');
-                sessionStorage.setItem('email', user.email);
                 sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
+                if (user !== undefined) {
+                    loginContext?.setUserL({ ...user });
+                }
                 setErrorApi(undefined);
                 navigate('/');
             }).catch((err) => {
@@ -92,9 +96,6 @@ export function Register({ user }: UserProps) {
                 console.log(err.message);
 
             });
-
-
-
 
     }
 
@@ -129,7 +130,7 @@ export function Register({ user }: UserProps) {
                         maxHeight: '500px',
                         padding: '30px',
                         backgroundColor: '#8d868670',
-                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                        boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                         '@media(max-width: 600px)': { display: 'flex' },
                         '@media(min-width: 600px)': { '& .MuiButton-root': { m: 1, width: '32ch' } }

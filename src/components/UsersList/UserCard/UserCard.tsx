@@ -7,10 +7,6 @@ import jwt_decode from "jwt-decode";
 
 
 type decode = {
-    _id: string,
-    email: string,
-    firstName: string,
-    lastName: string,
     role: string
 }
 
@@ -23,16 +19,10 @@ interface UserCardProps {
 export default function UserCard({ user }: UserCardProps) {
 
     const dateFormat = (date: string) => {
-        const timeCreated = date.split('.')[0];
-        let timeData = timeCreated.split('T')[0];
-        const timeH = timeCreated.split('T')[1];
-        timeData = timeData.split('-').reverse().join('-');
-        const currentDataCreated = timeH + ' / ' + timeData;
-        return currentDataCreated;
+        return date.split('.')[0].split('T')[0].split('-').reverse().join('-');
     }
 
-
-    const { userL, setUserL } = useContext(LoginContext);
+    const { userL } = useContext(LoginContext);
 
 
     const userRole = user.role as any as string;
@@ -55,7 +45,7 @@ export default function UserCard({ user }: UserCardProps) {
                     maxWidth: '300px', margin: '20px',
                     height: 'fit-content',
                     padding: '25px', backgroundColor: '#8d868670',
-                    boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
+                    boxShadow: '3px 2px 5px black',  border: 'solid 1px', borderRadius: '0px'
                 }}>
                     <Typography gutterBottom variant="h5" component="div">
                         User ID :{user._id}
@@ -81,7 +71,7 @@ export default function UserCard({ user }: UserCardProps) {
                     </Typography> <Typography gutterBottom variant="subtitle1" component="div">
                         Profile last edited on: {dateFormat(user.timeEdited!)}
                     </Typography> <Typography gutterBottom variant="subtitle1" component="div">
-                        Caount of logs: {user.countOfLogs}
+                        Count of logs: {user.countOfLogs}
                     </Typography> <Typography gutterBottom variant="subtitle1" component="div">
                         Last Login: {dateFormat(user.lastTimeLogin!)}
                     </Typography>
@@ -99,7 +89,7 @@ export default function UserCard({ user }: UserCardProps) {
                         maxWidth: '300px', margin: '20px',
                         height: 'fit-content',
                         padding: '25px', backgroundColor: '#8d868670',
-                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
+                        boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
                     }}>
                         <Typography gutterBottom variant="h5" component="div">
                             User ID :{user._id}

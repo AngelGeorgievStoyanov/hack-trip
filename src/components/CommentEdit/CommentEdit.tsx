@@ -36,7 +36,7 @@ export default function EditComment() {
     const comment = useLoaderData() as Comment;
     const navigate = useNavigate();
     const [loading, setLoading] = useState<boolean>(true);
-    const [buttonAdd, setButtonAdd] = useState<boolean>(true)
+    const [buttonAdd, setButtonAdd] = useState<boolean>(true);
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -44,8 +44,6 @@ export default function EditComment() {
         mode: 'onChange',
         resolver: yupResolver(schema),
     });
-
-
 
 
     const editCommentSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
@@ -83,7 +81,7 @@ export default function EditComment() {
                         padding: '30px',
                         marginTop: '50px',
                         backgroundColor: '#8d868670',
-                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                        boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                         '& .MuiButton-root': { m: 1, width: '32ch' },
                     }}

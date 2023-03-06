@@ -69,7 +69,7 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
     async logout(accessToken: string) {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`, {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/logout`, {
             method: 'POST',
             headers: {
                 'X-Authorization': accessToken
@@ -96,13 +96,13 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     }
 
     async findUserId(id: K): Promise<boolean> {
-        
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/userId/${id}`);
         if (response.status >= 400) {
             const result = await response.json();
             throw new Error(result);
         }
-        return response.json();
+        let res = await response.json();
+        return res
     }
 
 

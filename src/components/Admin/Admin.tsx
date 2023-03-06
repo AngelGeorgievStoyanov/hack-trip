@@ -1,5 +1,5 @@
 import { Box, Button } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { User } from "../../model/users";
 import UsersList from "../UsersList/UsersList";
@@ -12,23 +12,43 @@ import * as commentService from '../../services/commentService'
 import { CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
+import { LoginContext } from "../../App";
+import jwt_decode from "jwt-decode";
 
 
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
 const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
 
+type decode = {
+    _id: string;
+}
+
+
+
+let userId: string;
+
+
 export default function Admin() {
 
     const users = useLoaderData() as User[];
     const navigate = useNavigate();
-    const userId = sessionStorage.getItem('userId') + ''
 
+    const { userL } = useContext(LoginContext);
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
+    }
+
+    
     const [trips, setTrips] = useState<Trip[]>();
     const [hideUsersList, setHideUsersList] = useState<boolean>(true);
     const [hideTripsList, setHideTripsList] = useState<boolean>(true);
     const [hideCommentsList, setHideCommentsList] = useState<boolean>(true);
-    const [comments, setComments] = useState<CommentCreate[]>()
+    const [comments, setComments] = useState<CommentCreate[]>();
     const [reportedComment, setReportedComment] = useState<boolean>(false);
 
 
@@ -47,11 +67,10 @@ export default function Admin() {
             console.log(err)
         });
 
-    }, [])
+    }, []);
 
 
     const hideUsers = () => {
-
         setHideUsersList(!hideUsersList);
 
     }
@@ -72,7 +91,7 @@ export default function Admin() {
 
         API_COMMENT.reportComment(comment._id, comment).then((data) => {
             setReportedComment(true);
-            setComments(data)
+            setComments(data);
 
         }).catch((err) => {
             console.log(err);
@@ -194,14 +213,6 @@ export default function Admin() {
                         : ''}
 
 
-                    {hideTripsList ?
-                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', }}>
-                            {trips !== undefined && trips.length > 0 ?
-                                <TripList trips={trips} />
-                                : ''}
-
-                        </Box>
-                        : ''}
 
                 </Box>
             </Box>

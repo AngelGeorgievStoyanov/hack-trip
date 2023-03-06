@@ -63,17 +63,21 @@ export const LoginContext = createContext({} as LoginContext);
 
 
 
-export async function tripsLoaderTop() {
 
-  return API_TRIP.findTopTrips();
 
-}
+export const userId = sessionStorage.getItem('userId')
+
+
+
 
 export async function tripLoader({ params }: LoaderFunctionArgs) {
-  if (params.tripId) {
+
+
+  if (params.tripId && userId !== null && userId !== undefined) {
+
     try {
 
-      const trip = await API_TRIP.findById(params.tripId);
+      const trip = await API_TRIP.findById(params.tripId, userId);
       if (trip) {
         return trip
       }
@@ -166,11 +170,10 @@ const router = createBrowserRouter([
 
   {
     element: <Layout />,
-    errorElement: <h2>No internet connection with server.Please try again later.</h2>,
+    errorElement: <h2>No internet connection with server.Please try again later...</h2>,
     children: [
       {
         path: "/",
-        loader: tripsLoaderTop,
         element: <Home />
       },
       {
@@ -212,12 +215,12 @@ const router = createBrowserRouter([
       {
         path: '/trip/edit/:tripId',
         loader: tripLoader,
-        element: <GuardedRouteTrip />,
+        element: <GuardedRouteTrip  />,
         children: [
           {
             path: '',
             loader: tripLoader,
-            element: <TripEdit />,
+            element: <TripEdit  />,
             errorElement: <NotFound />
           }
         ]
@@ -365,7 +368,6 @@ const router = createBrowserRouter([
   }
 ]);
 
-
 function App() {
 
   const [userL, setUserL] = useState<null | User>(null)
@@ -373,11 +375,11 @@ function App() {
   return (
     <>
       <ErrorBoundary>
-        {window.navigator.onLine ?
-          <LoginContext.Provider value={{ userL, setUserL }}>
-            <RouterProvider router={router} />
-          </LoginContext.Provider>
-          : <h1>No internet connection. Please try again later.</h1>}
+
+        <LoginContext.Provider value={{ userL, setUserL }}>
+          <RouterProvider router={router} />
+        </LoginContext.Provider>
+
       </ErrorBoundary>
     </>
   );

@@ -11,30 +11,28 @@ import { ApiClient } from '../../services/userService';
 
 type decode = {
     _id: string,
-    email: string,
-    firstName: string,
-    lastName: string,
     role: string
 }
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
+let userId: IdType;
 
 const GuardedRouteAdmin = () => {
 
     const [guard, setGuard] = useState<boolean>(false);
-    const { userL, setUserL } = useContext(LoginContext);
+    const { userL } = useContext(LoginContext);
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
 
     let role = 'user';
-    let userId: IdType;
 
+    
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         role = decode.role;
         userId = decode._id;
     }
-
+    
 
 
     useEffect(() => {

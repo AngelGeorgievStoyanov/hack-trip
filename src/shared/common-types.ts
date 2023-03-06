@@ -46,3 +46,20 @@ export function stringAvatar(name: string) {
         children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
     };
 }
+
+
+
+export function sliceDescription(description: string, maxLength: number) {
+    if (description.length > maxLength) {
+
+        let slicedDescription = description.slice(0, maxLength - 3);
+        const lastSpaceIndex = slicedDescription.lastIndexOf(' ');
+        slicedDescription = slicedDescription.slice(0, lastSpaceIndex);
+        if (slicedDescription.length < description.length) {
+            slicedDescription += '...';
+        }
+        return slicedDescription;
+    } else {
+        return description;
+    }
+}

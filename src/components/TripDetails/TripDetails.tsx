@@ -1,4 +1,4 @@
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
 import { IdType } from "../../shared/common-types";
@@ -6,7 +6,7 @@ import * as tripService from '../../services/tripService';
 import * as pointService from '../../services/pointService';
 import { Point } from "../../model/point";
 import { ApiPoint } from "../../services/pointService";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { GoogleMap, MarkerF, PolylineF, useJsApiLoader } from "@react-google-maps/api";
 import React from "react";
 import { containerStyle, options } from "../settings";
@@ -25,8 +25,10 @@ import ReportGmailerrorredIcon from '@mui/icons-material/ReportGmailerrorred';
 import ReportOffIcon from '@mui/icons-material/ReportOff';
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import BookmarkRemoveOutlinedIcon from '@mui/icons-material/BookmarkRemoveOutlined';
+import jwt_decode from "jwt-decode";
+import { LoginContext } from "../../App";
 
-let zoom = 8;
+let zoom = 10;
 
 let center = {
     lat: 42.697866831005435,
@@ -38,16 +40,31 @@ const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
+type decode = {
+    _id: string,
+}
+
+const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
+const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
+const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
+let userId: string;
+
 export default function TripDetails() {
 
-    const trip = useLoaderData() as Trip;
 
-    const userId = sessionStorage.getItem('userId') + ''
+
+    const { userL } = useContext(LoginContext)
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
+    }
+
     const navigate = useNavigate();
 
-    const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
-    const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
-    const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
+    const idTrip = useParams().tripId;
 
     const theme = useTheme();
     const [activeStep, setActiveStep] = React.useState(0);
@@ -60,71 +77,90 @@ export default function TripDetails() {
     const [reported, setReported] = useState<boolean>();
     const [reportedComment, setReportedComment] = useState<boolean>(false);
     const [favorite, setFavorite] = useState<boolean>();
+    const [trip, setTrip] = useState<Trip>()
 
-
-    if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (Array.from(points).length === 0)) {
-
-        center = {
-            lat: Number(trip.lat),
-            lng: Number(trip.lng)
-        }
-
-
-    }
 
 
     useEffect(() => {
-
-        API_POINT.findByTripId(trip._id).then((data) => {
-
-            if (data) {
-                if (typeof data === "object") {
-                    const arrPoints = data as any as Point[];
-
-                    if (arrPoints !== undefined && arrPoints.length > 0) {
-
-                        arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
+        if (idTrip !== undefined) {
 
 
-                        center = {
-                            lat: Number(arrPoints[0].lat),
-                            lng: Number(arrPoints[0].lng)
+
+            API_TRIP.findById(idTrip, userId).then((data) => {
+
+                if (data) {
+                    setTrip(data)
+
+                    API_POINT.findByTripId(data._id).then((data) => {
+
+                        if (data) {
+                            if (typeof data === "object") {
+                                const arrPoints = data as any as Point[];
+
+                                if (arrPoints !== undefined && arrPoints.length > 0) {
+
+                                    arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
+
+
+                                    center = {
+                                        lat: Number(arrPoints[0].lat),
+                                        lng: Number(arrPoints[0].lng)
+                                    }
+
+
+                                    setPoints(arrPoints);
+                                }
+
+                            }
+                        }
+                        setMapCenter(center);
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+
+                    API_COMMENT.findByTripId(data._id, userId).then(async (data) => {
+                        if (data) {
+
+                            if (typeof data === "object") {
+                                setComments(data);
+                            }
                         }
 
 
-
-                        setPoints(arrPoints);
-                    }
+                    }).catch((err) => {
+                        console.log(err);
+                    });
 
                 }
-            }
-            setMapCenter(center);
-        }).catch((err) => {
-            console.log(err);
-        });
+            }).catch((err) => {
+                console.log(err)
+                navigate('/404')
 
-        API_COMMENT.findByTripId(trip._id).then(async (data) => {
-            if (data) {
+            })
 
-                if (typeof data === "object") {
-
-                    setComments(data);
-                }
-            }
-
-
-        }).catch((err) => {
-            console.log(err);
-        });
-
-
+        }
 
     }, [favorite]);
 
 
+    if (trip !== undefined) {
+
+        if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (Array.from(points).length === 0)) {
+
+            center = {
+                lat: Number(trip.lat),
+                lng: Number(trip.lng)
+            }
+
+
+        }
+
+    }
+
 
     const deleteClickHandler = () => {
 
+        if (trip === undefined) return;
         const tripId = trip._id
         API_TRIP.deleteById(tripId).then((data) => {
             API_POINT.deleteByTripId(tripId).then((data) => {
@@ -182,7 +218,7 @@ export default function TripDetails() {
                 }
 
                 setMapCenter(prev => center);
-                zoom = 10;
+                zoom = 14;
             }
 
         } else if (positionNumber) {
@@ -198,7 +234,7 @@ export default function TripDetails() {
                 }
 
                 setMapCenter(prev => center);
-                zoom = 10;
+                zoom = 14;
             }
 
         } else if (positionNumber === 0) {
@@ -209,7 +245,7 @@ export default function TripDetails() {
                 lng: Number(points[0].lng)
             }
             setMapCenter(prev => center);
-            zoom = 8;
+            zoom = 10;
         }
 
     }
@@ -254,18 +290,17 @@ export default function TripDetails() {
     const onEditComment = async (comment: Comment) => {
         navigate(`/comments/edit/${comment._id}`);
 
-
     }
 
     const onLikeTrip = () => {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
-            trip.likes.push(userId);
 
 
-            API_TRIP.updateLikes(trip._id, trip).then((data) => {
+            API_TRIP.updateLikes(trip._id, userId).then((data) => {
+                setTrip(data)
 
-                setLiked(true);
+                setLiked(prev => true);
 
             }).catch((err) => {
                 console.log(err);
@@ -317,14 +352,12 @@ export default function TripDetails() {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
 
-            const index = trip.likes.indexOf(userId);
 
-            trip.likes.splice(index, 1);
+            API_TRIP.updateLikes(trip._id, userId).then((data) => {
 
-            API_TRIP.updateLikes(trip._id, trip).then((data) => {
+                setTrip(data)
 
-
-                setLiked(false);
+                setLiked(prev => false);
             }).catch((err) => {
                 console.log(err);
             });
@@ -497,12 +530,14 @@ export default function TripDetails() {
     }
 
 
+
+
     return (
         <>
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                 <Container maxWidth={false} sx={{
-                    display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc', '@media(max-width: 600px)': {
+                    display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc', '@media(max-width: 900px)': {
                         display: 'flex', flexDirection: 'column-reverse'
                     }
                 }}>
@@ -513,14 +548,14 @@ export default function TripDetails() {
                         minWidth: '200px',
                         maxWidth: '450px', margin: '20px',
                         padding: '25px', backgroundColor: '#8d868670',
-                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
+                        boxShadow: '3px 2px 5px black',  border: 'solid 1px', borderRadius: '0px'
                     }}>
                         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                             <>
                                 <Typography gutterBottom variant="h5" component="div">
                                     TRIP NAME : {trip?.title}
                                 </Typography>
-                                {((trip.favorites?.some((x) => x === userId)) || (favorite === true)) ?
+                                {((trip && trip.favorites?.some((x) => x === userId)) || (favorite === true)) ?
                                     <MuiToolBookmarkRemove />
                                     : <MuiToolBookmark />
                                 }
@@ -545,7 +580,7 @@ export default function TripDetails() {
                             DESCRIPTION : {trip?.description}
                         </Typography>
 
-                        {trip._ownerId === userId ?
+                        {(trip && trip._ownerId === userId) ?
                             <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
 
                             :
@@ -561,7 +596,7 @@ export default function TripDetails() {
 
                         <Button component={Link} to={`/comments/add-comment/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD COMMENT</Button>
 
-                        {(trip._ownerId === userId) ?
+                        {(trip && trip._ownerId === userId) ?
                             <>
                                 <Button component={Link} to={`/trip/edit/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>EDIT TRIP</Button>
                                 <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE TRIP</Button>
@@ -587,16 +622,16 @@ export default function TripDetails() {
 
                         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around' }}>
 
-                            {((trip.reportTrip?.some((x) => x === userId)) || (reported === true)) ?
+                            {((trip && trip.reportTrip?.some((x) => x === userId)) || (reported === true)) ?
                                 <MuiTooltiUnReport />
                                 :
                                 <MuiTooltiReport />
                             }
 
-                            {trip._ownerId !== userId ?
+                            {trip && trip._ownerId !== userId ?
                                 <>
                                     {
-                                        trip.likes.some((x) => x === userId) || (liked === true) ?
+                                        trip.likes.includes(userId) || liked === true ?
                                             <MuiTooltipUnlike />
                                             :
                                             <MuiTooltipLike />
@@ -606,10 +641,10 @@ export default function TripDetails() {
                         </Box>
                     </Card>
 
-                    {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
+                    {(trip && trip.imageFile?.length && trip.imageFile?.length > 0) ?
                         <>
-                            <ImageList sx={{ width: 520, height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
-                                {trip.imageFile ? trip.imageFile.map((item, i) => (
+                            <ImageList sx={{ maxWidth: 520, height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={trip.imageFile.length >= 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : 'auto'}>
+                                {trip && trip.imageFile ? trip.imageFile.map((item, i) => (
                                     <ImageListItem key={i}>
                                         <img
                                             src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
@@ -630,11 +665,11 @@ export default function TripDetails() {
                     {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} onUnReportClickHandlerComment={unReportClickHandlerComment} onReportClickHandlerComment={reportClickHandlerComment} reportedComment={reportedComment} userId={userId} />) : ''}
                 </Container>
                 <Container maxWidth={false} sx={{
-                    display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 600px)': {
-                        display: 'flex', flexDirection: 'column'
+                    display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 900px)': {
+                        display: 'flex', flexDirection: 'column', alignItems: 'center'
                     }
                 }} >
-                    <Box component='div' sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <Box component='div' sx={{boxSizing:"content-box",  '@media(max-width: 600px)': {display:'flex',flexDirection:'column', width:'100vW'}}}>
                         {points?.length > 0 ?
                             <MobileStepper
                                 variant="progress"
@@ -675,7 +710,7 @@ export default function TripDetails() {
                                 onUnmount={onUnmount}
                             >
                                 {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                                {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
+                                {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip && trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
                             </GoogleMap>
                         </Box>
                     </Box>

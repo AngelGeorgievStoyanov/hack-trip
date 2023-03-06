@@ -7,13 +7,13 @@ const baseUrl = CONNECTIONURL;
 
 export interface ApiTrip<K, V extends Identifiable<K>> {
     findAll(search: string, typeOfGroup: string, typeOfTransportSelect: string): Promise<K>;
-    findById(id: K): Promise<V>;
+    findById(id: K, userId: K): Promise<V>;
     create(entityWithoutId: TripCreate): Promise<any>;
     update(id: K, entity: Trip): Promise<V>;
-    updateLikes(id: K, entity: Trip): Promise<V>;
+    updateLikes(id: K, userId: K): Promise<V>;
     deleteById(id: K): Promise<void>;
     reportTrip(id: K, entity: Trip): Promise<V>;
-    findTopTrips(): Promise<V[]>;
+    findTopTrips(userId: K | undefined): Promise<V[]>;
     findAllMyTrips(id: K): Promise<V[]>;
     sendFile(entityWithoutId: FormData): Promise<string[]>;
     editImages(id: K, oneImage: string[]): Promise<V>;
@@ -21,7 +21,7 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
     deleteReportTrip(id: K, entity: []): Promise<V>;
     updateFavorites(id: K, entity: Trip): Promise<V>;
     findAllMyFavorites(id: K): Promise<V[]>;
-    findAllPagination(page: K, search: string, typeOfGroup: string, typeOfTransportSelect: string): Promise<V[]>;
+    findAllPagination(page: K, search: string, typeOfGroup: string, typeOfTransportSelect: string, userId: K | undefined): Promise<V[]>;
 
 }
 
@@ -37,9 +37,9 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
     }
 
 
-    async findAllPagination(page: K, search: string, typeOfGroup: string, typeOfTransportSelect: string): Promise<V[]> {
+    async findAllPagination(page: K, search: string, typeOfGroup: string, typeOfTransportSelect: string, userId: K | undefined): Promise<V[]> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/paginate/?page=${page}&search=${search}&typegroup=${typeOfGroup}&typetransport=${typeOfTransportSelect}`);
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/paginate/?page=${page}&search=${search}&typegroup=${typeOfGroup}&typetransport=${typeOfTransportSelect}&userId=${userId}`);
 
 
         return await response.json();
@@ -58,8 +58,8 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
     }
 
 
-    async findTopTrips(): Promise<V[]> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/top`);
+    async findTopTrips(id: K | undefined): Promise<V[]> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/top/${id}`);
         return response.json();
     }
 
@@ -83,16 +83,19 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         return response.json();
     }
 
-    async findById(id: K): Promise<V> {
+    async findById(id: K, userId: K): Promise<V> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`);
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}/${userId}`);
 
         if (response.status >= 400) {
-            const result = await response.json();
-
-            throw new Error(result.message);
+            const res = await response.json();
+            throw new Error(res);
         }
-        return await response.json();
+
+        const result = await response.json();
+      
+        return result
     }
 
     async deleteById(id: K): Promise<void> {
@@ -130,14 +133,14 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
 
 
 
-    async updateLikes(id: K, entity: Trip): Promise<V> {
+    async updateLikes(id: K, userId: K): Promise<V> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/like/${id}`, {
             method: 'PUT',
             headers: {
                 'content-type': 'application/json'
             },
-            body: JSON.stringify(entity)
+            body: JSON.stringify({ userId })
         });
 
         const result = await response.json();
@@ -161,7 +164,7 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
 
         return result;
     }
-    
+
     async deleteReportTrip(id: K, entity: []): Promise<V> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/delete-report/${id}`, {

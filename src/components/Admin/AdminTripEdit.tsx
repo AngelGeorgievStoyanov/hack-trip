@@ -69,7 +69,7 @@ const schema = yup.object({
 }).required();
 
 
-
+let userId: string;
 
 
 
@@ -79,6 +79,8 @@ export default function AdminTripEdit() {
 
     const trip = useLoaderData() as Trip;
 
+   
+
     const [images, setImages] = useState<string[]>();
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral);
     const [initialPoint, setInitialPoint] = React.useState<google.maps.LatLngLiteral>({ lat: Number(trip.lat), lng: Number(trip.lng) } as google.maps.LatLngLiteral);
@@ -87,15 +89,24 @@ export default function AdminTripEdit() {
 
     const [visible, setVisible] = React.useState(true);
     let positionPoint;
-
+    if (trip) {
+        userId = trip._ownerId
+       
+    }
 
 
     useEffect(() => {
-        API_TRIP.findById(trip._id).then((data) => {
-            setImages(data.imageFile)
-        }).catch((err) => {
-            console.log(err)
-        })
+
+        if ((trip !== undefined) && (userId !== undefined)) {
+            if (userId) {
+
+                API_TRIP.findById(trip._id, userId).then((data) => {
+                    setImages(data.imageFile)
+                }).catch((err) => {
+                    console.log(err)
+                })
+            }
+        }
     }, [])
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
@@ -412,7 +423,7 @@ export default function AdminTripEdit() {
                                 maxHeight: '1100px',
                                 padding: '30px',
                                 backgroundColor: '#8d868670',
-                                boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                                boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                                 '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                                 '& .MuiButton-root': { m: 1, width: '32ch' },
                             }}

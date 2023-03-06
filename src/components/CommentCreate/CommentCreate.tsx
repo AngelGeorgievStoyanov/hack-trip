@@ -5,14 +5,21 @@ import { IdType } from "../../shared/common-types";
 import * as commentService from '../../services/commentService'
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { BaseSyntheticEvent, useState } from "react";
+import { BaseSyntheticEvent, useEffect, useState } from "react";
 import FormTextArea from "../FormFields/FormTextArea";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import LoadingButton from "@mui/lab/LoadingButton";
+import { LoginContext } from "../../App";
+import { useContext } from 'react'
+import jwt_decode from "jwt-decode";
+import { User } from "../../model/users";
+import * as userService from '../../services/userService'
+import { ApiClient } from "../../services/userService";
 
 
 const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
+const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
 type FormData = {
     comment: string;
@@ -30,13 +37,46 @@ const schema = yup.object({
 
 }).required();
 
+type decode = {
+    _id: string;
+}
+
+let userId: string;
+
+
+
 export default function CreateComment() {
 
     const idTrip = useParams().tripId;
-    const userId = sessionStorage.getItem('userId');
-    const nameAuthor = sessionStorage.getItem('email');
+
+
+    const { userL } = useContext(LoginContext);
+
     const [loading, setLoading] = useState<boolean>(true);
+    const [nameAuthor, setNameAuthor] = useState<string>()
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
+
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
+
+    }
+
+    useEffect(() => {
+        if (userId) {
+            API_CLIENT.findById(userId).then((data) => {
+                setNameAuthor(data.firstName + ' ' + data.lastName)
+            })
+        }
+
+    }, [])
+
+
+
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -87,7 +127,7 @@ export default function CreateComment() {
                         padding: '30px',
                         marginTop: '50px',
                         backgroundColor: '#8d868670',
-                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                        boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                         '& .MuiButton-root': { m: 1, width: '32ch' },
 

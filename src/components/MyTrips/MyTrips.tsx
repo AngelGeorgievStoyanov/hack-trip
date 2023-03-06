@@ -6,18 +6,46 @@ import * as tripService from '../../services/tripService';
 import { IdType } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
 import { useEffect, useState } from "react";
+import { LoginContext } from "../../App";
+import { useContext } from 'react';
+import jwt_decode from "jwt-decode";
+
+
+type decode = {
+    _id: string
+}
+
+let userId: string | undefined;
+
+
+const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
+
+
 
 export default function MyTrips() {
-    const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
 
     const [trips, setTrips] = useState<Trip[]>([]);
-    const userId = sessionStorage.getItem('userId');
+  
+
+
+    const { userL } = useContext(LoginContext);
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
+    }
+
+
+
 
     useEffect(() => {
 
-        if (userId !== null) {
+        if (userId !== undefined) {
 
             API_TRIP.findAllMyTrips(userId).then((data) => {
+               
                 setTrips(data);
 
             }).catch((err) => {

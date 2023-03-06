@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { LoginContext } from "../../App";
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { User } from "../../model/users";
 import { IdType } from "../../shared/common-types";
 import * as userService from '../../services/userService';
@@ -10,24 +10,24 @@ import jwt_decode from "jwt-decode";
 
 
 
-const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users/logout');
+const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
 
 type decode = {
-    _id: string,
     email: string,
-    firstName: string,
-    lastName: string,
-    role: string
+    role: string,
+    _id: string
 }
 
 
 
+let email: string | undefined;
+let userId: string | undefined;
 
 export default function Header() {
 
-    const email = sessionStorage.getItem('email');
-    const { userL, setUserL } = useContext(LoginContext);
+    const { userL } = useContext(LoginContext);
+    const [userVerId, setUserVerId] = useState<boolean>(false)
 
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
 
@@ -35,7 +35,17 @@ export default function Header() {
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         role = decode.role;
+        email = decode.email;
+        userId = decode._id
+    }
 
+
+    if (userId !== undefined && userId !== null) {
+        API_CLIENT.findUserId(userId).then((data) => {
+            setUserVerId(data)
+        }).catch((err) => {
+            console.log(err)
+        })
     }
 
 
@@ -43,10 +53,13 @@ export default function Header() {
 
     const loginContext = useContext(LoginContext);
 
+
+
     const logout = () => {
         const accessToken = sessionStorage.getItem('accessToken');
 
         if (accessToken) {
+
 
             API_CLIENT.logout(accessToken)
                 .then((data) => {
@@ -55,6 +68,8 @@ export default function Header() {
 
 
                     loginContext?.setUserL(null);
+                    email = undefined;
+
 
                     navigate('/');
                 }).catch((err) => {
@@ -69,15 +84,15 @@ export default function Header() {
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
                 <Toolbar sx={{
-                    display: 'flex', justifyContent: 'space-between', paddingBottom: '20px', '@media(max-width: 600px)': {
+                    display: 'flex', justifyContent: 'space-between', paddingBottom: '20px', '@media(max-width: 760px)': {
                         display: 'flex', flexDirection: 'column'
                     }
                 }}>
-                    {userL !== null || email !== null ?
+                    {accessToken !== undefined && userVerId === true ?
                         <>
 
                             <Typography variant="h6" component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                {userL !== null || email !== null ?
+                                {accessToken !== undefined ?
                                     <Button component={Link} to={'/profile'} color="inherit"  >Welcome  {email}</Button> : 'Welcome'
 
                                 }
@@ -90,6 +105,7 @@ export default function Header() {
                             {((role === 'admin') || (role === 'manager')) ? <Button component={Link} to={'/admin'} color="inherit">ADMIN</Button> : ''}
                             <Button onClick={logout} color="inherit">LOGOUT</Button>
                         </>
+
                         :
                         <>
                             <Button component={Link} to={'/'} color="inherit">HOME</Button>

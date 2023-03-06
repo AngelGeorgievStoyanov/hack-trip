@@ -1,8 +1,16 @@
 import { useContext } from 'react';
-import { Navigate, Outlet, useLoaderData } from 'react-router-dom';
+import {  Outlet, useLoaderData } from 'react-router-dom';
 import { LoginContext } from '../../App';
 import { Comment } from '../../model/comment';
 import NotFound from '../NotFound/NotFound';
+
+import jwt_decode from "jwt-decode";
+
+type decode = {
+    _id: string
+}
+
+let userId: string | undefined;
 
 
 
@@ -12,9 +20,14 @@ const GuardedRouteComment = () => {
     const comment = useLoaderData() as Comment;
 
 
-    const { userL, setUserL } = useContext(LoginContext);
+    const { userL } = useContext(LoginContext);
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
 
-    const userId = userL?._id ? userL._id : sessionStorage.getItem('userId') ? sessionStorage.getItem('userId') : undefined;
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id !== undefined ? decode._id : undefined;
+    }
 
     return (comment._ownerId === userId) ? <Outlet /> :  <NotFound />
 

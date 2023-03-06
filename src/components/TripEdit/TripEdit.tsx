@@ -4,7 +4,7 @@ import { IdType, toIsoDate } from "../../shared/common-types";
 import * as tripService from '../../services/tripService';
 import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
-import React, { BaseSyntheticEvent, useEffect, useState } from "react";
+import React, { BaseSyntheticEvent, useContext, useEffect, useState } from "react";
 import { containerStyle, options } from "../settings";
 import { Box, Button, Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
@@ -17,8 +17,13 @@ import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import FileUpload from "react-mui-fileuploader";
 import LoadingButton from "@mui/lab/LoadingButton";
 import imageCompression from "browser-image-compression";
+import jwt_decode from "jwt-decode";
+import { LoginContext } from "../../App";
 
+type decode = {
+    _id: string,
 
+}
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
@@ -67,6 +72,7 @@ const schema = yup.object({
 }).required();
 
 
+let userId: string | undefined;
 
 
 export default function TripEdit() {
@@ -80,17 +86,29 @@ export default function TripEdit() {
     const [errorMessageSearch, setErrorMessageSearch] = useState('');
     const [visible, setVisible] = React.useState(true);
     const [loading, setLoading] = useState<boolean>(true);
-    const [buttonAdd, setButtonAdd] = useState<boolean>(true)
+    const [buttonAdd, setButtonAdd] = useState<boolean>(true);
+
+    const { userL } = useContext(LoginContext);
+
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
 
     let positionPoint;
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
 
+    }
 
     useEffect(() => {
-        API_TRIP.findById(trip._id).then((data) => {
-            setImages(data.imageFile);
-        }).catch((err) => {
-            console.log(err)
-        });
+        if (userId) {
+
+            API_TRIP.findById(trip._id, userId).then((data) => {
+                setImages(data.imageFile);
+            }).catch((err) => {
+                console.log(err)
+            });
+        }
     }, []);
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
@@ -349,7 +367,7 @@ export default function TripEdit() {
 
     return (
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
                     <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
                         <GoogleMap
@@ -378,8 +396,8 @@ export default function TripEdit() {
 
                     </Box>
                     <Box component='div' sx={{
-                        display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 600px)': {
-                            display: 'flex', flexDirection: 'column-reverse', width: '100vw'
+                        display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 960px)': {
+                            display: 'flex', flexDirection: 'column-reverse', width: '100vw', alignItems:'center'
                         }
                     }}>
                         <Box component='form'
@@ -393,7 +411,7 @@ export default function TripEdit() {
                                 maxHeight: '1100px',
                                 padding: '30px',
                                 backgroundColor: '#8d868670',
-                                boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                                boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                                 '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                                 '& .MuiButton-root': { m: 1, width: '32ch' },
                             }}
@@ -450,7 +468,7 @@ export default function TripEdit() {
 
                         {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
 
-                            <ImageList sx={{ width: 520, height: 'auto', margin: '30px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={3} rowHeight={164}>
+                            <ImageList sx={{ width: 520, height: 'auto', margin: '30px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={trip.imageFile.length > 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : trip.imageFile.length > 5 ? 300 : trip.imageFile.length > 2 ? 350 : 450}>
                                 {images ? images.map((item, i) => (
                                     <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
                                         <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />

@@ -17,6 +17,11 @@ import FileUpload from "react-mui-fileuploader";
 import { LoginContext } from "../../App";
 import LoadingButton from "@mui/lab/LoadingButton";
 import imageCompression from "browser-image-compression";
+import jwt_decode from "jwt-decode";
+
+type decode = {
+    _id: string,
+}
 
 
 const API_POINT: ApiPoint<IdType, PointCreate> = new pointService.ApiPointImpl<IdType, PointCreate>('data/points');
@@ -52,12 +57,13 @@ const schema = yup.object({
 
 }).required();
 
+let userId: string | undefined;
 
 export function TripPoints() {
 
     const points = useLoaderData() as Point[]
 
-    const { userL, setUserL } = useContext(LoginContext);
+    const { userL } = useContext(LoginContext);
 
     const idTrip = useParams().tripId;
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
@@ -65,7 +71,20 @@ export function TripPoints() {
     const [loading, setLoading] = useState<boolean>(true);
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
 
-    const userId = userL?._id ? userL._id : sessionStorage.getItem('userId') !== null ? sessionStorage.getItem('userId') : ''
+
+
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
+
+    }
+
+
+
+
 
     const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
 
@@ -376,7 +395,7 @@ export function TripPoints() {
                                 maxHeight: '1100px',
                                 padding: '30px',
                                 backgroundColor: '#8d868670',
-                                boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                                boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                                 '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                                 '& .MuiButton-root': { m: 1, width: '32ch' },
                             }}

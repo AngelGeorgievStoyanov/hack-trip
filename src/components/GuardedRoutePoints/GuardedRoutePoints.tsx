@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { Navigate, Outlet, useLoaderData } from 'react-router-dom';
+import { Outlet, useLoaderData } from 'react-router-dom';
 import { LoginContext } from '../../App';
 import { Point } from '../../model/point';
 import jwt_decode from "jwt-decode";
@@ -10,11 +10,9 @@ import NotFound from '../NotFound/NotFound';
 
 type decode = {
     _id: string,
-    email: string,
-    firstName: string,
-    lastName: string,
     role: string
 }
+let userId: string | undefined;
 
 
 const GuardedRoutePoint = () => {
@@ -22,8 +20,7 @@ const GuardedRoutePoint = () => {
     const point = useLoaderData() as Point;
 
 
-    const { userL, setUserL } = useContext(LoginContext);
-    const userId = userL?._id ? userL._id : sessionStorage.getItem('userId') ? sessionStorage.getItem('userId') : undefined;
+    const { userL } = useContext(LoginContext);
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
 
 
@@ -33,10 +30,11 @@ const GuardedRoutePoint = () => {
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         role = decode.role;
+        userId = decode._id;
 
     }
 
-    return (point._ownerId === userId) || (role === 'admin' || role === 'manager') ? <Outlet /> :  <NotFound />
+    return (point._ownerId === userId) || (role === 'admin' || role === 'manager') ? <Outlet /> : <NotFound />
 
 }
 export default GuardedRoutePoint

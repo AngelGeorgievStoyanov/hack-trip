@@ -4,15 +4,25 @@ import {
     alpha, AppBar, Box, FormControl, Grid, InputLabel,
     MenuItem, Pagination, Select, SelectChangeEvent, styled, Toolbar
 } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import * as tripService from '../../services/tripService';
 import { IdType } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
 import SearchIcon from '@mui/icons-material/Search';
 import InputBase from '@mui/material/InputBase';
+import { LoginContext } from "../../App";
+import jwt_decode from "jwt-decode";
+
+
+
+type decode = {
+    _id: string,
+}
+
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
 
+let userId: IdType | undefined;
 
 export default function Trips() {
 
@@ -23,15 +33,24 @@ export default function Trips() {
     const [typeOfPeopleSelect, setTypeOfPeopleSelect] = useState<string>('');
     const [typeOfTransportSelect, setTypeOfTransportSelect] = useState<string>('');
 
+    const { userL } = useContext(LoginContext);
 
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
+
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
+    }
 
     const searchRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
 
-        API_TRIP.findAllPagination(page, searchInput, typeOfPeopleSelect, typeOfTransportSelect).then((data) => {
-            setTrips(data);
 
+        API_TRIP.findAllPagination(page, searchInput, typeOfPeopleSelect, typeOfTransportSelect, userId).then((data) => {
+            setTrips(data);
             API_TRIP.findAll(searchInput, typeOfPeopleSelect, typeOfTransportSelect).then((data) => {
                 setAllPageNumber(data);
             })
@@ -47,7 +66,7 @@ export default function Trips() {
 
         setPage(prev => value);
 
-        API_TRIP.findAllPagination(page, searchInput, typeOfPeopleSelect, typeOfTransportSelect).then((data) => {
+        API_TRIP.findAllPagination(page, searchInput, typeOfPeopleSelect, typeOfTransportSelect,userId).then((data) => {
 
             setTrips(prev => data);
 

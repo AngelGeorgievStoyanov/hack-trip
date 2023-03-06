@@ -6,7 +6,7 @@ const baseUrl = CONNECTIONURL;
 
 export interface ApiComment<K, V extends Identifiable<K>> {
     findAll(): Promise<V[]>;
-    findByTripId(id: K): Promise<V[]>;
+    findByTripId(id: K, userId: K): Promise<V[]>;
     create(entityWithoutId: CommentCreate): Promise<any>;
     update(id: K, entity: Comment): Promise<V>;
     deleteById(id: K): Promise<void>;
@@ -16,6 +16,7 @@ export interface ApiComment<K, V extends Identifiable<K>> {
     reportComment(id: K, entity: Comment): Promise<V[]>;
     getAllReportComments(): Promise<V[]>;
     deleteReportComment(id: K, entity: []): Promise<V>;
+    findUserImage(id: K): Promise<string>;
 
 }
 
@@ -25,9 +26,9 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
     findAll(): Promise<V[]> {
         throw new Error("Method not implemented.");
     }
-    async findByTripId(id: K): Promise<V[]> {
+    async findByTripId(id: K, userId: K): Promise<V[]> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trip/${id}`);
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trip/${id}/${userId}`);
         const res = await response.json()
         return res;
     }
@@ -149,6 +150,12 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
         const result = await response.json();
 
         return result;
+    }
+
+
+    async findUserImage(id: K): Promise<string> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/image-user/${id}`);
+        return response.json();
     }
 
 

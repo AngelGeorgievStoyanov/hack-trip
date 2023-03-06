@@ -16,8 +16,9 @@ import FormTextArea from "../FormFields/FormTextArea";
 import FileUpload from "react-mui-fileuploader";
 import LoadingButton from '@mui/lab/LoadingButton';
 import imageCompression from 'browser-image-compression';
-import { Preview } from "@mui/icons-material";
-
+import jwt_decode from "jwt-decode";
+import { LoginContext } from "../../App";
+import { useContext } from 'react';
 
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
@@ -74,6 +75,14 @@ let center = {
 
 let zoom = 8;
 
+
+type decode = {
+    _id: string,
+}
+
+let _ownerId: string | undefined;
+
+
 export function CreateTrip() {
 
     const [errorMessageSearch, setErrorMessageSearch] = useState('');
@@ -81,7 +90,20 @@ export function CreateTrip() {
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
-    const _ownerId = sessionStorage.getItem('userId');
+
+    const { userL } = useContext(LoginContext);
+
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        _ownerId = decode._id;
+
+    }
+
+
+
 
     const { control, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({
 
@@ -313,7 +335,7 @@ export function CreateTrip() {
 
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
-                    <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
+                    <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 900px)': { maxWidth: '97%' } }} >
 
 
                         <GoogleMap
@@ -330,7 +352,7 @@ export function CreateTrip() {
                             {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
                         </GoogleMap>
                     </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 
                         <Autocomplete>
@@ -354,7 +376,7 @@ export function CreateTrip() {
                             maxHeight: '1050px',
                             padding: '30px',
                             backgroundColor: '#8d868670',
-                            boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                            boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                             '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                             '& .MuiButton-root': { m: 1, width: '32ch' },
                         }}

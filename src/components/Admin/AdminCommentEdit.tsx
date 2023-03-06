@@ -9,10 +9,15 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
 import { BaseSyntheticEvent } from "react";
-
+import { LoginContext } from "../../App";
+import { useContext } from 'react'
+import jwt_decode from "jwt-decode";
 
 const API_COMMENT: ApiComment<IdType, Comment> = new commentService.ApiCommentImpl<IdType, Comment>('data/comments');
 
+type decode = {
+    _id: string;
+}
 
 type FormData = {
     comment: string;
@@ -28,16 +33,30 @@ const schema = yup.object({
 
 }).required();
 
-
+let userId: string;
 
 export default function AdminCommentEdit() {
 
 
 
-    const userId = sessionStorage.getItem('userId')
+
 
     const comment = useLoaderData() as Comment;
     const navigate = useNavigate();
+
+
+    const { userL } = useContext(LoginContext);
+
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
+
+    }
+
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -114,7 +133,7 @@ export default function AdminCommentEdit() {
                         padding: '30px',
                         marginTop: '50px',
                         backgroundColor: '#8d868670',
-                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                        boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                         '& .MuiButton-root': { m: 1, width: '32ch' },
                     }}

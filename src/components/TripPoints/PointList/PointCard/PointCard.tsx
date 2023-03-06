@@ -142,16 +142,16 @@ export default function PointCard({ point, length }: PointCardProps) {
                     flexDirection: 'column',
                     alignItems: 'center',
                     maxWidth: '300px', margin: '20px',
-                    padding: '15px', backgroundColor: '#8d868670',
-                    boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '12px'
+                    padding: '15px 0px', backgroundColor: '#8d868670',
+                    boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
                 }}>
-                <Typography gutterBottom component="h6">
+                <Typography gutterBottom component="h6" sx={{padding:'0px 10px'}}>
                     Point N {point.pointNumber}
                 </Typography>
-                <Typography gutterBottom component="h1">
+                <Typography gutterBottom component="h1" sx={{padding:'0px 10px'}}>
                     NAME: {point.name}
                 </Typography>
-                <Typography gutterBottom component="p">
+                <Typography gutterBottom component="p" sx={{padding:'0px 10px'}}>
                     DESCRIPTION : {point.description}
                 </Typography>
                 {center.lng ?
@@ -164,7 +164,7 @@ export default function PointCard({ point, length }: PointCardProps) {
                         onUnmount={onUnmount}
 
                     >
-                        <MarkerF position={center} animation={google.maps.Animation.DROP} />
+                        <MarkerF position={center} title={'Point №'+point.pointNumber } label={point.pointNumber + ''} animation={google.maps.Animation.DROP} />
                     </GoogleMap>
                     :
                     <Typography gutterBottom component="p">

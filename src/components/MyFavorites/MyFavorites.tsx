@@ -5,18 +5,39 @@ import { Trip, TripCreate } from "../../model/trip";
 import { useEffect, useState } from "react";
 import { IdType } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
+import jwt_decode from "jwt-decode";
+import { LoginContext } from "../../App";
+import { useContext } from 'react';
+
+
+type decode = {
+    _id: string
+}
+
+let userId: string | undefined;
+
+
+const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
 
 
 export default function MyFavorites() {
-    const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
-
+    
     const [trips, setTrips] = useState<Trip[]>([]);
-    const userId = sessionStorage.getItem('userId');
+    
+    const { userL } = useContext(LoginContext);
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
+    }
+
 
     useEffect(() => {
 
 
-        if (userId !== null) {
+        if (userId !== undefined) {
 
             API_TRIP.findAllMyFavorites(userId).then((data) => {
                 setTrips(data);

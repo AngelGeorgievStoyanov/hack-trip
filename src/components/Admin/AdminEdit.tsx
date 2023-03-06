@@ -33,11 +33,7 @@ const USER_SELECT_OPTIONS_ROLE: SelectOption[] = Object.keys(UserRole)
 
 
 type decode = {
-    _id: string,
-    email: string,
-    firstName: string,
-    lastName: string,
-    role: string
+    role: string;
 }
 
 
@@ -72,14 +68,16 @@ export default function AdminEdit() {
     const userEdit = useLoaderData() as User;
 
 
-    const [fileSelected, setFileSelected] = useState<File | undefined>();
+
+
+    const [fileSelected, setFileSelected] = useState<File | null>(null);
     const [user, setUser] = useState<User>();
     const navigate = useNavigate();
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
 
 
 
-    const { userL, setUserL } = useContext(LoginContext);
+    const { userL } = useContext(LoginContext);
 
 
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
@@ -120,23 +118,23 @@ export default function AdminEdit() {
 
 
         let formData = new FormData();
-
+        let imagesNames
         if (fileSelected) {
 
             formData.append('file', fileSelected);
 
-        }
 
 
-        const imagesNames = await API_CLIENT.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[];
-            return imageName.map((x) => {
-                return x.destination;
+
+             imagesNames = await API_CLIENT.sendFile(formData).then((data) => {
+                let imageName = data as unknown as any as any[];
+                return imageName.map((x) => {
+                    return x.destination;
+                })
+            }).catch((err) => {
+                console.log(err);
             })
-        }).catch((err) => {
-            console.log(err);
-        })
-
+        }
 
         if (imagesNames !== undefined && imagesNames.length > 0) {
             data.imageFile = imagesNames[0];
@@ -186,7 +184,7 @@ export default function AdminEdit() {
             API_CLIENT.updateUserAdmin(userEdit._id, editedUser).then((data) => {
 
                 setUser(prev => data);
-                setFileSelected(undefined);
+                setFileSelected(null);
 
             }).catch((err) => {
                 console.log(err)
@@ -264,7 +262,7 @@ export default function AdminEdit() {
 
         if (svg.tagName === 'svg') {
 
-            setFileSelected(undefined);
+            setFileSelected(null);
         }
     }
 
@@ -318,7 +316,7 @@ export default function AdminEdit() {
                     maxHeight: '700px',
                     padding: '30px',
                     backgroundColor: '#8d868670',
-                    boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                    boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                     '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                     '@media(max-width: 600px)': { display: 'flex', maxWidth: '95%' }
                 }}

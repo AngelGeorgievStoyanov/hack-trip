@@ -1,6 +1,6 @@
 import { Avatar, Button, Card, Tooltip, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
-import { Comment } from "../../model/comment";
+import { Comment, CommentCreate } from "../../model/comment";
 import { User } from "../../model/users";
 import * as userService from '../../services/userService';
 import { ApiClient } from "../../services/userService";
@@ -11,6 +11,8 @@ import ReportOffIcon from '@mui/icons-material/ReportOff';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from "../../App";
 import { Link } from "react-router-dom";
+import * as commentService from '../../services/commentService'
+import { ApiComment } from "../../services/commentService";
 
 
 
@@ -20,11 +22,7 @@ export interface CommentListener {
 
 
 type decode = {
-    _id: string,
-    email: string,
-    firstName: string,
-    lastName: string,
-    role: string
+    role: string;
 }
 
 interface CommentCardProps {
@@ -36,17 +34,21 @@ interface CommentCardProps {
     reportedComment: boolean
     userId: IdType
 }
-
-
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
+const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
+
+
+let name: string;
 
 export default function CommentCard({ comment, onDeleteCom, onEditCom, onReportClickHandlerComment, onUnReportClickHandlerComment, reportedComment, userId }: CommentCardProps) {
 
 
-    const [user, setUser] = useState<User>();
+    const [userImg, setUserImg] = useState<string>();
 
-    const { userL, setUserL } = useContext(LoginContext)
+    const [user, setUser] = useState<User>()
+
+    const { userL } = useContext(LoginContext)
 
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
 
@@ -58,11 +60,23 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom, onReportC
 
 
 
-    const name = user?.firstName + ' ' + user?.lastName;
+    if (comment.nameAuthor !== undefined && comment.nameAuthor !== null) {
 
+        name = comment.nameAuthor
+    } else {
+        name = 'A A'
+    }
 
 
     useEffect(() => {
+        if (comment._id) {
+            API_COMMENT.findUserImage(comment._id).then((data) => {
+                setUserImg(data)
+            }).catch(err => {
+                console.log(err)
+            });
+        }
+
         if (userId) {
             API_CLIENT.findById(userId).then((data) => {
                 setUser(data);
@@ -122,10 +136,10 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom, onReportC
                 maxWidth: '350px', margin: '20px',
                 height: 'fit-content',
                 padding: '30px', backgroundColor: '#8d868670',
-                boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
+                boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
             }}>
-                {user?.imageFile ?
-                    <Avatar alt="Remy Sharp" src={`https://storage.googleapis.com/hack-trip/${user.imageFile}`} />
+                {userImg ?
+                    <Avatar alt="Remy Sharp" src={`https://storage.googleapis.com/hack-trip/${userImg}`} />
                     : <Avatar {...stringAvatar(name)} />}
 
                 <Typography gutterBottom component="h4">

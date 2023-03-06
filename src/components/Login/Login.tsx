@@ -28,7 +28,6 @@ export function Login() {
         email: yup.string().required().email(),
         password: yup.string().required().matches(/^(?!\s+$).*/, 'Password cannot be empty string.'),
 
-
     }).required();
 
 
@@ -54,9 +53,7 @@ export function Login() {
 
         API_CLIENT.login(data.email, data.password)
             .then((user) => {
-
                 sessionStorage.setItem('userId', user._id + '');
-                sessionStorage.setItem('email', user.email);
                 sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
                 if (user !== undefined) {
 
@@ -112,7 +109,7 @@ export function Login() {
                         maxHeight: '300px',
                         padding: '30px',
                         backgroundColor: '#8d868670',
-                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px',
+                        boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                        
                         '@media(max-width: 600px)': { display: 'flex' },

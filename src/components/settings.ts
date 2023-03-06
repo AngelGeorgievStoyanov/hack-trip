@@ -2,7 +2,7 @@
 export const containerStyle = {
     width: '600px',
     height: '250px',
-   
+
 }
 
 
@@ -19,10 +19,12 @@ export const optionsPoint = {
     scaleControl: false,
     streetViewControl: false,
     rotateControl: false,
-    fullscreenControl: false
+    fullscreenControl: false,
 }
 
 export const containerStylePoint = {
-    width: '250px',
-    height: '150px'
+    width: '100%',
+    height: '150px',
+
+
 }

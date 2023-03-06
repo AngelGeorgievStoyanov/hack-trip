@@ -1,5 +1,4 @@
-
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { Link,  useNavigate, useParams } from "react-router-dom";
 import { Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
 import { IdType } from "../../shared/common-types";
@@ -28,9 +27,6 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 
 type decode = {
     _id: string,
-    email: string,
-    firstName: string,
-    lastName: string,
     role: string
 }
 
@@ -40,6 +36,7 @@ let center = {
     lat: 42.697866831005435,
     lng: 23.321590139866355
 }
+let userId: string;
 
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
@@ -49,17 +46,8 @@ const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualiz
 export default function AdminTripDetails() {
 
 
-
-
-    const trip = useLoaderData() as Trip;
-
-
-
-
-
-    const userId = sessionStorage.getItem('userId') + ''
-
     const navigate = useNavigate();
+    const idTrip = useParams().tripId;
 
     const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
     const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
@@ -75,19 +63,13 @@ export default function AdminTripDetails() {
     const [mapCenter, setMapCenter] = useState(center);
     const [tripReports, setTripReports] = useState<Trip>();
     const [reportedComment, setReportedComment] = useState<boolean>(false);
+    const [trip, setTrip] = useState<Trip>()
 
 
 
-    if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (points === undefined)) {
-
-        center = {
-            lat: Number(trip.lat),
-            lng: Number(trip.lng)
-        }
-    }
 
 
-    const { userL, setUserL } = useContext(LoginContext)
+    const { userL } = useContext(LoginContext)
 
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
 
@@ -95,60 +77,86 @@ export default function AdminTripDetails() {
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         role = decode.role;
+        userId = decode._id
     }
 
 
 
 
     useEffect(() => {
+        if (idTrip !== undefined) {
 
-        API_POINT.findByTripId(trip._id).then((data) => {
 
-            if (data) {
-                if (typeof data === "object") {
+            API_TRIP.findById(idTrip, userId).then((data) => {
+                if (data) {
+                    setTrip(data)
 
-                    const arrPoints = data as any as Point[];
+                    API_POINT.findByTripId(data._id).then((data) => {
 
-                    if (arrPoints !== undefined && arrPoints.length > 0) {
-                        arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
+                        if (data) {
+                            if (typeof data === "object") {
+                                const arrPoints = data as any as Point[];
 
-                        center = {
-                            lat: Number(arrPoints[0].lat),
-                            lng: Number(arrPoints[0].lng)
+                                if (arrPoints !== undefined && arrPoints.length > 0) {
+
+                                    arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
+
+
+                                    center = {
+                                        lat: Number(arrPoints[0].lat),
+                                        lng: Number(arrPoints[0].lng)
+                                    }
+
+
+
+                                    setPoints(arrPoints);
+                                }
+
+                            }
+                        }
+                        setMapCenter(center);
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+
+                    API_COMMENT.findByTripId(data._id, userId).then(async (data) => {
+                        if (data) {
+
+                            if (typeof data === "object") {
+
+                                setComments(data);
+                            }
                         }
 
-                        setMapCenter(center);
-                        setPoints(arrPoints);
-                    }
 
+                    }).catch((err) => {
+                        console.log(err);
+                    });
                 }
-            }
-        }).catch((err) => {
-            console.log(err);
-        })
-
-        API_COMMENT.findByTripId(trip._id).then(async (data) => {
-            if (data) {
-
-                if (typeof data === "object") {
-
-                    setComments(data);
-                }
-            }
+            }).catch((err) => {
+                console.log(err)
+            })
 
 
-        }).catch((err) => {
-            console.log(err);
-        })
+
+        }
 
     }, []);
 
+    if (trip !== undefined) {
 
+        if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (points === undefined)) {
 
+            center = {
+                lat: Number(trip.lat),
+                lng: Number(trip.lng)
+            }
+        }
+    }
 
     const deleteClickHandler = () => {
 
-
+        if (trip === undefined) return;
         API_TRIP.deleteById(trip._id).then((data) => {
             API_POINT.deleteByTripId(trip._id).then((data) => {
                 API_COMMENT.deleteByTripId(trip._id).then((data) => {
@@ -285,13 +293,12 @@ export default function AdminTripDetails() {
 
     const onLikeTrip = () => {
 
-        setLiked(true);
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
             trip.likes.push(userId);
 
-
-            API_TRIP.updateLikes(trip._id, trip).then((data) => {
-
+            API_TRIP.updateLikes(trip._id, userId).then((data) => {
+                setTrip(data);
+                setLiked(prev => true);
 
             }).catch((err) => {
                 console.log(err);
@@ -305,18 +312,13 @@ export default function AdminTripDetails() {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
 
-            const index = trip.likes.indexOf(userId);
+            API_TRIP.updateLikes(trip._id, userId).then((data) => {
 
-            trip.likes.splice(index, 1);
-
-            API_TRIP.updateLikes(trip._id, trip).then((data) => {
-
-
-                setLiked(false);
+                setTrip(data);
+                setLiked(prev => false);
             }).catch((err) => {
                 console.log(err);
             });
-
         }
 
     }
@@ -437,7 +439,7 @@ export default function AdminTripDetails() {
                         minWidth: '200px',
                         maxWidth: '450px', margin: '20px',
                         padding: '25px', backgroundColor: '#8d868670',
-                        boxShadow: '3px 2px 5px black', border: 'solid 2px', borderRadius: '12px'
+                        boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
                     }}>
                         <Typography gutterBottom variant="h5" component="div">
                             TRIP NAME : {trip?.title}
@@ -464,7 +466,7 @@ export default function AdminTripDetails() {
                             Reported by IDs : {trip?.reportTrip?.join(', ')}
                         </Typography>
 
-                        {trip._ownerId === userId ?
+                        {(trip && trip._ownerId === userId) ?
                             <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
 
                             :
@@ -483,7 +485,7 @@ export default function AdminTripDetails() {
 
                         <Button component={Link} to={`/comments/add-comment/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD COMMENT</Button>
 
-                        {((trip._ownerId === userId) || ((role === 'admin') || (role === 'manager'))) ?
+                        {((trip !== undefined && (trip._ownerId === userId)) || ((role === 'admin') || (role === 'manager'))) ?
                             <>
                                 <Button component={Link} to={`/admin/trip/edit/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>EDIT TRIP</Button>
                                 <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE TRIP</Button>
@@ -492,12 +494,12 @@ export default function AdminTripDetails() {
                             : ''}
 
 
-                        <Button variant="contained" onClick={deleteReportClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE {tripReports !== undefined ? tripReports.reportTrip?.length : trip.reportTrip?.length} REPORTS TRIP</Button>
+                        <Button variant="contained" onClick={deleteReportClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE {((trip !== undefined) && (tripReports !== undefined)) ? tripReports.reportTrip?.length : trip?.reportTrip?.length} REPORTS TRIP</Button>
 
 
                         <Button onClick={goBack} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >BACK</Button>
 
-                        {trip._ownerId !== userId ?
+                        {(trip) && (trip._ownerId !== userId) ?
                             <>
                                 {
                                     trip.likes.some((x) => x === userId) || (liked === true) ?
@@ -528,7 +530,7 @@ export default function AdminTripDetails() {
                     </Card>
 
 
-                    {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
+                    {(trip !== undefined) && (trip.imageFile?.length && trip.imageFile?.length > 0) ?
                         <>
                             <ImageList sx={{ width: 520, height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
                                 {trip.imageFile ? trip.imageFile.map((item, i) => (
@@ -610,7 +612,7 @@ export default function AdminTripDetails() {
 
                             >
                                 {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                                {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
+                                {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip !== undefined) && (trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
                             </GoogleMap>
                         </Box>
                     </Box>
