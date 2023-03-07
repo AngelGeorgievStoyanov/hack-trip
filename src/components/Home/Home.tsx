@@ -23,7 +23,7 @@ function Home() {
 
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
 
-    let userId :string | undefined;
+    let userId: string | undefined;
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         userId = decode._id;
@@ -42,13 +42,13 @@ function Home() {
 
     return (
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', padding: '0px', margin: '0px', width: '100vw' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '25px' }}>
-                        <h1>Welcome TRAVELERS or future TRAVELERS!</h1>
-                        <h4>This is an APP where you can share your trips or get valuable tips for your future trips.</h4>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: ' 0 25px' }}>
+                        <h2  style={{margin:'2px'}}>Welcome TRAVELERS or future TRAVELERS!</h2>
+                        <h5 style={{margin:'2px'}}>This is an APP where you can share your trips or get valuable tips for your future trips.</h5>
                         {(trips !== undefined && trips.length > 0) ?
-                            <h4>These are our TOP 5 most liked TRIPS!</h4>
+                            <h4 style={{margin:'2px'}}>These are our TOP 5 most liked TRIPS!</h4>
                             : ''}
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>

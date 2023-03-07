@@ -85,7 +85,7 @@ export default function Header() {
             <AppBar position="static">
                 <Toolbar sx={{
                     display: 'flex', justifyContent: 'space-between', paddingBottom: '20px', '@media(max-width: 760px)': {
-                        display: 'flex', flexDirection: 'column'
+                        display: 'flex', flexDirection: 'row',flexWrap:'wrap'
                     }
                 }}>
                     {accessToken !== undefined && userVerId === true ?

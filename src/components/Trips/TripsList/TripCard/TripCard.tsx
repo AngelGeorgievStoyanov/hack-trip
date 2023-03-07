@@ -1,6 +1,5 @@
 
 import { Button, Card, CardContent, ImageList, ImageListItem, Typography } from '@mui/material';
-import { Link } from 'react-router-dom';
 import { Trip } from '../../../../model/trip';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from '../../../../App';
@@ -48,7 +47,7 @@ export default function TripCard({ trip }: TripCardProps) {
 
     if (userId !== undefined && userId !== null) {
         API_CLIENT.findUserId(userId).then((data) => {
-          
+
             setUserVerId(data)
         }).catch((err) => {
             console.log(err)
@@ -67,16 +66,16 @@ export default function TripCard({ trip }: TripCardProps) {
                     maxWidth: '300px', margin: '20px',
                     height: 'fit-content',
                     padding: '25px 0px 0px 0px', backgroundColor: '#8d868670',
-                    boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
+                    boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                 }}>
                     <Typography gutterBottom variant="h5" component="div" sx={{ padding: '0px 15px' }}>
-                        Title of the trip: {trip.title}
+                        Title: {trip.title}
                     </Typography>
                     <Typography gutterBottom variant="h6" component="div" sx={{ padding: '0px 15px' }}>
-                        Destination of the trip: {trip.destination}
+                        Destination: {trip.destination}
                     </Typography>
                     {trip.imageFile?.length && trip.imageFile.length > 0 ?
-                        <ImageList sx={{ maxWidth: 320, maxHeight: 350 }} cols={trip.imageFile.length > 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : 'auto'}>
+                        <ImageList sx={{ maxWidth: 320, maxHeight: trip.imageFile.length > 9 ? 350 : 'auto' }} cols={trip.imageFile.length > 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : 'auto'}>
                             {trip.imageFile ? trip.imageFile.map((item, i) => (
                                 <ImageListItem key={i}>
                                     <img
@@ -89,7 +88,7 @@ export default function TripCard({ trip }: TripCardProps) {
                             )) : ''}
                         </ImageList>
                         :
-                        <Typography gutterBottom component="h6">
+                        <Typography gutterBottom component="h6" sx={{ padding: '0 15px' }}>
                             There is no image for this trip
                         </Typography>
                     }

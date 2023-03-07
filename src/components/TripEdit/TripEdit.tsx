@@ -367,8 +367,8 @@ export default function TripEdit() {
 
     return (
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px 0', minHeight: '100vh', margin:'0px', width:'100vw', '@media(max-width: 1000px)':{width:'100vw', padding:'15px 0px', margin:'0px'}}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding:'0px' }}>
                     <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
                         <GoogleMap
                             mapContainerStyle={containerStyle}
@@ -384,7 +384,7 @@ export default function TripEdit() {
 
                         </GoogleMap>
                     </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px',  '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
                         <Autocomplete>
                             <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
@@ -397,7 +397,7 @@ export default function TripEdit() {
                     </Box>
                     <Box component='div' sx={{
                         display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 960px)': {
-                            display: 'flex', flexDirection: 'column-reverse', width: '100vw', alignItems:'center'
+                            display: 'flex', flexDirection: 'column-reverse', width: '100vw', alignItems: 'center'
                         }
                     }}>
                         <Box component='form'
@@ -471,7 +471,7 @@ export default function TripEdit() {
                             <ImageList sx={{ width: 520, height: 'auto', margin: '30px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={trip.imageFile.length > 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : trip.imageFile.length > 5 ? 300 : trip.imageFile.length > 2 ? 350 : 450}>
                                 {images ? images.map((item, i) => (
                                     <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
-                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />
+                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', position:'absolute', backgroundColor:'#ffffff54', borderRadius:'50%' }} onClick={deleteImage} id={item}  />
                                         <img
                                             src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
                                             srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}

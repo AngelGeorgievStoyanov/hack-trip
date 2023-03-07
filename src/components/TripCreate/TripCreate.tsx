@@ -19,6 +19,7 @@ import imageCompression from 'browser-image-compression';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from "../../App";
 import { useContext } from 'react';
+import { IndexInfo } from "typescript";
 
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
@@ -121,12 +122,24 @@ export function CreateTrip() {
     const navigate = useNavigate();
     const searchRef = React.useRef<HTMLInputElement | null>(null);
 
+    const handleFileUploadError = (error: any) => {
+        console.log(error);
 
+    }
 
     const handleFilesChange = async (files: any) => {
 
+        if (files.length > 3) {
+            handleFileUploadError('ERRRRRR')
+            console.log(files)
+            console.log(fileSelected)
+
+
+        }
+
         if (!files) return;
-        let compress = await files.map(async (x: File) => {
+        let compress = await files.map(async (x: File, i: IndexInfo) => {
+
             if (x.size > 10000) {
 
                 const options = {
@@ -154,6 +167,8 @@ export function CreateTrip() {
 
 
         Promise.all(compress).then((data) => {
+
+
             setFileSelected(data)
         })
 
@@ -247,8 +262,11 @@ export function CreateTrip() {
         event?.preventDefault();
 
         let formData = new FormData();
+        console.log(fileSelected)
 
         if (fileSelected) {
+            fileSelected.splice(0, 3)
+            console.log(fileSelected)
             fileSelected.forEach((file) => {
                 formData.append('file', file);
             }
@@ -333,7 +351,7 @@ export function CreateTrip() {
     return (
         <>
 
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh','@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' }}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
                     <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 900px)': { maxWidth: '97%' } }} >
 
@@ -352,7 +370,7 @@ export function CreateTrip() {
                             {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
                         </GoogleMap>
                     </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px',  '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 
                         <Autocomplete>
@@ -409,15 +427,16 @@ export function CreateTrip() {
                         <FileUpload
                             title="Upload images"
                             multiFile={true}
-                            onFilesChange={(files) => handleFilesChange(files)}
+                            onFilesChange={handleFilesChange}
                             onContextReady={(context) => { }}
                             showPlaceholderImage={false}
                             maxFilesContainerHeight={157}
                             buttonLabel='Click here for upload images'
                             rightLabel={''}
-                            maxUploadFiles={9}
+                            maxUploadFiles={3}
                             header={'Drag and drop'}
                             allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
+                            onError={handleFileUploadError}
 
                         />
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />

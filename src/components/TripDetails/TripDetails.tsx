@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
-import { IdType } from "../../shared/common-types";
+import { IdType, sliceDescription } from "../../shared/common-types";
 import * as tripService from '../../services/tripService';
 import * as pointService from '../../services/pointService';
 import { Point } from "../../model/point";
@@ -14,10 +14,10 @@ import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Box, Button, Card, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
-import { useTheme } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
@@ -27,6 +27,9 @@ import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import BookmarkRemoveOutlinedIcon from '@mui/icons-material/BookmarkRemoveOutlined';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from "../../App";
+import IconButton, { IconButtonProps } from '@mui/material/IconButton';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 
 let zoom = 10;
 
@@ -48,6 +51,23 @@ const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType
 const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
 const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
 let userId: string;
+
+
+interface ExpandMoreProps extends IconButtonProps {
+    expand: boolean;
+}
+
+const ExpandMore = styled((props: ExpandMoreProps) => {
+    const { expand, ...other } = props;
+    return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+    transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+    marginLeft: 'auto',
+    transition: theme.transitions.create('transform', {
+        duration: theme.transitions.duration.shortest,
+    }),
+}));
+
 
 export default function TripDetails() {
 
@@ -78,7 +98,11 @@ export default function TripDetails() {
     const [reportedComment, setReportedComment] = useState<boolean>(false);
     const [favorite, setFavorite] = useState<boolean>();
     const [trip, setTrip] = useState<Trip>()
+    const [expanded, setExpanded] = useState(false);
 
+    const handleExpandClick = () => {
+        setExpanded(!expanded);
+    };
 
 
     useEffect(() => {
@@ -534,7 +558,7 @@ export default function TripDetails() {
 
     return (
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                 <Container maxWidth={false} sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc', '@media(max-width: 900px)': {
@@ -548,7 +572,7 @@ export default function TripDetails() {
                         minWidth: '200px',
                         maxWidth: '450px', margin: '20px',
                         padding: '25px', backgroundColor: '#8d868670',
-                        boxShadow: '3px 2px 5px black',  border: 'solid 1px', borderRadius: '0px'
+                        boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
                     }}>
                         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                             <>
@@ -576,10 +600,43 @@ export default function TripDetails() {
                         <Typography gutterBottom variant="subtitle1" component="div">
                             DESTINATION: {trip?.destination}
                         </Typography>
-                        <Typography gutterBottom variant="subtitle1" component="div">
-                            DESCRIPTION : {trip?.description}
-                        </Typography>
+                        {(trip !== undefined) && (trip.description.length < 150) ?
+                            <Typography gutterBottom variant="subtitle1" component="div">
+                                DESCRIPTION : {trip?.description}
+                            </Typography>
 
+                            :
+
+                            <>
+                                {trip ?
+                                    <>
+                                        <Typography gutterBottom variant="subtitle1" component="div" sx={{ padding: '0px 15px', marginTop: '10px' }}>
+                                            Description: {sliceDescription(trip.description, 150)}
+                                        </Typography>
+
+                                        <CardActions disableSpacing>
+                                            <ExpandMore
+                                                expand={expanded}
+                                                onClick={handleExpandClick}
+                                                aria-expanded={expanded}
+                                                aria-label="show more"
+                                            >
+                                                <ExpandMoreIcon />
+                                            </ExpandMore>
+                                        </CardActions>
+                                        <Collapse in={expanded} timeout="auto" unmountOnExit>
+                                            <CardContent>
+                                                <Typography paragraph>
+                                                    Description: {trip.description}
+                                                </Typography>
+                                            </CardContent>
+                                        </Collapse>
+                                    </> : ''}
+
+
+                            </>
+
+                        }
                         {(trip && trip._ownerId === userId) ?
                             <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
 
@@ -666,10 +723,10 @@ export default function TripDetails() {
                 </Container>
                 <Container maxWidth={false} sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 900px)': {
-                        display: 'flex', flexDirection: 'column', alignItems: 'center'
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', padding:'0px'
                     }
                 }} >
-                    <Box component='div' sx={{boxSizing:"content-box",  '@media(max-width: 600px)': {display:'flex',flexDirection:'column', width:'100vW'}}}>
+                    <Box component='div' sx={{ boxSizing: "content-box", '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', width: '94vW' } }}>
                         {points?.length > 0 ?
                             <MobileStepper
                                 variant="progress"
