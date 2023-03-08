@@ -122,21 +122,11 @@ export function CreateTrip() {
     const navigate = useNavigate();
     const searchRef = React.useRef<HTMLInputElement | null>(null);
 
-    const handleFileUploadError = (error: any) => {
-        console.log(error);
-
-    }
+   
 
     const handleFilesChange = async (files: any) => {
 
-        if (files.length > 3) {
-            handleFileUploadError('ERRRRRR')
-            console.log(files)
-            console.log(fileSelected)
-
-
-        }
-
+     
         if (!files) return;
         let compress = await files.map(async (x: File, i: IndexInfo) => {
 
@@ -262,11 +252,10 @@ export function CreateTrip() {
         event?.preventDefault();
 
         let formData = new FormData();
-        console.log(fileSelected)
+      
 
         if (fileSelected) {
-            fileSelected.splice(0, 3)
-            console.log(fileSelected)
+          
             fileSelected.forEach((file) => {
                 formData.append('file', file);
             }
@@ -433,10 +422,9 @@ export function CreateTrip() {
                             maxFilesContainerHeight={157}
                             buttonLabel='Click here for upload images'
                             rightLabel={''}
-                            maxUploadFiles={3}
+                            maxUploadFiles={9}
                             header={'Drag and drop'}
                             allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
-                            onError={handleFileUploadError}
 
                         />
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />

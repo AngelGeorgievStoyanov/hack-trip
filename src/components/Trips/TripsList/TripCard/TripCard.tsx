@@ -28,6 +28,8 @@ let userId: string | undefined;
 
 export default function TripCard({ trip }: TripCardProps) {
 
+
+
     const [userVerId, setUserVerId] = useState<boolean>(false)
 
 
@@ -53,7 +55,6 @@ export default function TripCard({ trip }: TripCardProps) {
             console.log(err)
         })
     }
-
 
 
     return (
@@ -97,7 +98,7 @@ export default function TripCard({ trip }: TripCardProps) {
                             (((role === 'admin') || (role === 'manager')) && (Number(trip.reportTrip) > 0) && (userVerId === true)) ?
                                 <Button href={`/admin/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
                                 :
-                                (userVerId === true) ?
+                                (userVerId === true && accessToken !== undefined) ?
                                     <Button href={`/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
                                     :
                                     ''}

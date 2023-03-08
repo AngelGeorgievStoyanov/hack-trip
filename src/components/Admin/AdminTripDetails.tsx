@@ -1,4 +1,4 @@
-import { Link,  useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
 import { IdType } from "../../shared/common-types";
@@ -425,10 +425,10 @@ export default function AdminTripDetails() {
     return (
         <>
 
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                 <Container maxWidth={false} sx={{
-                    display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc', '@media(max-width: 600px)': {
+                    display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc', '@media(max-width: 900px)': {
                         display: 'flex', flexDirection: 'column-reverse'
                     }
                 }}>
@@ -555,7 +555,6 @@ export default function AdminTripDetails() {
                 <Container maxWidth={false} sx={{ display: hide ? 'flex' : 'none', flexWrap: 'wrap' }} >
 
 
-                    {/* {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} />) : ''} */}
                     {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} onUnReportClickHandlerComment={unReportClickHandlerComment} onReportClickHandlerComment={reportClickHandlerComment} reportedComment={reportedComment} userId={userId} />) : ''}
 
                 </Container>
@@ -563,12 +562,12 @@ export default function AdminTripDetails() {
 
 
                 <Container maxWidth={false} sx={{
-                    display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 600px)': {
-                        display: 'flex', flexDirection: 'column'
+                    display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 900px)': {
+                        display: 'flex', flexDirection: 'column', padding: '0px',  alignItems:'center'
                     }
                 }} >
 
-                    <Box component='div' sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <Box component='div' sx={{ display: 'flex', flexDirection: 'column', '@media(max-width: 600px)': { width: '94vw' } }}>
                         {points?.length > 0 ?
                             <MobileStepper
                                 variant="progress"

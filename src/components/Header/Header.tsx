@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { LoginContext } from "../../App";
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { User } from "../../model/users";
 import { IdType } from "../../shared/common-types";
 import * as userService from '../../services/userService';
@@ -28,30 +28,33 @@ export default function Header() {
 
     const { userL } = useContext(LoginContext);
     const [userVerId, setUserVerId] = useState<boolean>(false)
-
+    
+    const navigate = useNavigate();
+    const loginContext = useContext(LoginContext);
+    
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
 
     let role = 'user'
+
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         role = decode.role;
         email = decode.email;
         userId = decode._id
     }
+    
+    
+
+        if (userId !== undefined && userId !== null) {
+            API_CLIENT.findUserId(userId).then((data) => {
+                setUserVerId(data)
+            }).catch((err) => {
+                console.log(err)
+            })
+        }
 
 
-    if (userId !== undefined && userId !== null) {
-        API_CLIENT.findUserId(userId).then((data) => {
-            setUserVerId(data)
-        }).catch((err) => {
-            console.log(err)
-        })
-    }
 
-
-    const navigate = useNavigate();
-
-    const loginContext = useContext(LoginContext);
 
 
 
@@ -66,12 +69,11 @@ export default function Header() {
 
                     sessionStorage.clear();
 
-
                     loginContext?.setUserL(null);
                     email = undefined;
+                    userId = undefined;
 
-
-                    navigate('/');
+                    navigate('/login');
                 }).catch((err) => {
                     console.log(err);
                 });
@@ -85,7 +87,7 @@ export default function Header() {
             <AppBar position="static">
                 <Toolbar sx={{
                     display: 'flex', justifyContent: 'space-between', paddingBottom: '20px', '@media(max-width: 760px)': {
-                        display: 'flex', flexDirection: 'row',flexWrap:'wrap'
+                        display: 'flex', flexDirection: 'row', flexWrap: 'wrap'
                     }
                 }}>
                     {accessToken !== undefined && userVerId === true ?

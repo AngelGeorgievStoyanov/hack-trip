@@ -43,7 +43,7 @@ export default function Admin() {
         userId = decode._id;
     }
 
-    
+
     const [trips, setTrips] = useState<Trip[]>();
     const [hideUsersList, setHideUsersList] = useState<boolean>(true);
     const [hideTripsList, setHideTripsList] = useState<boolean>(true);
