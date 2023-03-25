@@ -10,7 +10,7 @@ const baseUrl = CONNECTIONURL;
 export interface ApiClient<K, V extends Identifiable<K>> {
 
 
-    register(entityWithoutId: UserRegister): Promise<V>
+    register(entityWithoutId: UserRegister): Promise<string>
     login(email: K, password: K): Promise<V>;
     logout(accessToken: string): Promise<V>;
     findById(id: K): Promise<V>;
@@ -50,7 +50,7 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     }
 
 
-    async register(entityWithoutId: UserRegister): Promise<V> {
+    async register(entityWithoutId: UserRegister): Promise<string> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`, {
             method: 'POST',

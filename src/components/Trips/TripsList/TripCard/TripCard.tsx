@@ -95,7 +95,7 @@ export default function TripCard({ trip }: TripCardProps) {
                     }
                     <CardContent sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center' }}>
                         {
-                            (((role === 'admin') || (role === 'manager')) && (Number(trip.reportTrip) > 0) && (userVerId === true)) ?
+                            (((role === 'admin') || (role === 'manager')) && ((trip.reportTrip?.length !== undefined ? trip.reportTrip.length : Number(trip.reportTrip)) > 0) && (userVerId === true)) ?
                                 <Button href={`/admin/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
                                 :
                                 (userVerId === true && accessToken !== undefined) ?

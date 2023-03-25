@@ -42,6 +42,8 @@ import AdminCommentEdit from './components/Admin/AdminCommentEdit';
 import GuardedRouteTrip from './components/GuardedRouteTrip/GuardedRouteTrip';
 import GuardedRoutePoint from './components/GuardedRoutePoints/GuardedRoutePoints';
 import GuardedRouteComment from './components/GuardedRouteComment/GuardedRouteComment';
+import TermPrivacy from './components/TermPrivacy/TermPrivacy';
+import AboutUs from './components/About/About';
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
@@ -190,6 +192,16 @@ const router = createBrowserRouter([
         errorElement: <NotFound />
       },
       {
+        path: '/term-privacy-policy',
+        element: <TermPrivacy />,
+        errorElement: <NotFound />
+      },
+      {
+        path: '/about',
+        element: <AboutUs />,
+        errorElement: <NotFound />
+      },
+      {
         path: '/create-trip',
         element: <GuardedRoute />,
         children: [
@@ -215,12 +227,12 @@ const router = createBrowserRouter([
       {
         path: '/trip/edit/:tripId',
         loader: tripLoader,
-        element: <GuardedRouteTrip  />,
+        element: <GuardedRouteTrip />,
         children: [
           {
             path: '',
             loader: tripLoader,
-            element: <TripEdit  />,
+            element: <TripEdit />,
             errorElement: <NotFound />
           }
         ]

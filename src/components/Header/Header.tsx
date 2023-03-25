@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { LoginContext } from "../../App";
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { User } from "../../model/users";
 import { IdType } from "../../shared/common-types";
 import * as userService from '../../services/userService';
@@ -28,10 +28,10 @@ export default function Header() {
 
     const { userL } = useContext(LoginContext);
     const [userVerId, setUserVerId] = useState<boolean>(false)
-    
+
     const navigate = useNavigate();
     const loginContext = useContext(LoginContext);
-    
+
     const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
 
     let role = 'user'
@@ -42,16 +42,16 @@ export default function Header() {
         email = decode.email;
         userId = decode._id
     }
-    
-    
 
-        if (userId !== undefined && userId !== null) {
-            API_CLIENT.findUserId(userId).then((data) => {
-                setUserVerId(data)
-            }).catch((err) => {
-                console.log(err)
-            })
-        }
+
+
+    if (userId !== undefined && userId !== null) {
+        API_CLIENT.findUserId(userId).then((data) => {
+            setUserVerId(data)
+        }).catch((err) => {
+            console.log(err)
+        })
+    }
 
 
 
@@ -104,19 +104,18 @@ export default function Header() {
                             <Button component={Link} to={'/create-trip'} color="inherit">CREATE TRIPS</Button>
                             <Button component={Link} to={'/my-trips'} color="inherit">MY TRIPS</Button>
                             <Button component={Link} to={'/favorites'} color="inherit">MY FAVOTITES</Button>
+                            <Button component={Link} to={'/about'} color="inherit">ABOUT US</Button>
                             {((role === 'admin') || (role === 'manager')) ? <Button component={Link} to={'/admin'} color="inherit">ADMIN</Button> : ''}
                             <Button onClick={logout} color="inherit">LOGOUT</Button>
                         </>
-
                         :
                         <>
                             <Button component={Link} to={'/'} color="inherit">HOME</Button>
                             <Button component={Link} to={'/trips'} color="inherit">TRIPS</Button>
                             <Button component={Link} to={'/login'} color="inherit">LOGIN</Button>
                             <Button component={Link} to={'/register'} color="inherit">REGISTER</Button>
-
+                            <Button component={Link} to={'/about'} color="inherit">ABOUT US</Button>
                         </>
-
                     }
                 </Toolbar>
             </AppBar>
