@@ -1,9 +1,10 @@
-import { Grid, Box } from '@mui/material'
+import { Grid, Box, Button } from '@mui/material'
 import { MouseEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 function TermPrivacy() {
 
-
+    const navigate = useNavigate()
     const handleClick = (e: MouseEvent) => {
         const element = e.target as HTMLLIElement
 
@@ -13,34 +14,30 @@ function TermPrivacy() {
             elementFocus?.scrollIntoView({ behavior: 'smooth' })
         }
     }
+
+    const goBack = () => {
+        navigate(-1)
+    }
     return (
         <Grid container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: '#cfe8fc', padding: '0', margin: '0', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: '#cfe8fc', maxWidth: '80%' }}>
 
                 <div >
-                   
-                        <ul style={{ listStyleType: 'none' }} onClick={handleClick}>
 
-                            <li style={{ cursor: 'pointer' }} className='term-of-use'>
-                                <h1>
+                    <ul style={{ listStyleType: 'none' }} onClick={handleClick}>
 
-                                    Terms of use
-                                </h1>
-                            </li>
-                            <li>
-                                <h1>
-                                    and
-                                </h1>
-                            </li>
+                        <li>
+                            <h1 style={{ cursor: 'pointer' }} className='term-of-use'>Terms of use</h1>
+                        </li>
+                        <li>
+                            <h1>and</h1>
+                        </li>
 
-                            <li style={{ cursor: 'pointer' }} className='privacy-policy'>
-                                <h1>
+                        <li >
+                            <h1 style={{ cursor: 'pointer' }} className='privacy-policy'>privacy policy.</h1>
+                        </li>
+                    </ul>
 
-                                    privacy policy.
-                                </h1>
-                            </li>
-                        </ul>
-                   
                 </div>
 
                 <h2 id='term-of-use'>Terms and conditions</h2>
@@ -95,7 +92,7 @@ function TermPrivacy() {
                 <p className="madewith"><a href="https://www.websitepolicies.com/?via=madewithbadge" target="_blank" rel="noopener noreferrer"><img width="200" height="25" alt="Made with WebsitePolicies" src="https://cdn.websitepolicies.io/img/badge.png" srcSet="https://cdn.websitepolicies.io/img/badge_2x.png 2x" /></a></p>
 
                 <h2 id='privacy-policy'>Privacy Policy</h2>
-                <p>Last Updated: 23.03.2023.
+                <p>Last Updated: 24.03.2023.
                     This Privacy Policy (“Policy”) explains the information collection, use, and sharing practices of https://www.hack-trip.com (“we,” “us,” and “our”).
                     Unless otherwise stated, this Policy describes and governs the information collection, use, and sharing practices of https://www.hack-trip.com with respect to your use of our website (https://www.hack-trip.com) and the services (“Services”) we provide and/or host on our servers.
                     Before you use or submit any information through or in connection with the Services, please carefully review this Privacy Policy. By using any part of the Services, you understand that your information will be collected, used, and disclosed as outlined in this Privacy Policy.
@@ -304,6 +301,9 @@ function TermPrivacy() {
                 <p>
                     If you have any questions about this Privacy Policy or our privacy practices, you can contact us at: www.hack.trip@gmail.com.
                 </p>
+
+                <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' },margin:'20px', background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+
             </Box>
 
         </Grid>

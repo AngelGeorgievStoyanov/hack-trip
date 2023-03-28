@@ -389,6 +389,7 @@ function App() {
       <ErrorBoundary>
 
         <LoginContext.Provider value={{ userL, setUserL }}>
+   
           <RouterProvider router={router} />
         </LoginContext.Provider>
 
