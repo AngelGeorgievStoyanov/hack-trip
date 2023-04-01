@@ -59,7 +59,7 @@ export default function PointCard({ point, length }: PointCardProps) {
         mapRef.current = null;
     }
 
-    if (!isLoaded) return <div>MAP LOADING ...</div>
+    if (!isLoaded) return <div >MAP LOADING ...</div>
 
     const deleteClickHandler = () => {
         API_POINT.deleteById(point._id, idTrip + '').then((data) => {

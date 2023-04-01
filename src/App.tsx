@@ -183,8 +183,18 @@ const router = createBrowserRouter([
         element: <Login />
       },
       {
-        path: '/register',
-        element: <Register user={undefined} />
+        path: '/register/',
+        children: [
+          {
+            path: '',
+            element: <Register />
+
+          },
+          {
+            path: ':userId/:token',
+            element: <Register />
+          }
+        ]
       },
       {
         path: '/trips',
@@ -389,7 +399,7 @@ function App() {
       <ErrorBoundary>
 
         <LoginContext.Provider value={{ userL, setUserL }}>
-   
+
           <RouterProvider router={router} />
         </LoginContext.Provider>
 

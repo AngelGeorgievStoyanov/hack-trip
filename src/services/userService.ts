@@ -22,6 +22,8 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     updateUserAdmin(id: K, entity: UserEditAdmin): Promise<V>;
     guardedRoute(id: K, role: string): Promise<boolean>;
     findUserId(id: K): Promise<boolean>;
+    forgotPassword(email: string): Promise<string>;
+    newPassword(id: K, token: string, password: string): Promise<V>;
 }
 
 
@@ -33,7 +35,7 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
     async login(email: K, password: K): Promise<V> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`, {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/login`, {
             method: 'POST',
             headers: {
                 "content-type": "application/json"
@@ -52,7 +54,7 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
     async register(entityWithoutId: UserRegister): Promise<string> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`, {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/register`, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -217,6 +219,46 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
                 "content-type": "application/json"
             },
             body: JSON.stringify({ id, role })
+        });
+
+
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
+
+        return response.json();
+    }
+
+
+    async forgotPassword(email: string): Promise<string> {
+
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/forgot-password`, {
+            method: 'POST',
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({ email })
+        });
+
+
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
+
+        return response.json();
+    }
+
+
+    async newPassword(id: K, token: string, password: string): Promise<V> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/new-password`, {
+            method: 'POST',
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({ id, token, password })
         });
 
 

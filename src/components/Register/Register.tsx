@@ -1,9 +1,9 @@
 import { BaseSyntheticEvent, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { User, UserRole, UserStatus } from '../../model/users';
 import * as userService from '../../services/userService'
 import { ApiClient } from '../../services/userService';
-import { IdType, Optional, toIsoDate } from '../../shared/common-types';
+import { IdType, toIsoDate } from '../../shared/common-types';
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
@@ -16,13 +16,10 @@ import {
     TReCaptchaV2Callback, TReCaptchaV3Callback, TReCaptchaV3RefreshToken
 } from 'react-recaptcha-x';
 
-const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users/register');
+const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
 
-interface UserProps {
-    user: Optional<User>;
 
-}
 type FormData = {
     email: string;
     firstName: string;
@@ -40,7 +37,7 @@ type FormData = {
 };
 
 
-const schema = yup.object({
+const schema1 = yup.object({
     email: yup.string().required().email(),
     firstName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'First Name cannot be empty string and must contain at least 2 characters .'),
     lastName: yup.string().required().min(2).max(15).matches(/^(?!\s+$).*(\S{2})/, 'Last Name cannot be empty string and must contain at least 2 characters .'),
@@ -50,61 +47,93 @@ const schema = yup.object({
 
 }).required();
 
+
+const schema2 = yup.object({
+    password: yup.string().required().matches(/^(?=(.*[a-zA-Z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/, 'Password must contain 8 characters, at least one digit, and one character different from letter or digit'),
+    confirmpass: yup.string().test('passwords-match', 'Passwords must match', function (value) { return this.parent.password === value }),
+
+
+}).required();
+
 const reCaptchaV2 = process.env.REACT_APP_SITE_KEY2;
 const reCaptchaV3 = process.env.REACT_APP_SITE_KEY3;
 
-export function Register({ user }: UserProps) {
+export function Register() {
+
+    const userId = useParams().userId;
+    const token = useParams().token;
+
     const navigate = useNavigate();
 
-    const [errorApi, setErrorApi] = useState();
+    const [errorApi, setErrorApi] = useState<string>();
     const [registerMessage, setRegisterMessage] = useState<string>()
     const [checkedPrivacyPolicy, setCheckedPrivacyPolicy] = useState<boolean>(false)
     const [verified, setVerified] = useState<boolean>(false)
+
+  
+
+
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
         defaultValues: { email: '', firstName: '', lastName: '', password: '', confirmpass: '', timeCreated: '', timeEdited: '', lastTimeLogin: '', countOfLogs: '', status: UserStatus.ACTIVE, role: UserRole.user },
 
         mode: 'onChange',
-        resolver: yupResolver(schema),
+        resolver: yupResolver((userId !== undefined && token !== undefined) ? schema2 : schema1),
     });
 
 
     const registerSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
         event?.preventDefault();
+        if (userId !== undefined && token !== undefined) {
 
-        if (verified) {
-            alert('You have successfully subscibed!')
-        } else {
-            alert('Please verify that you are a human!')
-            return
-        }
-
-        data.timeCreated = toIsoDate(new Date());
-        data.timeEdited = toIsoDate(new Date());
-        data.lastTimeLogin = toIsoDate(new Date());
-        data.countOfLogs = '1';
-        data.email = data.email.trim();
-        data.firstName = data.firstName.trim();
-        data.lastName = data.lastName.trim();
+            API_CLIENT.findById(userId).then((res) => {
 
 
-        const newUser = { ...data };
+                setErrorApi(undefined)
+                API_CLIENT.newPassword(userId, token, data.password).then((result) => {
+                    setRegisterMessage('You have successfully changed a new password.')
+                    setErrorApi(undefined)
+                }).catch((err) => {
+                    setErrorApi(err.message)
+                    console.log(err.message)
+                })
 
-
-        API_CLIENT.register({ ...newUser })
-            .then((message) => {
-
-                setErrorApi(undefined);
-                setRegisterMessage(message)
             }).catch((err) => {
-                if (err.message === 'Failed to fetch') {
-                    err.message = 'No internet connection with server.Please try again later.';
-                }
-                setErrorApi(err.message);
-                console.log(err.message);
+                setErrorApi(err.message)
+                console.log(err.message)
+            })
 
-            });
+        } else {
 
+
+           
+
+            data.timeCreated = toIsoDate(new Date());
+            data.timeEdited = toIsoDate(new Date());
+            data.lastTimeLogin = toIsoDate(new Date());
+            data.countOfLogs = '1';
+            data.email = data.email.trim();
+            data.firstName = data.firstName.trim();
+            data.lastName = data.lastName.trim();
+
+
+            const newUser = { ...data };
+
+
+            API_CLIENT.register({ ...newUser })
+                .then((message) => {
+
+                    setErrorApi(undefined);
+                    setRegisterMessage(message)
+                }).catch((err) => {
+                    if (err.message === 'Failed to fetch') {
+                        err.message = 'No internet connection with server.Please try again later.';
+                    }
+                    setErrorApi(err.message);
+                    console.log(err.message);
+
+                });
+        }
     }
 
 
@@ -122,7 +151,7 @@ export function Register({ user }: UserProps) {
             setErrorApi(undefined);
             setRegisterMessage(undefined);
             navigate('/login')
-        }, 10000)
+        }, 5000)
 
     }
 
@@ -139,13 +168,15 @@ export function Register({ user }: UserProps) {
     ): void => {
         if (typeof token === 'string') {
             setVerified(true)
-            console.log('this is the token V2', token);
+            setErrorApi(undefined)
         } else if (typeof token === 'boolean' && !token) {
             setVerified(false)
-            console.log('token has expired, user must check the checkbox again');
+            setErrorApi('User must check the checkbox again')
+
         } else if (token instanceof Error) {
             setVerified(false)
-            console.log('error. please check your network connection');
+            setErrorApi('Please check your network connection')
+
         }
     };
 
@@ -154,9 +185,13 @@ export function Register({ user }: UserProps) {
         refreshToken: TReCaptchaV3RefreshToken | void
     ): void => {
         if (typeof token === 'string') {
-            console.log('this is the token V3', token);
+            setVerified(true);
+            setErrorApi(undefined);
+         
             if (typeof refreshToken === 'function') {
-                console.log('this is the refresh token function V3', refreshToken);
+             
+                setVerified(true);
+            setErrorApi(undefined);
             }
         } else {
             console.log('token retrieval in progress...');
@@ -203,29 +238,45 @@ export function Register({ user }: UserProps) {
                         onSubmit={handleSubmit(registerSubmitHandler)}
                     >
                         <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
-                            REGISTER
+                            {userId !== undefined && token !== undefined ? 'RESET PASSWORD' : 'REGISTER'}
                         </Typography>
-                        <FormInputText name='email' label='Email' control={control} error={errors.email?.message}
-                            rules={{ required: true, minLength: 5 }} />
-                        <FormInputText name='firstName' label='First Name' control={control} error={errors.firstName?.message}
-                            rules={{ required: true, minLength: 2, maxLength: 15 }} />
+                        {userId === undefined && token === undefined ?
+                            <>
+                                <FormInputText name='email' label='Email' control={control} error={errors.email?.message}
+                                    rules={{ required: true, minLength: 5 }} />
+                                <FormInputText name='firstName' label='First Name' control={control} error={errors.firstName?.message}
+                                    rules={{ required: true, minLength: 2, maxLength: 15 }} />
 
-                        <FormInputText name='lastName' label='Last Name' control={control} error={errors.lastName?.message}
-                            rules={{ required: true, minLength: 2, maxLength: 15 }} />
-
+                                <FormInputText name='lastName' label='Last Name' control={control} error={errors.lastName?.message}
+                                    rules={{ required: true, minLength: 2, maxLength: 15 }} />
+                            </>
+                            : ''}
                         <FormInputText name='password' label='Password' type='password' control={control} error={errors.password?.message}
                             rules={{ required: true }} />
 
                         <FormInputText name='confirmpass' label='Confirm Password' type='password' control={control} error={errors.confirmpass?.message}
                             rules={{ required: true }} />
-                        <FormControlLabel sx={{ width: 'fit-content' }} control={<Checkbox checked={checkedPrivacyPolicy} onChange={handleChangePrivacyPolicy} />} label={<Link to={'/term-privacy-policy'}>I accept the terms of use and privacy policy</Link>} />
-                        <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!checkedPrivacyPolicy ? true : !verified ? true : registerMessage ? true : false}>Sign Up</Button>
-                            <Button component={Link} to={'/login'} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Already Have An Account?</Button>
-                        </Box >
+                        {userId === undefined && token === undefined ?
+                            <>
+                                <FormControlLabel sx={{ width: 'fit-content' }} control={<Checkbox checked={checkedPrivacyPolicy} onChange={handleChangePrivacyPolicy} />} label={<Link to={'/term-privacy-policy'}>I accept the terms of use and privacy policy</Link>} />
+                                <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!checkedPrivacyPolicy ? true : !verified ? true : registerMessage ? true : false}>Sign Up</Button>
+                                    <Button component={Link} to={'/login'} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Already Have An Account?</Button>
+                                </Box >
+                            </>
+                            :
+                            <>
+                                <Box sx={{ display: 'flex', padding: '0 20px', flexDirection: 'row', justifyContent: 'space-between' }}>
+
+                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!verified ? true : registerMessage ? true : false}>NEW PASSWORD</Button>
+                                    <Button component={Link} to={'/login'} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '10px' }}  >Already Have An Account?</Button>
+                                </Box>
+
+
+                            </>}
                     </Box>
 
-                    <Box sx={{display:'flex', margin:'30px'}}>
+                    <Box sx={{ display: 'flex', margin: '30px' }}>
 
                         <ReCaptchaProvider
                             siteKeyV2={reCaptchaV2}
