@@ -44,6 +44,8 @@ import GuardedRoutePoint from './components/GuardedRoutePoints/GuardedRoutePoint
 import GuardedRouteComment from './components/GuardedRouteComment/GuardedRouteComment';
 import TermPrivacy from './components/TermPrivacy/TermPrivacy';
 import AboutUs from './components/About/About';
+import Users from './components/Users/Users';
+import ForgotPassword from './components/ForgotPassword/ForgotPassword';
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
@@ -181,6 +183,14 @@ const router = createBrowserRouter([
       {
         path: '/login',
         element: <Login />
+      },
+      {
+        path: '/users/verify-email/:userId/:token',
+        element: <Users />
+      },
+      {
+        path: '/forgot-password',
+        element: <ForgotPassword />
       },
       {
         path: '/register/',

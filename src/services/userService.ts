@@ -24,6 +24,7 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     findUserId(id: K): Promise<boolean>;
     forgotPassword(email: string): Promise<string>;
     newPassword(id: K, token: string, password: string): Promise<V>;
+    verifyEmail(id: K, token: string): Promise<boolean>;
 }
 
 
@@ -268,6 +269,20 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         }
 
         return response.json();
+    }
+
+
+    async verifyEmail(id: K, token: string):Promise<boolean>{
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/verify-email/${id}/${token}`)
+
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
+
+        return response.json();
+
+
     }
 
 }
