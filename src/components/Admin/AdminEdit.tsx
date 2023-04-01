@@ -302,7 +302,7 @@ export default function AdminEdit() {
                                 component="img"
                                 image={`https://storage.googleapis.com/hack-trip/${userEdit.imageFile}`}
                                 sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
-                                alt="USEREDit"
+                                alt="USEREDIT"
 
                             />
                         </>
