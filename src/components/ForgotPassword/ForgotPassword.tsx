@@ -9,33 +9,36 @@ import { BaseSyntheticEvent, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import {
-    EReCaptchaV2Size, EReCaptchaV2Theme, ReCaptchaProvider, ReCaptchaV2, ReCaptchaV3,
-    TReCaptchaV2Callback, TReCaptchaV3Callback, TReCaptchaV3RefreshToken
-} from 'react-recaptcha-x';
+
+
+import ReCAPTCHA from "react-google-recaptcha";
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
+
 const reCaptchaV2 = process.env.REACT_APP_SITE_KEY2;
-const reCaptchaV3 = process.env.REACT_APP_SITE_KEY3;
+
 
 type FormData = {
     email: string;
-
-
 };
+
 
 const schema = yup.object({
     email: yup.string().required().email(),
 
 }).required();
 
-function ForgotPassword() {
-    const navigate = useNavigate();
 
+
+function ForgotPassword() {
+
+
+    const navigate = useNavigate();
     const [errorApi, setErrorApi] = useState<string>();
     const [verified, setVerified] = useState<boolean>(false)
     const [registerMessage, setRegisterMessage] = useState<string>()
+
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -61,8 +64,6 @@ function ForgotPassword() {
             console.log(err.message);
         })
 
-
-
     }
 
     if (errorApi) {
@@ -73,41 +74,7 @@ function ForgotPassword() {
     }
 
 
-    const v2Callback: TReCaptchaV2Callback = (
-        token: string | false | Error
-    ): void => {
-        if (typeof token === 'string') {
-            setVerified(true)
-            setErrorApi(undefined)
-        } else if (typeof token === 'boolean' && !token) {
-            setVerified(false)
-            setErrorApi('User must check the checkbox again')
-
-        } else if (token instanceof Error) {
-            setVerified(false)
-            setErrorApi('Please check your network connection')
-
-        }
-    };
-
-
-    const v3Callback: TReCaptchaV3Callback = (
-        token: string | void,
-        refreshToken: TReCaptchaV3RefreshToken | void
-    ): void => {
-        if (typeof token === 'string') {
-            setVerified(true);
-            setErrorApi(undefined);
-
-            if (typeof refreshToken === 'function') {
-
-                setVerified(true);
-                setErrorApi(undefined);
-            }
-        } else {
-            console.log('token retrieval in progress...');
-        }
-    };
+   
 
 
     if (registerMessage) {
@@ -120,6 +87,13 @@ function ForgotPassword() {
 
     }
 
+
+    const onChangeReCAPTCHA = (value: any) => {
+        if (value !== null) {
+            setVerified(true);
+            setErrorApi(undefined);
+        }
+    }
 
     return (
         <>
@@ -170,23 +144,15 @@ function ForgotPassword() {
                         </Box >
                     </Box>
 
-                    <Box sx={{ display: 'flex', margin: '30px' }}>
-                        <ReCaptchaProvider
-                            siteKeyV2={reCaptchaV2}
-                            siteKeyV3={reCaptchaV3}
-                            langCode="en"
-                            hideV3Badge={false}
-                        >
-                            <ReCaptchaV2
-                                callback={v2Callback}
-                                theme={EReCaptchaV2Theme.Light}
-                                size={EReCaptchaV2Size.Normal}
-                                id="my-id"
-                                data-test-id="my-test-id"
-                                tabindex={0}
-                            />
-                            <ReCaptchaV3 action="youraction" callback={v3Callback} />
-                        </ReCaptchaProvider>
+                    <Box sx={{ display: 'flex', margin: '30px' }} id={'captcha-parent'}>
+                   
+
+                        <ReCAPTCHA
+                            size="normal"
+                            sitekey={reCaptchaV2 ? reCaptchaV2 : ''}
+                            onChange={onChangeReCAPTCHA}
+                        />
+
                     </Box>
                 </Container>
             </Grid>

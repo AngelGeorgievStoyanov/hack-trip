@@ -11,10 +11,8 @@ import { Box, Button, Container, Grid, Typography } from '@mui/material';
 import FormInputText from '../FormFields/FormInputText';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import {
-    EReCaptchaV2Size, EReCaptchaV2Theme, ReCaptchaProvider, ReCaptchaV2, ReCaptchaV3,
-    TReCaptchaV2Callback, TReCaptchaV3Callback, TReCaptchaV3RefreshToken
-} from 'react-recaptcha-x';
+import ReCAPTCHA from 'react-google-recaptcha';
+
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
@@ -56,7 +54,6 @@ const schema2 = yup.object({
 }).required();
 
 const reCaptchaV2 = process.env.REACT_APP_SITE_KEY2;
-const reCaptchaV3 = process.env.REACT_APP_SITE_KEY3;
 
 export function Register() {
 
@@ -69,7 +66,6 @@ export function Register() {
     const [registerMessage, setRegisterMessage] = useState<string>()
     const [checkedPrivacyPolicy, setCheckedPrivacyPolicy] = useState<boolean>(false)
     const [verified, setVerified] = useState<boolean>(false)
-
   
 
 
@@ -106,7 +102,7 @@ export function Register() {
         } else {
 
 
-           
+
 
             data.timeCreated = toIsoDate(new Date());
             data.timeEdited = toIsoDate(new Date());
@@ -163,40 +159,14 @@ export function Register() {
 
 
 
-    const v2Callback: TReCaptchaV2Callback = (
-        token: string | false | Error
-    ): void => {
-        if (typeof token === 'string') {
-            setVerified(true)
-            setErrorApi(undefined)
-        } else if (typeof token === 'boolean' && !token) {
-            setVerified(false)
-            setErrorApi('User must check the checkbox again')
 
-        } else if (token instanceof Error) {
-            setVerified(false)
-            setErrorApi('Please check your network connection')
-
-        }
-    };
-
-    const v3Callback: TReCaptchaV3Callback = (
-        token: string | void,
-        refreshToken: TReCaptchaV3RefreshToken | void
-    ): void => {
-        if (typeof token === 'string') {
+    const onChangeReCAPTCHA = (value: any) => {
+        if (value !== null) {
             setVerified(true);
             setErrorApi(undefined);
-         
-            if (typeof refreshToken === 'function') {
-             
-                setVerified(true);
-            setErrorApi(undefined);
-            }
-        } else {
-            console.log('token retrieval in progress...');
         }
-    };
+    }
+
 
     return (
         <>
@@ -276,26 +246,12 @@ export function Register() {
                             </>}
                     </Box>
 
-                    <Box sx={{ display: 'flex', margin: '30px' }}>
+                    <Box sx={{ display: 'flex', margin: '30px' }} id={'captcha-parent'}>
 
-                        <ReCaptchaProvider
-                            siteKeyV2={reCaptchaV2}
-                            siteKeyV3={reCaptchaV3}
-                            langCode="en"
-                            hideV3Badge={false}
-                        >
-
-                            <ReCaptchaV2
-                                callback={v2Callback}
-                                theme={EReCaptchaV2Theme.Light}
-                                size={EReCaptchaV2Size.Normal}
-                                id="my-id"
-                                data-test-id="my-test-id"
-                                tabindex={0}
-                            />
-                            <ReCaptchaV3 action="youraction" callback={v3Callback} />
-                        </ReCaptchaProvider>
-
+                        <ReCAPTCHA
+                            sitekey={reCaptchaV2 ? reCaptchaV2 : ''}
+                            onChange={onChangeReCAPTCHA}
+                        />
                     </Box>
                 </Container>
             </Grid>

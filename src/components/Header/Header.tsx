@@ -103,7 +103,7 @@ export default function Header() {
                             <Button component={Link} to={'/trips'} color="inherit">TRIPS</Button>
                             <Button component={Link} to={'/create-trip'} color="inherit">CREATE TRIPS</Button>
                             <Button component={Link} to={'/my-trips'} color="inherit">MY TRIPS</Button>
-                            <Button component={Link} to={'/favorites'} color="inherit">MY FAVOTITES</Button>
+                            <Button component={Link} to={'/favorites'} color="inherit">MY FAVORITES</Button>
                             <Button component={Link} to={'/about'} color="inherit">ABOUT US</Button>
                             {((role === 'admin') || (role === 'manager')) ? <Button component={Link} to={'/admin'} color="inherit">ADMIN</Button> : ''}
                             <Button onClick={logout} color="inherit">LOGOUT</Button>
