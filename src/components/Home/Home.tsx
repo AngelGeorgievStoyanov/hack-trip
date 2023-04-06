@@ -7,6 +7,7 @@ import { useContext, useEffect, useState } from 'react';
 import { IdType } from '../../shared/common-types';
 import * as tripService from '../../services/tripService';
 import { ApiTrip } from '../../services/tripService';
+import Typography from '@mui/material/Typography';
 
 type decode = {
     _id: string,
@@ -42,13 +43,20 @@ function Home() {
 
     return (
         <>
+
+
+{/* font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif; */}
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', padding: '0px', margin: '0px', width: '100vw' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: ' 0 25px' }}>
-                        <h2  style={{margin:'2px'}}>Welcome TRAVELERS or future TRAVELERS!</h2>
-                        <h5 style={{margin:'2px'}}>This is an APP where you can share your trips or get valuable tips for your future trips.</h5>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: ' 0 25px', }}>
+                        <Typography sx={{fontFamily:'cursive'}} variant='h5'>Welcome TRAVELERS or future TRAVELERS!</Typography>
+                        <Typography sx={{fontFamily:'cursive'}} variant='subtitle1'>This is an APP where you can share your trips or get valuable tips for your future trips.</Typography>
+
                         {(trips !== undefined && trips.length > 0) ?
-                            <h4 style={{margin:'2px'}}>These are our TOP 5 most liked TRIPS!</h4>
+                            <Typography sx={{fontFamily:'cursive'}} variant='body1'>These are our TOP 5 most liked TRIPS!</Typography>
+
                             : ''}
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>

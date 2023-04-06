@@ -95,26 +95,26 @@ export default function Header() {
 
                             <Typography variant="h6" component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                 {accessToken !== undefined ?
-                                    <Button component={Link} to={'/profile'} color="inherit"  >Welcome  {email}</Button> : 'Welcome'
+                                    <Button component={Link} to={'/profile'} color="inherit"  sx={{ ':hover': { fontFamily: 'cursive' } }} >Welcome   {email}</Button> : 'Welcome'
 
                                 }
                             </Typography>
-                            <Button component={Link} to={'/'} color="inherit"  >HOME</Button>
-                            <Button component={Link} to={'/trips'} color="inherit">TRIPS</Button>
-                            <Button component={Link} to={'/create-trip'} color="inherit">CREATE TRIPS</Button>
-                            <Button component={Link} to={'/my-trips'} color="inherit">MY TRIPS</Button>
-                            <Button component={Link} to={'/favorites'} color="inherit">MY FAVORITES</Button>
-                            <Button component={Link} to={'/about'} color="inherit">ABOUT US</Button>
-                            {((role === 'admin') || (role === 'manager')) ? <Button component={Link} to={'/admin'} color="inherit">ADMIN</Button> : ''}
-                            <Button onClick={logout} color="inherit">LOGOUT</Button>
+                            <Button component={Link} to={'/'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }} >HOME</Button>
+                            <Button component={Link} to={'/trips'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>TRIPS</Button>
+                            <Button component={Link} to={'/create-trip'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>CREATE TRIPS</Button>
+                            <Button component={Link} to={'/my-trips'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>MY TRIPS</Button>
+                            <Button component={Link} to={'/favorites'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>MY FAVORITES</Button>
+                            <Button component={Link} to={'/about'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>ABOUT US</Button>
+                            {((role === 'admin') || (role === 'manager')) ? <Button component={Link} to={'/admin'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>ADMIN</Button> : ''}
+                            <Button onClick={logout} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>LOGOUT</Button>
                         </>
                         :
                         <>
-                            <Button component={Link} to={'/'} color="inherit">HOME</Button>
-                            <Button component={Link} to={'/trips'} color="inherit">TRIPS</Button>
-                            <Button component={Link} to={'/login'} color="inherit">LOGIN</Button>
-                            <Button component={Link} to={'/register'} color="inherit">REGISTER</Button>
-                            <Button component={Link} to={'/about'} color="inherit">ABOUT US</Button>
+                            <Button component={Link} to={'/'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>HOME</Button>
+                            <Button component={Link} to={'/trips'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>TRIPS</Button>
+                            <Button component={Link} to={'/login'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>LOGIN</Button>
+                            <Button component={Link} to={'/register'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>REGISTER</Button>
+                            <Button component={Link} to={'/about'} color="inherit" sx={{ ':hover': { fontFamily: 'cursive' } }}>ABOUT US</Button>
                         </>
                     }
                 </Toolbar>
