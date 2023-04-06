@@ -174,7 +174,7 @@ const router = createBrowserRouter([
 
   {
     element: <Layout />,
-    errorElement: <h2>No internet connection with server.Please try again later...</h2>,
+    errorElement: <NotFound />,
     children: [
       {
         path: "/",
@@ -395,6 +395,10 @@ const router = createBrowserRouter([
       {
         path: '*',
         element: <NotFound />
+      },
+      {
+        path: '/not-found',
+        element: <NotFound />
       }
     ]
   }
@@ -406,6 +410,8 @@ function App() {
 
   return (
     <>
+
+
       <ErrorBoundary>
 
         <LoginContext.Provider value={{ userL, setUserL }}>
@@ -414,6 +420,7 @@ function App() {
         </LoginContext.Provider>
 
       </ErrorBoundary>
+
     </>
   );
 }

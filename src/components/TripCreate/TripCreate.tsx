@@ -6,21 +6,22 @@ import { containerStyle, options } from "../settings";
 import * as tripService from '../../services/tripService'
 import { TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
-import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, Grid, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormTextArea from "../FormFields/FormTextArea";
-import FileUpload from "react-mui-fileuploader";
 import LoadingButton from '@mui/lab/LoadingButton';
 import imageCompression from 'browser-image-compression';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from "../../App";
 import { useContext } from 'react';
-import { IndexInfo } from "typescript";
-
+import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
 
@@ -91,7 +92,7 @@ export function CreateTrip() {
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
-
+    const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const { userL } = useContext(LoginContext);
 
 
@@ -103,7 +104,9 @@ export function CreateTrip() {
 
     }
 
+    const iconFotoCamera = useMediaQuery('(max-width:600px)');
 
+   
 
 
     const { control, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({
@@ -122,48 +125,96 @@ export function CreateTrip() {
     const navigate = useNavigate();
     const searchRef = React.useRef<HTMLInputElement | null>(null);
 
-   
 
-    const handleFilesChange = async (files: any) => {
 
-     
+    const handleFilesChange = async (event: BaseSyntheticEvent) => {
+
+        let files: File[] = Array.from(event.target.files);
+
         if (!files) return;
-        let compress = await files.map(async (x: File, i: IndexInfo) => {
+        if (files.length === 0) return
 
-            if (x.size > 10000) {
+        while (files.some((x) => !x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/))) {
+            setErrorMessageImage('Please select valid file image');
 
-                const options = {
-                    maxSizeMB: 0.1,
-                    maxWidthOrHeight: 520,
-                    fileType: x.type,
-                    name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
-                        x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
-                }
-                try {
-                    const compressedFile = await imageCompression(x, options)
-                    return new File([compressedFile], options.name, { type: x.type })
+            let index = files.findIndex((x: any) => {
+                return !x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)
+            })
 
-                } catch (err) {
-                    console.log(err);
+            files.splice(index, 1)
+        }
+
+        if (files.length > 9) {
+            files = files.slice(0, 9)
+        }
+
+        if (fileSelected.length > 0) {
+            files = files.slice(0, 9 - fileSelected.length)
+        }
+
+
+
+        let compress = files.map(async (x: File) => {
+
+
+
+            if (x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
+
+                if (x.size > 10000) {
+
+                    const options = {
+                        maxSizeMB: 0.1,
+                        maxWidthOrHeight: 520,
+                        fileType: x.type,
+                        name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
+                            x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
+                    }
+                    try {
+                        const compressedFile = await imageCompression(x, options)
+                        return new File([compressedFile], options.name, { type: x.type })
+
+                    } catch (err) {
+                        console.log(err);
+                    }
+                } else {
+                    const options = {
+                        name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
+                            x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
+                    }
+                    return new File([x], options.name, { type: x.type })
                 }
-            } else {
-                const options = {
-                    name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
-                        x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
-                }
-                return new File([x], options.name, { type: x.type })
+            } else if (!x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
+                setErrorMessageImage('Please select valid file image');
+                return
             }
         })
 
 
-        Promise.all(compress).then((data) => {
+
+        Promise.all(compress).then((data: any) => {
+            let imagesConcat: File[] = []
+            if (data) {
+                data.map((x: File) => {
+                    if (x !== undefined) {
+                        imagesConcat.push(x)
+                    }
+                })
 
 
-            setFileSelected(data)
+                let images = fileSelected.concat(imagesConcat)
+
+                if (images.length > 9) {
+                    images = fileSelected.slice(0, 9)
+                }
+                setFileSelected(prev => [...images]);
+
+            }
         })
 
 
-    };
+    }
+
+
 
 
     const { isLoaded } = useJsApiLoader({
@@ -240,7 +291,8 @@ export function CreateTrip() {
 
 
 
-    if (!isLoaded) return <div>MAP LOADING ...</div>
+    if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}> <div>MAP LOADING ...</div></Grid>
+
 
 
 
@@ -252,10 +304,10 @@ export function CreateTrip() {
         event?.preventDefault();
 
         let formData = new FormData();
-      
+
 
         if (fileSelected) {
-          
+
             fileSelected.forEach((file) => {
                 formData.append('file', file);
             }
@@ -334,15 +386,63 @@ export function CreateTrip() {
         }
     }
 
+    const onDeleteImage = (event: BaseSyntheticEvent) => {
 
+
+
+        let index = fileSelected.findIndex(x => {
+            return x.name === event.currentTarget.id
+        })
+
+        fileSelected.splice(index, 1)
+
+        setFileSelected([...fileSelected])
+    }
+
+
+    if (errorMessageImage) {
+
+        setTimeout(() => {
+            setErrorMessageImage(undefined)
+        }, 5000)
+
+
+    }
+
+    const onDeleteAllImage = () => {
+        setFileSelected([])
+    }
+
+
+
+    const MuiTooltipIconFotoCamera = () => {
+        return (
+            <Tooltip title='UPLOAD' arrow>
+                <IconButton color="primary" disabled={fileSelected.length >= 9 ? true : false} aria-label="upload picture" component="label">
+                    <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
+
+                    <PhotoCamera fontSize="large" />
+                </IconButton>
+            </Tooltip>
+        )
+    }
+
+
+    const MuiTooltipIconRemoveAll = () => {
+        return (
+            <Tooltip title='REMOVE ALL IMAGES' arrow>
+                <DeleteForeverIcon color="primary" fontSize="large" onClick={onDeleteAllImage} />
+            </Tooltip>
+        )
+    }
 
 
     return (
         <>
 
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh','@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' }}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
-                    <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 900px)': { maxWidth: '97%' } }} >
+                    <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 900px)': { maxWidth: '97%' } }} >
 
 
                         <GoogleMap
@@ -359,7 +459,7 @@ export function CreateTrip() {
                             {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
                         </GoogleMap>
                     </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px',  '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 
                         <Autocomplete>
@@ -413,20 +513,57 @@ export function CreateTrip() {
 
                         <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
                         />
-                        <FileUpload
-                            title="Upload images"
-                            multiFile={true}
-                            onFilesChange={handleFilesChange}
-                            onContextReady={(context) => { }}
-                            showPlaceholderImage={false}
-                            maxFilesContainerHeight={157}
-                            buttonLabel='Click here for upload images'
-                            rightLabel={''}
-                            maxUploadFiles={9}
-                            header={'Drag and drop'}
-                            allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
 
-                        />
+                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+
+                            {iconFotoCamera ?
+
+
+                                <>
+                                    <MuiTooltipIconFotoCamera />
+                                </>
+                                :
+                                <>
+
+                                    <Button variant="contained" component="label" disabled={fileSelected.length >= 9 ? true : false} >
+                                        Upload
+                                        <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
+
+                                    </Button>
+                                </>
+                            }
+                            <Typography variant="overline" display="block" gutterBottom style={{ marginRight: '15px' }}>     {fileSelected.length}/9 uploaded images</Typography>
+                        </Box >
+                        {fileSelected.length === 9 ? <Typography style={{ color: 'red', marginLeft: '12px' }}>9 images are the maximum number to upload.</Typography> : ''}
+                        {errorMessageImage ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageImage}</Typography> : ''}
+                        {fileSelected.length > 0 ? <>
+
+                            <Box component='div' id='box-images' sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                maxHeight: "200px",
+                                overflow: "hidden",
+                                overflowY: 'auto',
+                                padding: '6px',
+                                border: 'solid 1px black',
+                                margin: '6px',
+                                borderRadius: '5px',
+
+                            }}>
+                                {fileSelected.map((x, i) => { return <li style={{ 'listStyle': 'none', display: 'flex', justifyContent: 'space-between', margin: '5px 0px', alignItems: 'center' }} key={i}><img src={URL.createObjectURL(x)} style={{ borderRadius: '5px' }} alt={x.name} height='45px' width='55px' /> {x.name.length > 60 ? '...' + x.name.slice(-60) : x.name} <HighlightOffSharpIcon sx={{ cursor: 'pointer', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={onDeleteImage} key={x.name} id={x.name} /></li> }
+                                )}
+                            </Box >
+                            {iconFotoCamera ?
+                                <MuiTooltipIconRemoveAll />
+                                :
+                                <Box component='div' sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                    <Button variant="contained" onClick={onDeleteAllImage}>Remove all images</Button>
+                                </Box>
+                            }
+
+
+                        </> : ''}
+
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
                         <span>
                             {buttonAdd === true ?

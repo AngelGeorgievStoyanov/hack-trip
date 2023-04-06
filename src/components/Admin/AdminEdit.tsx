@@ -1,5 +1,4 @@
-import { Box, Button, CardMedia, Typography } from "@mui/material";
-import { MuiFileInput } from "mui-file-input";
+import { Box, Button, CardMedia, IconButton, Tooltip, Typography } from "@mui/material";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import FormInputText from "../FormFields/FormInputText";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
@@ -15,6 +14,9 @@ import { LoginContext } from "../../App";
 import jwt_decode from "jwt-decode";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import imageCompression from "browser-image-compression";
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import useMediaQuery from '@mui/material/useMediaQuery';
+
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
@@ -69,7 +71,6 @@ export default function AdminEdit() {
 
 
 
-
     const [fileSelected, setFileSelected] = useState<File | null>(null);
     const [user, setUser] = useState<User>();
     const navigate = useNavigate();
@@ -89,6 +90,9 @@ export default function AdminEdit() {
 
     }
 
+
+
+    const iconFotoCamera = useMediaQuery('(max-width:600px)');
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -123,10 +127,7 @@ export default function AdminEdit() {
 
             formData.append('file', fileSelected);
 
-
-
-
-             imagesNames = await API_CLIENT.sendFile(formData).then((data) => {
+            imagesNames = await API_CLIENT.sendFile(formData).then((data) => {
                 let imageName = data as unknown as any as any[];
                 return imageName.map((x) => {
                     return x.destination;
@@ -202,7 +203,11 @@ export default function AdminEdit() {
     }
 
 
-    const handleFileChange = async (file: any) => {
+    const handleFileChange = async (event: BaseSyntheticEvent) => {
+
+        let file = Array.from(event.target.files)[0] as File;
+
+        if (!file) return;
 
         if (file !== null) {
 
@@ -255,16 +260,7 @@ export default function AdminEdit() {
 
     };
 
-    const deleteFile = (e: React.MouseEvent) => {
 
-
-        let svg = e.target as HTMLElement;
-
-        if (svg.tagName === 'svg') {
-
-            setFileSelected(null);
-        }
-    }
 
     const deleteImage = (e: React.MouseEvent) => {
 
@@ -272,12 +268,45 @@ export default function AdminEdit() {
         if (userEdit._id) {
 
             API_CLIENT.deleteProfileImage(userEdit._id + '', img).then((data) => {
+             
                 setUser(data);
+                userEdit.imageFile = undefined;
             }).catch((err) => {
                 console.log(err)
             });
         }
     }
+
+
+    const onDeleteImage = (event: BaseSyntheticEvent) => {
+
+        setFileSelected(null)
+    }
+
+
+    if (errorMessageImage) {
+
+        setTimeout(() => {
+            setErrorMessageImage(undefined)
+        }, 5000)
+
+
+    }
+
+
+
+    const MuiTooltipIconFotoCamera = () => {
+        return (
+            <Tooltip title='UPLOAD' arrow>
+                <IconButton color="primary" aria-label="upload picture" component="label">
+                    <input hidden accept="image/*" type="file" onChange={handleFileChange} />
+
+                    <PhotoCamera fontSize="large" />
+                </IconButton>
+            </Tooltip>
+        )
+    }
+
 
     return (
 
@@ -285,11 +314,12 @@ export default function AdminEdit() {
             <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px' }}>
                 {(user !== undefined && user?.imageFile !== null && user.imageFile !== undefined && user.imageFile.length > 0) ?
                     <>
-                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={user.imageFile} />
+                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px', position: 'relative', translate: '0 28px', backgroundColor: 'white', borderRadius: '50%' }} onClick={deleteImage} id={user.imageFile} />
                         <CardMedia
                             component="img"
                             image={`https://storage.googleapis.com/hack-trip/${user.imageFile}`}
-                            sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
+                            sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid', boxShadow: '3px 2px 5px black', borderRadius: '50%' }}
+
                             alt="USER"
 
                         />
@@ -297,11 +327,11 @@ export default function AdminEdit() {
                     :
                     (userEdit !== undefined && userEdit.imageFile !== null && userEdit.imageFile !== undefined && userEdit.imageFile.length > 0) ?
                         <>
-                            <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={userEdit.imageFile} />
+                            <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px', position: 'relative', translate: '0 28px', backgroundColor: 'white', borderRadius: '50%' }} onClick={deleteImage} id={userEdit.imageFile} />
                             <CardMedia
                                 component="img"
                                 image={`https://storage.googleapis.com/hack-trip/${userEdit.imageFile}`}
-                                sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
+                                sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid', boxShadow: '3px 2px 5px black', borderRadius: '50%' }}
                                 alt="USEREDIT"
 
                             />
@@ -349,9 +379,39 @@ export default function AdminEdit() {
 
                         </>
                         : ''}
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+
+                        {iconFotoCamera ?
+                            <MuiTooltipIconFotoCamera />
+                            :
+                            <Button variant="contained" component="label"  >
+                                Upload
+                                <input hidden accept="image/*" multiple type="file" onChange={handleFileChange} />
+                            </Button>
+                        }
+                    </Box >
+                    {errorMessageImage ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageImage}</Typography> : ''}
+                    {(fileSelected !== null) && (fileSelected !== undefined) ? <>
+
+                        <Box component='div' id='box-images' sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            maxHeight: "200px",
+                            overflow: "hidden",
+                            overflowY: 'auto',
+                            padding: '6px',
+                            border: 'solid 1px black',
+                            margin: '6px',
+                            borderRadius: '5px',
+
+                        }}>
+                            {Array(fileSelected).map((x, i) => { return <li style={{ 'listStyle': 'none', display: 'flex', justifyContent: 'space-between', margin: '5px 0px', alignItems: 'center' }} key={i}><img src={URL.createObjectURL(x)} style={{ borderRadius: '5px' }} alt={x.name} height='45px' width='55px' /> {x.name.length > 60 ? '...' + x.name.slice(-60) : x.name} <HighlightOffSharpIcon sx={{ cursor: 'pointer', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={onDeleteImage} key={x.name} id={x.name} /></li> }
+                            )}
+                        </Box >
 
 
-                    <MuiFileInput value={fileSelected ? fileSelected : undefined} name='inpImages' helperText={errorMessageImage} sx={{ '& input.css-152mnda-MuiInputBase-input-MuiOutlinedInput-input': { cursor: 'pointer' } }} onChange={handleFileChange} onClick={(e) => deleteFile(e)} />
+                    </> : ''}
+
 
                     <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>

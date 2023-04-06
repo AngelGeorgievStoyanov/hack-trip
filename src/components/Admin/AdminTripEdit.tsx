@@ -6,7 +6,7 @@ import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, useEffect, useState } from "react";
 import { containerStyle, options } from "../settings";
-import { Box, Button, Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, Grid, IconButton, ImageList, ImageListItem, TextField, Tooltip, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import FormTextArea from "../FormFields/FormTextArea";
@@ -14,9 +14,10 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
-import FileUpload from "react-mui-fileuploader";
 import imageCompression from "browser-image-compression";
-
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
@@ -79,20 +80,24 @@ export default function AdminTripEdit() {
 
     const trip = useLoaderData() as Trip;
 
-   
+
 
     const [images, setImages] = useState<string[]>();
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral);
     const [initialPoint, setInitialPoint] = React.useState<google.maps.LatLngLiteral>({ lat: Number(trip.lat), lng: Number(trip.lng) } as google.maps.LatLngLiteral);
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
     const [errorMessageSearch, setErrorMessageSearch] = useState('');
+    const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
 
     const [visible, setVisible] = React.useState(true);
     let positionPoint;
+
     if (trip) {
         userId = trip._ownerId
-       
+
     }
+
+    const iconFotoCamera = useMediaQuery('(max-width:600px)');
 
 
     useEffect(() => {
@@ -152,42 +157,93 @@ export default function AdminTripEdit() {
     })
 
 
-    const handleFilesChange = async (files: any) => {
+    const handleFilesChange = async (event: BaseSyntheticEvent) => {
+
+        let files: File[] = Array.from(event.target.files);
 
         if (!files) return;
-        let compress = await files.map(async (x: File) => {
-            if (x.size > 10000) {
+        if (files.length === 0) return
 
-                const options = {
-                    maxSizeMB: 0.1,
-                    maxWidthOrHeight: 520,
-                    fileType: x.type,
-                    name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
-                        x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
-                }
-                try {
-                    const compressedFile = await imageCompression(x, options)
-                    return new File([compressedFile], options.name, { type: x.type })
+        while (files.some((x) => !x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/))) {
+            setErrorMessageImage('Please select valid file image');
 
-                } catch (err) {
-                    console.log(err);
+            let index = files.findIndex((x: any) => {
+                return !x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)
+            })
+
+            files.splice(index, 1)
+        }
+
+        if (files.length > 9) {
+            files = files.slice(0, 9)
+        }
+
+        if (files.length > 0) {
+            files = files.slice(0, 9 - (fileSelected.length) - (images !== undefined ? images?.length : 0))
+        }
+
+
+        let compress = files.map(async (x: File) => {
+
+
+
+            if (x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
+
+                if (x.size > 10000) {
+
+                    const options = {
+                        maxSizeMB: 0.1,
+                        maxWidthOrHeight: 520,
+                        fileType: x.type,
+                        name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
+                            x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
+                    }
+                    try {
+                        const compressedFile = await imageCompression(x, options)
+                        return new File([compressedFile], options.name, { type: x.type })
+
+                    } catch (err) {
+                        console.log(err);
+                    }
+                } else {
+                    const options = {
+                        name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
+                            x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
+                    }
+                    return new File([x], options.name, { type: x.type })
                 }
-            } else {
-                const options = {
-                    name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
-                        x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
-                }
-                return new File([x], options.name, { type: x.type })
+            } else if (!x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
+                setErrorMessageImage('Please select valid file image');
+                return
             }
         })
 
 
-        Promise.all(compress).then((data) => {
-            setFileSelected(data)
+
+        Promise.all(compress).then((data: any) => {
+            let imagesConcat: File[] = []
+            if (data) {
+                data.map((x: File) => {
+                    if (x !== undefined) {
+                        imagesConcat.push(x)
+                    }
+                })
+
+
+                let images = fileSelected.concat(imagesConcat)
+
+                if (images.length > 9) {
+                    images = fileSelected.slice(0, 9)
+                }
+                setFileSelected(prev => [...images]);
+
+            }
         })
 
 
-    };
+
+    }
+
 
 
     const mapRef = React.useRef<google.maps.Map | null>(null);
@@ -272,7 +328,8 @@ export default function AdminTripEdit() {
 
 
 
-    if (!isLoaded) return <div>MAP LOADING ...</div>
+    if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}> <div>MAP LOADING ...</div></Grid>
+
 
 
     const editTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
@@ -378,13 +435,55 @@ export default function AdminTripEdit() {
 
     }
 
+    const onDeleteAllImage = () => {
+        setFileSelected([])
+    }
 
+
+
+    const MuiTooltipIconFotoCamera = () => {
+        return (
+            <Tooltip title='UPLOAD' arrow>
+                <IconButton color="primary" disabled={((images ? images.length : 0) + fileSelected.length) >= 9 ? true : false} aria-label="upload picture" component="label">
+                    <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
+
+                    <PhotoCamera fontSize="large" />
+                </IconButton>
+            </Tooltip>
+        )
+    }
+
+
+    const MuiTooltipIconRemoveAll = () => {
+        return (
+            <Tooltip title='REMOVE ALL IMAGES' arrow>
+                <DeleteForeverIcon color="primary" fontSize="large" onClick={onDeleteAllImage} />
+            </Tooltip>
+        )
+    }
+
+
+    const onDeleteImage = (event: BaseSyntheticEvent) => {
+        let index = fileSelected.findIndex(x => {
+            return x.name === event.currentTarget.id;
+        })
+        fileSelected.splice(index, 1);
+        setFileSelected([...fileSelected]);
+    }
+
+
+    if (errorMessageImage) {
+
+        setTimeout(() => {
+            setErrorMessageImage(undefined);
+        }, 5000);
+    }
 
     return (
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px 0', minHeight: '100vh', margin:'0px', width:'100vw', '@media(max-width: 1000px)':{width:'100vw', padding:'15px 0px', margin:'0px'} }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding:'0px' }}>
-                    <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px 0', minHeight: '100vh', margin: '0px', width: '100vw', '@media(max-width: 1000px)': { width: '100vw', padding: '15px 0px', margin: '0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding: '0px' }}>
+                    <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
                         <GoogleMap
                             mapContainerStyle={containerStyle}
                             options={options as google.maps.MapOptions}
@@ -399,7 +498,7 @@ export default function AdminTripEdit() {
 
                         </GoogleMap>
                     </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px',  '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
                         <Autocomplete>
                             <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
 
@@ -408,8 +507,8 @@ export default function AdminTripEdit() {
                         <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
                     </Box>
                     <Box component='div' sx={{
-                        display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 960px)': {
-                            display: 'flex', flexDirection: 'column-reverse', width: '100vw',alignItems: 'center'
+                        display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 1120px)': {
+                            display: 'flex', flexDirection: 'column-reverse', width: '100vw', alignItems: 'center'
                         }
                     }}>
                         <Box component='form'
@@ -418,7 +517,7 @@ export default function AdminTripEdit() {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'space-between',
-                                maxWidth: '420px',
+                                maxWidth: '430px',
                                 minHeight: '250px',
                                 maxHeight: '1100px',
                                 padding: '30px',
@@ -449,21 +548,47 @@ export default function AdminTripEdit() {
 
                             <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
                             />
-                            <FileUpload
-                                title="Upload images"
-                                multiFile={true}
-                                onFilesChange={handleFilesChange}
-                                onContextReady={(context) => { }}
-                                showPlaceholderImage={false}
-                                maxFilesContainerHeight={157}
-                                buttonLabel='Click here for upload images'
-                                rightLabel={''}
-                                maxUploadFiles={9}
-                                header={'Drag and drop'}
-                                allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
 
-                                sx={{ '& .MuiPaper-root MuiPaper-outlined MuiPaper-rounded css-ibczwg-MuiPaper-root': { backgroundColor: '#8d868670' } }}
-                            />
+
+                            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                {iconFotoCamera ?
+                                    <MuiTooltipIconFotoCamera />
+                                    :
+                                    <Box sx={{ width: '30ch' }}>
+                                        <Button variant="contained" component="label" disabled={((images ? images.length : 0) + fileSelected.length) >= 9 ? true : false} >
+                                            Upload
+                                            <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
+                                        </Button>
+                                    </Box>
+                                }
+                                <Typography variant="overline" display="block" gutterBottom style={{ marginRight: '15px' }}>     {((images ? images.length : 0) + fileSelected.length)}/9 uploaded images</Typography>
+                            </Box >
+                            {((images ? images.length : 0) + fileSelected.length) >= 9 ? <Typography style={{ color: 'red', marginLeft: '12px' }}>9 images are the maximum number to upload.</Typography> : ''}
+                            {errorMessageImage ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageImage}</Typography> : ''}
+                            {fileSelected.length > 0 ? <>
+                                <Box component='div' id='box-images' sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    maxHeight: "200px",
+                                    overflow: "hidden",
+                                    overflowY: 'auto',
+                                    padding: '6px',
+                                    border: 'solid 1px black',
+                                    margin: '6px',
+                                    borderRadius: '5px',
+                                }}>
+                                    {fileSelected.map((x, i) => { return <li style={{ 'listStyle': 'none', display: 'flex', justifyContent: 'space-between', margin: '5px 0px', alignItems: 'center' }} key={i}><img src={URL.createObjectURL(x)} style={{ borderRadius: '5px' }} alt={x.name} height='45px' width='55px' /> {x.name.length > 60 ? '...' + x.name.slice(-60) : x.name} <HighlightOffSharpIcon sx={{ cursor: 'pointer', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={onDeleteImage} key={x.name} id={x.name} /></li> }
+                                    )}
+                                </Box >
+                                {iconFotoCamera ?
+                                    <MuiTooltipIconRemoveAll />
+                                    :
+                                    <Box component='div' sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                        <Button variant="contained" onClick={onDeleteAllImage}>Remove all images</Button>
+                                    </Box>
+                                }
+
+                            </> : ''}
                             <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
                             <span>
                                 <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADMIN EDIT TRIP</Button>
@@ -474,7 +599,7 @@ export default function AdminTripEdit() {
                             <ImageList sx={{ width: 520, height: 'auto', margin: '30px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={3} rowHeight={164}>
                                 {images ? images.map((item, i) => (
                                     <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
-                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', position:'absolute', backgroundColor:'#ffffff54', borderRadius:'50%'  }} onClick={deleteImage} id={item} />
+                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', position: 'absolute', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={deleteImage} id={item} />
                                         <img
                                             src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
                                             srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}

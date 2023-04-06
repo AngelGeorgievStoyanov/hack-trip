@@ -196,7 +196,8 @@ export default function AdminTripDetails() {
     const onUnmount = (): void => {
         mapRef.current = null;
     }
-    if (!isLoaded) return <div>MAP LOADING ...</div>
+    if (!isLoaded) return     <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}> <div>MAP LOADING ...</div></Grid>
+
 
 
 
@@ -563,11 +564,11 @@ export default function AdminTripDetails() {
 
                 <Container maxWidth={false} sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 900px)': {
-                        display: 'flex', flexDirection: 'column', padding: '0px',  alignItems:'center'
+                        display: 'flex', flexDirection: 'column', padding: '0px', alignItems: 'center'
                     }
                 }} >
 
-                    <Box component='div' sx={{ display: 'flex', flexDirection: 'column', '@media(max-width: 600px)': { width: '94vw' } }}>
+                    <Box component='div' sx={{ display: 'flex', flexDirection: 'column', border: 'solid 1px', boxShadow: '3px 2px 5px black', height: 'fit-content', '@media(max-width: 600px)': { width: '94vw' } }}>
                         {points?.length > 0 ?
                             <MobileStepper
                                 variant="progress"
@@ -597,7 +598,7 @@ export default function AdminTripDetails() {
                                 }
                             />
                             : ''}
-                        <Box sx={{ display: 'flex', maxWidth: '600px' }}>
+                        <Box sx={{ display: 'flex', maxWidth: '600px', }}>
 
                             <GoogleMap
                                 mapContainerStyle={containerStyle}

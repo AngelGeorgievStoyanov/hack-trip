@@ -31,7 +31,7 @@ import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 
-let zoom = 10;
+let zoom = 12;
 
 let center = {
     lat: 42.697866831005435,
@@ -105,6 +105,9 @@ export default function TripDetails() {
     };
 
 
+
+
+
     useEffect(() => {
         if (idTrip !== undefined) {
 
@@ -158,7 +161,7 @@ export default function TripDetails() {
                 }
             }).catch((err) => {
                 console.log(err)
-                navigate('/404')
+                navigate('/not-found')
 
             })
 
@@ -221,7 +224,8 @@ export default function TripDetails() {
     const onUnmount = (): void => {
         mapRef.current = null;
     }
-    if (!isLoaded) return <div>MAP LOADING ...</div>
+    if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}> <div>MAP LOADING ...</div></Grid>
+
 
 
 
@@ -723,10 +727,10 @@ export default function TripDetails() {
                 </Container>
                 <Container maxWidth={false} sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 900px)': {
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', padding:'0px'
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0px'
                     }
                 }} >
-                    <Box component='div' sx={{ boxSizing: "content-box", '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', width: '94vW' } }}>
+                    <Box component='div' sx={{ boxSizing: "content-box", height: 'fit-content', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', width: '94vW' } }}>
                         {points?.length > 0 ?
                             <MobileStepper
                                 variant="progress"

@@ -161,27 +161,22 @@ export default function Admin() {
                     <Button variant="contained" onClick={hideUsers} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hideUsersList ? 'HIDE USERS' : 'SHOW USERS'} </Button>
                     {trips !== undefined && trips.length > 0 ?
                         <Button variant="contained" onClick={hideTrips} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hideTripsList ? 'HIDE TRIPS' : 'SHOW TRIPS'} </Button>
-                        : 'NO TRIPS REPORTED'}
+                        : <h4>NO TRIPS REPORTED</h4>}
 
 
 
                     {comments !== undefined && comments.length > 0 ?
                         <Button variant="contained" onClick={hideComments} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hideCommentsList ? 'HIDE COMMENTS' : 'SHOW COMMENTS'} </Button>
-                        : 'NO COMMENTS REPORTED'
+                        : <h4>NO COMMENTS REPORTED</h4>
                     }
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'row', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', maxWidth: '95%' } }}>
 
-
                     {hideUsersList ?
                         <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
-
-
                             <UsersList users={users} />
 
-
                         </Box>
-
                         : ''}
 
 
@@ -201,18 +196,9 @@ export default function Admin() {
                     {hideCommentsList ?
                         <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
 
-
-
                             {(comments !== undefined && comments.length > 0) ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} onUnReportClickHandlerComment={unReportClickHandlerComment} onReportClickHandlerComment={reportClickHandlerComment} reportedComment={reportedComment} userId={userId} />) : ''}
-
-
-
-
                         </Box>
-
                         : ''}
-
-
 
                 </Box>
             </Box>

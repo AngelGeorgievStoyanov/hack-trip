@@ -6,7 +6,7 @@ import { IdType } from "../../../../shared/common-types";
 import { containerStylePoint, optionsPoint } from "../../../settings";
 import * as pointService from '../../../../services/pointService'
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Button, Card, Typography } from "@mui/material";
+import { Button, Card, Grid, Typography } from "@mui/material";
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 
@@ -59,7 +59,8 @@ export default function PointCard({ point, length }: PointCardProps) {
         mapRef.current = null;
     }
 
-    if (!isLoaded) return <div >MAP LOADING ...</div>
+    if (!isLoaded) return     <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}> <div>MAP LOADING ...</div></Grid>
+
 
     const deleteClickHandler = () => {
         API_POINT.deleteById(point._id, idTrip + '').then((data) => {
@@ -159,7 +160,7 @@ export default function PointCard({ point, length }: PointCardProps) {
                         mapContainerStyle={containerStylePoint}
                         options={optionsPoint}
                         center={center}
-                        zoom={12}
+                        zoom={14}
                         onLoad={onLoad}
                         onUnmount={onUnmount}
 

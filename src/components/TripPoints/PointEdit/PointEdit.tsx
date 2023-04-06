@@ -1,22 +1,25 @@
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
-import React, { BaseSyntheticEvent, useEffect, useState } from "react";
+import React, { BaseSyntheticEvent, useContext, useEffect, useState } from "react";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { Point } from "../../../model/point";
 import { IdType } from "../../../shared/common-types";
 import { containerStyle, options } from "../../settings";
 import * as pointService from '../../../services/pointService';
 import { ApiPoint } from "../../../services/pointService";
-import { Box, Button, Container, Grid, ImageList, ImageListItem, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, Grid, IconButton, ImageList, ImageListItem, TextField, Tooltip, Typography } from "@mui/material";
 import FormInputText from "../../FormFields/FormInputText";
 import { useForm } from "react-hook-form";
 import FormTextArea from "../../FormFields/FormTextArea";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
-import FileUpload from "react-mui-fileuploader";
 import LoadingButton from "@mui/lab/LoadingButton";
 import imageCompression from "browser-image-compression";
-
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { LoginContext } from "../../../App";
+import jwt_decode from "jwt-decode";
 
 
 
@@ -26,6 +29,11 @@ let center = {
     lng: 23.321590139866355
 }
 
+
+type decode = {
+    _id: string,
+
+}
 
 const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
@@ -48,6 +56,9 @@ const schema = yup.object({
 }).required();
 
 
+let userId: string | undefined;
+
+
 export default function PointEdit() {
 
     const point = useLoaderData() as Point;
@@ -60,15 +71,39 @@ export default function PointEdit() {
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
+    const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
+
+
+    const { userL } = useContext(LoginContext);
+
+
+    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+
+
+
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
+
+    }
+
+
+
 
     useEffect(() => {
-        API_POINT.findByPointId(point._id).then((data) => {
-            setImages(data.imageFile);
-        }).catch((err) => {
-            console.log(err)
-        });
+        if (userId) {
+
+            API_POINT.findByPointId(point._id).then((data) => {
+                setImages(data.imageFile);
+            }).catch((err) => {
+                console.log(err)
+            });
+        }
     }, []);
 
+
+    const iconFotoCamera = useMediaQuery('(max-width:600px)');
 
 
     const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
@@ -197,49 +232,102 @@ export default function PointEdit() {
 
 
 
-    if (!isLoaded) return <div>MAP LOADING ...</div>
+    if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}> <div>MAP LOADING ...</div></Grid>
 
 
-    const handleFilesChange = async (files: any) => {
+
+
+
+    const handleFilesChange = async (event: BaseSyntheticEvent) => {
+
+        let files: File[] = Array.from(event.target.files);
 
         if (!files) return;
+        if (files.length === 0) return
+
+        while (files.some((x) => !x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/))) {
+            setErrorMessageImage('Please select valid file image');
+
+            let index = files.findIndex((x: any) => {
+                return !x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)
+            })
+
+            files.splice(index, 1)
+        }
+
+        if (files.length > 9) {
+            files = files.slice(0, 9)
+        }
+
+        if (files.length > 0) {
+            files = files.slice(0, 9 - (fileSelected.length) - (images !== undefined ? images?.length : 0))
+        }
 
 
-        let compress = await files.map(async (x: File) => {
-            if (x.size > 10000) {
 
-                const options = {
-                    maxSizeMB: 0.1,
-                    maxWidthOrHeight: 520,
-                    fileType: x.type,
-                    name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
-                        x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
+
+        let compress = files.map(async (x: File) => {
+
+
+
+            if (x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
+
+                if (x.size > 10000) {
+
+                    const options = {
+                        maxSizeMB: 0.1,
+                        maxWidthOrHeight: 520,
+                        fileType: x.type,
+                        name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
+                            x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
+                    }
+                    try {
+                        const compressedFile = await imageCompression(x, options)
+                        return new File([compressedFile], options.name, { type: x.type })
+
+                    } catch (err) {
+                        console.log(err);
+                    }
+                } else {
+                    const options = {
+                        name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
+                            x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
+                    }
+                    return new File([x], options.name, { type: x.type })
                 }
-                try {
-                    const compressedFile = await imageCompression(x, options)
-                    return new File([compressedFile], options.name, { type: x.type })
-
-                } catch (err) {
-                    console.log(err);
-                }
-            } else {
-                const options = {
-                    name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
-                        x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
-                }
-                return new File([x], options.name, { type: x.type })
+            } else if (!x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
+                setErrorMessageImage('Please select valid file image');
+                return
             }
         })
 
 
-        Promise.all(compress).then((data) => {
-            setFileSelected(data)
+
+        Promise.all(compress).then((data: any) => {
+            let imagesConcat: File[] = []
+            if (data) {
+                data.map((x: File) => {
+                    if (x !== undefined) {
+                        imagesConcat.push(x)
+                    }
+                })
+
+
+                let images = fileSelected.concat(imagesConcat)
+
+                if (images.length > 9) {
+                    images = fileSelected.slice(0, 9)
+                }
+                setFileSelected(prev => [...images]);
+
+            }
         })
 
 
-    };
 
-    const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
+    }
+
+    const editPointSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
         setButtonAdd(false)
         let formData = new FormData();
 
@@ -340,13 +428,56 @@ export default function PointEdit() {
     }
 
 
+    const onDeleteAllImage = () => {
+        setFileSelected([])
+    }
+
+
+
+    const MuiTooltipIconFotoCamera = () => {
+        return (
+            <Tooltip title='UPLOAD' arrow>
+                <IconButton color="primary" disabled={((images ? images.length : 0) + fileSelected.length) >= 9 ? true : false} aria-label="upload picture" component="label">
+                    <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
+
+                    <PhotoCamera fontSize="large" />
+                </IconButton>
+            </Tooltip>
+        )
+    }
+
+
+    const MuiTooltipIconRemoveAll = () => {
+        return (
+            <Tooltip title='REMOVE ALL IMAGES' arrow>
+                <DeleteForeverIcon color="primary" fontSize="large" onClick={onDeleteAllImage} />
+            </Tooltip>
+        )
+    }
+
+
+    const onDeleteImage = (event: BaseSyntheticEvent) => {
+        let index = fileSelected.findIndex(x => {
+            return x.name === event.currentTarget.id;
+        })
+        fileSelected.splice(index, 1);
+        setFileSelected([...fileSelected]);
+    }
+
+
+    if (errorMessageImage) {
+
+        setTimeout(() => {
+            setErrorMessageImage(undefined);
+        }, 5000);
+    }
+
     return (
 
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
-                    <Box sx={{ display: 'flex', maxWidth: '600px', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
-
+            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px 0', minHeight: '100vh', margin: '0px', width: '100vw', '@media(max-width: 1000px)': { width: '100vw', padding: '15px 0px', margin: '0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding: '0px' }}>
+                    <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
                         <GoogleMap
                             mapContainerStyle={containerStyle}
                             options={options as google.maps.MapOptions}
@@ -360,7 +491,7 @@ export default function PointEdit() {
                                 clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos} draggable onDragEnd={dragMarker} /> : null}
                         </GoogleMap>
                     </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 
                         <Autocomplete>
@@ -370,8 +501,8 @@ export default function PointEdit() {
                         <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
                     </Box>
                     <Box component='div' sx={{
-                        display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 600px)': {
-                            display: 'flex', flexDirection: 'column-reverse', width: '100vw'
+                        display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 1020px)': {
+                            display: 'flex', flexDirection: 'column-reverse', width: '100vw', alignItems: 'center'
                         }
                     }}>
 
@@ -392,7 +523,7 @@ export default function PointEdit() {
                             }}
                             noValidate
                             autoComplete="off"
-                            onSubmit={handleSubmit(createTripSubmitHandler)}
+                            onSubmit={handleSubmit(editPointSubmitHandler)}
                         >
                             <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h4">
                                 EDIT POINT
@@ -403,20 +534,46 @@ export default function PointEdit() {
                             </span>
                             <Button variant="contained" onClick={findInMap} sx={{ ':hover': { background: '#4daf30' } }}>FIND IN MAP</Button>
                             <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
-                            <FileUpload
-                                title="Upload images"
-                                multiFile={true}
-                                onFilesChange={handleFilesChange}
-                                onContextReady={(context) => { }}
-                                showPlaceholderImage={false}
-                                maxFilesContainerHeight={157}
-                                buttonLabel='Click here for upload images'
-                                rightLabel={''}
-                                maxUploadFiles={9}
-                                header={'Drag and drop'}
-                                allowedExtensions={['jpg', 'jpeg', 'PNG', 'gif', 'JPEG', 'png', 'JPG']}
-                                sx={{ '& .MuiPaper-root MuiPaper-outlined MuiPaper-rounded css-ibczwg-MuiPaper-root': { backgroundColor: '#8d868670' } }}
-                            />
+
+                            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                {iconFotoCamera ?
+                                    <MuiTooltipIconFotoCamera />
+                                    :
+                                    <Box sx={{ width: '30ch' }}>
+                                        <Button variant="contained" component="label" disabled={((images ? images.length : 0) + fileSelected.length) >= 9 ? true : false} >
+                                            Upload
+                                            <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
+                                        </Button>
+                                    </Box>
+                                }
+                                <Typography variant="overline" display="block" gutterBottom style={{ marginRight: '15px' }}>     {((images ? images.length : 0) + fileSelected.length)}/9 uploaded images</Typography>
+                            </Box >
+                            {((images ? images.length : 0) + fileSelected.length) >= 9 ? <Typography style={{ color: 'red', marginLeft: '12px' }}>9 images are the maximum number to upload.</Typography> : ''}
+                            {errorMessageImage ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageImage}</Typography> : ''}
+                            {fileSelected.length > 0 ? <>
+                                <Box component='div' id='box-images' sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    maxHeight: "200px",
+                                    overflow: "hidden",
+                                    overflowY: 'auto',
+                                    padding: '6px',
+                                    border: 'solid 1px black',
+                                    margin: '6px',
+                                    borderRadius: '5px',
+                                }}>
+                                    {fileSelected.map((x, i) => { return <li style={{ 'listStyle': 'none', display: 'flex', justifyContent: 'space-between', margin: '5px 0px', alignItems: 'center' }} key={i}><img src={URL.createObjectURL(x)} style={{ borderRadius: '5px' }} alt={x.name} height='45px' width='55px' /> {x.name.length > 60 ? '...' + x.name.slice(-60) : x.name} <HighlightOffSharpIcon sx={{ cursor: 'pointer', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={onDeleteImage} key={x.name} id={x.name} /></li> }
+                                    )}
+                                </Box >
+                                {iconFotoCamera ?
+                                    <MuiTooltipIconRemoveAll />
+                                    :
+                                    <Box component='div' sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                        <Button variant="contained" onClick={onDeleteAllImage}>Remove all images</Button>
+                                    </Box>
+                                }
+
+                            </> : ''}
                             <span>
                                 {buttonAdd === true ?
                                     <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT POINT</Button>
