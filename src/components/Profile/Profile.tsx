@@ -310,14 +310,13 @@ export default function Profile() {
             <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px', '@media(max-width: 600px)': { display: 'flex', padding: '20px', maxWidth: '100vW' } }}>
                 {user?.imageFile ?
                     <>
-                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px' }} onClick={deleteImage} id={user.imageFile} />
-                        <CardMedia
-                            component="img"
-                            image={`https://storage.googleapis.com/hack-trip/${user.imageFile}`}
-                            sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid' }}
-                            alt="USER"
-
-                        />
+                            <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px', position: 'relative', translate: '0 28px', backgroundColor: 'white', borderRadius: '50%' }} onClick={deleteImage} id={user.imageFile} />
+                            <CardMedia
+                                component="img"
+                                image={`https://storage.googleapis.com/hack-trip/${user.imageFile}`}
+                                sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid', boxShadow: '3px 2px 5px black', borderRadius: '50%' }}
+                                alt="USER"
+                            />
                     </>
                     : ''}
                 <Box component="form"

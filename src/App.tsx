@@ -23,7 +23,7 @@ import EditComment from './components/CommentEdit/CommentEdit';
 import { ApiComment } from './services/commentService';
 import { Comment } from './model/comment';
 import * as commentService from './services/commentService'
-import { useState, createContext } from 'react';
+import { useState, createContext, useContext } from 'react';
 import { User } from './model/users';
 import MyTrips from './components/MyTrips/MyTrips';
 import GuardedRoute from './components/GuardedRoute/GuardedRoute';
@@ -66,16 +66,13 @@ type LoginContext = {
 export const LoginContext = createContext({} as LoginContext);
 
 
-
-
-
-export const userId = sessionStorage.getItem('userId')
-
-
-
-
 export async function tripLoader({ params }: LoaderFunctionArgs) {
 
+
+
+  const userId = sessionStorage.getItem('userId')
+
+ 
 
   if (params.tripId && userId !== null && userId !== undefined) {
 

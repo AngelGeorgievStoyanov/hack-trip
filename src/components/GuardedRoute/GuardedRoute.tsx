@@ -22,7 +22,9 @@ const GuardedRoute = () => {
         userId = decode._id !== undefined ? decode._id : undefined;
     }
 
-    return userId ? <Outlet /> : <Navigate to="/login" />
+
+
+    return userId !==undefined ? <Outlet /> : <Navigate to="/login" />
 
 }
 export default GuardedRoute

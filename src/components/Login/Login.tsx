@@ -56,7 +56,7 @@ export function Login() {
 
         API_CLIENT.login(data.email, data.password)
             .then((user) => {
-                sessionStorage.setItem('userId', user._id + '');
+                sessionStorage.setItem('userId', user._id.toString());
                 sessionStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
                 if (user !== undefined) {
 
@@ -91,7 +91,7 @@ export function Login() {
 
 
 
-   
+
     return (
         <>
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
@@ -103,7 +103,7 @@ export function Login() {
                             </Typography>
                         </Box>
                         : ''}
-                  
+
                     <Box component="form" sx={{
                         display: 'flex',
                         flexDirection: 'column',
