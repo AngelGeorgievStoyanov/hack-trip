@@ -310,7 +310,7 @@ export function TripPoints() {
 
 
 
-    if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}> <div>MAP LOADING ...</div></Grid>
+    if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}><Typography sx={{ fontFamily: 'cursive' }} variant='h4'>MAP LOADING ...</Typography></Grid>
 
 
 
@@ -458,7 +458,7 @@ export function TripPoints() {
         <>
             <Grid container sx={{
                 justifyContent: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', '@media(max-width: 600px)': {
-                    display: 'flex', flexDirection: 'column'
+                    display: 'flex', flexDirection: 'column',margin: '-25px 0px 0px 0px'
                 }
             }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
