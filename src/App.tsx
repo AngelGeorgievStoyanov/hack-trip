@@ -23,7 +23,7 @@ import EditComment from './components/CommentEdit/CommentEdit';
 import { ApiComment } from './services/commentService';
 import { Comment } from './model/comment';
 import * as commentService from './services/commentService'
-import { useState, createContext, useContext } from 'react';
+import { useState, createContext } from 'react';
 import { User } from './model/users';
 import MyTrips from './components/MyTrips/MyTrips';
 import GuardedRoute from './components/GuardedRoute/GuardedRoute';

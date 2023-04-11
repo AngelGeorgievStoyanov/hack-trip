@@ -66,7 +66,7 @@ export default function Trips() {
 
         setPage(prev => value);
 
-        API_TRIP.findAllPagination(page, searchInput, typeOfPeopleSelect, typeOfTransportSelect,userId).then((data) => {
+        API_TRIP.findAllPagination(page, searchInput, typeOfPeopleSelect, typeOfTransportSelect, userId).then((data) => {
 
             setTrips(prev => data);
 
@@ -182,17 +182,18 @@ export default function Trips() {
                             </Select>
                         </FormControl>
                     </Box>
-
-                    <Search>
-                        <SearchIconWrapper>
-                            <SearchIcon />
-                        </SearchIconWrapper>
-                        <StyledInputBase
-                            placeholder="Search…"
-                            inputProps={{ 'aria-label': 'search' }} ref={searchRef}
-                            onClick={changeHandlerSearch}
-                        />
-                    </Search>
+                    <Box>
+                        <Search>
+                            <SearchIconWrapper>
+                                <SearchIcon />
+                            </SearchIconWrapper>
+                            <StyledInputBase
+                                placeholder="Search…"
+                                inputProps={{ 'aria-label': 'search' }} ref={searchRef}
+                                onClick={changeHandlerSearch}
+                            />
+                        </Search>
+                    </Box>
                 </Toolbar>
             </AppBar>
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>

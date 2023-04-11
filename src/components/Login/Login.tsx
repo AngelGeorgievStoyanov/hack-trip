@@ -132,7 +132,7 @@ export function Login() {
                         <FormInputText name='password' type='password' label='Password' control={control} error={errors.password?.message}
                             rules={{ required: true }} />
 
-                        <Box >
+                        <Box sx={{'@media(max-width: 490px)': { display: 'flex', flexDirection: 'column' } }}>
                             <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, margin: '5px' }}>Sign Up</Button>
                             <Button variant="contained" component={Link} to={'/register'} sx={{ ':hover': { color: 'rgb(248 245 245)' }, margin: '5px', background: 'rgb(194 194 224)', color: 'black' }}  >Don't Have An Account? Sign up!</Button>
                             <Button variant="contained" component={Link} to={'/forgot-password'} sx={{ ':hover': { color: 'rgb(248 245 245)' }, margin: '5px', background: 'rgb(194 194 224)', color: 'black' }}  >Forgot Password</Button>

@@ -66,7 +66,7 @@ export function Register() {
     const [registerMessage, setRegisterMessage] = useState<string>()
     const [checkedPrivacyPolicy, setCheckedPrivacyPolicy] = useState<boolean>(false)
     const [verified, setVerified] = useState<boolean>(false)
-  
+
 
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
@@ -229,17 +229,18 @@ export function Register() {
                         {userId === undefined && token === undefined ?
                             <>
                                 <FormControlLabel sx={{ width: 'fit-content' }} control={<Checkbox checked={checkedPrivacyPolicy} onChange={handleChangePrivacyPolicy} />} label={<Link to={'/term-privacy-policy'}>I accept the terms of use and privacy policy</Link>} />
-                                <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!checkedPrivacyPolicy ? true : !verified ? true : registerMessage ? true : false}>Sign Up</Button>
-                                    <Button component={Link} to={'/login'} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Already Have An Account?</Button>
+                                <Box sx={{ '@media(max-width: 520px)': { display: 'flex', flexDirection: 'column' } }}>
+
+                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, margin: '5px' }} disabled={!checkedPrivacyPolicy ? true : !verified ? true : registerMessage ? true : false}>Sign Up</Button>
+                                    <Button component={Link} to={'/login'} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '5px' }}  >Already Have An Account?</Button>
                                 </Box >
                             </>
                             :
                             <>
                                 <Box sx={{ display: 'flex', padding: '0 20px', flexDirection: 'row', justifyContent: 'space-between' }}>
 
-                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!verified ? true : registerMessage ? true : false}>NEW PASSWORD</Button>
-                                    <Button component={Link} to={'/login'} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '10px' }}  >Already Have An Account?</Button>
+                                    <Button variant="contained" type='submit' sx={{ margin: '5px', ':hover': { background: '#4daf30' }, }} disabled={!verified ? true : registerMessage ? true : false}>NEW PASSWORD</Button>
+                                    <Button component={Link} to={'/login'} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '5px' }}  >Already Have An Account?</Button>
                                 </Box>
 
 
