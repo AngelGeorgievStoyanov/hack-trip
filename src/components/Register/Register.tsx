@@ -164,6 +164,8 @@ export function Register() {
         if (value !== null) {
             setVerified(true);
             setErrorApi(undefined);
+        } else {
+            setVerified(false);
         }
     }
 
@@ -233,6 +235,7 @@ export function Register() {
 
                                     <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, margin: '5px' }} disabled={!checkedPrivacyPolicy ? true : !verified ? true : registerMessage ? true : false}>Sign Up</Button>
                                     <Button component={Link} to={'/login'} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '5px' }}  >Already Have An Account?</Button>
+                                    <Button component={Link} to={'/resend-email'} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '5px' }}  >Resend verification email</Button>
                                 </Box >
                             </>
                             :

@@ -25,6 +25,7 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     forgotPassword(email: string): Promise<string>;
     newPassword(id: K, token: string, password: string): Promise<V>;
     verifyEmail(id: K, token: string): Promise<boolean>;
+    resendVerEmail(email: string): Promise<string>;
 }
 
 
@@ -272,7 +273,7 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     }
 
 
-    async verifyEmail(id: K, token: string):Promise<boolean>{
+    async verifyEmail(id: K, token: string): Promise<boolean> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/verify-email/${id}/${token}`)
 
         if (response.status >= 400) {
@@ -284,6 +285,29 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
 
     }
+
+
+
+    async resendVerEmail(email: string): Promise<string> {
+
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/resend-email`, {
+            method: 'POST',
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({ email })
+        });
+
+
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
+
+        return response.json();
+    }
+
 
 }
 

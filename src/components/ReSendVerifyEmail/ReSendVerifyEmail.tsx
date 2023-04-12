@@ -4,7 +4,7 @@ import { IdType } from "../../shared/common-types";
 import FormInputText from "../FormFields/FormInputText";
 import * as userService from '../../services/userService';
 import { ApiClient } from "../../services/userService";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { BaseSyntheticEvent, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -31,7 +31,7 @@ const schema = yup.object({
 
 
 
-function ForgotPassword() {
+function ReSendVerifyEmail() {
 
 
     const navigate = useNavigate();
@@ -50,12 +50,12 @@ function ForgotPassword() {
 
 
 
-    const forgotPasswordSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
+    const resendVerEmailSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
         event?.preventDefault();
         data.email = data.email.trim();
 
 
-        API_CLIENT.forgotPassword(data.email).then((message) => {
+        API_CLIENT.resendVerEmail(data.email).then((message) => {
 
             setErrorApi(undefined);
             setRegisterMessage(message)
@@ -97,6 +97,11 @@ function ForgotPassword() {
         }
     }
 
+    const goBack = () => {
+        navigate(-1);
+    }
+
+
     return (
         <>
             <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
@@ -132,17 +137,17 @@ function ForgotPassword() {
                     }}
                         noValidate
                         autoComplete='0ff'
-                        onSubmit={handleSubmit(forgotPasswordSubmitHandler)}
+                        onSubmit={handleSubmit(resendVerEmailSubmitHandler)}
                     >
                         <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
-                            FORGOT PASSWORD
+                            RESEND VERIFICATION EMAIL
                         </Typography>
                         <FormInputText name='email' label='Email' control={control} error={errors.email?.message}
                             rules={{ required: true, minLength: 5 }} />
 
                         <Box >
                             <Button variant="contained" disabled={verified === false ? true : registerMessage ? true : false} type='submit' sx={{ ':hover': { background: '#4daf30' }, margin: '5px' }}>Send Email</Button>
-                            <Button variant="contained" component={Link} to={'/login'} sx={{ ':hover': { color: 'rgb(248 245 245)' }, margin: '5px', background: 'rgb(194 194 224)', color: 'black' }}  >Back in Login</Button>
+                            <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, margin: '5px', background: 'rgb(194 194 224)', color: 'black' }}  >Back</Button>
                         </Box >
                     </Box>
 
@@ -163,4 +168,4 @@ function ForgotPassword() {
 }
 
 
-export default ForgotPassword;
+export default ReSendVerifyEmail;

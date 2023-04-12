@@ -46,6 +46,7 @@ import TermPrivacy from './components/TermPrivacy/TermPrivacy';
 import AboutUs from './components/About/About';
 import Users from './components/Users/Users';
 import ForgotPassword from './components/ForgotPassword/ForgotPassword';
+import ReSendVerifyEmail from './components/ReSendVerifyEmail/ReSendVerifyEmail';
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
@@ -72,7 +73,7 @@ export async function tripLoader({ params }: LoaderFunctionArgs) {
 
   const userId = sessionStorage.getItem('userId')
 
- 
+
 
   if (params.tripId && userId !== null && userId !== undefined) {
 
@@ -188,6 +189,10 @@ const router = createBrowserRouter([
       {
         path: '/forgot-password',
         element: <ForgotPassword />
+      },
+      {
+        path: '/resend-email',
+        element: <ReSendVerifyEmail />
       },
       {
         path: '/register/',
