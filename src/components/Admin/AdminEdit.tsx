@@ -3,7 +3,7 @@ import { useLoaderData, useNavigate } from "react-router-dom";
 import FormInputText from "../FormFields/FormInputText";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import { User, UserRole, UserStatus } from "../../model/users";
-import { BaseSyntheticEvent, useContext, useState } from "react";
+import { BaseSyntheticEvent, FC, useContext, useState } from "react";
 import { IdType, toIsoDate } from "../../shared/common-types";
 import { ApiClient } from "../../services/userService";
 import * as userService from '../../services/userService'
@@ -65,7 +65,10 @@ const schema = yup.object({
 
 
 
-export default function AdminEdit() {
+
+
+const AdminEdit: FC = () => {
+
 
     const userEdit = useLoaderData() as User;
 
@@ -81,7 +84,7 @@ export default function AdminEdit() {
     const { userL } = useContext(LoginContext);
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
     if (accessToken) {
@@ -268,7 +271,7 @@ export default function AdminEdit() {
         if (userEdit._id) {
 
             API_CLIENT.deleteProfileImage(userEdit._id + '', img).then((data) => {
-             
+
                 setUser(data);
                 userEdit.imageFile = undefined;
             }).catch((err) => {
@@ -424,3 +427,5 @@ export default function AdminEdit() {
         </>
     )
 }
+
+export default AdminEdit;

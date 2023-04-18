@@ -1,5 +1,5 @@
 import { GoogleMap, Marker, useJsApiLoader, Autocomplete } from "@react-google-maps/api";
-import React, { BaseSyntheticEvent, useContext, useState } from "react";
+import React, { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
 import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { containerStyle, options } from "../settings";
 import { IdType } from "../../shared/common-types";
@@ -21,7 +21,9 @@ import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
-
+import * as tripService from '../../services/tripService';
+import { Trip } from '../../model/trip';
+import { ApiTrip } from '../../services/tripService';
 
 
 
@@ -31,6 +33,8 @@ type decode = {
 
 
 const API_POINT: ApiPoint<IdType, PointCreate> = new pointService.ApiPointImpl<IdType, PointCreate>('data/points');
+const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
+
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 let zoom = 8;
 
@@ -65,7 +69,8 @@ const schema = yup.object({
 
 let userId: string | undefined;
 
-export function TripPoints() {
+
+const TripPoints: FC = () => {
 
     const points = useLoaderData() as Point[]
 
@@ -77,16 +82,14 @@ export function TripPoints() {
     const [loading, setLoading] = useState<boolean>(true);
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
+    const [imageBackground, setImageBackground] = useState<string>()
 
 
-
-
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         userId = decode._id;
-
     }
 
 
@@ -94,7 +97,16 @@ export function TripPoints() {
     const iconFotoCamera = useMediaQuery('(max-width:600px)');
 
 
-    const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
+    useEffect(() => {
+        API_TRIP.backgroundImages().then((data) => {
+            setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+        }).catch((err) => {
+            console.log(err)
+        });
+    }, [])
+
+    const { control, handleSubmit, reset, setValue, formState: { errors, isDirty, isValid } } = useForm<FormData>({
 
 
         defaultValues: {
@@ -457,13 +469,14 @@ export function TripPoints() {
     return (
         <>
             <Grid container sx={{
-                justifyContent: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', '@media(max-width: 600px)': {
-                    display: 'flex', flexDirection: 'column',margin: '-25px 0px 0px 0px'
+                backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed',
+                justifyContent: 'center', padding: '15px 0', bgcolor: '#cfe8fc', minHeight: '100vh', '@media(max-width: 600px)': {
+                    display: 'flex', flexDirection: 'column'
                 }
             }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                 <Container maxWidth={false} sx={{
-                    display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc', '@media(max-width: 920px)': {
+                    display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', '@media(max-width: 1020px)': {
                         display: 'flex', flexDirection: 'column', maxWidth: '100%'
                     }
                 }}>
@@ -488,11 +501,11 @@ export function TripPoints() {
                                 {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
                             </GoogleMap>
                         </Box>
-                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', minWidth: '500px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 
                             <Autocomplete>
-                                <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+                                <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
                             </Autocomplete>
                             <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
                             <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
@@ -507,7 +520,7 @@ export function TripPoints() {
                                 minHeight: '250px',
                                 maxHeight: '1100px',
                                 padding: '30px',
-                                backgroundColor: '#8d868670',
+                                backgroundColor: '#eee7e79e',
                                 boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                                 '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                                 '& .MuiButton-root': { m: 1, width: '32ch' },
@@ -521,7 +534,7 @@ export function TripPoints() {
                                 ADD POINT
                             </Typography>
                             <span >
-                                <FormInputText name='name' type="search" label='NEME OF CITY,PLACE,LANDMARK OR ANOTHER' control={control} error={errors.name?.message} id='inputAddPointName'
+                                <FormInputText name='name' type="search" label='NEME OF CITY, PLACE, LANDMARK OR ANOTHER' control={control} error={errors.name?.message} id='inputAddPointName'
                                 />
                             </span>
                             <Button variant="contained" onClick={findInMap} sx={{ ':hover': { background: '#4daf30' } }}>FIND IN MAP</Button>
@@ -576,7 +589,7 @@ export function TripPoints() {
                             <Box component='div' sx={{ display: 'flex', '@media(max-width: 600px)': { flexDirection: 'column', alignItems: 'center' } }}>
 
                                 {buttonAdd === true ?
-                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD POINT</Button>
+                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!isDirty || !isValid}>ADD POINT</Button>
                                     : <LoadingButton variant="contained" loading={loading}   >
                                         <span>disabled</span>
                                     </LoadingButton>}

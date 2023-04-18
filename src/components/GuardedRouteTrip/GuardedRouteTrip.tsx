@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { FC, useContext } from 'react';
 import { Outlet, useLoaderData } from 'react-router-dom';
 import { LoginContext } from '../../App';
 import { Trip } from '../../model/trip';
@@ -16,7 +16,7 @@ type decode = {
 let userId: string | undefined;
 
 
-const GuardedRouteTrip = () => {
+const GuardedRouteTrip: FC = () => {
 
     const trip = useLoaderData() as Trip;
 
@@ -24,16 +24,16 @@ const GuardedRouteTrip = () => {
     const { userL } = useContext(LoginContext);
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
-    
+
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         role = decode.role;
         userId = decode._id !== undefined ? decode._id : undefined;
     }
-   
+
 
     return (trip._ownerId === userId) || (role === 'admin' || role === 'manager') ? <Outlet /> : <NotFound />
 

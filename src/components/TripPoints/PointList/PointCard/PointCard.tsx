@@ -1,5 +1,5 @@
 import { GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
-import React from "react";
+import React, { FC, ReactElement } from "react";
 import { Point } from "../../../../model/point";
 import { ApiPoint } from "../../../../services/pointService";
 import { IdType } from "../../../../shared/common-types";
@@ -29,7 +29,9 @@ const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType,
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 
-export default function PointCard({ point, length }: PointCardProps) {
+
+const PointEdit: FC<PointCardProps> = ({ point, length }): ReactElement => {
+
 
     const idTrip = useParams().tripId;
 
@@ -59,7 +61,7 @@ export default function PointCard({ point, length }: PointCardProps) {
         mapRef.current = null;
     }
 
-    if (!isLoaded) return     <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}><Typography sx={{ fontFamily: 'cursive' }} variant='h4'>MAP LOADING ...</Typography></Grid>
+    if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}><Typography sx={{ fontFamily: 'cursive' }} variant='h4'>MAP LOADING ...</Typography></Grid>
 
 
     const deleteClickHandler = () => {
@@ -146,13 +148,13 @@ export default function PointCard({ point, length }: PointCardProps) {
                     padding: '15px 0px', backgroundColor: '#8d868670',
                     boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
                 }}>
-                <Typography gutterBottom component="h6" sx={{padding:'0px 10px'}}>
+                <Typography gutterBottom component="h6" sx={{ padding: '0px 10px' }}>
                     Point N {point.pointNumber}
                 </Typography>
-                <Typography gutterBottom component="h1" sx={{padding:'0px 10px'}}>
+                <Typography gutterBottom component="h1" sx={{ padding: '0px 10px' }}>
                     NAME: {point.name}
                 </Typography>
-                <Typography gutterBottom component="p" sx={{padding:'0px 10px'}}>
+                <Typography gutterBottom component="p" sx={{ padding: '0px 10px' }}>
                     DESCRIPTION : {point.description}
                 </Typography>
                 {center.lng ?
@@ -165,7 +167,7 @@ export default function PointCard({ point, length }: PointCardProps) {
                         onUnmount={onUnmount}
 
                     >
-                        <MarkerF position={center} title={'Point №'+point.pointNumber } label={point.pointNumber + ''} animation={google.maps.Animation.DROP} />
+                        <MarkerF position={center} title={'Point №' + point.pointNumber} label={point.pointNumber + ''} animation={google.maps.Animation.DROP} />
                     </GoogleMap>
                     :
                     <Typography gutterBottom component="p">
@@ -184,3 +186,5 @@ export default function PointCard({ point, length }: PointCardProps) {
         </>
     )
 }
+
+export default PointEdit;

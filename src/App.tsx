@@ -1,7 +1,5 @@
 import { createBrowserRouter, LoaderFunctionArgs, Outlet, RouterProvider } from 'react-router-dom';
 import Home from './components/Home/Home';
-import { Login } from './components/Login/Login';
-import { Register } from './components/Register/Register';
 import Trips from './components/Trips/Trips';
 import Header from './components/Header/Header';
 import ErrorBoundary from './utils/ErrorBoundary';
@@ -23,7 +21,7 @@ import EditComment from './components/CommentEdit/CommentEdit';
 import { ApiComment } from './services/commentService';
 import { Comment } from './model/comment';
 import * as commentService from './services/commentService'
-import { useState, createContext } from 'react';
+import { useState, createContext, FC } from 'react';
 import { User } from './model/users';
 import MyTrips from './components/MyTrips/MyTrips';
 import GuardedRoute from './components/GuardedRoute/GuardedRoute';
@@ -47,6 +45,8 @@ import AboutUs from './components/About/About';
 import Users from './components/Users/Users';
 import ForgotPassword from './components/ForgotPassword/ForgotPassword';
 import ReSendVerifyEmail from './components/ReSendVerifyEmail/ReSendVerifyEmail';
+import Login from './components/Login/Login';
+import Register from './components/Register/Register';
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
@@ -71,7 +71,7 @@ export async function tripLoader({ params }: LoaderFunctionArgs) {
 
 
 
-  const userId = sessionStorage.getItem('userId')
+  const userId = localStorage.getItem('userId')
 
 
 
@@ -406,7 +406,8 @@ const router = createBrowserRouter([
   }
 ]);
 
-function App() {
+
+const App: FC = () => {
 
   const [userL, setUserL] = useState<null | User>(null)
 

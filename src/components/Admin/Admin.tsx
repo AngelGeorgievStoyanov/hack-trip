@@ -1,5 +1,5 @@
 import { Box, Button } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { FC, useContext, useEffect, useState } from "react";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { User } from "../../model/users";
 import UsersList from "../UsersList/UsersList";
@@ -29,14 +29,15 @@ type decode = {
 let userId: string;
 
 
-export default function Admin() {
+
+const Admin: FC = () => {
 
     const users = useLoaderData() as User[];
     const navigate = useNavigate();
 
     const { userL } = useContext(LoginContext);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
@@ -205,3 +206,5 @@ export default function Admin() {
         </>
     )
 }
+
+export default Admin;

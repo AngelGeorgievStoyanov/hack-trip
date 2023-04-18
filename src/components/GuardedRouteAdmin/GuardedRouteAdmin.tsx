@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { FC, useContext, useEffect, useState } from 'react';
 import { LoginContext } from '../../App';
 import { Outlet } from 'react-router-dom';
 import jwt_decode from "jwt-decode";
@@ -18,11 +18,12 @@ const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType
 
 let userId: IdType;
 
-const GuardedRouteAdmin = () => {
+
+const GuardedRouteAdmin: FC = () => {
 
     const [guard, setGuard] = useState<boolean>(false);
     const { userL } = useContext(LoginContext);
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
 

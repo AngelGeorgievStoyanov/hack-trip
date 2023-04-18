@@ -6,7 +6,7 @@ import * as tripService from '../../services/tripService';
 import * as pointService from '../../services/pointService';
 import { Point } from "../../model/point";
 import { ApiPoint } from "../../services/pointService";
-import { useContext, useEffect, useState } from "react";
+import { FC, useContext, useEffect, useState } from "react";
 import { GoogleMap, MarkerF, PolylineF, useJsApiLoader } from "@react-google-maps/api";
 import React from "react";
 import { containerStyle, options } from "../settings";
@@ -43,7 +43,8 @@ const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 
-export default function AdminTripDetails() {
+
+const AdminTripDetails: FC = () => {
 
 
     const navigate = useNavigate();
@@ -71,7 +72,7 @@ export default function AdminTripDetails() {
 
     const { userL } = useContext(LoginContext)
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
     if (accessToken) {
@@ -196,7 +197,7 @@ export default function AdminTripDetails() {
     const onUnmount = (): void => {
         mapRef.current = null;
     }
-    if (!isLoaded) return     <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}><Typography sx={{ fontFamily: 'cursive' }} variant='h4'>MAP LOADING ...</Typography></Grid>
+    if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}><Typography sx={{ fontFamily: 'cursive' }} variant='h4'>MAP LOADING ...</Typography></Grid>
 
 
 
@@ -632,3 +633,5 @@ export default function AdminTripDetails() {
         </>
     )
 }
+
+export default AdminTripDetails;

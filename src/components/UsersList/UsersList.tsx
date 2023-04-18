@@ -1,3 +1,5 @@
+import { Typography } from "@mui/material";
+import { FC, ReactElement } from "react";
 import { User } from "../../model/users";
 import UserCard from "./UserCard/UserCard";
 
@@ -9,14 +11,20 @@ interface UsersListProps {
 }
 
 
-export default function UsersList({ users }: UsersListProps) {
+
+const UserList: FC<UsersListProps> = ({ users }): ReactElement => {
 
 
     return (
         <>
-            {users!==undefined && users.length > 0 ?
+            {users !== undefined && users.length > 0 ?
                 users.map(x => <UserCard key={x._id} user={x} />)
-                : <h1>WELCOME!</h1>}
+                :
+                <Typography sx={{ fontFamily: 'cursive' }} variant='h5'>WELCOME!</Typography>
+
+            }
         </>
     )
 }
+
+export default UserList;

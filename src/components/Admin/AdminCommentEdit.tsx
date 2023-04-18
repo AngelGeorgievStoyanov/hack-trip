@@ -8,7 +8,7 @@ import FormTextArea from "../FormFields/FormTextArea";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
-import { BaseSyntheticEvent } from "react";
+import { BaseSyntheticEvent, FC } from "react";
 import { LoginContext } from "../../App";
 import { useContext } from 'react'
 import jwt_decode from "jwt-decode";
@@ -35,10 +35,10 @@ const schema = yup.object({
 
 let userId: string;
 
-export default function AdminCommentEdit() {
 
 
 
+const AdminCommentEdit: FC = () => {
 
 
     const comment = useLoaderData() as Comment;
@@ -48,7 +48,7 @@ export default function AdminCommentEdit() {
     const { userL } = useContext(LoginContext);
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+   const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
 
     if (accessToken) {
@@ -162,3 +162,5 @@ export default function AdminCommentEdit() {
         </>
     )
 }
+
+export default AdminCommentEdit;

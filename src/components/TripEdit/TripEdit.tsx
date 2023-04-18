@@ -1,10 +1,8 @@
 import { useLoaderData, useNavigate } from "react-router-dom";
-import { Trip, TripTipeOfGroup, TripTransport } from "../../model/trip";
+import { Trip, TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
-import * as tripService from '../../services/tripService';
-import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
-import React, { BaseSyntheticEvent, useContext, useEffect, useState } from "react";
+import React, { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
 import { containerStyle, options } from "../settings";
 import { Box, Button, Container, Grid, IconButton, ImageList, ImageListItem, TextField, Tooltip, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
@@ -21,6 +19,8 @@ import { LoginContext } from "../../App";
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { ApiTrip } from "../../services/tripService";
+import * as tripService from "../../services/tripService";
 
 
 
@@ -28,6 +28,10 @@ type decode = {
     _id: string,
 
 }
+
+
+const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
+
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
@@ -79,7 +83,9 @@ const schema = yup.object({
 let userId: string | undefined;
 
 
-export default function TripEdit() {
+
+const TripEdit: FC = () => {
+
 
     const trip = useLoaderData() as Trip;
 
@@ -92,11 +98,12 @@ export default function TripEdit() {
     const [loading, setLoading] = useState<boolean>(true);
     const [buttonAdd, setButtonAdd] = useState<boolean>(true);
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
+    const [imageBackground, setImageBackground] = useState<string>()
 
     const { userL } = useContext(LoginContext);
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined;
 
     let positionPoint;
     if (accessToken) {
@@ -118,12 +125,21 @@ export default function TripEdit() {
             }).catch((err) => {
                 console.log(err)
             });
+
+            API_TRIP.backgroundImages().then((data) => {
+                setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+            }).catch((err) => {
+                console.log(err)
+            });
+
+
         }
     }, []);
 
 
 
-    const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors, isDirty, isValid } } = useForm<FormData>({
 
 
         defaultValues: {
@@ -154,7 +170,6 @@ export default function TripEdit() {
 
     const navigate = useNavigate();
 
-    const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
 
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
@@ -245,6 +260,7 @@ export default function TripEdit() {
                     images = fileSelected.slice(0, 9)
                 }
                 setFileSelected(prev => [...images]);
+
 
             }
         })
@@ -473,9 +489,9 @@ export default function TripEdit() {
 
     return (
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px 0', minHeight: '100vh', margin: '0px', width: '100vw', '@media(max-width: 1000px)': { width: '100vw', padding: '15px 0px', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px 0', minHeight: '100vh', margin: '0px', width: '100vw', '@media(max-width: 1000px)': { width: '100vw', padding: '15px 0px', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding: '0px' }}>
-                    <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
+                    <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 600px)': { maxWidth: '92%' } }} >
                         <GoogleMap
                             mapContainerStyle={containerStyle}
                             options={options as google.maps.MapOptions}
@@ -493,7 +509,7 @@ export default function TripEdit() {
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
                         <Autocomplete>
-                            <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+                            <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
 
                         </Autocomplete>
 
@@ -516,7 +532,7 @@ export default function TripEdit() {
                                 minHeight: '250px',
                                 maxHeight: '1100px',
                                 padding: '30px',
-                                backgroundColor: '#8d868670',
+                                backgroundColor: '#eee7e79e',
                                 boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                                 '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                                 '& .MuiButton-root': { m: 1, width: '32ch' },
@@ -552,7 +568,7 @@ export default function TripEdit() {
                                     <Box sx={{ width: '30ch' }}>
                                         <Button variant="contained" component="label" disabled={((images ? images.length : 0) + fileSelected.length) >= 9 ? true : false} >
                                             Upload
-                                            <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
+                                            <input name="files" hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
                                         </Button>
                                     </Box>
                                 }
@@ -588,7 +604,7 @@ export default function TripEdit() {
                             <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
                             <Box component='div' sx={{ display: 'flex', '@media(max-width: 600px)': { flexDirection: 'column' } }}>
                                 {buttonAdd === true ?
-                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT YOUR TRIP</Button>
+                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={(fileSelected.length > 0 ? false : (!isDirty || !isValid))} >EDIT YOUR TRIP</Button>
                                     : <LoadingButton variant="contained" loading={loading}   >
                                         <span>disabled</span>
                                     </LoadingButton>
@@ -614,10 +630,16 @@ export default function TripEdit() {
                                     </ImageListItem>
                                 )) : ''}
                             </ImageList> :
-                            <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>}
+                            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <Typography variant="h6" margin='10px' maxWidth='95%' alignContent='center' alignItems="center">
+                                    FOR THIS TRIP DON'T HAVE IMAGES
+                                </Typography>
+                            </Box>}
                     </Box>
                 </Container>
             </Grid>
         </>
     )
 }
+
+export default TripEdit;

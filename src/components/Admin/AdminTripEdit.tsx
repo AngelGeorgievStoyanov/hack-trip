@@ -4,7 +4,7 @@ import { IdType, toIsoDate } from "../../shared/common-types";
 import * as tripService from '../../services/tripService';
 import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
-import React, { BaseSyntheticEvent, useEffect, useState } from "react";
+import React, { BaseSyntheticEvent, FC, useEffect, useState } from "react";
 import { containerStyle, options } from "../settings";
 import { Box, Button, Container, Grid, IconButton, ImageList, ImageListItem, TextField, Tooltip, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
@@ -74,12 +74,12 @@ let userId: string;
 
 
 
-export default function AdminTripEdit() {
 
+
+const AdminTipEdit: FC = () => {
 
 
     const trip = useLoaderData() as Trip;
-
 
 
     const [images, setImages] = useState<string[]>();
@@ -617,3 +617,6 @@ export default function AdminTripEdit() {
         </>
     )
 }
+
+
+export default AdminTipEdit;

@@ -5,7 +5,7 @@ import { IdType } from "../../shared/common-types";
 import * as commentService from '../../services/commentService'
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { BaseSyntheticEvent, useEffect, useState } from "react";
+import { BaseSyntheticEvent, FC, useEffect, useState } from "react";
 import FormTextArea from "../FormFields/FormTextArea";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -16,10 +16,13 @@ import jwt_decode from "jwt-decode";
 import { User } from "../../model/users";
 import * as userService from '../../services/userService'
 import { ApiClient } from "../../services/userService";
-
+import * as tripService from '../../services/tripService';
+import { Trip } from '../../model/trip';
+import { ApiTrip } from '../../services/tripService';
 
 const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
+const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
 
 type FormData = {
     comment: string;
@@ -45,7 +48,9 @@ let userId: string;
 
 
 
-export default function CreateComment() {
+
+const CreateComment: FC = () => {
+
 
     const idTrip = useParams().tripId;
 
@@ -55,9 +60,10 @@ export default function CreateComment() {
     const [loading, setLoading] = useState<boolean>(true);
     const [nameAuthor, setNameAuthor] = useState<string>()
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
+    const [imageBackground, setImageBackground] = useState<string>()
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
 
     if (accessToken) {
@@ -70,7 +76,14 @@ export default function CreateComment() {
         if (userId) {
             API_CLIENT.findById(userId).then((data) => {
                 setNameAuthor(data.firstName + ' ' + data.lastName)
-            })
+            });
+
+            API_TRIP.backgroundImages().then((data) => {
+                setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+            }).catch((err) => {
+                console.log(err)
+            });
         }
 
     }, [])
@@ -78,7 +91,7 @@ export default function CreateComment() {
 
 
 
-    const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors, isDirty, isValid } } = useForm<FormData>({
 
         defaultValues: { comment: '', nameAuthor: '', _ownerId: '', _tripId: '' },
         mode: 'onChange',
@@ -116,7 +129,7 @@ export default function CreateComment() {
     return (
         <>
 
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 600px)': { display: 'flex', padding: '50px', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 600px)': { display: 'flex', padding: '50px', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box component='form'
                     sx={{
                         display: 'flex',
@@ -126,7 +139,7 @@ export default function CreateComment() {
                         maxHeight: '280px',
                         padding: '30px',
                         marginTop: '50px',
-                        backgroundColor: '#8d868670',
+                        backgroundColor: '#eee7e79e',
                         boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                         '& .MuiButton-root': { m: 1, width: '32ch' },
@@ -144,7 +157,7 @@ export default function CreateComment() {
 
                     <span>
                         {buttonAdd === true ?
-                            <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD COMMENT</Button>
+                            <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!isDirty || !isValid}>ADD COMMENT</Button>
                             : <LoadingButton variant="contained" loading={loading}   >
                                 <span>disabled</span>
                             </LoadingButton>
@@ -159,3 +172,5 @@ export default function CreateComment() {
         </>
     )
 }
+
+export default CreateComment;

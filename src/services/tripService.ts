@@ -22,7 +22,7 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
     updateFavorites(id: K, entity: Trip): Promise<V>;
     findAllMyFavorites(id: K): Promise<V[]>;
     findAllPagination(page: K, search: string, typeOfGroup: string, typeOfTransportSelect: string, userId: K | undefined): Promise<V[]>;
-
+    backgroundImages(): Promise<string[]>;
 }
 
 
@@ -94,7 +94,7 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         }
 
         const result = await response.json();
-      
+
         return result
     }
 
@@ -227,6 +227,11 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
 
         const result = await response.json();
         return result;
+    }
+
+    async backgroundImages(): Promise<string[]> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/background`);
+        return response.json();
     }
 
 }

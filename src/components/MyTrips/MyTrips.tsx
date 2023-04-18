@@ -5,7 +5,7 @@ import TripList from "../Trips/TripsList/TripsList";
 import * as tripService from '../../services/tripService';
 import { IdType } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { LoginContext } from "../../App";
 import { useContext } from 'react';
 import jwt_decode from "jwt-decode";
@@ -22,15 +22,16 @@ const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType
 
 
 
-export default function MyTrips() {
+
+const MyTrips: FC = () => {
+
 
     const [trips, setTrips] = useState<Trip[]>([]);
-  
-
+    const [imageBackground, setImageBackground] = useState<string>()
 
     const { userL } = useContext(LoginContext);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
@@ -45,12 +46,19 @@ export default function MyTrips() {
         if (userId !== undefined) {
 
             API_TRIP.findAllMyTrips(userId).then((data) => {
-               
+
                 setTrips(data);
 
             }).catch((err) => {
                 console.log(err);
                 throw err.message;
+            });
+
+            API_TRIP.backgroundImages().then((data) => {
+                setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+            }).catch((err) => {
+                console.log(err)
             });
         }
 
@@ -60,7 +68,7 @@ export default function MyTrips() {
 
     return (
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh','@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '-25px 0px 0px 0px' }}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 {trips.length === 0 ?
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }}>
                         <Typography gutterBottom variant="h4" align="center">
@@ -69,11 +77,11 @@ export default function MyTrips() {
                         <Button component={Link} to={'/create-trip'} sx={{ backgroundColor: "#0e0d0d", color: "#f3eeee", margin: '10px', ':hover': { backgroundColor: "#f3eeee", color: "#0e0d0d" } }}>CLICK HERE AN ADD YOUR FIRST TRIP</Button>
                     </Box>
                     :
-                    <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh','@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                    <Grid container sx={{ justifyContent: 'center', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                         <Typography gutterBottom sx={{ margin: '50px' }} variant="h5" component="div">
                             These are your trips
                         </Typography>
-                        <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh','@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                        <Grid container sx={{ justifyContent: 'center', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                             <TripList trips={trips} />
 
@@ -84,3 +92,5 @@ export default function MyTrips() {
         </>
     )
 }
+
+export default MyTrips;

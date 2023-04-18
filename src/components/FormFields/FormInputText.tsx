@@ -9,15 +9,15 @@ interface FormInputTextProps<TFieldValues extends FieldValues> {
     disabled?: boolean;
     size?: 'small' | 'medium';
     error?: string | undefined;
-    type?: 'text' | 'password' | 'number' | 'intiger' | 'search' | 'file';
+    type?: 'text' | 'password' | 'number' | 'intiger' | 'search';
     id?: string | undefined
-    accept?: '.jpg' | '.jpeg' | '.png' | 'image/*';
-    multiple?:boolean
+
+
 }
 
 
 function FormInputText<TFieldValues extends FieldValues>(
-    { name, control, label, rules = {}, disabled = false, size = 'medium', error = undefined, type = 'text', id,  multiple }:
+    { name, control, label, rules = {}, disabled = false, size = 'medium', error = undefined, type = 'text', id }:
         FormInputTextProps<TFieldValues>) {
     return (
         (
@@ -25,7 +25,7 @@ function FormInputText<TFieldValues extends FieldValues>(
                 name={name}
                 control={control}
                 render={({ field }) =>
-                    <TextField label={label} disabled={disabled} size={size} error={!!error} id={id}  multiline={multiple} 
+                    <TextField label={label} disabled={disabled} size={size} error={!!error} id={id}
                         helperText={error || ''} type={type} {...field} />
                 }
                 rules={rules}

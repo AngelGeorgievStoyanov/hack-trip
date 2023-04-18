@@ -1,7 +1,7 @@
 import { Button, Card, CardMedia, Typography } from "@mui/material";
 import { User } from "../../../model/users";
 import { Link } from 'react-router-dom';
-import { useContext } from "react";
+import { FC, ReactElement, useContext } from "react";
 import { LoginContext } from "../../../App";
 import jwt_decode from "jwt-decode";
 
@@ -16,7 +16,8 @@ interface UserCardProps {
 
 }
 
-export default function UserCard({ user }: UserCardProps) {
+
+const UserCard: FC<UserCardProps> = ({ user }): ReactElement => {
 
     const dateFormat = (date: string) => {
         return date.split('.')[0].split('T')[0].split('-').reverse().join('-');
@@ -27,7 +28,7 @@ export default function UserCard({ user }: UserCardProps) {
 
     const userRole = user.role as any as string;
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
     if (accessToken) {
@@ -45,7 +46,7 @@ export default function UserCard({ user }: UserCardProps) {
                     maxWidth: '300px', margin: '20px',
                     height: 'fit-content',
                     padding: '25px', backgroundColor: '#8d868670',
-                    boxShadow: '3px 2px 5px black',  border: 'solid 1px', borderRadius: '0px'
+                    boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
                 }}>
                     <Typography gutterBottom variant="h5" component="div">
                         User ID :{user._id}
@@ -131,3 +132,5 @@ export default function UserCard({ user }: UserCardProps) {
         </>
     )
 }
+
+export default UserCard;

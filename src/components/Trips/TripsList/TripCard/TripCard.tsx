@@ -3,7 +3,7 @@ import { Button, Card, CardContent, ImageList, ImageListItem, Typography } from 
 import { Trip } from '../../../../model/trip';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from '../../../../App';
-import { useContext, useState } from 'react';
+import { FC, ReactElement, useContext, useState } from 'react';
 import { IdType } from '../../../../shared/common-types';
 import { User } from '../../../../model/users';
 import * as userService from '../../../../services/userService';
@@ -26,18 +26,15 @@ const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType
 
 let userId: string | undefined;
 
-export default function TripCard({ trip }: TripCardProps) {
 
-
+const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
 
     const [userVerId, setUserVerId] = useState<boolean>(false)
-
-
 
     const { userL } = useContext(LoginContext);
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
     if (accessToken) {
@@ -116,3 +113,5 @@ export default function TripCard({ trip }: TripCardProps) {
 
     )
 }
+
+export default TripCard;

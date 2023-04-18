@@ -6,7 +6,7 @@ import * as tripService from '../../services/tripService';
 import * as pointService from '../../services/pointService';
 import { Point } from "../../model/point";
 import { ApiPoint } from "../../services/pointService";
-import { useContext, useEffect, useState } from "react";
+import { FC, useContext, useEffect, useState } from "react";
 import { GoogleMap, MarkerF, PolylineF, useJsApiLoader } from "@react-google-maps/api";
 import React from "react";
 import { containerStyle, options } from "../settings";
@@ -69,13 +69,12 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 }));
 
 
-export default function TripDetails() {
-
+const TripDetails: FC = () => {
 
 
     const { userL } = useContext(LoginContext)
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
@@ -99,6 +98,7 @@ export default function TripDetails() {
     const [favorite, setFavorite] = useState<boolean>();
     const [trip, setTrip] = useState<Trip>()
     const [expanded, setExpanded] = useState(false);
+    const [imageBackground, setImageBackground] = useState<string>()
 
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -107,8 +107,9 @@ export default function TripDetails() {
 
 
 
-
     useEffect(() => {
+
+
         if (idTrip !== undefined) {
 
 
@@ -164,6 +165,13 @@ export default function TripDetails() {
                 navigate('/not-found')
 
             })
+
+            API_TRIP.backgroundImages().then((data) => {
+                setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+            }).catch((err) => {
+                console.log(err)
+            });
 
         }
 
@@ -560,12 +568,13 @@ export default function TripDetails() {
 
 
 
+
     return (
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', paddingBottom: '15px', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                 <Container maxWidth={false} sx={{
-                    display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', bgcolor: '#cfe8fc', '@media(max-width: 900px)': {
+                    display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', '@media(max-width: 900px)': {
                         display: 'flex', flexDirection: 'column-reverse'
                     }
                 }}>
@@ -575,7 +584,7 @@ export default function TripDetails() {
                         flexDirection: 'column',
                         minWidth: '200px',
                         maxWidth: '450px', margin: '20px',
-                        padding: '25px', backgroundColor: '#8d868670',
+                        padding: '25px', backgroundColor: '#eee7e79e',
                         boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
                     }}>
                         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -769,6 +778,8 @@ export default function TripDetails() {
                                 zoom={zoom}
                                 onLoad={onLoad}
                                 onUnmount={onUnmount}
+
+
                             >
                                 {pathPoints ? <PolylineF path={pathPoints} /> : null}
                                 {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip && trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
@@ -787,3 +798,5 @@ export default function TripDetails() {
         </>
     )
 }
+
+export default TripDetails;

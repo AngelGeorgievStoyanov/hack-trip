@@ -1,8 +1,9 @@
 import { Grid, Box, CardMedia } from "@mui/material";
+import { FC } from "react";
 
 
-function AboutUs() {
 
+const AboutUs: FC = () => {
 
     return (
 

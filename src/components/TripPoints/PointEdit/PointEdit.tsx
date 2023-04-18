@@ -1,5 +1,5 @@
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
-import React, { BaseSyntheticEvent, useContext, useEffect, useState } from "react";
+import React, { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { Point } from "../../../model/point";
 import { IdType } from "../../../shared/common-types";
@@ -20,7 +20,9 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { LoginContext } from "../../../App";
 import jwt_decode from "jwt-decode";
-
+import { ApiTrip } from "../../../services/tripService";
+import * as tripService from "../../../services/tripService";
+import { TripCreate } from "../../../model/trip";
 
 
 let zoom = 8;
@@ -36,6 +38,8 @@ type decode = {
 }
 
 const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
+const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
+
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 
@@ -59,7 +63,9 @@ const schema = yup.object({
 let userId: string | undefined;
 
 
-export default function PointEdit() {
+
+const PointEdit: FC = () => {
+
 
     const point = useLoaderData() as Point;
 
@@ -72,12 +78,13 @@ export default function PointEdit() {
     const [loading, setLoading] = useState<boolean>(true);
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
+    const [imageBackground, setImageBackground] = useState<string>()
 
 
     const { userL } = useContext(LoginContext);
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
 
 
@@ -99,6 +106,13 @@ export default function PointEdit() {
             }).catch((err) => {
                 console.log(err)
             });
+
+            API_TRIP.backgroundImages().then((data) => {
+                setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+            }).catch((err) => {
+                console.log(err)
+            });
         }
     }, []);
 
@@ -106,7 +120,7 @@ export default function PointEdit() {
     const iconFotoCamera = useMediaQuery('(max-width:600px)');
 
 
-    const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit, reset, setValue, formState: { errors, isDirty, isValid } } = useForm<FormData>({
 
 
         defaultValues: {
@@ -475,7 +489,7 @@ export default function PointEdit() {
     return (
 
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px 0', minHeight: '100vh', margin: '0px', width: '100vw', '@media(max-width: 1000px)': { width: '100vw', padding: '15px 0px', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px 0', minHeight: '100vh', margin: '0px', width: '100vw', '@media(max-width: 1000px)': { width: '100vw', padding: '15px 0px', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding: '0px' }}>
                     <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
                         <GoogleMap
@@ -495,7 +509,7 @@ export default function PointEdit() {
 
 
                         <Autocomplete>
-                            <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+                            <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
                         </Autocomplete>
                         <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
                         <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
@@ -516,7 +530,7 @@ export default function PointEdit() {
                                 minHeight: '250px',
                                 maxHeight: '1100px',
                                 padding: '30px',
-                                backgroundColor: '#8d868670',
+                                backgroundColor: '#eee7e79e',
                                 boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                                 '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                                 '& .MuiButton-root': { m: 1, width: '32ch' },
@@ -576,7 +590,7 @@ export default function PointEdit() {
                             </> : ''}
                             <span>
                                 {buttonAdd === true ?
-                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT POINT</Button>
+                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={(fileSelected.length > 0 ? false : (!isDirty || !isValid))}>EDIT POINT</Button>
                                     : <LoadingButton variant="contained" loading={loading}   >
                                         <span>disabled</span>
                                     </LoadingButton>}
@@ -586,10 +600,10 @@ export default function PointEdit() {
 
                         {(point.imageFile?.length && point.imageFile?.length > 0) ?
 
-                            <ImageList sx={{ width: 520, height: 'auto', margin: '20px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={3} rowHeight={164}>
+                            <ImageList sx={{ width: 520, height: 'auto', margin: '20px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={point.imageFile.length > 3 ? 3 : point.imageFile.length} rowHeight={point.imageFile.length > 9 ? 164 : point.imageFile.length > 5 ? 300 : point.imageFile.length > 2 ? 350 : 450}>
                                 {images ? images.map((item, i) => (
                                     <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
-                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer' }} onClick={deleteImage} id={item} />
+                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', position: 'absolute', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={deleteImage} id={item} />
                                         <img
                                             src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
                                             srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
@@ -600,10 +614,18 @@ export default function PointEdit() {
                                     </ImageListItem>
                                 )) : ''}
                             </ImageList> :
-                            <h4>FOR THIS POINT DON'T HAVE IMAGES</h4>}
+                            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <Typography variant="h6" margin='10px' maxWidth='95%' alignContent='center' alignItems="center">
+                                    FOR THIS POINT DON'T HAVE IMAGES
+                                </Typography>
+                            </Box>
+                        }
                     </Box>
                 </Container>
             </Grid>
         </>
     )
 }
+
+
+export default PointEdit;

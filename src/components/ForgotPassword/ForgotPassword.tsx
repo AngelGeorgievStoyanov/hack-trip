@@ -5,15 +5,17 @@ import FormInputText from "../FormFields/FormInputText";
 import * as userService from '../../services/userService';
 import { ApiClient } from "../../services/userService";
 import { Link, useNavigate } from "react-router-dom";
-import { BaseSyntheticEvent, useState } from "react";
+import { BaseSyntheticEvent, FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-
-
 import ReCAPTCHA from "react-google-recaptcha";
+import * as tripService from '../../services/tripService';
+import { Trip } from '../../model/trip';
+import { ApiTrip } from '../../services/tripService';
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
+const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
 
 
 const reCaptchaV2 = process.env.REACT_APP_SITE_KEY2;
@@ -31,13 +33,24 @@ const schema = yup.object({
 
 
 
-function ForgotPassword() {
+const ForgotPassword: FC = () => {
 
 
     const navigate = useNavigate();
     const [errorApi, setErrorApi] = useState<string>();
     const [verified, setVerified] = useState<boolean>(false)
     const [registerMessage, setRegisterMessage] = useState<string>()
+    const [imageBackground, setImageBackground] = useState<string>()
+
+
+    useEffect(() => {
+        API_TRIP.backgroundImages().then((data) => {
+            setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+        }).catch((err) => {
+            console.log(err)
+        });
+    }, [])
 
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
@@ -99,8 +112,8 @@ function ForgotPassword() {
 
     return (
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', padding: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', '@media(max-width: 600px)': { display: 'flex' } }}>
+            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                <Container sx={{ minHeight: '100vh', padding: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', '@media(max-width: 600px)': { display: 'flex' } }}>
                     {errorApi ?
                         <Box component='div' sx={{ backgroundColor: 'red', color: 'black', padding: '10px 20px', borderRadius: '9px', margin: '20px' }}>
                             <Typography component='h4'>
@@ -122,7 +135,7 @@ function ForgotPassword() {
                         maxWidth: '700px',
                         maxHeight: '385px',
                         padding: '30px',
-                        backgroundColor: '#8d868670',
+                        backgroundColor: '#e5e3e3d9',
                         boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
 

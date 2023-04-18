@@ -1,5 +1,5 @@
 import { Avatar, Button, Card, Tooltip, Typography } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { FC, ReactElement, useContext, useEffect, useState } from "react";
 import { Comment, CommentCreate } from "../../model/comment";
 import { User } from "../../model/users";
 import * as userService from '../../services/userService';
@@ -41,8 +41,8 @@ const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCom
 
 let name: string;
 
-export default function CommentCard({ comment, onDeleteCom, onEditCom, onReportClickHandlerComment, onUnReportClickHandlerComment, reportedComment, userId }: CommentCardProps) {
 
+const CommentCard: FC<CommentCardProps> = ({ comment, onDeleteCom, onEditCom, onReportClickHandlerComment, onUnReportClickHandlerComment, reportedComment, userId }): ReactElement => {
 
     const [userImg, setUserImg] = useState<string>();
 
@@ -50,7 +50,7 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom, onReportC
 
     const { userL } = useContext(LoginContext)
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
     if (accessToken) {
@@ -135,7 +135,7 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom, onReportC
                 alignItems: 'flex-start',
                 maxWidth: '350px', margin: '20px',
                 height: 'fit-content',
-                padding: '30px', backgroundColor: '#8d868670',
+                padding: '30px', backgroundColor: '#eee7e7cc',
                 boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
             }}>
                 {userImg ?
@@ -175,5 +175,7 @@ export default function CommentCard({ comment, onDeleteCom, onEditCom, onReportC
         </>
     )
 }
+
+export default CommentCard;
 
 

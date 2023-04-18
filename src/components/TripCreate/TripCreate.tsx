@@ -1,5 +1,5 @@
 import { GoogleMap, Marker, useJsApiLoader, Autocomplete, } from "@react-google-maps/api";
-import React, { BaseSyntheticEvent, useState } from "react";
+import React, { BaseSyntheticEvent, FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiTrip } from "../../services/tripService";
 import { containerStyle, options } from "../settings";
@@ -85,7 +85,7 @@ type decode = {
 let _ownerId: string | undefined;
 
 
-export function CreateTrip() {
+const CreateTrip: FC = () => {
 
     const [errorMessageSearch, setErrorMessageSearch] = useState('');
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral);
@@ -94,9 +94,10 @@ export function CreateTrip() {
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const { userL } = useContext(LoginContext);
+    const [imageBackground, setImageBackground] = useState<string>()
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
@@ -106,10 +107,17 @@ export function CreateTrip() {
 
     const iconFotoCamera = useMediaQuery('(max-width:600px)');
 
+    useEffect(() => {
+        API_TRIP.backgroundImages().then((data) => {
+            setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+        }).catch((err) => {
+            console.log(err)
+        });
+    }, [])
 
 
-
-    const { control, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors, isValid, isDirty } } = useForm<FormData>({
 
 
         defaultValues: {
@@ -440,7 +448,7 @@ export function CreateTrip() {
     return (
         <>
 
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
                     <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 900px)': { maxWidth: '97%', marginTop: '10px' } }} >
 
@@ -463,7 +471,7 @@ export function CreateTrip() {
 
 
                         <Autocomplete>
-                            <TextField id="outlined-search" label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+                            <TextField id="outlined-search" sx={{backgroundColor:'#f2f1e58f', borderRadius:'5px'}} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
 
                         </Autocomplete>
 
@@ -482,7 +490,7 @@ export function CreateTrip() {
                             maxWidth: '600px',
                             maxHeight: '1050px',
                             padding: '30px',
-                            backgroundColor: '#8d868670',
+                            backgroundColor: '#eee7e79e',
                             boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                             '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                             '& .MuiButton-root': { m: 1, width: '32ch' },
@@ -567,7 +575,7 @@ export function CreateTrip() {
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
                         <span>
                             {buttonAdd === true ?
-                                <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADD TRIP</Button>
+                                <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!isDirty || !isValid}>ADD TRIP</Button>
                                 : <LoadingButton variant="contained" loading={loading}   >
                                     <span>disabled</span>
                                 </LoadingButton>

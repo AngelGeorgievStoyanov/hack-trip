@@ -4,7 +4,7 @@ import {
     alpha, AppBar, Box, FormControl, Grid, InputLabel,
     MenuItem, Pagination, Select, SelectChangeEvent, styled, Toolbar
 } from "@mui/material";
-import { useEffect, useRef, useState, useContext } from "react";
+import { useEffect, useRef, useState, useContext, FC } from "react";
 import * as tripService from '../../services/tripService';
 import { IdType } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
@@ -25,7 +25,8 @@ const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip
 
 let userId: IdType | undefined;
 
-export default function Trips() {
+
+const Trips: FC = () => {
 
     const [page, setPage] = useState(1);
     const [trips, setTrips] = useState<Trip[]>();
@@ -33,11 +34,12 @@ export default function Trips() {
     const [searchInput, setSearchInput] = useState<string>('');
     const [typeOfPeopleSelect, setTypeOfPeopleSelect] = useState<string>('');
     const [typeOfTransportSelect, setTypeOfTransportSelect] = useState<string>('');
+    const [imageBackground, setImageBackground] = useState<string>()
 
     const { userL } = useContext(LoginContext);
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
 
     if (accessToken) {
@@ -59,6 +61,16 @@ export default function Trips() {
         }).catch(err => {
             console.log(err)
         });
+
+
+        API_TRIP.backgroundImages().then((data) => {
+            setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+
+        }).catch((err) => {
+            console.log(err)
+        });
+
 
     }, [page, searchInput, typeOfPeopleSelect, typeOfTransportSelect]);
 
@@ -141,116 +153,122 @@ export default function Trips() {
 
     return (
         <>
+
             <AppBar position="sticky" sx={{ marginTop: '-25px' }}>
                 <Toolbar sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', '@media(max-width: 670px)': {
                         display: 'flex', flexDirection: 'column'
                     }
                 }}>
-                    {mediaQuery ?
-                        <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-                            <Box sx={{ minWidth: 180, margin: '3px' }}>
-                                <FormControl fullWidth>
-                                    <InputLabel >TYPE OF GROUP</InputLabel>
-                                    <Select
-                                        value={TripTipeOfGroup[Number(typeOfPeopleSelect)]}
-                                        defaultValue={TripTipeOfGroup[Number(typeOfPeopleSelect)] || ''}
-                                        label="TYPE OF GROUP"
-                                        onChange={handleChangeTypeOfPeople}
-                                        sx={{ color: 'white' }}
-                                    >
-                                        <MenuItem defaultValue={''} defaultChecked value={''}>ALL</MenuItem>
-                                        <MenuItem value={TripTipeOfGroup[1]}>Family</MenuItem>
-                                        <MenuItem value={TripTipeOfGroup[2]}>Family with children</MenuItem>
-                                        <MenuItem value={TripTipeOfGroup[3]}>Friends</MenuItem>
-                                        <MenuItem value={TripTipeOfGroup[4]}>Another type</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                            <Box sx={{ minWidth: 180, margin: '3px' }}>
-                                <FormControl fullWidth>
-                                    <InputLabel >TYPE OF TRANSPORT</InputLabel>
-                                    <Select
-                                        value={TripTransport[Number(typeOfTransportSelect)]}
-                                        defaultValue={TripTransport[Number(typeOfTransportSelect)] || ''}
-                                        label="TYPE OF TRANSPORT"
-                                        onChange={handleChangeTypeOfTransport}
-                                        sx={{ color: 'white' }}
-                                    >
-                                        <MenuItem defaultValue={''} defaultChecked value={''}>ALL</MenuItem>
-                                        <MenuItem value={TripTransport[1]}>Car</MenuItem>
-                                        <MenuItem value={TripTransport[2]}>Bus</MenuItem>
-                                        <MenuItem value={TripTransport[3]}>Aircraft</MenuItem>
-                                        <MenuItem value={TripTransport[4]}>Another type</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                        </Box >
-                        :
-                        <>
-                            <Box sx={{ minWidth: 200, margin: '5px' }}>
-                                <FormControl fullWidth>
-                                    <InputLabel >TYPE OF GROUP</InputLabel>
-                                    <Select
-                                        value={TripTipeOfGroup[Number(typeOfPeopleSelect)]}
-                                        defaultValue={TripTipeOfGroup[Number(typeOfPeopleSelect)] || ''}
-                                        label="TYPE OF GROUP"
-                                        onChange={handleChangeTypeOfPeople}
-                                        sx={{ color: 'white' }}
-                                    >
-                                        <MenuItem defaultValue={''} defaultChecked value={''}>ALL</MenuItem>
-                                        <MenuItem value={TripTipeOfGroup[1]}>Family</MenuItem>
-                                        <MenuItem value={TripTipeOfGroup[2]}>Family with children</MenuItem>
-                                        <MenuItem value={TripTipeOfGroup[3]}>Friends</MenuItem>
-                                        <MenuItem value={TripTipeOfGroup[4]}>Another type</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                            <Box sx={{ minWidth: 200, margin: '5px' }}>
-                                <FormControl fullWidth>
-                                    <InputLabel >TYPE OF TRANSPORT</InputLabel>
-                                    <Select
-                                        value={TripTransport[Number(typeOfTransportSelect)]}
-                                        defaultValue={TripTransport[Number(typeOfTransportSelect)] || ''}
-                                        label="TYPE OF TRANSPORT"
-                                        onChange={handleChangeTypeOfTransport}
-                                        sx={{ color: 'white' }}
-                                    >
-                                        <MenuItem defaultValue={''} defaultChecked value={''}>ALL</MenuItem>
-                                        <MenuItem value={TripTransport[1]}>Car</MenuItem>
-                                        <MenuItem value={TripTransport[2]}>Bus</MenuItem>
-                                        <MenuItem value={TripTransport[3]}>Aircraft</MenuItem>
-                                        <MenuItem value={TripTransport[4]}>Another type</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                        </>
-                    }
+                        {mediaQuery ?
+                            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                                <Box sx={{ minWidth: 180, margin: '3px' }}>
+                                    <FormControl fullWidth>
+                                        <InputLabel >TYPE OF GROUP</InputLabel>
+                                        <Select
+                                            value={TripTipeOfGroup[Number(typeOfPeopleSelect)]}
+                                            defaultValue={TripTipeOfGroup[Number(typeOfPeopleSelect)] || ''}
+                                            label="TYPE OF GROUP"
+                                            onChange={handleChangeTypeOfPeople}
+                                            sx={{ color: 'white' }}
+                                        >
+                                            <MenuItem defaultValue={''} defaultChecked value={''}>ALL</MenuItem>
+                                            <MenuItem value={TripTipeOfGroup[1]}>Family</MenuItem>
+                                            <MenuItem value={TripTipeOfGroup[2]}>Family with children</MenuItem>
+                                            <MenuItem value={TripTipeOfGroup[3]}>Friends</MenuItem>
+                                            <MenuItem value={TripTipeOfGroup[4]}>Another type</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                                <Box sx={{ minWidth: 180, margin: '3px' }}>
+                                    <FormControl fullWidth>
+                                        <InputLabel >TYPE OF TRANSPORT</InputLabel>
+                                        <Select
+                                            value={TripTransport[Number(typeOfTransportSelect)]}
+                                            defaultValue={TripTransport[Number(typeOfTransportSelect)] || ''}
+                                            label="TYPE OF TRANSPORT"
+                                            onChange={handleChangeTypeOfTransport}
+                                            sx={{ color: 'white' }}
+                                        >
+                                            <MenuItem defaultValue={''} defaultChecked value={''}>ALL</MenuItem>
+                                            <MenuItem value={TripTransport[1]}>Car</MenuItem>
+                                            <MenuItem value={TripTransport[2]}>Bus</MenuItem>
+                                            <MenuItem value={TripTransport[3]}>Aircraft</MenuItem>
+                                            <MenuItem value={TripTransport[4]}>Another type</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                            </Box >
+                            :
+                            <>
+                                <Box sx={{ minWidth: 200, margin: '5px' }}>
+                                    <FormControl fullWidth>
+                                        <InputLabel >TYPE OF GROUP</InputLabel>
+                                        <Select
+                                            value={TripTipeOfGroup[Number(typeOfPeopleSelect)]}
+                                            defaultValue={TripTipeOfGroup[Number(typeOfPeopleSelect)] || ''}
+                                            label="TYPE OF GROUP"
+                                            onChange={handleChangeTypeOfPeople}
+                                            sx={{ color: 'white' }}
+                                        >
+                                            <MenuItem defaultValue={''} defaultChecked value={''}>ALL</MenuItem>
+                                            <MenuItem value={TripTipeOfGroup[1]}>Family</MenuItem>
+                                            <MenuItem value={TripTipeOfGroup[2]}>Family with children</MenuItem>
+                                            <MenuItem value={TripTipeOfGroup[3]}>Friends</MenuItem>
+                                            <MenuItem value={TripTipeOfGroup[4]}>Another type</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                                <Box sx={{ minWidth: 200, margin: '5px' }}>
+                                    <FormControl fullWidth>
+                                        <InputLabel >TYPE OF TRANSPORT</InputLabel>
+                                        <Select
+                                            value={TripTransport[Number(typeOfTransportSelect)]}
+                                            defaultValue={TripTransport[Number(typeOfTransportSelect)] || ''}
+                                            label="TYPE OF TRANSPORT"
+                                            onChange={handleChangeTypeOfTransport}
+                                            sx={{ color: 'white' }}
+                                        >
+                                            <MenuItem defaultValue={''} defaultChecked value={''}>ALL</MenuItem>
+                                            <MenuItem value={TripTransport[1]}>Car</MenuItem>
+                                            <MenuItem value={TripTransport[2]}>Bus</MenuItem>
+                                            <MenuItem value={TripTransport[3]}>Aircraft</MenuItem>
+                                            <MenuItem value={TripTransport[4]}>Another type</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                            </>
+                        }
 
-                    <Box sx={{ minWidth: 220, margin: '5px' }}>
-                        <Search>
-                            <SearchIconWrapper>
-                                <SearchIcon />
-                            </SearchIconWrapper>
-                            <StyledInputBase
-                                placeholder="Search…"
-                                inputProps={{ 'aria-label': 'search' }} ref={searchRef}
-                                onClick={changeHandlerSearch}
-                            />
-                        </Search>
-                    </Box>
+                        <Box sx={{ minWidth: 220, margin: '5px' }}>
+                            <Search>
+                                <SearchIconWrapper>
+                                    <SearchIcon />
+                                </SearchIconWrapper>
+                                <StyledInputBase
+                                    placeholder="Search…"
+                                    inputProps={{ 'aria-label': 'search' }} ref={searchRef}
+                                    onClick={changeHandlerSearch}
+                                />
+                            </Search>
+                        </Box>
                 </Toolbar>
             </AppBar>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+
+            <Grid container sx={{ justifyContent: 'center', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 {trips !== undefined ?
                     <TripList trips={trips} />
                     : ''}
             </Grid>
-            <Box component='div' sx={{ display: 'flex', bgcolor: '#cfe8fc', justifyContent: 'center' }}>
+            <Box component='div' sx={{ display: 'flex', justifyContent: 'center' }}>
                 {allPageNumber !== undefined ?
                     <Pagination count={+allPageNumber} color="primary" sx={{ margin: '20px' }} onChange={handleChange} />
                     : ''}
             </Box>
+        </Grid>
         </>
     )
 }
+
+export default Trips;

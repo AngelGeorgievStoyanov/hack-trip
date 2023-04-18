@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { FC, useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { LoginContext } from '../../App';
 import jwt_decode from "jwt-decode";
@@ -10,11 +10,13 @@ type decode = {
 let userId: string | undefined;
 
 
-const GuardedRoute = () => {
+
+const GuardedRoute: FC = () => {
+
 
     const { userL } = useContext(LoginContext);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
 
     if (accessToken) {
@@ -24,7 +26,7 @@ const GuardedRoute = () => {
 
 
 
-    return userId !==undefined ? <Outlet /> : <Navigate to="/login" />
+    return userId !== undefined ? <Outlet /> : <Navigate to="/login" />
 
 }
 export default GuardedRoute

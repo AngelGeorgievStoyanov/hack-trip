@@ -1,4 +1,4 @@
-import { BaseSyntheticEvent, useState } from 'react';
+import { BaseSyntheticEvent, FC, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { User, UserRole, UserStatus } from '../../model/users';
 import * as userService from '../../services/userService'
@@ -12,9 +12,14 @@ import FormInputText from '../FormFields/FormInputText';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import ReCAPTCHA from 'react-google-recaptcha';
+import * as tripService from '../../services/tripService';
+import { Trip } from '../../model/trip';
+import { ApiTrip } from '../../services/tripService';
+import { color } from '@mui/system';
 
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
+const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
 
 
 
@@ -55,7 +60,7 @@ const schema2 = yup.object({
 
 const reCaptchaV2 = process.env.REACT_APP_SITE_KEY2;
 
-export function Register() {
+const Register: FC = () => {
 
     const userId = useParams().userId;
     const token = useParams().token;
@@ -66,8 +71,17 @@ export function Register() {
     const [registerMessage, setRegisterMessage] = useState<string>()
     const [checkedPrivacyPolicy, setCheckedPrivacyPolicy] = useState<boolean>(false)
     const [verified, setVerified] = useState<boolean>(false)
+    const [imageBackground, setImageBackground] = useState<string>()
 
 
+    useEffect(() => {
+        API_TRIP.backgroundImages().then((data) => {
+            setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+        }).catch((err) => {
+            console.log(err)
+        });
+    }, [])
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -172,9 +186,9 @@ export function Register() {
 
     return (
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
-                <Container sx={{ bgcolor: '#cfe8fc', minHeight: '100vh', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <Container sx={{ minHeight: '100vh', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
 
 
 
@@ -199,7 +213,7 @@ export function Register() {
                         maxWidth: '600px',
                         maxHeight: '540px',
                         padding: '30px',
-                        backgroundColor: '#8d868670',
+                        backgroundColor: '#e5e3e3d9',
                         boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                         '@media(max-width: 600px)': { display: 'flex' },
@@ -255,6 +269,7 @@ export function Register() {
                         <ReCAPTCHA
                             sitekey={reCaptchaV2 ? reCaptchaV2 : ''}
                             onChange={onChangeReCAPTCHA}
+                          
                         />
                     </Box>
                 </Container>
@@ -263,3 +278,5 @@ export function Register() {
     )
 
 }
+
+export default Register;

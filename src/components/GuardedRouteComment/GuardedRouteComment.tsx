@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { FC, useContext } from 'react';
 import {  Outlet, useLoaderData } from 'react-router-dom';
 import { LoginContext } from '../../App';
 import { Comment } from '../../model/comment';
@@ -15,13 +15,15 @@ let userId: string | undefined;
 
 
 
-const GuardedRouteComment = () => {
+
+const GuardedRouteComment: FC = () => {
+
 
     const comment = useLoaderData() as Comment;
 
 
     const { userL } = useContext(LoginContext);
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
 
     if (accessToken) {

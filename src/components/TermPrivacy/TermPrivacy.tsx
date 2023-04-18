@@ -1,8 +1,10 @@
 import { Grid, Box, Button } from '@mui/material'
-import { MouseEvent } from 'react'
+import { FC, MouseEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-function TermPrivacy() {
+
+const TermPrivacy: FC = () => {
+
 
     const navigate = useNavigate()
     const handleClick = (e: MouseEvent) => {

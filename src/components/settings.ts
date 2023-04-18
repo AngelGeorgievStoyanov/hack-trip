@@ -10,6 +10,8 @@ export const containerStyle = {
 
 export const options = {
     zoomControl: true,
+    gestureHandling: "greedy"
+
 }
 
 

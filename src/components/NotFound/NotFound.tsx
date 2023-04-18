@@ -1,10 +1,10 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './NotFound.css';
 
 
-export default function NotFound() {
+const NotFound: FC = () => {
 
 
     let internalSec: ReturnType<typeof setInterval>;
@@ -66,3 +66,5 @@ export default function NotFound() {
         </Box >
     )
 }
+
+export default NotFound;

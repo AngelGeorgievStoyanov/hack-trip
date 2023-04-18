@@ -4,7 +4,7 @@ import FormInputText from "../FormFields/FormInputText";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
-import React, { BaseSyntheticEvent, useContext, useEffect, useState } from "react";
+import React, { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
 import * as userService from '../../services/userService';
 import { IdType, toIsoDate } from "../../shared/common-types";
 import { User } from "../../model/users";
@@ -15,9 +15,13 @@ import { LoginContext } from "../../App";
 import jwt_decode from "jwt-decode";
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { TripCreate } from "../../model/trip";
+import * as tripService from "../../services/tripService";
+import { ApiTrip } from "../../services/tripService";
 
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
+const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
 
 const schema1 = yup.object({
     email: yup.string().required().email(),
@@ -62,18 +66,22 @@ type decode = {
 
 
 let userId: string | undefined;
-export default function Profile() {
+
+
+const Profile: FC = () => {
 
     const [user, setUser] = useState<User>();
     const [hide, setHide] = useState<boolean>(false);
     const [fileSelected, setFileSelected] = useState<File | null>(null);
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
+    const [imageBackground, setImageBackground] = useState<string>()
+
     const navigate = useNavigate();
 
     const { userL } = useContext(LoginContext);
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
@@ -92,12 +100,19 @@ export default function Profile() {
             }).catch(err => {
                 console.log(err)
             });
+
+            API_TRIP.backgroundImages().then((data) => {
+                setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+            }).catch((err) => {
+                console.log(err)
+            });
         }
 
     }, []);
 
 
-    const { control, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors, isDirty, isValid }, reset } = useForm<FormData>({
 
         defaultValues: { email: '', firstName: '', lastName: '', password: '', confirmpass: '' },
 
@@ -307,16 +322,16 @@ export default function Profile() {
     return (
 
         <>
-            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px', '@media(max-width: 600px)': { display: 'flex', padding: '20px', maxWidth: '100vW' } }}>
+            <Box sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px', '@media(max-width: 600px)': { display: 'flex', padding: '20px', maxWidth: '100vW' } }}>
                 {user?.imageFile ?
                     <>
-                            <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px', position: 'relative', translate: '0 28px', backgroundColor: 'white', borderRadius: '50%' }} onClick={deleteImage} id={user.imageFile} />
-                            <CardMedia
-                                component="img"
-                                image={`https://storage.googleapis.com/hack-trip/${user.imageFile}`}
-                                sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid', boxShadow: '3px 2px 5px black', borderRadius: '50%' }}
-                                alt="USER"
-                            />
+                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', marginTop: '20px', position: 'relative', translate: '0 28px', backgroundColor: 'white', borderRadius: '50%' }} onClick={deleteImage} id={user.imageFile} />
+                        <CardMedia
+                            component="img"
+                            image={`https://storage.googleapis.com/hack-trip/${user.imageFile}`}
+                            sx={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid', boxShadow: '3px 2px 5px black', borderRadius: '50%' }}
+                            alt="USER"
+                        />
                     </>
                     : ''}
                 <Box component="form"
@@ -393,7 +408,7 @@ export default function Profile() {
 
                     </> : ''}
                     <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
+                        <Button variant="contained" type='submit' disabled={!isDirty || !isValid} sx={{ ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
                         <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                         <Button variant="contained" onClick={changePass} disabled={user?.email === 'test@abv.bg' ? true : false} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hide ? 'HIDE CHANGE PASSWORD' : 'CHANGE PASSWORD'}</Button>
                     </Box >
@@ -402,3 +417,5 @@ export default function Profile() {
         </>
     )
 }
+
+export default Profile;

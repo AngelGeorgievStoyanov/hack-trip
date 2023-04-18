@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { LoginContext } from "../../App";
-import { useContext, useState } from 'react';
+import { FC, useContext, useState } from 'react';
 import { User } from "../../model/users";
 import { IdType } from "../../shared/common-types";
 import * as userService from '../../services/userService';
@@ -30,7 +30,8 @@ let userId: string | undefined;
 
 type Anchor = 'left';
 
-export default function Header() {
+const Header: FC = () => {
+
 
     const { userL } = useContext(LoginContext);
     const [userVerId, setUserVerId] = useState<boolean>(false)
@@ -39,7 +40,7 @@ export default function Header() {
     const navigate = useNavigate();
     const loginContext = useContext(LoginContext);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
 
@@ -65,11 +66,9 @@ export default function Header() {
 
 
 
-
-
-
     const logout = () => {
-        const accessToken = sessionStorage.getItem('accessToken');
+
+        const accessToken = localStorage.getItem('accessToken');
 
         if (accessToken) {
 
@@ -77,7 +76,8 @@ export default function Header() {
             API_CLIENT.logout(accessToken)
                 .then((data) => {
 
-                    sessionStorage.clear();
+
+                    localStorage.clear();
 
                     loginContext?.setUserL(null);
                     email = undefined;
@@ -128,7 +128,6 @@ export default function Header() {
     )
 
 
-
     return (
 
         <Box sx={{ flexGrow: 1 }}>
@@ -173,7 +172,7 @@ export default function Header() {
 
                                         </React.Fragment>
                                     ))}
-                                    {/* </IconButton> */}
+
                                 </>
                                 :
                                 <>
@@ -207,8 +206,7 @@ export default function Header() {
             </AppBar>
         </Box >
 
-
-
-
     )
 }
+
+export default Header;

@@ -2,7 +2,7 @@ import { Box, Grid, Typography } from "@mui/material";
 import TripList from "../Trips/TripsList/TripsList";
 import * as tripService from '../../services/tripService';
 import { Trip, TripCreate } from "../../model/trip";
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { IdType } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
 import jwt_decode from "jwt-decode";
@@ -20,13 +20,16 @@ let userId: string | undefined;
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
 
 
-export default function MyFavorites() {
+
+const MyFavorites: FC = () => {
+
 
     const [trips, setTrips] = useState<Trip[]>([]);
+    const [imageBackground, setImageBackground] = useState<string>()
 
     const { userL } = useContext(LoginContext);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : sessionStorage.getItem('accessToken') ? sessionStorage.getItem('accessToken') : undefined;
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
@@ -46,6 +49,13 @@ export default function MyFavorites() {
                 console.log(err);
                 throw err.message;
             })
+
+            API_TRIP.backgroundImages().then((data) => {
+                setImageBackground(data[Math.floor(Math.random() * data.length)])
+
+            }).catch((err) => {
+                console.log(err)
+            });
         }
 
 
@@ -54,7 +64,7 @@ export default function MyFavorites() {
 
     return (
         <>
-            <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                 {trips.length === 0 ?
 
@@ -65,11 +75,11 @@ export default function MyFavorites() {
                         </Typography>
                     </Box>
                     :
-                    <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                    <Grid container sx={{ justifyContent: 'center', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                         <Typography gutterBottom sx={{ margin: '50px' }} variant="h4" component="div">
                             These are your trips
                         </Typography>
-                        <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                        <Grid container sx={{ justifyContent: 'center', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                             <TripList trips={trips} />
 
@@ -82,3 +92,6 @@ export default function MyFavorites() {
         </>
     )
 }
+
+
+export default MyFavorites;

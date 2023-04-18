@@ -4,7 +4,7 @@ import { sliceDescription } from "../../shared/common-types";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { styled } from '@mui/material/styles';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
-import { useState } from "react";
+import { FC, ReactElement, useState } from "react";
 
 
 interface PointCardProps {
@@ -28,7 +28,11 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 }));
 
 
-export default function TripDetailsPointCard({ point }: PointCardProps) {
+
+const TripDetailsPointCard: FC<PointCardProps> = ({ point }): ReactElement => {
+
+
+
     const [expanded, setExpanded] = useState(false);
 
     const handleExpandClick = () => {
@@ -109,3 +113,5 @@ export default function TripDetailsPointCard({ point }: PointCardProps) {
         </>
     )
 }
+
+export default TripDetailsPointCard;
