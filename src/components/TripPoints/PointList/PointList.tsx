@@ -1,4 +1,4 @@
-import { Tooltip, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { FC, ReactElement } from "react";
 import { Point } from "../../../model/point";
 import PointCard from "./PointCard/PointCard";

@@ -15,7 +15,6 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import * as tripService from '../../services/tripService';
 import { Trip } from '../../model/trip';
 import { ApiTrip } from '../../services/tripService';
-import { color } from '@mui/system';
 
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');

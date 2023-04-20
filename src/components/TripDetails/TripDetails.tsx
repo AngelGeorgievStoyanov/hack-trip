@@ -71,21 +71,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 
 const TripDetails: FC = () => {
 
-
-    const { userL } = useContext(LoginContext)
-
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
-
-    if (accessToken) {
-        const decode: decode = jwt_decode(accessToken);
-        userId = decode._id;
-    }
-
-    const navigate = useNavigate();
-
-    const idTrip = useParams().tripId;
-
-    const theme = useTheme();
+    
     const [activeStep, setActiveStep] = React.useState(0);
     const [points, setPoints] = useState<Point[]>([]);
     const [comments, setComments] = useState<Comment[]>([]);
@@ -99,7 +85,26 @@ const TripDetails: FC = () => {
     const [trip, setTrip] = useState<Trip>()
     const [expanded, setExpanded] = useState(false);
     const [imageBackground, setImageBackground] = useState<string>()
-
+    
+    const { userL } = useContext(LoginContext)
+   
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+   
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
+    }
+    
+    
+    const theme = useTheme();
+   
+    const idTrip = useParams().tripId;
+  
+    const navigate = useNavigate();
+  
+    const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
+    
+    
     const handleExpandClick = () => {
         setExpanded(!expanded);
     };
@@ -571,7 +576,26 @@ const TripDetails: FC = () => {
 
     return (
         <>
-            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', paddingBottom: '15px', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={!isIphone ?
+                {
+                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
+                    backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px',
+                    minHeight: '100vh',
+                    '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', paddingBottom: '15px', margin: '-25px 0px 0px 0px' }
+
+
+                } :
+                {
+                  
+                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
+                    justifyContent: 'center',
+                    bgcolor: '#cfe8fc', height: '100vh', overflow: 'scroll',
+                    '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', paddingBottom: '15px', margin: '-25px 0px 0px 0px' }
+
+                }
+            } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                 <Container maxWidth={false} sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', '@media(max-width: 900px)': {

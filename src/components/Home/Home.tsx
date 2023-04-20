@@ -20,8 +20,11 @@ const Home: FC = () => {
     const [trips, setTrips] = useState<Trip[]>()
     const [imageBackground, setImageBackground] = useState<string>()
 
+
     const { userL } = useContext(LoginContext);
 
+
+    const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
     const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
@@ -31,15 +34,8 @@ const Home: FC = () => {
         userId = decode._id;
     }
 
+
     useEffect(() => {
-
-        API_TRIP.findTopTrips(userId).then((data) => {
-            setTrips(data)
-        }).catch((err) => {
-            console.log(err)
-        });
-
-
 
         API_TRIP.backgroundImages().then((data) => {
             setImageBackground(data[Math.floor(Math.random() * data.length)])
@@ -48,13 +44,37 @@ const Home: FC = () => {
             console.log(err)
         });
 
+        API_TRIP.findTopTrips(userId).then((data) => {
+            setTrips(data)
+        }).catch((err) => {
+            console.log(err)
+        });
 
 
     }, [])
 
     return (
         <>
-            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', padding: '0px', margin: '-25px 0px 0px 0px', width: '100vw' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+
+            <Grid container sx={!isIphone ?
+                {
+                    padding: '30px', margin: '-25px 0px 0px 0px',
+                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundRepeat: "no-repeat", backgroundPosition: "center center",
+                    backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center',
+                    bgcolor: '#cfe8fc', minHeight: '100vh'
+                }
+                :
+                {
+                    padding: '30px', margin: '-25px 0px 0px 0px',
+                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
+                    justifyContent: 'center',
+                    bgcolor: '#cfe8fc', height: '100vh', overflow: 'scroll'
+                }
+
+            } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: ' 0 25px', }}>
                         <Typography sx={{ fontFamily: 'cursive' }} variant='h5'>Welcome TRAVELERS or future TRAVELERS!</Typography>

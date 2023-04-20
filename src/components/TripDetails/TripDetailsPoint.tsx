@@ -46,7 +46,7 @@ const TripDetailsPointCard: FC<PointCardProps> = ({ point }): ReactElement => {
                 alignItems: 'center',
                 height: 'auto',
                 maxWidth: '500px', margin: '20px',
-                padding: '25px 0px 0px 0px', backgroundColor: '#8d868670',
+                padding: '25px 0px 0px 0px', backgroundColor: '#eee7e79e',
                 boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                 marginBottom: '200px'
             }}>

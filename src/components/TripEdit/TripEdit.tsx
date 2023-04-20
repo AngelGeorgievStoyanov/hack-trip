@@ -102,18 +102,19 @@ const TripEdit: FC = () => {
 
     const { userL } = useContext(LoginContext);
 
+    const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
+
+    const iconFotoCamera = useMediaQuery('(max-width:600px)');
 
     const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined;
 
     let positionPoint;
+
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         userId = decode._id;
 
     }
-
-
-    const iconFotoCamera = useMediaQuery('(max-width:600px)');
 
 
     useEffect(() => {
@@ -489,7 +490,27 @@ const TripEdit: FC = () => {
 
     return (
         <>
-            <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px 0', minHeight: '100vh', margin: '0px', width: '100vw', '@media(max-width: 1000px)': { width: '100vw', padding: '15px 0px', margin: '-25px 0px 0px 0px' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid container sx={!isIphone ?
+                {
+                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed',
+                    justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px 0', minHeight: '100vh', margin: '0px', width: '100vw',
+                    '@media(max-width: 1000px)': { width: '100vw', padding: '15px 0px', margin: '-25px 0px 0px 0px' }
+                }
+                :
+                {
+                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
+                    justifyContent: 'center',
+                    bgcolor: '#cfe8fc', height: '100vh', overflow: 'scroll',
+                    '@media(max-width: 1000px)': {
+                        width: '100vw', padding: '15px 0px', margin: '-25px 0px 0px 0px'
+                    }
+
+
+                }
+            } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding: '0px' }}>
                     <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 600px)': { maxWidth: '92%' } }} >
                         <GoogleMap

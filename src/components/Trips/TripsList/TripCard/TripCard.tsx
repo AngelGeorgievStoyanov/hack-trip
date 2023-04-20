@@ -63,7 +63,7 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                     alignItems: 'center',
                     maxWidth: '300px', margin: '20px',
                     height: 'fit-content',
-                    padding: '25px 0px 0px 0px', backgroundColor: '#8d868670',
+                    padding: '25px 0px 0px 0px', backgroundColor: '#eee7e79e',
                     boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                 }}>
                     <Typography gutterBottom variant="h5" component="div" sx={{ padding: '0px 15px' }}>

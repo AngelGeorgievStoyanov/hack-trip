@@ -85,6 +85,8 @@ const TripPoints: FC = () => {
     const [imageBackground, setImageBackground] = useState<string>()
 
 
+    const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
+
     const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
@@ -468,12 +470,23 @@ const TripPoints: FC = () => {
 
     return (
         <>
-            <Grid container sx={{
-                backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed',
-                justifyContent: 'center', padding: '15px 0', bgcolor: '#cfe8fc', minHeight: '100vh', '@media(max-width: 600px)': {
-                    display: 'flex', flexDirection: 'column'
+            <Grid container sx={!isIphone ?
+                {
+                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed',
+                    justifyContent: 'center',padding:'0px 0px 0px 13px', bgcolor: '#cfe8fc', minHeight: '100vh', '@media(max-width: 600px)': {
+                        display: 'flex', flexDirection: 'column'
+                    }
                 }
-            }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                :
+                {
+                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
+                    justifyContent: 'center',
+                    bgcolor: '#cfe8fc', height: '100vh', overflow: 'scroll', margin: '-25px 0px 0px 0px', padding:'0px 0px 0px 13px'
+                   
+                }
+
+            } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                 <Container maxWidth={false} sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', '@media(max-width: 1020px)': {

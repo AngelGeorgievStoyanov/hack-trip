@@ -145,7 +145,7 @@ const PointEdit: FC<PointCardProps> = ({ point, length }): ReactElement => {
                     flexDirection: 'column',
                     alignItems: 'center',
                     maxWidth: '300px', margin: '20px',
-                    padding: '15px 0px', backgroundColor: '#8d868670',
+                    padding: '15px 0px', backgroundColor: '#e5e3e3d9',
                     boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
                 }}>
                 <Typography gutterBottom component="h6" sx={{ padding: '0px 10px' }}>
