@@ -5,7 +5,7 @@ import { User } from "../../model/users";
 import { IdType } from "../../shared/common-types";
 import * as userService from '../../services/userService';
 import { ApiClient } from "../../services/userService";
-import { AppBar, Box, Button, Drawer, Toolbar, Typography, useMediaQuery } from "@mui/material";
+import { AppBar, Box, Button, Divider, Drawer, Toolbar, Typography, useMediaQuery } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import jwt_decode from "jwt-decode";
@@ -117,12 +117,18 @@ const Header: FC = () => {
         >
 
             <Button component={Link} to={'/'} color="inherit"  >HOME</Button>
+            <Divider />
             <Button component={Link} to={'/trips'} color="inherit" >TRIPS</Button>
+            <Divider />
             <Button component={Link} to={'/create-trip'} color="inherit" >CREATE TRIPS</Button>
+            <Divider />
             <Button component={Link} to={'/my-trips'} color="inherit" >MY TRIPS</Button>
+            <Divider />
             <Button component={Link} to={'/favorites'} color="inherit" >MY FAVORITES</Button>
+            <Divider />
             <Button component={Link} to={'/about'} color="inherit" >ABOUT US</Button>
-            {((role === 'admin') || (role === 'manager')) ? <Button component={Link} to={'/admin'} color="inherit" >ADMIN</Button> : ''}
+            <Divider />
+            {((role === 'admin') || (role === 'manager')) ? <> <Button component={Link} to={'/admin'} color="inherit" >ADMIN</Button> <Divider /></> : ''}
             <Button onClick={logout} color="inherit" >LOGOUT</Button>
         </Box>
     )

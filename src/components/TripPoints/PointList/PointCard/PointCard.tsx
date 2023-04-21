@@ -136,7 +136,7 @@ const PointEdit: FC<PointCardProps> = ({ point, length }): ReactElement => {
     return (
         <>
             {point.pointNumber > 1 ?
-                <ArrowCircleUpIcon onClick={(e) => editPositionUp(e, +point.pointNumber, point._id)} /> : <ArrowCircleUpIcon sx={{ display: 'none' }} onClick={(e) => editPositionUp(e, +point.pointNumber, point._id)} />
+                <ArrowCircleUpIcon sx={{ ':hover': { cursor: 'pointer' } }} onClick={(e) => editPositionUp(e, +point.pointNumber, point._id)} /> : <ArrowCircleUpIcon sx={{ display: 'none' }} onClick={(e) => editPositionUp(e, +point.pointNumber, point._id)} />
             }
             <Card
                 id={point._id + ''}
@@ -180,7 +180,7 @@ const PointEdit: FC<PointCardProps> = ({ point, length }): ReactElement => {
                 </span>
             </Card>
             {point.pointNumber < length ?
-                <ArrowCircleDownIcon onClick={(e) => editPositionDwn(e, +point.pointNumber, point._id)} /> :
+                <ArrowCircleDownIcon sx={{ ':hover': { cursor: 'pointer' } }} onClick={(e) => editPositionDwn(e, +point.pointNumber, point._id)} /> :
                 <ArrowCircleDownIcon sx={{ display: 'none' }} onClick={(e) => editPositionDwn(e, +point.pointNumber, point._id)} />
             }
         </>

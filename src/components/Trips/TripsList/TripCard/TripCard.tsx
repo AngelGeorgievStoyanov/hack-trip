@@ -1,16 +1,15 @@
 
-import { Button, Card, CardContent, ImageList, ImageListItem, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, MobileStepper, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Trip } from '../../../../model/trip';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from '../../../../App';
-import { FC, ReactElement, useContext, useState } from 'react';
+import { FC, ReactElement, useContext, useState, TouchEvent } from 'react';
 import { IdType } from '../../../../shared/common-types';
 import { User } from '../../../../model/users';
 import * as userService from '../../../../services/userService';
 import { ApiClient } from '../../../../services/userService';
-
-
-
+import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 
 type decode = {
     _id: string,
@@ -22,6 +21,8 @@ interface TripCardProps {
 
 }
 
+
+
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
 let userId: string | undefined;
@@ -30,9 +31,14 @@ let userId: string | undefined;
 const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
 
     const [userVerId, setUserVerId] = useState<boolean>(false)
+    const [activeStep, setActiveStep] = useState(0);
+    const [touchStart, setTouchStart] = useState<number>(0)
+    const [touchEnd, setTouchEnd] = useState<number>(0)
 
+    const minSwipeDistance = 45;
+    const theme = useTheme();
     const { userL } = useContext(LoginContext);
-
+    const isMobile = useMediaQuery('(max-width:900px)');
 
     const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
@@ -54,37 +60,106 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
     }
 
 
+    const maxSteps = trip.imageFile ? trip.imageFile.length : 0;
+
+    const handleNext = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    }
+
+    const handleBack = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    }
+
+
+    const onTouchStart = (e: TouchEvent) => {
+        setTouchEnd(0)
+        setTouchStart(e.targetTouches[0].clientX)
+    }
+
+
+    const onTouchMove = (e: TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX)
+    }
+
+
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe === true) {
+
+            if (activeStep < maxSteps - 1) {
+                setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            }
+
+        } else if (isRightSwipe === true) {
+
+            if (activeStep > 0) {
+                setActiveStep((prevActiveStep) => prevActiveStep - 1);
+            }
+        }
+
+    }
+
+
     return (
         <>
             {(((trip.reportTrip !== undefined) && (trip.reportTrip !== null) && (Number(trip.reportTrip)) >= 5) && (role === 'user')) ? '' :
                 <Card sx={{
                     display: 'flex',
                     flexDirection: 'column',
+                    justifyContent: 'flex-end',
                     alignItems: 'center',
                     maxWidth: '300px', margin: '20px',
-                    height: 'fit-content',
+                    height: isMobile ? 'fit-content' : 'auto',
                     padding: '25px 0px 0px 0px', backgroundColor: '#eee7e79e',
                     boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                 }}>
-                    <Typography gutterBottom variant="h5" component="div" sx={{ padding: '0px 15px' }}>
-                        Title: {trip.title}
-                    </Typography>
-                    <Typography gutterBottom variant="h6" component="div" sx={{ padding: '0px 15px' }}>
-                        Destination: {trip.destination}
-                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: isMobile ? 'auto' : '-webkit-fill-available', justifyContent: 'space-evenly' }}>
+
+                        <Typography gutterBottom variant="h5" component="div" sx={{ padding: '0px 15px' }}>
+                            Title: {trip.title}
+                        </Typography>
+                        <Typography gutterBottom variant="h6" component="div" sx={{ padding: '0px 15px' }}>
+                            Destination: {trip.destination}
+                        </Typography>
+                    </Box>
                     {trip.imageFile?.length && trip.imageFile.length > 0 ?
-                        <ImageList sx={{ maxWidth: 320, maxHeight: trip.imageFile.length > 9 ? 350 : 'auto' }} cols={trip.imageFile.length > 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : 'auto'}>
-                            {trip.imageFile ? trip.imageFile.map((item, i) => (
-                                <ImageListItem key={i}>
-                                    <img
-                                        src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
-                                        srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                                        alt={item}
-                                        loading="lazy"
-                                    />
-                                </ImageListItem>
-                            )) : ''}
-                        </ImageList>
+                        <>
+                            <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStep]}`} alt={trip.imageFile[activeStep]} width='300px' height='250px' />
+
+                            <MobileStepper
+                                variant="dots"
+                                steps={maxSteps}
+                                position="static"
+                                activeStep={activeStep}
+                                sx={{ width: '-webkit-fill-available', flexGrow: 1, maxHeight: "20px" }}
+                                nextButton={
+                                    <Button size="small" onClick={handleNext} disabled={activeStep === maxSteps - 1}>
+                                        Next
+                                        {theme.direction === 'rtl' ? (
+                                            <KeyboardArrowLeft />
+                                        ) : (
+                                            <KeyboardArrowRight />
+                                        )}
+                                    </Button>
+                                }
+                                backButton={
+                                    <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
+                                        {theme.direction === 'rtl' ? (
+                                            <KeyboardArrowRight />
+                                        ) : (
+                                            <KeyboardArrowLeft />
+                                        )}
+                                        Back
+                                    </Button>
+                                }
+                            />
+                        </>
+
                         :
                         <Typography gutterBottom component="h6" sx={{ padding: '0 15px' }}>
                             There is no image for this trip
@@ -103,7 +178,11 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                         {Number(trip.likes) > 0 ?
                             < Typography sx={{ margin: '10px' }} gutterBottom variant="h6" component="div">
                                 LIKES: {Number(trip.likes[0])}
-                            </Typography> : ''
+                            </Typography>
+                            :
+                            < Typography sx={{ margin: '10px', display: 'flex', alignItems: 'center' }} gutterBottom variant="h6" component="div">
+                                LIKES: <FavoriteIcon color="primary" />
+                            </Typography>
                         }
 
                     </CardContent>

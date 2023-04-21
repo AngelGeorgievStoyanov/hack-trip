@@ -73,7 +73,9 @@ const TripDetailsPointCard: FC<PointCardProps> = ({ point }): ReactElement => {
                         </ImageList>
                     </>
                     :
-                    <h4>FOR THIS POINT DON'T HAVE IMAGES</h4>
+                    <Typography  variant="subtitle2" sx={{ padding: '0px 25px' }}>
+                        FOR THIS POINT DON'T HAVE IMAGES
+                    </Typography>
                 }
 
                 {point.description.length < 150 ?
