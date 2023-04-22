@@ -343,7 +343,7 @@ const Profile: FC = () => {
                         maxWidth: '600px',
                         maxHeight: '700px',
                         padding: '30px',
-                        backgroundColor: '#8d868670',
+                        backgroundColor: '#eee7e79e',
                         boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                         '@media(max-width: 600px)': { display: 'flex', width: '90%' }

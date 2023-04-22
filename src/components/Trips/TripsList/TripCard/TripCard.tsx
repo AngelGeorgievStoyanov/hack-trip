@@ -3,7 +3,7 @@ import { Box, Button, Card, CardContent, MobileStepper, Typography, useMediaQuer
 import { Trip } from '../../../../model/trip';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from '../../../../App';
-import { FC, ReactElement, useContext, useState, TouchEvent } from 'react';
+import { FC, ReactElement, useContext, useState, TouchEvent, BaseSyntheticEvent } from 'react';
 import { IdType } from '../../../../shared/common-types';
 import { User } from '../../../../model/users';
 import * as userService from '../../../../services/userService';
@@ -105,6 +105,8 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
     }
 
 
+ 
+
     return (
         <>
             {(((trip.reportTrip !== undefined) && (trip.reportTrip !== null) && (Number(trip.reportTrip)) >= 5) && (role === 'user')) ? '' :
@@ -129,7 +131,7 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                     </Box>
                     {trip.imageFile?.length && trip.imageFile.length > 0 ?
                         <>
-                            <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStep]}`} alt={trip.imageFile[activeStep]} width='300px' height='250px' />
+                            <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStep]}`} alt='Trip' width='300px' height='200px' />
 
                             <MobileStepper
                                 variant="dots"

@@ -77,11 +77,11 @@ const Home: FC = () => {
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: ' 0 25px', }}>
-                        <Typography sx={{ fontFamily: 'cursive' }} variant='h5'>Welcome TRAVELERS or future TRAVELERS!</Typography>
-                        <Typography sx={{ fontFamily: 'cursive' }} variant='subtitle1'>This is an APP where you can share your trips or get valuable tips for your future trips.</Typography>
+                        <Typography sx={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant='h5'>Welcome TRAVELERS or future TRAVELERS!</Typography>
+                        <Typography sx={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant='subtitle1'>This is an APP where you can share your trips or get valuable tips for your future trips.</Typography>
 
                         {(trips !== undefined && trips.length > 0) ?
-                            <Typography sx={{ fontFamily: 'cursive' }} variant='body1'>These are our TOP 5 most liked TRIPS!</Typography>
+                            <Typography sx={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant='body1'>These are our TOP 5 most liked TRIPS!</Typography>
 
                             : ''}
                     </Box>
