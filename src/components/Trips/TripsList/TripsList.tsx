@@ -20,8 +20,8 @@ const TripList: FC<TripsListProps> = ({ trips }): ReactElement => {
                 :
                 <>
                     <Box>
-                        <Typography sx={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant='h5'>WELCOME!</Typography>
-                        <Typography sx={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant='subtitle1'>No trips found!</Typography>
+                        <Typography sx={{ fontFamily: 'cursive' }} variant='h5'>WELCOME!</Typography>
+                        <Typography sx={{ fontFamily: 'cursive' }} variant='subtitle1'>No trips found!</Typography>
                     </Box>
                 </>
             }

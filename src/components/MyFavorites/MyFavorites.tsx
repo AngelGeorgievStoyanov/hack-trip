@@ -90,13 +90,13 @@ const MyFavorites: FC = () => {
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0', alignItems: 'center' } }}>
 
-                        <Typography gutterBottom variant="h5" component="div" sx={{ padding: '0 15px', fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>
+                        <Typography gutterBottom sx={{ margin: '50px', fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant="h5" component="div" >
                             You dont't have a favorites trip yet.
                         </Typography>
                     </Box>
                     :
                     <Grid container sx={{ justifyContent: 'center', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                        <Typography gutterBottom sx={{ margin: '50px', fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant="h4" component="div">
+                        <Typography gutterBottom sx={{ margin: '50px', fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant="h5" component="div">
                             These are your favorites trips
                         </Typography>
                         <Grid container sx={{ justifyContent: 'center', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
