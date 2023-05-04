@@ -2,7 +2,7 @@
 # https://www.hack-trip.com
 ## Author: Angel Stoyanov
 ### Technologies used:
-* React-TypeSript
+* React-TypeScript
 * MySQL 
 * Express.js
 * Node.js

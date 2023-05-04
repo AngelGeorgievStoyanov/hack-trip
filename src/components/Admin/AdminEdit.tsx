@@ -226,10 +226,12 @@ const AdminEdit: FC = () => {
 
 
 
-            if (file.size > 10000) {
+            if (file.size > 1000000) {
+
                 const options = {
-                    maxSizeMB: 0.1,
-                    maxWidthOrHeight: 520,
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1920,
+                    useWebWorker: true,
                     fileType: file.type,
                     name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
                         file.name.split(/[,\s]+/).length > 1 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name

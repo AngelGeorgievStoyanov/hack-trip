@@ -214,11 +214,12 @@ const TripEdit: FC = () => {
 
             if (x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
 
-                if (x.size > 10000) {
+                if (x.size > 1000000) {
 
                     const options = {
-                        maxSizeMB: 0.1,
-                        maxWidthOrHeight: 520,
+                        maxSizeMB: 1,
+                        maxWidthOrHeight: 1920,
+                        useWebWorker: true,
                         fileType: x.type,
                         name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
                             x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
