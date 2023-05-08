@@ -4,11 +4,12 @@ import { sliceDescription } from "../../shared/common-types";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { styled } from '@mui/material/styles';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
-import { FC, ReactElement, useState } from "react";
+import { BaseSyntheticEvent, FC, ReactElement, useState } from "react";
 
 
 interface PointCardProps {
     point: Point;
+    onClickPointImage: (e: BaseSyntheticEvent) => void
 
 }
 
@@ -29,7 +30,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 
 
 
-const TripDetailsPointCard: FC<PointCardProps> = ({ point }): ReactElement => {
+const TripDetailsPointCard: FC<PointCardProps> = ({ point, onClickPointImage }): ReactElement => {
 
 
 
@@ -38,6 +39,9 @@ const TripDetailsPointCard: FC<PointCardProps> = ({ point }): ReactElement => {
     const handleExpandClick = () => {
         setExpanded(!expanded);
     };
+
+
+
     return (
         <>
             <Card sx={{
@@ -67,13 +71,14 @@ const TripDetailsPointCard: FC<PointCardProps> = ({ point }): ReactElement => {
 
                                         alt={item}
                                         loading="lazy"
+                                        onClick={onClickPointImage}
                                     />
                                 </ImageListItem>
                             )) : ''}
                         </ImageList>
                     </>
                     :
-                    <Typography  variant="subtitle2" sx={{ padding: '0px 25px' }}>
+                    <Typography variant="subtitle2" sx={{ padding: '0px 25px' }}>
                         FOR THIS POINT DON'T HAVE IMAGES
                     </Typography>
                 }
@@ -105,9 +110,6 @@ const TripDetailsPointCard: FC<PointCardProps> = ({ point }): ReactElement => {
                                 </Typography>
                             </CardContent>
                         </Collapse>
-
-
-
                     </>
                 }
 

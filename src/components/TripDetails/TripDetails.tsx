@@ -88,9 +88,13 @@ const TripDetails: FC = () => {
     const [expanded, setExpanded] = useState(false);
     const [imageBackground, setImageBackground] = useState<string>()
     const [fullImage, setFullImage] = useState<boolean>(false)
+    const [fullPointImage, setPointFullImage] = useState<boolean>(false)
     const [activeStepImage, setActiveStepImage] = useState(0);
     const [touchStart, setTouchStart] = useState<number>(0)
     const [touchEnd, setTouchEnd] = useState<number>(0)
+    const [maxSteps, setMaxSteps] = useState<number>(0)
+
+
     const minSwipeDistance = 45;
     const { userL } = useContext(LoginContext);
 
@@ -133,6 +137,8 @@ const TripDetails: FC = () => {
                     API_POINT.findByTripId(data._id).then((data) => {
 
                         if (data) {
+
+                            console.log(data)
                             if (typeof data === "object") {
                                 const arrPoints = data as any as Point[];
 
@@ -237,9 +243,14 @@ const TripDetails: FC = () => {
 
     const mapRef = React.useRef<google.maps.Map | null>(null);
 
-    const imageRef = React.useRef<HTMLImageElement | null>(null)
+    const imageRef = React.useRef<HTMLImageElement | null>(null);
+
+    const imagePointRef = React.useRef<HTMLImageElement | null>(null);
+
 
     const pathPoints = (points?.length) && (points !== undefined) ? points?.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber)).map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : [];
+
+
     const onLoad = (map: google.maps.Map): void => {
         mapRef.current = map;
     }
@@ -585,10 +596,13 @@ const TripDetails: FC = () => {
         let indexImage = trip?.imageFile?.indexOf(imageName);
         setActiveStepImage(indexImage ? indexImage : 0);
         setFullImage(true);
+        setMaxSteps(trip && (trip.imageFile) ? trip?.imageFile.length : 0)
     }
 
 
-    const maxSteps = trip && trip.imageFile ? trip.imageFile.length : 0;
+
+
+
 
     const handleNextImage = () => {
         setActiveStepImage((prevActiveStep) => prevActiveStep + 1);
@@ -617,6 +631,7 @@ const TripDetails: FC = () => {
         if (isLeftSwipe === true) {
 
             if (activeStepImage < maxSteps - 1) {
+
                 setActiveStepImage((prevActiveStep) => prevActiveStep + 1);
             }
 
@@ -626,12 +641,29 @@ const TripDetails: FC = () => {
                 setActiveStepImage((prevActiveStep) => prevActiveStep - 1);
             }
         }
+
+        console.log(activeStepImage)
+
+        console.log(maxSteps)
     }
 
 
     const onClickClose = (e: BaseSyntheticEvent) => {
         setFullImage(false);
+        setPointFullImage(false);
     }
+
+    const onClickPointImage = (e: BaseSyntheticEvent) => {
+
+        let imageName = e.currentTarget.src.split('hack-trip/')[1].split('?')[0];
+        let indexImage = pointCard?.imageFile?.indexOf(imageName);
+        setActiveStepImage(indexImage ? indexImage : 0);
+        setPointFullImage(true)
+        setFullImage(false)
+        setMaxSteps(pointCard && (pointCard.imageFile) ? pointCard?.imageFile.length : 0)
+
+    }
+
 
 
     return (
@@ -655,235 +687,236 @@ const TripDetails: FC = () => {
                 }
             } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
-                {!fullImage ? 
-                <>
-                    <Container maxWidth={false} sx={{
-                        boxSizing: 'border-box',
-                        display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', '@media(max-width: 900px)': {
-                            display: 'flex', flexDirection: 'column-reverse'
-                        }
-                    }}>
-
-                        <Card sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            minWidth: '200px',
-                            maxWidth: '450px', margin: '20px',
-                            padding: '25px', backgroundColor: '#eee7e79e',
-                            boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
+                {!fullImage && !fullPointImage ?
+                    <>
+                        <Container maxWidth={false} sx={{
+                            boxSizing: 'border-box',
+                            display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', '@media(max-width: 900px)': {
+                                display: 'flex', flexDirection: 'column-reverse'
+                            }
                         }}>
-                            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <>
-                                    <Typography gutterBottom variant="h5" component="div">
-                                        TRIP NAME : {trip?.title}
-                                    </Typography>
-                                    {((trip && trip.favorites?.some((x) => x === userId)) || (favorite === true)) ?
-                                        <MuiToolBookmarkRemove />
-                                        : <MuiToolBookmark />
-                                    }
-                                </>
-                            </Box>
-                            <Typography gutterBottom variant="subtitle1" component="h5">
-                                PRICE OF THE TRIP: {trip?.price ? trip.price + 'euro' : 'missing price'}
-                            </Typography>
-                            <Typography gutterBottom variant="subtitle1" component="div">
-                                TRANSPORT WITH: {trip?.transport}
-                            </Typography>
-                            <Typography gutterBottom variant="subtitle1" component="div">
-                                COUNT OF PEOPLE: {trip?.countPeoples}
-                            </Typography>
-                            <Typography gutterBottom variant="subtitle1" component="div">
-                                TYPE OF THE GROUP: {trip?.typeOfPeople}
-                            </Typography>
-                            <Typography gutterBottom variant="subtitle1" component="div">
-                                DESTINATION: {trip?.destination}
-                            </Typography>
-                            {(trip !== undefined) && (trip.description.length < 150) ?
-                                <Typography gutterBottom variant="subtitle1" component="div">
-                                    DESCRIPTION : {trip?.description}
-                                </Typography>
 
-                                :
-
-                                <>
-                                    {trip ?
-                                        <>
-                                            <Typography gutterBottom variant="subtitle1" component="div" sx={{ padding: '0px 15px', marginTop: '10px' }}>
-                                                Description: {sliceDescription(trip.description, 150)}
-                                            </Typography>
-
-                                            <CardActions disableSpacing>
-                                                <ExpandMore
-                                                    expand={expanded}
-                                                    onClick={handleExpandClick}
-                                                    aria-expanded={expanded}
-                                                    aria-label="show more"
-                                                >
-                                                    <ExpandMoreIcon />
-                                                </ExpandMore>
-                                            </CardActions>
-                                            <Collapse in={expanded} timeout="auto" unmountOnExit>
-                                                <CardContent>
-                                                    <Typography paragraph>
-                                                        Description: {trip.description}
-                                                    </Typography>
-                                                </CardContent>
-                                            </Collapse>
-                                        </> : ''}
-
-
-                                </>
-
-                            }
-                            {(trip && trip._ownerId === userId) ?
-                                <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
-
-                                :
-                                (points !== undefined && points.length > 0) ?
-                                    <Typography gutterBottom variant="subtitle1" component="div">
-                                        FOR THIS TRIP HAVE {points.length} POINTS
-                                    </Typography>
-                                    :
-                                    <Typography gutterBottom variant="subtitle1" component="div">
-                                        FOR THIS TRIP DONT HAVE POINTS
-                                    </Typography>
-                            }
-
-                            <Button component={Link} to={`/comments/add-comment/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD COMMENT</Button>
-
-                            {(trip && trip._ownerId === userId) ?
-                                <>
-                                    <Button component={Link} to={`/trip/edit/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>EDIT TRIP</Button>
-                                    <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE TRIP</Button>
-                                </>
-
-                                : ''}
-
-                            <Button onClick={goBack} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >BACK</Button>
-                            {comments?.length ?
-
-                                <Button onClick={() => onLoadComments(undefined)} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >FOR THIS TRIP HAVE {comments?.length} COMMENTS, SEE ALL COMMENTS</Button>
-                                :
-                                <Typography gutterBottom variant="subtitle1" component="div">
-                                    FOR THIS TRIP DON'T HAVE COMMENT
-                                </Typography>
-                            }
-
-                            {comments.length > 0 ?
-
-                                <Button onClick={onHideComments} className="btn-hide" variant="contained" sx={{ display: hide ? 'block' : 'none', ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >HIDE COMMENTS</Button>
-                                : ''
-                            }
-
-                            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around' }}>
-
-                                {((trip && trip.reportTrip?.some((x) => x === userId)) || (reported === true)) ?
-                                    <MuiTooltiUnReport />
-                                    :
-                                    <MuiTooltiReport />
-                                }
-
-                                {trip && trip._ownerId !== userId ?
+                            <Card sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                minWidth: '200px',
+                                maxWidth: '450px', margin: '20px',
+                                padding: '25px', backgroundColor: '#eee7e79e',
+                                boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
+                            }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                     <>
-                                        {
-                                            trip.likes.includes(userId) || liked === true ?
-                                                <MuiTooltipUnlike />
-                                                :
-                                                <MuiTooltipLike />
+                                        <Typography gutterBottom variant="h5" component="div">
+                                            TRIP NAME : {trip?.title}
+                                        </Typography>
+                                        {((trip && trip.favorites?.some((x) => x === userId)) || (favorite === true)) ?
+                                            <MuiToolBookmarkRemove />
+                                            : <MuiToolBookmark />
                                         }
                                     </>
+                                </Box>
+                                <Typography gutterBottom variant="subtitle1" component="h5">
+                                    PRICE OF THE TRIP: {trip?.price ? trip.price + 'euro' : 'missing price'}
+                                </Typography>
+                                <Typography gutterBottom variant="subtitle1" component="div">
+                                    TRANSPORT WITH: {trip?.transport}
+                                </Typography>
+                                <Typography gutterBottom variant="subtitle1" component="div">
+                                    COUNT OF PEOPLE: {trip?.countPeoples}
+                                </Typography>
+                                <Typography gutterBottom variant="subtitle1" component="div">
+                                    TYPE OF THE GROUP: {trip?.typeOfPeople}
+                                </Typography>
+                                <Typography gutterBottom variant="subtitle1" component="div">
+                                    DESTINATION: {trip?.destination}
+                                </Typography>
+                                {(trip !== undefined) && (trip.description.length < 150) ?
+                                    <Typography gutterBottom variant="subtitle1" component="div">
+                                        DESCRIPTION : {trip?.description}
+                                    </Typography>
+
+                                    :
+
+                                    <>
+                                        {trip ?
+                                            <>
+                                                <Typography gutterBottom variant="subtitle1" component="div" sx={{ padding: '0px 15px', marginTop: '10px' }}>
+                                                    Description: {sliceDescription(trip.description, 150)}
+                                                </Typography>
+
+                                                <CardActions disableSpacing>
+                                                    <ExpandMore
+                                                        expand={expanded}
+                                                        onClick={handleExpandClick}
+                                                        aria-expanded={expanded}
+                                                        aria-label="show more"
+                                                    >
+                                                        <ExpandMoreIcon />
+                                                    </ExpandMore>
+                                                </CardActions>
+                                                <Collapse in={expanded} timeout="auto" unmountOnExit>
+                                                    <CardContent>
+                                                        <Typography paragraph>
+                                                            Description: {trip.description}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Collapse>
+                                            </> : ''}
+
+
+                                    </>
+
+                                }
+                                {(trip && trip._ownerId === userId) ?
+                                    <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
+
+                                    :
+                                    (points !== undefined && points.length > 0) ?
+                                        <Typography gutterBottom variant="subtitle1" component="div">
+                                            FOR THIS TRIP HAVE {points.length} POINTS
+                                        </Typography>
+                                        :
+                                        <Typography gutterBottom variant="subtitle1" component="div">
+                                            FOR THIS TRIP DONT HAVE POINTS
+                                        </Typography>
+                                }
+
+                                <Button component={Link} to={`/comments/add-comment/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD COMMENT</Button>
+
+                                {(trip && trip._ownerId === userId) ?
+                                    <>
+                                        <Button component={Link} to={`/trip/edit/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>EDIT TRIP</Button>
+                                        <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE TRIP</Button>
+                                    </>
+
                                     : ''}
-                            </Box>
-                        </Card>
 
-                        {(trip && trip.imageFile?.length && trip.imageFile?.length > 0) ?
-                            <>
-                                <ImageList sx={{ maxWidth: 520, height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={trip.imageFile.length >= 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : 'auto'}>
-                                    {trip && trip.imageFile ? trip.imageFile.map((item, i) => (
-                                        <ImageListItem key={i}>
-                                            <img
-                                                src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
-                                                srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                                                alt={item}
-                                                loading="lazy"
-                                                onClick={onClickImage}
-                                            />
-                                        </ImageListItem>
-                                    )) : ''}
-                                </ImageList>
-                            </>
-                            :
-                            <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>
-                        }
-                    </Container>
-                    <Container maxWidth={false} sx={{ display: hide ? 'flex' : 'none', flexWrap: 'wrap' }} >
-                        {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} onUnReportClickHandlerComment={unReportClickHandlerComment} onReportClickHandlerComment={reportClickHandlerComment} reportedComment={reportedComment} userId={userId} />) : ''}
-                    </Container>
-                    <Container maxWidth={false} sx={{
-                        display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 900px)': {
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0px'
-                        }
-                    }} >
-                        <Box component='div' sx={{ boxSizing: "content-box", height: 'fit-content', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', width: '94vW' } }}>
-                            {points?.length > 0 ?
-                                <MobileStepper
-                                    variant="progress"
-                                    steps={points.length + 1}
-                                    position="static"
-                                    activeStep={activeStep}
-                                    sx={{ maxWidth: 600, flexGrow: 1, maxHeight: '25px' }}
-                                    nextButton={
-                                        <Button size="small" onClick={handleNext} disabled={activeStep === points.length}>
-                                            Next
-                                            {theme.direction === 'rtl' ? (
-                                                <KeyboardArrowLeft />
-                                            ) : (
-                                                <KeyboardArrowRight />
-                                            )}
-                                        </Button>
+                                <Button onClick={goBack} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >BACK</Button>
+                                {comments?.length ?
+
+                                    <Button onClick={() => onLoadComments(undefined)} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >FOR THIS TRIP HAVE {comments?.length} COMMENTS, SEE ALL COMMENTS</Button>
+                                    :
+                                    <Typography gutterBottom variant="subtitle1" component="div">
+                                        FOR THIS TRIP DON'T HAVE COMMENT
+                                    </Typography>
+                                }
+
+                                {comments.length > 0 ?
+
+                                    <Button onClick={onHideComments} className="btn-hide" variant="contained" sx={{ display: hide ? 'block' : 'none', ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}  >HIDE COMMENTS</Button>
+                                    : ''
+                                }
+
+                                <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around' }}>
+
+                                    {((trip && trip.reportTrip?.some((x) => x === userId)) || (reported === true)) ?
+                                        <MuiTooltiUnReport />
+                                        :
+                                        <MuiTooltiReport />
                                     }
-                                    backButton={
-                                        <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
-                                            {theme.direction === 'rtl' ? (
-                                                <KeyboardArrowRight />
-                                            ) : (
-                                                <KeyboardArrowLeft />
-                                            )}
-                                            Back
-                                        </Button>
-                                    }
-                                />
-                                : ''}
-                            <Box sx={{ display: 'flex', maxWidth: '600px' }}>
 
-                                <GoogleMap
-                                    mapContainerStyle={containerStyle}
-                                    options={options as google.maps.MapOptions}
-                                    center={mapCenter !== undefined ? mapCenter : center}
-                                    zoom={zoom}
-                                    onLoad={onLoad}
-                                    onUnmount={onUnmount}
+                                    {trip && trip._ownerId !== userId ?
+                                        <>
+                                            {
+                                                trip.likes.includes(userId) || liked === true ?
+                                                    <MuiTooltipUnlike />
+                                                    :
+                                                    <MuiTooltipLike />
+                                            }
+                                        </>
+                                        : ''}
+                                </Box>
+                            </Card>
 
-
-                                >
-                                    {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                                    {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip && trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
-                                </GoogleMap>
-                            </Box>
-                        </Box>
-
-                        <Box component='section' id="point-section-add">
-                            {
-                                pointCard ? <TripDetailsPointCard point={pointCard} key={pointCard._id} /> : ''
-
+                            {(trip && trip.imageFile?.length && trip.imageFile?.length > 0) ?
+                                <>
+                                    <ImageList sx={{ maxWidth: 520, height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={trip.imageFile.length >= 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : 'auto'}>
+                                        {trip && trip.imageFile ? trip.imageFile.map((item, i) => (
+                                            <ImageListItem key={i}>
+                                                <img
+                                                    src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
+                                                    srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                                    alt={item}
+                                                    loading="lazy"
+                                                    onClick={onClickImage}
+                                                />
+                                            </ImageListItem>
+                                        )) : ''}
+                                    </ImageList>
+                                </>
+                                :
+                                <h4>FOR THIS TRIP DON'T HAVE IMAGES</h4>
                             }
-                        </Box>
-                    </Container>
+                        </Container>
+                        <Container maxWidth={false} sx={{ display: hide ? 'flex' : 'none', flexWrap: 'wrap' }} >
+                            {comments.length > 0 ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} onUnReportClickHandlerComment={unReportClickHandlerComment} onReportClickHandlerComment={reportClickHandlerComment} reportedComment={reportedComment} userId={userId} />) : ''}
+                        </Container>
+                        <Container maxWidth={false} sx={{
+                            display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '50px 50px', '@media(max-width: 900px)': {
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0px'
+                            }
+                        }} >
+                            <Box component='div' sx={{ boxSizing: "content-box", height: 'fit-content', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', width: '94vW' } }}>
+                                {points?.length > 0 ?
+                                    <MobileStepper
+                                        variant="progress"
+                                        steps={points.length + 1}
+                                        position="static"
+                                        activeStep={activeStep}
+                                        sx={{ maxWidth: 600, flexGrow: 1, maxHeight: '25px' }}
+                                        nextButton={
+                                            <Button size="small" onClick={handleNext} disabled={activeStep === points.length}>
+                                                Next
+                                                {theme.direction === 'rtl' ? (
+                                                    <KeyboardArrowLeft />
+                                                ) : (
+                                                    <KeyboardArrowRight />
+                                                )}
+                                            </Button>
+                                        }
+                                        backButton={
+                                            <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
+                                                {theme.direction === 'rtl' ? (
+                                                    <KeyboardArrowRight />
+                                                ) : (
+                                                    <KeyboardArrowLeft />
+                                                )}
+                                                Back
+                                            </Button>
+                                        }
+                                    />
+                                    : ''}
+                                <Box sx={{ display: 'flex', maxWidth: '600px' }}>
 
-                </> 
-                :
-                    <>
-                        {trip && (trip.imageFile?.length) && (trip.imageFile.length > 0) ?
+                                    <GoogleMap
+                                        mapContainerStyle={containerStyle}
+                                        options={options as google.maps.MapOptions}
+                                        center={mapCenter !== undefined ? mapCenter : center}
+                                        zoom={zoom}
+                                        onLoad={onLoad}
+                                        onUnmount={onUnmount}
+
+
+                                    >
+                                        {pathPoints ? <PolylineF path={pathPoints} /> : null}
+                                        {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip && trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
+                                    </GoogleMap>
+                                </Box>
+                            </Box>
+
+                            <Box component='section' id="point-section-add">
+                                {
+                                    pointCard ? <TripDetailsPointCard onClickPointImage={onClickPointImage} point={pointCard} key={pointCard._id} /> : ''
+
+                                }
+                            </Box>
+                        </Container>
+
+                    </>
+                    :
+                    fullImage ?
+                        <>
+                            {trip && (trip.imageFile?.length) && (trip.imageFile.length > 0) ?
 
                                 <Box sx={{ position: 'relative', display: 'flex' }}>
                                     <ArrowBackIosIcon onClick={handleBackImage} sx={{
@@ -905,8 +938,40 @@ const TripDetails: FC = () => {
                                     }} onClick={onClickClose} />
                                 </Box>
 
-                            : ''}
-                    </>
+                                : ''}
+                        </>
+                        :
+                        fullPointImage ?
+                            <>
+                                {pointCard && (pointCard.imageFile?.length) && (pointCard.imageFile.length > 0) ?
+
+                                    <Box sx={{ position: 'relative', display: 'flex' }}>
+                                        <ArrowBackIosIcon onClick={handleBackImage} sx={{
+                                            cursor: 'pointer', fontSize: 35, position: 'absolute', left: 7, top: '50%',
+                                            zIndex: 1, display: (activeStepImage === 0) ? 'none' : 'block',
+                                            color: '#ffffffed'
+                                        }} />
+                                        <ArrowForwardIosIcon onClick={handleNextImage} sx={{
+                                            cursor: 'pointer', fontSize: 35, position: 'absolute', right: 0, top: '50%',
+                                            zIndex: 1, display: (activeStepImage === maxSteps - 1) ? 'none' : 'block',
+                                            color: '#ffffffed'
+
+                                        }} />
+                                        <img ref={imagePointRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${pointCard.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
+                                        <CloseIcon sx={{
+                                            cursor: 'pointer', position: 'absolute', fontSize: 35,
+                                            top: 5, left: '47%', color: '#ffffffed'
+
+                                        }} onClick={onClickClose} />
+
+                                    </Box>
+
+                                    : ''}
+
+                            </>
+
+                            : ''
+
                 }
             </Grid>
         </>
