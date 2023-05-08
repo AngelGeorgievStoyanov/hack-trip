@@ -66,7 +66,8 @@ const Home: FC = () => {
                 }
                 :
                 {
-                    padding: '30px', margin: '-25px 0px 0px 0px',
+                    padding: '30px',
+                     margin: '-25px 0px 0px 0px',
                     backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                     justifyContent: 'center',

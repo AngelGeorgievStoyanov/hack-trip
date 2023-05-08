@@ -8,7 +8,7 @@ export class Point implements Identifiable<IdType> {
         public _ownerTripId: string,
         public lat: string,
         public lng: string,
-        public pointNumber: IdType,
+        public pointNumber: number,
         public imageFile? : string[],
         public _ownerId?: string,
 
@@ -24,7 +24,7 @@ export class PointCreate implements Omit<Point, '_id'> {
         public _ownerTripId: string,
         public lat: string,
         public lng: string,
-        public pointNumber: IdType,
+        public pointNumber: number,
         public imageFile? : string[],
         public _ownerId?: string,
 

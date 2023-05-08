@@ -3,7 +3,7 @@ import { Box, Button, Card, CardContent, MobileStepper, Typography, useMediaQuer
 import { Trip } from '../../../../model/trip';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from '../../../../App';
-import { FC, ReactElement, useContext, useState, TouchEvent, BaseSyntheticEvent } from 'react';
+import { FC, ReactElement, useContext, useState, TouchEvent } from 'react';
 import { IdType } from '../../../../shared/common-types';
 import { User } from '../../../../model/users';
 import * as userService from '../../../../services/userService';

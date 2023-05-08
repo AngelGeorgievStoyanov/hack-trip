@@ -135,7 +135,7 @@ const PointEdit: FC<PointCardProps> = ({ point, length }): ReactElement => {
 
     return (
         <>
-            {point.pointNumber > 1 ?
+            {Number(point.pointNumber) > 1 ?
                 <ArrowCircleUpIcon sx={{ ':hover': { cursor: 'pointer' } }} onClick={(e) => editPositionUp(e, +point.pointNumber, point._id)} /> : <ArrowCircleUpIcon sx={{ display: 'none' }} onClick={(e) => editPositionUp(e, +point.pointNumber, point._id)} />
             }
             <Card
@@ -179,7 +179,7 @@ const PointEdit: FC<PointCardProps> = ({ point, length }): ReactElement => {
                     <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE POINT</Button>
                 </span>
             </Card>
-            {point.pointNumber < length ?
+            {Number(point.pointNumber) < length ?
                 <ArrowCircleDownIcon sx={{ ':hover': { cursor: 'pointer' } }} onClick={(e) => editPositionDwn(e, +point.pointNumber, point._id)} /> :
                 <ArrowCircleDownIcon sx={{ display: 'none' }} onClick={(e) => editPositionDwn(e, +point.pointNumber, point._id)} />
             }
