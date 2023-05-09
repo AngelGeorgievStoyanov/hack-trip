@@ -838,6 +838,7 @@ const TripDetails: FC = () => {
                                                     alt={item}
                                                     loading="lazy"
                                                     onClick={onClickImage}
+                                                    style={{  cursor: 'pointer'  }}
                                                 />
                                             </ImageListItem>
                                         )) : ''}
@@ -920,7 +921,7 @@ const TripDetails: FC = () => {
                                     sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                                     open={open}
                                 >
-                                    <Box sx={{ position: 'relative', display: 'flex'}}>
+                                    <Box sx={{ position: 'relative', display: 'flex' }}>
                                         <ArrowBackIosIcon onClick={handleBackImage} sx={{
                                             cursor: 'pointer', fontSize: 35, position: 'absolute', left: 7, top: '50%',
                                             zIndex: 1, display: (activeStepImage === 0) ? 'none' : 'block',

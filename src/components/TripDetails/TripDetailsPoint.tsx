@@ -68,10 +68,10 @@ const TripDetailsPointCard: FC<PointCardProps> = ({ point, onClickPointImage }):
                                     <img
                                         src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
                                         srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-
                                         alt={item}
                                         loading="lazy"
                                         onClick={onClickPointImage}
+                                        style={{ cursor: 'pointer' }}
                                     />
                                 </ImageListItem>
                             )) : ''}
