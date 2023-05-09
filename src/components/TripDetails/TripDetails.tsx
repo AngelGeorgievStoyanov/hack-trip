@@ -14,7 +14,7 @@ import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Box, Button, Card, CardActions, CardContent, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography } from "@mui/material";
+import { Backdrop, Box, Button, Card, CardActions, CardContent, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { styled, useTheme } from '@mui/material/styles';
@@ -93,6 +93,7 @@ const TripDetails: FC = () => {
     const [touchStart, setTouchStart] = useState<number>(0)
     const [touchEnd, setTouchEnd] = useState<number>(0)
     const [maxSteps, setMaxSteps] = useState<number>(0)
+    const [open, setOpen] = useState(false);
 
 
     const minSwipeDistance = 45;
@@ -138,7 +139,6 @@ const TripDetails: FC = () => {
 
                         if (data) {
 
-                            console.log(data)
                             if (typeof data === "object") {
                                 const arrPoints = data as any as Point[];
 
@@ -597,11 +597,8 @@ const TripDetails: FC = () => {
         setActiveStepImage(indexImage ? indexImage : 0);
         setFullImage(true);
         setMaxSteps(trip && (trip.imageFile) ? trip?.imageFile.length : 0)
+        handleOpen()
     }
-
-
-
-
 
 
     const handleNextImage = () => {
@@ -642,15 +639,14 @@ const TripDetails: FC = () => {
             }
         }
 
-        console.log(activeStepImage)
 
-        console.log(maxSteps)
     }
 
 
     const onClickClose = (e: BaseSyntheticEvent) => {
         setFullImage(false);
         setPointFullImage(false);
+        setOpen(false);
     }
 
     const onClickPointImage = (e: BaseSyntheticEvent) => {
@@ -661,10 +657,13 @@ const TripDetails: FC = () => {
         setPointFullImage(true)
         setFullImage(false)
         setMaxSteps(pointCard && (pointCard.imageFile) ? pointCard?.imageFile.length : 0)
-
+        handleOpen()
     }
 
 
+    const handleOpen = () => {
+        setOpen(true);
+    };
 
     return (
         <>
@@ -917,35 +916,11 @@ const TripDetails: FC = () => {
                     fullImage ?
                         <>
                             {trip && (trip.imageFile?.length) && (trip.imageFile.length > 0) ?
-
-                                <Box sx={{ position: 'relative', display: 'flex' }}>
-                                    <ArrowBackIosIcon onClick={handleBackImage} sx={{
-                                        cursor: 'pointer', fontSize: 35, position: 'absolute', left: 7, top: '50%',
-                                        zIndex: 1, display: (activeStepImage === 0) ? 'none' : 'block',
-                                        color: '#ffffffed'
-                                    }} />
-                                    <ArrowForwardIosIcon onClick={handleNextImage} sx={{
-                                        cursor: 'pointer', fontSize: 35, position: 'absolute', right: 0, top: '50%',
-                                        zIndex: 1, display: (activeStepImage === maxSteps - 1) ? 'none' : 'block',
-                                        color: '#ffffffed'
-
-                                    }} />
-                                    <img ref={imageRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
-                                    <CloseIcon sx={{
-                                        cursor: 'pointer', position: 'absolute', fontSize: 35,
-                                        top: 5, left: '47%', color: '#ffffffed'
-
-                                    }} onClick={onClickClose} />
-                                </Box>
-
-                                : ''}
-                        </>
-                        :
-                        fullPointImage ?
-                            <>
-                                {pointCard && (pointCard.imageFile?.length) && (pointCard.imageFile.length > 0) ?
-
-                                    <Box sx={{ position: 'relative', display: 'flex' }}>
+                                <Backdrop
+                                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                                    open={open}
+                                >
+                                    <Box sx={{ position: 'relative', display: 'flex'}}>
                                         <ArrowBackIosIcon onClick={handleBackImage} sx={{
                                             cursor: 'pointer', fontSize: 35, position: 'absolute', left: 7, top: '50%',
                                             zIndex: 1, display: (activeStepImage === 0) ? 'none' : 'block',
@@ -957,14 +932,45 @@ const TripDetails: FC = () => {
                                             color: '#ffffffed'
 
                                         }} />
-                                        <img ref={imagePointRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${pointCard.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
+                                        <img ref={imageRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
                                         <CloseIcon sx={{
                                             cursor: 'pointer', position: 'absolute', fontSize: 35,
-                                            top: 5, left: '47%', color: '#ffffffed'
+                                            top: 5, left: '45%', color: '#ffffffed'
 
                                         }} onClick={onClickClose} />
-
                                     </Box>
+                                </Backdrop>
+                                : ''}
+                        </>
+                        :
+                        fullPointImage ?
+                            <>
+                                {pointCard && (pointCard.imageFile?.length) && (pointCard.imageFile.length > 0) ?
+                                    <Backdrop
+                                        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                                        open={open}
+                                    >
+                                        <Box sx={{ position: 'relative', display: 'flex' }}>
+                                            <ArrowBackIosIcon onClick={handleBackImage} sx={{
+                                                cursor: 'pointer', fontSize: 35, position: 'absolute', left: 7, top: '50%',
+                                                zIndex: 1, display: (activeStepImage === 0) ? 'none' : 'block',
+                                                color: '#ffffffed'
+                                            }} />
+                                            <ArrowForwardIosIcon onClick={handleNextImage} sx={{
+                                                cursor: 'pointer', fontSize: 35, position: 'absolute', right: 0, top: '50%',
+                                                zIndex: 1, display: (activeStepImage === maxSteps - 1) ? 'none' : 'block',
+                                                color: '#ffffffed'
+
+                                            }} />
+                                            <img ref={imagePointRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${pointCard.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
+                                            <CloseIcon sx={{
+                                                cursor: 'pointer', position: 'absolute', fontSize: 35,
+                                                top: 5, left: '47%', color: '#ffffffed'
+
+                                            }} onClick={onClickClose} />
+
+                                        </Box>
+                                    </Backdrop>
 
                                     : ''}
 
