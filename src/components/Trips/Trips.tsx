@@ -13,6 +13,7 @@ import InputBase from '@mui/material/InputBase';
 import { LoginContext } from "../../App";
 import jwt_decode from "jwt-decode";
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { Helmet } from "react-helmet-async";
 
 
 
@@ -155,6 +156,12 @@ const Trips: FC = () => {
 
     return (
         <>
+
+            <Helmet>
+                <title>All hack trips</title>
+                <meta name='description' content='All Trips page, all hack trip. This is an APP where you can share your trips or get valuable tips for your future trips.  .' />
+                <link rel="canonical" href="/trips" />
+            </Helmet>
 
             <AppBar position="sticky" sx={{ marginTop: '-25px' }}>
                 <Toolbar sx={{

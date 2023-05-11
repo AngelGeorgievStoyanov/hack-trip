@@ -8,6 +8,7 @@ import { IdType } from '../../shared/common-types';
 import * as tripService from '../../services/tripService';
 import { ApiTrip } from '../../services/tripService';
 import Typography from '@mui/material/Typography';
+import { Helmet } from 'react-helmet-async';
 
 type decode = {
     _id: string,
@@ -56,6 +57,12 @@ const Home: FC = () => {
     return (
         <>
 
+            <Helmet>
+                <title>Home page hack trip</title>
+                <meta name='description' content='Home page with TOP 5 TRIPS ( hack trip ) most liked trips.' />
+                <link rel="canonical" href="/" />
+            </Helmet>
+
             <Grid container sx={!isIphone ?
                 {
                     padding: '30px', margin: '-25px 0px 0px 0px',
@@ -67,7 +74,7 @@ const Home: FC = () => {
                 :
                 {
                     padding: '30px',
-                     margin: '-25px 0px 0px 0px',
+                    margin: '-25px 0px 0px 0px',
                     backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                     justifyContent: 'center',

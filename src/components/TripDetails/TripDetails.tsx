@@ -243,9 +243,7 @@ const TripDetails: FC = () => {
 
     const mapRef = React.useRef<google.maps.Map | null>(null);
 
-    const imageRef = React.useRef<HTMLImageElement | null>(null);
 
-    const imagePointRef = React.useRef<HTMLImageElement | null>(null);
 
 
     const pathPoints = (points?.length) && (points !== undefined) ? points?.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber)).map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : [];
@@ -483,6 +481,7 @@ const TripDetails: FC = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
         let position = activeStep + 1;
         onMarkerClick('', position);
+
     }
 
     const handleBack = () => {
@@ -490,6 +489,7 @@ const TripDetails: FC = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
         let position = activeStep - 1;
         onMarkerClick('', position);
+
     };
 
 
@@ -838,7 +838,7 @@ const TripDetails: FC = () => {
                                                     alt={item}
                                                     loading="lazy"
                                                     onClick={onClickImage}
-                                                    style={{  cursor: 'pointer'  }}
+                                                    style={{ cursor: 'pointer' }}
                                                 />
                                             </ImageListItem>
                                         )) : ''}
@@ -933,7 +933,7 @@ const TripDetails: FC = () => {
                                             color: '#ffffffed'
 
                                         }} />
-                                        <img ref={imageRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
+                                        <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
                                         <CloseIcon sx={{
                                             cursor: 'pointer', position: 'absolute', fontSize: 35,
                                             top: 5, left: '45%', color: '#ffffffed'
@@ -963,7 +963,7 @@ const TripDetails: FC = () => {
                                                 color: '#ffffffed'
 
                                             }} />
-                                            <img ref={imagePointRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${pointCard.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
+                                            <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${pointCard.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
                                             <CloseIcon sx={{
                                                 cursor: 'pointer', position: 'absolute', fontSize: 35,
                                                 top: 5, left: '47%', color: '#ffffffed'
