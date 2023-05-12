@@ -15,6 +15,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import * as tripService from '../../services/tripService';
 import { Trip } from '../../model/trip';
 import { ApiTrip } from '../../services/tripService';
+import { Helmet } from 'react-helmet-async';
 
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
@@ -185,10 +186,16 @@ const Register: FC = () => {
 
     return (
         <>
+            <Helmet>
+                <title>Register page hack trip</title>
+                <meta name='description' content='Welcome in hack trip' />
+                <link rel="canonical" href="/register" />
+            </Helmet>
             <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                 <Container sx={{ minHeight: '100vh', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
 
+                    <h1 style={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome in hack trip.</h1>
 
 
                     {errorApi ?
@@ -268,7 +275,7 @@ const Register: FC = () => {
                         <ReCAPTCHA
                             sitekey={reCaptchaV2 ? reCaptchaV2 : ''}
                             onChange={onChangeReCAPTCHA}
-                          
+
                         />
                     </Box>
                 </Container>

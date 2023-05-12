@@ -159,7 +159,7 @@ const Trips: FC = () => {
 
             <Helmet>
                 <title>All hack trips</title>
-                <meta name='description' content='All Trips page, all hack trip. This is an APP where you can share your trips or get valuable tips for your future trips.  .' />
+                <meta name='description' content='All Trips page, all hack trips. This is an APP where you can share your trips or get valuable tips for your future trips.  .' />
                 <link rel="canonical" href="/trips" />
             </Helmet>
 

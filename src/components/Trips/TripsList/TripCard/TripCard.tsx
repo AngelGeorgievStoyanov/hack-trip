@@ -105,7 +105,7 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
     }
 
 
- 
+
 
     return (
         <>
@@ -122,16 +122,16 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: isMobile ? 'auto' : '-webkit-fill-available', justifyContent: 'space-evenly' }}>
 
-                        <Typography gutterBottom variant="h5" component="div" sx={{ padding: '0px 15px' }}>
+                        <Typography gutterBottom variant="h5" sx={{ padding: '0px 15px' }}>
                             Title: {trip.title}
                         </Typography>
-                        <Typography gutterBottom variant="h6" component="div" sx={{ padding: '0px 15px' }}>
+                        <Typography gutterBottom variant="h6" sx={{ padding: '0px 15px' }}>
                             Destination: {trip.destination}
                         </Typography>
                     </Box>
                     {trip.imageFile?.length && trip.imageFile.length > 0 ?
                         <>
-                            <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStep]}`} alt='Trip' width='300px' height='200px' />
+                            <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStep]}`} alt='hack trip' title='hack trip' loading="lazy" width='300px' height='200px' />
 
                             <MobileStepper
                                 variant="dots"

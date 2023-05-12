@@ -25,9 +25,9 @@ const AboutUs: FC = () => {
                         component="img"
                         sx={{ height: '240px', width: 'auto', margin: '20px', padding: '20px', '@media(max-width: 920px)': { height: 'auto', width: '380px', padding: '20px' } }}
                         src={'https://storage.googleapis.com/hack-trip/hack-trip-markers.png'}
-                        title="hack-trip-points"
-                        alt="hack-trip-points"
-
+                        title="hack trip"
+                        alt="hack trip"
+                        loading="lazy"
                     />
                     <h4> It's integrated for you Google Maps and you can add points Markers.</h4>
 
@@ -35,9 +35,9 @@ const AboutUs: FC = () => {
                         component="img"
                         sx={{ height: '440px', width: 'auto', margin: '20px', padding: '20px', '@media(max-width: 920px)': { height: 'auto', width: '380px', padding: '20px' } }}
                         src={'https://storage.googleapis.com/hack-trip/hack-trip-points1.png'}
-                        title="hack-trip-points"
-                        alt="hack-trip-points"
-
+                        title="hack trip"
+                        alt="hack trip"
+                        loading="lazy"
                     />
                     <h4> As you can mark everything you want, a city, hotel, restaurant, shop,
                         hidden beach or why not if you are in the mountains add points there too and it becomes like an eco trail,
@@ -49,9 +49,9 @@ const AboutUs: FC = () => {
                         component="img"
                         sx={{ height: '440px', width: 'auto', margin: '20px', padding: '20px', '@media(max-width: 920px)': { height: 'auto', width: '380px', padding: '20px' } }}
                         src={'https://storage.googleapis.com/hack-trip/hack-trip-points2.png'}
-                        title="hack-trip-points"
-                        alt="hack-trip-points"
-
+                        title="hack trip"
+                        alt="hack trip"
+                        loading="lazy"
                     />
                     <h4>
                         You can also, if you have a trip coming up, plan your trip,
@@ -62,9 +62,9 @@ const AboutUs: FC = () => {
                         component="img"
                         sx={{ height: '240px', width: 'auto', margin: '20px', padding: '20px', '@media(max-width: 920px)': { height: 'auto', width: '380px', padding: '20px' } }}
                         src={'https://storage.googleapis.com/hack-trip/hack-trip-points3.png'}
-                        title="hack-trip-points"
-                        alt="hack-trip-points"
-
+                        title="hack trip"
+                        alt="hack trip"
+                        loading="lazy"
                     />
                     <h5>You can contact us at email:  www.hack.trip@gmail.com</h5>
 

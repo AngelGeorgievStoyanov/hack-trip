@@ -1,3 +1,5 @@
 https://www.hack-trip.com/
 https://www.hack-trip.com/trips
 https://www.hack-trip.com/about
+https://www.hack-trip.com/login
+https://www.hack-trip.com/register

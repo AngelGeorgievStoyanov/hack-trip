@@ -59,7 +59,7 @@ const Home: FC = () => {
 
             <Helmet>
                 <title>Home page hack trip</title>
-                <meta name='description' content='Home page with TOP 5 TRIPS ( hack trip ) most liked trips.' />
+                <meta name='description' content='Home page with top 5 hack trips ( hack trip ) most liked trips.' />
                 <link rel="canonical" href="/" />
             </Helmet>
 
