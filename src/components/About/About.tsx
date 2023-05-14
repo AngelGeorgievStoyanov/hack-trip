@@ -10,22 +10,22 @@ const AboutUs: FC = () => {
 
         <>
             <Helmet>
-                <title>About us page hack trip</title>
-                <meta name='description' content='The idea of ​​HACK-TRIP is to help all travelers, if you want to visit a certain destination, city or area, enter to search for information and see other travelers...' />
+                <title>About us Hack Trip</title>
+                <meta name='description' content='The idea of ​Hack Trip is to help all travelers, if you want to visit a certain destination, city or area, enter to search for information and see other travelers...' />
                 <meta property="og:title" content="Hack Trip" />
                 <meta property="og:url" content="https://www.hack-trip.com" />
                 <meta property="og:image" content={'https://storage.googleapis.com/hack-trip/hack-trip-points3.png'} />
                 <meta property="og:type" content="website" />
                 <meta property="og:description"
-                    content="The idea of ​​HACK-TRIP is to help all travelers, if you want to visit a certain destination, city or area, enter to search for information and see other travelers..." />
+                    content="The idea of ​Hack Trip is to help all travelers, if you want to visit a certain destination, city or area, enter to search for information and see other travelers..." />
                 <link rel="canonical" href="/about" />
             </Helmet>
             <Grid container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: '#cfe8fc', padding: '0', margin: '-25px 0px 0px 0px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: '#cfe8fc', maxWidth: '80%' }}>
-                    <h1 style={{ margin: '2px', fontFamily: 'cursive' }}>Welcome travelers or future travelers!</h1>
-                    <h2 style={{ margin: '2px', fontFamily: 'cursive' }}>This is an app where you can share your trips or get valuable tips for your future trips.</h2>
+                    <h1 style={{ margin: '2px', fontFamily: 'cursive' }}>Welcome travelers or future travelers in Hack Trip!</h1>
+                    <h2 style={{ margin: '2px', fontFamily: 'cursive' }}>Hack Trip is an app where you can share your trips or get valuable tips for your future trips.</h2>
                     <h3 style={{ margin: '2px', fontFamily: 'cursive' }}>
-                        The idea of ​​HACK-TRIP is to help all travelers, if you want to visit a certain destination, city or area, enter to search for information and see other travelers if they have been there and if they have described
+                        The idea of ​​Hack Trip is to help all travelers, if you want to visit a certain destination, city or area, enter to search for information and see other travelers if they have been there and if they have described
                         what they recommend and then if wish you could add your journey and be of help.</h3>
                     <CardMedia
                         component="img"
@@ -72,6 +72,7 @@ const AboutUs: FC = () => {
                         alt="hack trip"
                         loading="lazy"
                     />
+                    <h5 style={{ margin: '2px', fontFamily: 'cursive' }}>Enjoy the Hack Trip !</h5>
                     <h5>You can contact us at email:  www.hack.trip@gmail.com</h5>
 
                 </Box>

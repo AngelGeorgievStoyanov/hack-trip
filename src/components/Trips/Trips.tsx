@@ -158,8 +158,19 @@ const Trips: FC = () => {
         <>
 
             <Helmet>
-                <title>All hack trips</title>
-                <meta name='description' content='All Trips page, all hack trips. This is an APP where you can share your trips or get valuable tips for your future trips.  .' />
+                <title>Hack Trip</title>
+                <meta name='description' content='All Hack Trips page, hack trip . Hack Trip is an app where you can share your trips or get valuable tips for your future trips...' />
+                <meta property="og:title" content="Hack Trip" />
+                <meta property="og:url" content="https://www.hack-trip.com" />
+                <meta property="og:image:url" content="https://www.hack-trip.com" />
+                <meta property="og:image" content={`https://storage.googleapis.com/hack-trip-background-images/${imageBackground}`} />
+                <meta property="og:type" content="website" />
+                <meta property="og:description"
+                    content="Hack Trip is an app where you can share your trips or get valuable tips for your future trips. These are our TOP 5 most liked in Hack Trips!" />
+                <meta property="quote" content={'Hack Trip'} />
+                <meta property="og:locale" content="en_US" />
+                <meta property="og:hashtag" content={'#HackTrip'} />
+                <meta property="og:site_name" content="Hack-Trip" />
                 <link rel="canonical" href="/trips" />
             </Helmet>
 

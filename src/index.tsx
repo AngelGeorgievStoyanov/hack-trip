@@ -3,16 +3,21 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { HelmetProvider } from 'react-helmet-async';
 
 
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+const helmetContext = {};
+
 root.render(
-  <React.StrictMode>
+  <HelmetProvider context={helmetContext}>
+    <React.StrictMode>
       <App />
-  </React.StrictMode>
+    </React.StrictMode>
+  </HelmetProvider>
 );
 
 

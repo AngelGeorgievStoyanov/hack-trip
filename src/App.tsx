@@ -47,7 +47,6 @@ import ForgotPassword from './components/ForgotPassword/ForgotPassword';
 import ReSendVerifyEmail from './components/ReSendVerifyEmail/ReSendVerifyEmail';
 import Login from './components/Login/Login';
 import Register from './components/Register/Register';
-import { HelmetProvider } from 'react-helmet-async';
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
@@ -412,16 +411,13 @@ const router = createBrowserRouter([
 const App: FC = () => {
 
   const [userL, setUserL] = useState<null | User>(null)
-  const helmetContext = {};
   return (
     <>
-      <HelmetProvider context={helmetContext}>
         <ErrorBoundary>
           <LoginContext.Provider value={{ userL, setUserL }}>
             <RouterProvider router={router} />
           </LoginContext.Provider>
         </ErrorBoundary>
-      </HelmetProvider>
     </>
   );
 

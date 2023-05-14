@@ -37,6 +37,7 @@ const Home: FC = () => {
     }
 
 
+
     useEffect(() => {
 
         API_TRIP.backgroundImages().then((data) => {
@@ -55,21 +56,22 @@ const Home: FC = () => {
 
 
 
+
     }, [])
 
 
     return (
         <>
             <Helmet>
-                <title>Home page hack trip</title>
-                <meta name='description' content='Home page with top 5 hack trips ( hack trip ) most liked trips.' />
+                <title>Hack Trip</title>
+                <meta name='description' content='Hack Trip is an app where you can share your trips or get valuable tips for your future trips. These are our TOP 5 most liked in Hack Trips!' />
                 <meta property="og:title" content="Hack Trip" />
                 <meta property="og:url" content="https://www.hack-trip.com" />
                 <meta property="og:image:url" content="https://www.hack-trip.com" />
                 <meta property="og:image" content={`https://storage.googleapis.com/hack-trip-background-images/${imageBackground}`} />
                 <meta property="og:type" content="website" />
                 <meta property="og:description"
-                    content="This is an APP where you can share your trips or get valuable tips for your future trips. These are our TOP 5 most liked TRIPS!" />
+                    content="Hack Trip is an app where you can share your trips or get valuable tips for your future trips. These are our TOP 5 most liked in Hack Trips!" />
                 <meta property="quote" content={'Hack Trip'} />
                 <meta property="og:locale" content="en_US" />
                 <meta property="og:hashtag" content={'#HackTrip'} />
@@ -98,11 +100,11 @@ const Home: FC = () => {
             } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: ' 0 25px', }}>
-                        <Typography sx={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant='h5'>Welcome TRAVELERS or future TRAVELERS!</Typography>
-                        <Typography sx={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant='subtitle1'>This is an APP where you can share your trips or get valuable tips for your future trips.</Typography>
+                        <h1 style={{ margin: '2px', fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome travelers or future travelers in Hack Trip!</h1>
+                        <h2 style={{ margin: '2px', fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Hack Trip is an app where you can share your trips or get valuable tips for your future trips.</h2>
 
                         {(trips !== undefined && trips.length > 0) ?
-                            <Typography sx={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant='body1'>These are our TOP 5 most liked TRIPS!</Typography>
+                            <h3 style={{ margin: '2px', fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>These are our TOP 5 most liked in Hack Trips!</h3>
 
                             : ''}
                     </Box>
@@ -116,6 +118,7 @@ const Home: FC = () => {
                     <Box sx={{ display: 'flex' }}>
                         <h3 style={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Facebook</h3>
                         <FacebookShareButton
+
                             url={'https://www.hack-trip.com'}
                             quote={'Hack Trip'}
                             hashtag='#HackTrip'
