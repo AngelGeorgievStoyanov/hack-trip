@@ -7,7 +7,6 @@ import { FC, useContext, useEffect, useState } from 'react';
 import { IdType } from '../../shared/common-types';
 import * as tripService from '../../services/tripService';
 import { ApiTrip } from '../../services/tripService';
-import Typography from '@mui/material/Typography';
 import { Helmet } from 'react-helmet-async';
 import { FacebookShareButton, FacebookIcon } from 'react-share';
 
