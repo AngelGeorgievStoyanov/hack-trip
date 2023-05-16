@@ -9,8 +9,8 @@ import { BaseSyntheticEvent, FC, ReactElement, useState } from "react";
 
 interface PointCardProps {
     point: Point;
-    onClickPointImage: (e: BaseSyntheticEvent) => void
-
+    onClickPointImage: (e: BaseSyntheticEvent) => void;
+    refPoint: any
 }
 
 interface ExpandMoreProps extends IconButtonProps {
@@ -30,7 +30,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 
 
 
-const TripDetailsPointCard: FC<PointCardProps> = ({ point, onClickPointImage }): ReactElement => {
+const TripDetailsPointCard: FC<PointCardProps> = ({ point, onClickPointImage, refPoint }): ReactElement => {
 
 
 
@@ -44,7 +44,7 @@ const TripDetailsPointCard: FC<PointCardProps> = ({ point, onClickPointImage }):
 
     return (
         <>
-            <Card sx={{
+            <Card ref={refPoint} sx={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',

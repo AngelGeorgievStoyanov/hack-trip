@@ -14,7 +14,7 @@ import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Backdrop, Box, Button, Card, CardActions, CardContent, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography } from "@mui/material";
+import { Backdrop, Box, Button, Card, CardActions, CardContent, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography, useMediaQuery } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { styled, useTheme } from '@mui/material/styles';
@@ -115,12 +115,14 @@ const TripDetails: FC = () => {
 
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
+    const scrollMedia = useMediaQuery('(max-width:900px)');
 
     const handleExpandClick = () => {
         setExpanded(!expanded);
     };
 
 
+    const refPoint = React.useRef<HTMLDivElement | null>()
 
 
     useEffect(() => {
@@ -177,6 +179,8 @@ const TripDetails: FC = () => {
                     });
 
                 }
+
+
             }).catch((err) => {
                 console.log(err)
                 navigate('/not-found')
@@ -192,7 +196,17 @@ const TripDetails: FC = () => {
 
         }
 
+
+
     }, [favorite]);
+
+
+    useEffect(() => {
+     
+        if (refPoint.current && scrollMedia) {
+            refPoint.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }
+    }, [pointCard])
 
 
     if (trip !== undefined) {
@@ -242,8 +256,6 @@ const TripDetails: FC = () => {
 
 
     const mapRef = React.useRef<google.maps.Map | null>(null);
-
-
 
 
     const pathPoints = (points?.length) && (points !== undefined) ? points?.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber)).map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : [];
@@ -906,7 +918,7 @@ const TripDetails: FC = () => {
 
                             <Box component='section' id="point-section-add">
                                 {
-                                    pointCard ? <TripDetailsPointCard onClickPointImage={onClickPointImage} point={pointCard} key={pointCard._id} /> : ''
+                                    pointCard ? <TripDetailsPointCard onClickPointImage={onClickPointImage} point={pointCard} key={pointCard._id} refPoint={refPoint} /> : ''
 
                                 }
                             </Box>

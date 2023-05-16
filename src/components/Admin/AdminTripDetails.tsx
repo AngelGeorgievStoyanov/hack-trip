@@ -14,7 +14,7 @@ import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Box, Button, Card, CardActions, CardContent, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Tooltip, Typography, useMediaQuery } from "@mui/material";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { styled, useTheme } from '@mui/material/styles';
 import { LoginContext } from "../../App";
@@ -112,6 +112,10 @@ const AdminTripDetails: FC = () => {
         setExpanded(!expanded);
     };
 
+    const scrollMedia = useMediaQuery('(max-width:900px)');
+
+    const refPoint = React.useRef<HTMLDivElement | null>()
+
 
     useEffect(() => {
         if (idTrip !== undefined) {
@@ -173,6 +177,12 @@ const AdminTripDetails: FC = () => {
 
     }, []);
 
+    useEffect(() => {
+        if (refPoint.current && scrollMedia) {
+            refPoint.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }
+    }, [pointCard])
+
     if (trip !== undefined) {
 
         if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (points === undefined)) {
@@ -215,11 +225,6 @@ const AdminTripDetails: FC = () => {
 
 
     const mapRef = React.useRef<google.maps.Map | null>(null);
-
-
-    const imageRef = React.useRef<HTMLImageElement | null>(null);
-
-    const imagePointRef = React.useRef<HTMLImageElement | null>(null);
 
 
     const pathPoints = (points?.length) && (points !== undefined) ? points?.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber)).map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : []
@@ -753,7 +758,7 @@ const AdminTripDetails: FC = () => {
                             <Box component='section' id="point-section-add">
 
                                 {
-                                    pointCard ? <TripDetailsPointCard onClickPointImage={onClickPointImage} point={pointCard} key={pointCard._id} /> : ''
+                                    pointCard ? <TripDetailsPointCard onClickPointImage={onClickPointImage} point={pointCard} key={pointCard._id} refPoint={refPoint} /> : ''
 
                                 }
                             </Box>
@@ -777,7 +782,7 @@ const AdminTripDetails: FC = () => {
                                         color: '#ffffffed'
 
                                     }} />
-                                    <img ref={imageRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
+                                    <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
                                     <CloseIcon sx={{
                                         cursor: 'pointer', position: 'absolute', fontSize: 35,
                                         top: 5, left: '47%', color: '#ffffffed'
@@ -804,7 +809,7 @@ const AdminTripDetails: FC = () => {
                                             color: '#ffffffed'
 
                                         }} />
-                                        <img ref={imagePointRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${pointCard.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
+                                        <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${pointCard.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
                                         <CloseIcon sx={{
                                             cursor: 'pointer', position: 'absolute', fontSize: 35,
                                             top: 5, left: '47%', color: '#ffffffed'
