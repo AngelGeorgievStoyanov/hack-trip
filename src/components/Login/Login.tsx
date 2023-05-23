@@ -115,6 +115,18 @@ const Login: FC = () => {
                 <title>Login page hack trip</title>
                 <meta name='description' content='Welcome in hack trip' />
                 <link rel="canonical" href="/login" />
+                <meta property="og:title" content="Hack Trip" />
+                <meta property="og:url" content="https://www.hack-trip.com" />
+                <meta property="og:image:url" content="https://www.hack-trip.com" />
+                <meta property="og:image" content={`https://storage.googleapis.com/hack-trip-background-images/${imageBackground}`} />
+                <meta property="og:type" content="website" />
+                <meta property="og:description"
+                    content="Hack Trip is an app where you can share your trips or get valuable tips for your future trips. These are our TOP 5 most liked in Hack Trips!" />
+                <meta property="quote" content={'Hack Trip'} />
+                <meta property="og:locale" content="en_US" />
+                <meta property="og:hashtag" content={'#HackTrip'} />
+                <meta property="og:site_name" content="Hack-Trip" />
+           
             </Helmet>
             <Grid container sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ minHeight: '100vh', padding: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', '@media(max-width: 600px)': { display: 'flex' } }}>

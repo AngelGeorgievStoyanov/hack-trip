@@ -8,3 +8,10 @@ https://www.hack-trip.com/login
 https://hack-trip.com/login
 https://www.hack-trip.com/register
 https://hack-trip.com/register
+https://www.hack-trip.com/resend-email
+https://hack-trip.com/resend-email
+https://www.hack-trip.com/term-privacy-policy
+https://hack-trip.com/term-privacy-policy
+https://www.hack-trip.com/forgot-password
+https://hack-trip.com/forgot-password
+
