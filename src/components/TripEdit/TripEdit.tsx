@@ -493,14 +493,14 @@ const TripEdit: FC = () => {
         <>
             <Grid container sx={!isIphone ?
                 {
-                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed',
                     justifyContent: 'center', bgcolor: '#cfe8fc', padding: '15px 0', minHeight: '100vh', margin: '0px', width: '100vw',
                     '@media(max-width: 1000px)': { width: '100vw', padding: '15px 0px', margin: '-25px 0px 0px 0px' }
                 }
                 :
                 {
-                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                     justifyContent: 'center',
                     bgcolor: '#cfe8fc', height: '100vh', overflow: 'scroll',

@@ -473,18 +473,19 @@ const TripPoints: FC = () => {
         <>
             <Grid container sx={!isIphone ?
                 {
-                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed',
-                    justifyContent: 'center',padding:'0px 0px 0px 13px', bgcolor: '#cfe8fc', minHeight: '100vh', '@media(max-width: 600px)': {
+                    backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
+                    backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed',
+                    justifyContent: 'center', padding: '0px 0px 0px 13px', bgcolor: '#cfe8fc', minHeight: '100vh', '@media(max-width: 600px)': {
                         display: 'flex', flexDirection: 'column'
                     }
                 }
                 :
                 {
-                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                     justifyContent: 'center',
-                    bgcolor: '#cfe8fc', height: '100vh', overflow: 'scroll', margin: '-25px 0px 0px 0px', padding:'0px 0px 0px 13px'
-                   
+                    bgcolor: '#cfe8fc', height: '100vh', overflow: 'scroll', margin: '-25px 0px 0px 0px', padding: '0px 0px 0px 13px'
+
                 }
 
             } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>

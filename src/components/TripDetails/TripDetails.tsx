@@ -202,7 +202,7 @@ const TripDetails: FC = () => {
 
 
     useEffect(() => {
-     
+
         if (refPoint.current && scrollMedia) {
             refPoint.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
         }
@@ -682,14 +682,14 @@ const TripDetails: FC = () => {
             <Grid container sx={!isIphone ?
                 {
                     boxSizing: 'border-box',
-                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                     backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px',
                     minHeight: '100vh', alignItems: 'center',
                     '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100vw', padding: '0', paddingBottom: '15px', margin: '-25px 0px 0px 0px' }
                 } :
                 {
-                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                     justifyContent: 'center',
                     bgcolor: '#cfe8fc', height: '100vh', overflow: 'scroll',

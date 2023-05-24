@@ -81,7 +81,7 @@ const Home: FC = () => {
             <Grid id="print" container sx={!isIphone ?
                 {
                     padding: '30px', margin: '-25px 0px 0px 0px',
-                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center",
                     backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center',
                     bgcolor: '#cfe8fc', minHeight: '100vh'
@@ -90,7 +90,7 @@ const Home: FC = () => {
                 {
                     padding: '30px',
                     margin: '-25px 0px 0px 0px',
-                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                     justifyContent: 'center',
                     bgcolor: '#cfe8fc', height: '100vh', overflow: 'scroll'

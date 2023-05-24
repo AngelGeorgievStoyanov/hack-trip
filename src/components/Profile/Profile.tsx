@@ -323,7 +323,13 @@ const Profile: FC = () => {
     return (
 
         <>
-            <Box sx={{ backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`, backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px', '@media(max-width: 600px)': { display: 'flex', padding: '20px', maxWidth: '100vW' } }}>
+            <Box sx={{
+                backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
+                backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
+                backgroundAttachment: 'fixed', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly',
+                alignItems: 'center', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px',
+                '@media(max-width: 600px)': { display: 'flex', padding: '20px', maxWidth: '100vW' }
+            }}>
                 {user?.imageFile ?
                     <>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

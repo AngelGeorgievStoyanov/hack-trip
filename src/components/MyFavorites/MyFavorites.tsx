@@ -69,7 +69,7 @@ const MyFavorites: FC = () => {
 
             <Grid container sx={!isIphone ?
                 {
-                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                     backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc',
                     padding: '30px', margin: '-25px 0px 0px 0px', minHeight: '100vh',
@@ -78,7 +78,7 @@ const MyFavorites: FC = () => {
                 :
                 {
                     margin: '-25px 0px 0px 0px',
-                    backgroundImage: `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})`,
+                    backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                     justifyContent: 'center',
                     bgcolor: '#cfe8fc', height: '100vh', overflow: 'scroll', width: '100vw'
