@@ -1,12 +1,12 @@
 import { useForm } from 'react-hook-form';
-import { Box, Button, Container, Grid, Typography } from '@mui/material';
+import { Box, Button, Container, Grid, Typography, useMediaQuery } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import FormInputText from '../FormFields/FormInputText';
 import * as userService from '../../services/userService';
 import * as yup from "yup";
-import { BaseSyntheticEvent, FC, useContext, useEffect, useState } from 'react';
+import { BaseSyntheticEvent, FC, useContext, useEffect, useRef, useState } from 'react';
 import { ApiClient } from '../../services/userService';
-import { IdType } from '../../shared/common-types';
+import { IdType, mouseover, touchStart } from '../../shared/common-types';
 import { User } from '../../model/users';
 import { LoginContext } from '../../App';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -42,7 +42,9 @@ const Login: FC = () => {
     const loginContext = useContext(LoginContext);
     const [errorApi, setErrorApi] = useState<string>();
     const [imageBackground, setImageBackground] = useState<string>()
+    const h1HackRef = useRef<HTMLHeadingElement | null>(null)
 
+    const madiaQuery = useMediaQuery('(min-width:480px)');
 
     useEffect(() => {
         API_TRIP.backgroundImages().then((data) => {
@@ -106,7 +108,15 @@ const Login: FC = () => {
 
     }
 
+    const onmouseover = (e: BaseSyntheticEvent) => {
+        mouseover(e, h1HackRef)
+    }
 
+
+
+    const onTouchStart = () => {
+        touchStart(h1HackRef)
+    }
 
     return (
         <>
@@ -128,14 +138,22 @@ const Login: FC = () => {
                 <meta property="og:site_name" content="Hack-Trip" />
 
             </Helmet>
-            <Grid container sx={{
+            <Grid onTouchStart={onTouchStart} container sx={{
                 backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                 backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                 backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh'
             }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                <Container sx={{ minHeight: '100vh', padding: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', '@media(max-width: 600px)': { display: 'flex' } }}>
+                <Container sx={{ minHeight: '100vh', padding: '10px', display: 'flex', flexDirection: 'column', justifyContent: madiaQuery ? 'space-evenly' : 'center', alignItems: 'center', '@media(max-width: 600px)': { display: 'flex' } }}>
 
-                    <h1 style={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome in hack trip.</h1>
+                    {madiaQuery ?
+                        <h1 ref={h1HackRef} onMouseOver={onmouseover} data-value="Welcome in Hack Trip!" style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome in Hack Trip!</h1>
+
+                        :
+                        <>
+                            <h1 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome in</h1>
+                            <h1 ref={h1HackRef} data-value="Hack Trip!" style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Hack Trip!</h1>
+                        </>
+                    }
                     {errorApi ?
                         <Box component='div' sx={{ backgroundColor: 'red', color: 'black', padding: '10px 20px', borderRadius: '9px', margin: '20px' }}>
                             <Typography component='h4'>

@@ -1,10 +1,10 @@
-import { Box, Grid } from '@mui/material';
+import { Box, Grid, useMediaQuery } from '@mui/material';
 import { LoginContext } from '../../App';
 import { Trip } from '../../model/trip';
 import TripList from '../Trips/TripsList/TripsList';
 import jwt_decode from "jwt-decode";
-import { FC, useContext, useEffect, useState } from 'react';
-import { IdType } from '../../shared/common-types';
+import { BaseSyntheticEvent, FC, useContext, useEffect, useRef, useState } from 'react';
+import { IdType, mouseover, touchStart } from '../../shared/common-types';
 import * as tripService from '../../services/tripService';
 import { ApiTrip } from '../../services/tripService';
 import { Helmet } from 'react-helmet-async';
@@ -25,7 +25,11 @@ const Home: FC = () => {
 
     const { userL } = useContext(LoginContext);
 
+
+    const h1HackRef = useRef<HTMLHeadingElement | null>(null)
+
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
+    const madiaQuery = useMediaQuery('(min-width:550px)');
 
     const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
@@ -54,9 +58,55 @@ const Home: FC = () => {
         });
 
 
-
-
     }, [])
+
+
+
+    // const onmouseover = (e: BaseSyntheticEvent) => {
+
+    //     if (h1HackRef && h1HackRef.current !== null) {
+    //         const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    //         let iterations = 0;
+    //         const interval = setInterval(() => {
+    //             e.target.innerText = e.target.innerText.split('').map((letter: string, index: number) => {
+    //                 if (index < iterations) {
+    //                     return e.target.dataset.value[index];
+    //                 }
+    //                 return letters[Math.floor(Math.random() * 26)];
+    //             }).join('');
+    //             if (iterations >= e.target.dataset.value.length) clearInterval(interval);
+    //             iterations += 1 / 3;
+    //         }, 30);
+    //     }
+
+    // }
+
+
+    const onmouseover=(e:BaseSyntheticEvent)=>{
+        mouseover(e, h1HackRef)
+    }
+
+    // const onTouchStart = () => {
+    //     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    //     let iterations = 0;
+    //     const interval = setInterval(() => {
+    //         if ((h1HackRef !== null) && (h1HackRef.current !== null)) {
+    //             h1HackRef.current.innerText = h1HackRef.current?.innerText.split('').map((letter: string, index: number) => {
+    //                 if (index < iterations) {
+    //                     return h1HackRef.current?.dataset.value![index];
+    //                 }
+    //                 return letters[Math.floor(Math.random() * 26)];
+    //             }).join('');
+    //             if (iterations >= h1HackRef.current?.dataset.value!.length!) clearInterval(interval);
+    //             iterations += 1 / 3;
+    //         }
+    //     }, 30);
+    // }
+
+
+    const onTouchStart=()=>{
+        touchStart(h1HackRef)
+    }
 
 
     return (
@@ -78,7 +128,7 @@ const Home: FC = () => {
                 <link rel="canonical" href="/" />
             </Helmet>
 
-            <Grid id="print" container sx={!isIphone ?
+            <Grid onTouchStart={onTouchStart} container sx={!isIphone ?
                 {
                     padding: '30px', margin: '-25px 0px 0px 0px',
                     backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
@@ -99,11 +149,23 @@ const Home: FC = () => {
             } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: ' 0 25px', }}>
-                        <h1 style={{ margin: '2px', fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome travelers or future travelers in Hack Trip!</h1>
-                        <h2 style={{ margin: '2px', fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Hack Trip is an app where you can share your trips or get valuable tips for your future trips.</h2>
+                        <h1 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome travelers or future travelers!</h1>
+                        {madiaQuery ?
+                            <h1 ref={h1HackRef} onMouseOver={onmouseover} data-value="Welcome in Hack Trip!" style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome in Hack Trip!</h1>
+
+                            :
+                            <>
+                                <h1 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome in</h1>
+                                <h1 ref={h1HackRef} data-value="Hack Trip!" style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Hack Trip!</h1>
+                            </>
+                        }
+
+
+
+                        <h2 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Hack Trip is an app where you can share your trips or get valuable tips for your future trips.</h2>
 
                         {(trips !== undefined && trips.length > 0) ?
-                            <h3 style={{ margin: '2px', fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>These are our TOP 5 most liked in Hack Trips!</h3>
+                            <h3 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>These are our TOP 5 most liked in Hack Trips!</h3>
 
                             : ''}
                     </Box>
@@ -115,7 +177,7 @@ const Home: FC = () => {
 
                     </Box>
                     <Box sx={{ display: 'flex' }}>
-                        <h3 style={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Facebook</h3>
+                        <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Facebook</h3>
                         <FacebookShareButton
 
                             url={'https://www.hack-trip.com'}

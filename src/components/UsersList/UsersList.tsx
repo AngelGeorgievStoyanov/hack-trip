@@ -20,7 +20,7 @@ const UserList: FC<UsersListProps> = ({ users }): ReactElement => {
             {users !== undefined && users.length > 0 ?
                 users.map(x => <UserCard key={x._id} user={x} />)
                 :
-                <Typography sx={{ fontFamily: 'cursive' }} variant='h5'>WELCOME!</Typography>
+                <Typography sx={{ fontFamily: 'Space Mono, monospace' }} variant='h5'>WELCOME!</Typography>
 
             }
         </>

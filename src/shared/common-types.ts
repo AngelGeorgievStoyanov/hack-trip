@@ -1,3 +1,5 @@
+import { BaseSyntheticEvent } from "react";
+
 export function toIsoDate(date: Date) {
     return date.toJSON();
 }
@@ -62,4 +64,44 @@ export function sliceDescription(description: string, maxLength: number) {
     } else {
         return description;
     }
+}
+
+
+
+export function mouseover(e: BaseSyntheticEvent, element: React.MutableRefObject<HTMLHeadingElement | null>) {
+
+    if (element && element.current !== null) {
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let iterations = 0;
+        const interval = setInterval(() => {
+            e.target.innerText = e.target.innerText.split('').map((letter: string, index: number) => {
+                if (index < iterations) {
+                    return e.target.dataset.value[index];
+                }
+                return letters[Math.floor(Math.random() * 26)];
+            }).join('');
+            if (iterations >= e.target.dataset.value.length) clearInterval(interval);
+            iterations += 1 / 3;
+        }, 30);
+    }
+
+}
+
+
+
+export function touchStart(element: React.MutableRefObject<HTMLHeadingElement | null>) {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let iterations = 0;
+    const interval = setInterval(() => {
+        if ((element !== null) && (element.current !== null)) {
+            element.current.innerText = element.current?.innerText.split('').map((letter: string, index: number) => {
+                if (index < iterations) {
+                    return element.current?.dataset.value![index];
+                }
+                return letters[Math.floor(Math.random() * 26)];
+            }).join('');
+            if (iterations >= element.current?.dataset.value!.length!) clearInterval(interval);
+            iterations += 1 / 3;
+        }
+    }, 30);
 }

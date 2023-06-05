@@ -1,13 +1,13 @@
-import { BaseSyntheticEvent, FC, useEffect, useState } from 'react';
+import { BaseSyntheticEvent, FC, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { User, UserRole, UserStatus } from '../../model/users';
 import * as userService from '../../services/userService'
 import { ApiClient } from '../../services/userService';
-import { IdType, toIsoDate } from '../../shared/common-types';
+import { IdType, mouseover, toIsoDate, touchStart } from '../../shared/common-types';
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
-import { Box, Button, Container, Grid, Typography } from '@mui/material';
+import { Box, Button, Container, Grid, Typography, useMediaQuery } from '@mui/material';
 import FormInputText from '../FormFields/FormInputText';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
@@ -72,7 +72,9 @@ const Register: FC = () => {
     const [checkedPrivacyPolicy, setCheckedPrivacyPolicy] = useState<boolean>(false)
     const [verified, setVerified] = useState<boolean>(false)
     const [imageBackground, setImageBackground] = useState<string>()
+    const h1HackRef = useRef<HTMLHeadingElement | null>(null)
 
+    const madiaQuery = useMediaQuery('(min-width:480px)');
 
     useEffect(() => {
         API_TRIP.backgroundImages().then((data) => {
@@ -184,6 +186,18 @@ const Register: FC = () => {
     }
 
 
+    const onmouseover = (e: BaseSyntheticEvent) => {
+        mouseover(e, h1HackRef)
+    }
+
+
+
+    const onTouchStart = () => {
+        touchStart(h1HackRef)
+    }
+
+
+
     return (
         <>
             <Helmet>
@@ -202,16 +216,23 @@ const Register: FC = () => {
                 <meta property="og:site_name" content="Hack-Trip" />
                 <link rel="canonical" href="/register" />
             </Helmet>
-            <Grid container sx={{
+            <Grid onTouchStart={onTouchStart} container sx={{
                 backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                 backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                 backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh'
             }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
-                <Container sx={{ minHeight: '100vh', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <Container sx={{ minHeight: '100vh', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: madiaQuery ? 'space-evenly' : 'center', alignItems: 'center' }}>
 
-                    <h1 style={{ fontFamily: 'cursive', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome in hack trip.</h1>
+                    {madiaQuery ?
+                        <h1 ref={h1HackRef} onMouseOver={onmouseover} data-value="Welcome in Hack Trip!" style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome in Hack Trip!</h1>
 
+                        :
+                        <>
+                            <h1 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome in</h1>
+                            <h1 ref={h1HackRef} data-value="Hack Trip!" style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Hack Trip!</h1>
+                        </>
+                    }
 
                     {errorApi ?
                         <Box component='div' sx={{ backgroundColor: 'red', color: 'black', padding: '10px 20px', borderRadius: '9px', margin: '20px' }}>
@@ -232,7 +253,7 @@ const Register: FC = () => {
                         flexDirection: 'column',
                         justifyContent: 'space-between',
                         maxWidth: '600px',
-                        maxHeight: '540px',
+                        maxHeight: '565px',
                         padding: '30px',
                         backgroundColor: '#e5e3e3d9',
                         boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
