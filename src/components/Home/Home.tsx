@@ -61,50 +61,11 @@ const Home: FC = () => {
     }, [])
 
 
-
-    // const onmouseover = (e: BaseSyntheticEvent) => {
-
-    //     if (h1HackRef && h1HackRef.current !== null) {
-    //         const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    //         let iterations = 0;
-    //         const interval = setInterval(() => {
-    //             e.target.innerText = e.target.innerText.split('').map((letter: string, index: number) => {
-    //                 if (index < iterations) {
-    //                     return e.target.dataset.value[index];
-    //                 }
-    //                 return letters[Math.floor(Math.random() * 26)];
-    //             }).join('');
-    //             if (iterations >= e.target.dataset.value.length) clearInterval(interval);
-    //             iterations += 1 / 3;
-    //         }, 30);
-    //     }
-
-    // }
-
-
-    const onmouseover=(e:BaseSyntheticEvent)=>{
+    const onmouseover = (e: BaseSyntheticEvent) => {
         mouseover(e, h1HackRef)
     }
 
-    // const onTouchStart = () => {
-    //     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    //     let iterations = 0;
-    //     const interval = setInterval(() => {
-    //         if ((h1HackRef !== null) && (h1HackRef.current !== null)) {
-    //             h1HackRef.current.innerText = h1HackRef.current?.innerText.split('').map((letter: string, index: number) => {
-    //                 if (index < iterations) {
-    //                     return h1HackRef.current?.dataset.value![index];
-    //                 }
-    //                 return letters[Math.floor(Math.random() * 26)];
-    //             }).join('');
-    //             if (iterations >= h1HackRef.current?.dataset.value!.length!) clearInterval(interval);
-    //             iterations += 1 / 3;
-    //         }
-    //     }, 30);
-    // }
-
-
-    const onTouchStart=()=>{
+    const onTouchStart = () => {
         touchStart(h1HackRef)
     }
 
@@ -149,7 +110,7 @@ const Home: FC = () => {
             } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: ' 0 25px', }}>
-                        <h1 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome travelers or future travelers!</h1>
+                        <h1 style={{ margin: '2px', textAlign: 'center', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome travelers or future travelers!</h1>
                         {madiaQuery ?
                             <h1 ref={h1HackRef} onMouseOver={onmouseover} data-value="Welcome in Hack Trip!" style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Welcome in Hack Trip!</h1>
 
@@ -162,10 +123,10 @@ const Home: FC = () => {
 
 
 
-                        <h2 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Hack Trip is an app where you can share your trips or get valuable tips for your future trips.</h2>
+                        <h2 style={{ margin: '2px', textAlign: 'center', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Hack Trip is an app where you can share your trips or get valuable tips for your future trips.</h2>
 
                         {(trips !== undefined && trips.length > 0) ?
-                            <h3 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>These are our TOP 5 most liked in Hack Trips!</h3>
+                            <h3 style={{ margin: '2px', textAlign: 'center', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>These are our TOP 5 most liked in Hack Trips!</h3>
 
                             : ''}
                     </Box>
