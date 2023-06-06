@@ -1,10 +1,23 @@
-import { Grid, Box, CardMedia } from "@mui/material";
-import { FC } from "react";
+import { Grid, Box, CardMedia, useMediaQuery } from "@mui/material";
+import { BaseSyntheticEvent, FC, useRef } from "react";
 import { Helmet } from "react-helmet-async";
+import { mouseover, touchStart } from "../../shared/common-types";
 
 
 
 const AboutUs: FC = () => {
+    const h1HackRef = useRef<HTMLHeadingElement | null>(null)
+
+    const madiaQuery = useMediaQuery('(min-width:550px)');
+
+    const onmouseover = (e: BaseSyntheticEvent) => {
+        mouseover(e, h1HackRef)
+    }
+
+    const onTouchStart = () => {
+        touchStart(h1HackRef)
+    }
+
 
     return (
 
@@ -20,9 +33,19 @@ const AboutUs: FC = () => {
                     content="The idea of ​Hack Trip is to help all travelers, if you want to visit a certain destination, city or area, enter to search for information and see other travelers..." />
                 <link rel="canonical" href="/about" />
             </Helmet>
-            <Grid container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: '#cfe8fc', padding: '0', margin: '-25px 0px 0px 0px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <Grid onTouchStart={onTouchStart} container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: '#cfe8fc', padding: '0', margin: '-25px 0px 0px 0px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: '#cfe8fc', maxWidth: '80%' }}>
-                    <h1 style={{ margin: '2px', fontFamily: 'Space Mono, monospace' }}>Welcome travelers or future travelers in Hack Trip!</h1>
+                    <h1 style={{ margin: '2px', fontFamily: 'Space Mono, monospace' }}>Welcome travelers or future travelers!</h1>
+                    {madiaQuery ?
+                        <h1 ref={h1HackRef} onMouseOver={onmouseover} data-value="Welcome in Hack Trip!" style={{ margin: '2px', fontFamily: 'Space Mono, monospace' }}>Welcome in Hack Trip!</h1>
+
+                        :
+                        <>
+                            <h1 style={{ margin: '2px', fontFamily: 'Space Mono, monospace' }}>Welcome in</h1>
+                            <h1 ref={h1HackRef} data-value="Hack Trip!" style={{ margin: '2px', fontFamily: 'Space Mono, monospace' }}>Hack Trip!</h1>
+                        </>
+                    }
+
                     <h2 style={{ margin: '2px', fontFamily: 'Space Mono, monospace' }}>Hack Trip is an app where you can share your trips or get valuable tips for your future trips.</h2>
                     <h3 style={{ margin: '2px', fontFamily: 'Space Mono, monospace' }}>
                         The idea of ​​Hack Trip is to help all travelers, if you want to visit a certain destination, city or area, enter to search for information and see other travelers if they have been there and if they have described
