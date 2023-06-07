@@ -1,11 +1,23 @@
-import { Grid, Box, CardMedia, useMediaQuery } from "@mui/material";
+import { Grid, Box, CardMedia, useMediaQuery, keyframes } from "@mui/material";
 import { BaseSyntheticEvent, FC, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { mouseover, touchStart } from "../../shared/common-types";
 
 
+const rotateHorCenter = keyframes`
+0% {
+    -webkit-transform: rotate(0);
+            transform: rotate(0);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+`;
+
 
 const AboutUs: FC = () => {
+    
     const h1HackRef = useRef<HTMLHeadingElement | null>(null)
 
     const madiaQuery = useMediaQuery('(min-width:550px)');
@@ -52,7 +64,7 @@ const AboutUs: FC = () => {
                         what they recommend and then if wish you could add your journey and be of help.</h3>
                     <CardMedia
                         component="img"
-                        sx={{ height: '240px', width: 'auto', margin: '20px', padding: '20px', '@media(max-width: 920px)': { height: 'auto', width: '100%', margin: '15px 0px 15px 0px', padding: '0' } }}
+                        sx={{ height: '240px', width: 'auto', margin: '20px', padding: '20px', animation: `${rotateHorCenter} 1s ease-in-out 3s both`, '@media(max-width: 920px)': { height: 'auto', width: '100%', margin: '15px 0px 15px 0px', padding: '0' } }}
                         src={'https://storage.googleapis.com/hack-trip/hack-trip-markers.png'}
                         title="hack trip"
                         alt="hack trip"
@@ -62,7 +74,7 @@ const AboutUs: FC = () => {
 
                     <CardMedia
                         component="img"
-                        sx={{ height: '440px', width: 'auto', margin: '20px', padding: '20px', '@media(max-width: 920px)': { height: 'auto', width: '100%', margin: '15px 0px 15px 0px', padding: '0' } }}
+                        sx={{ height: '440px', width: 'auto', margin: '20px', padding: '20px', animation: `${rotateHorCenter} 1s ease-in-out 3s both`, '@media(max-width: 920px)': { height: 'auto', width: '100%', margin: '15px 0px 15px 0px', padding: '0' } }}
                         src={'https://storage.googleapis.com/hack-trip/hack-trip-points1.png'}
                         title="hack trip"
                         alt="hack trip"
@@ -76,7 +88,7 @@ const AboutUs: FC = () => {
 
                     <CardMedia
                         component="img"
-                        sx={{ height: '440px', width: 'auto', margin: '20px', padding: '20px', '@media(max-width: 920px)': { height: 'auto', width: '100%', margin: '15px 0px 15px 0px', padding: '0' } }}
+                        sx={{ height: '440px', width: 'auto', margin: '20px', padding: '20px', animation: `${rotateHorCenter} 1s ease-in-out 3s both`, '@media(max-width: 920px)': { height: 'auto', width: '100%', margin: '15px 0px 15px 0px', padding: '0' } }}
                         src={'https://storage.googleapis.com/hack-trip/hack-trip-points2.png'}
                         title="hack trip"
                         alt="hack trip"
@@ -89,7 +101,7 @@ const AboutUs: FC = () => {
                     </h4>
                     <CardMedia
                         component="img"
-                        sx={{ height: '240px', width: 'auto', margin: '20px', padding: '20px', '@media(max-width: 920px)': { height: 'auto', width: '100%', margin: '15px 0px 15px 0px', padding: '0' } }}
+                        sx={{ height: '240px', width: 'auto', margin: '20px', padding: '20px', animation: `${rotateHorCenter} 1s ease-in-out 3s both`, '@media(max-width: 920px)': { height: 'auto', width: '100%', margin: '15px 0px 15px 0px', padding: '0' } }}
                         src={'https://storage.googleapis.com/hack-trip/hack-trip-points3.png'}
                         title="hack trip"
                         alt="hack trip"
