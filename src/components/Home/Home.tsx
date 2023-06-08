@@ -1,4 +1,4 @@
-import { Box, Grid, useMediaQuery } from '@mui/material';
+import { Box, Grid, keyframes, useMediaQuery } from '@mui/material';
 import { LoginContext } from '../../App';
 import { Trip } from '../../model/trip';
 import TripList from '../Trips/TripsList/TripsList';
@@ -10,13 +10,16 @@ import { ApiTrip } from '../../services/tripService';
 import { Helmet } from 'react-helmet-async';
 import { FacebookShareButton, FacebookIcon } from 'react-share';
 
-
 type decode = {
     _id: string,
 }
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
+
+
+
+
 
 const Home: FC = () => {
 
@@ -131,6 +134,7 @@ const Home: FC = () => {
                             : ''}
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+
 
                         {trips !== undefined ?
                             <TripList trips={trips} /> : ''
