@@ -1,4 +1,4 @@
-import { Box, Grid, keyframes, useMediaQuery } from '@mui/material';
+import { Box, Grid, useMediaQuery } from '@mui/material';
 import { LoginContext } from '../../App';
 import { Trip } from '../../model/trip';
 import TripList from '../Trips/TripsList/TripsList';
@@ -16,7 +16,6 @@ type decode = {
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
-
 
 
 
