@@ -271,8 +271,6 @@ const TripDetails: FC = () => {
     if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}><Typography sx={{ fontFamily: 'Space Mono, monospace' }} variant='h4'>MAP LOADING ...</Typography></Grid>
 
 
-
-
     const onMarkerClick = (id: string, positionNumber: number) => {
 
         if (id) {
@@ -289,7 +287,7 @@ const TripDetails: FC = () => {
                     lng: Number(currentPoint[0].lng)
                 }
 
-                setMapCenter(prev => center);
+                mapRef.current?.panTo(center)
                 zoom = 14;
             }
 
@@ -305,7 +303,7 @@ const TripDetails: FC = () => {
                     lng: Number(currentPoint[0].lng)
                 }
 
-                setMapCenter(prev => center);
+                mapRef.current?.panTo(center)
                 zoom = 14;
             }
 
@@ -316,7 +314,9 @@ const TripDetails: FC = () => {
                 lat: Number(points[0].lat),
                 lng: Number(points[0].lng)
             }
-            setMapCenter(prev => center);
+            mapRef.current?.panTo(center)
+
+
             zoom = 10;
         }
 

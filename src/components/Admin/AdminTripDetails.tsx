@@ -260,7 +260,7 @@ const AdminTripDetails: FC = () => {
                     lng: Number(currentPoint[0].lng)
                 }
 
-                setMapCenter(prev => center);
+                mapRef.current?.panTo(center)
                 zoom = 10;
             }
 
@@ -276,7 +276,7 @@ const AdminTripDetails: FC = () => {
                     lng: Number(currentPoint[0].lng)
                 }
 
-                setMapCenter(prev => center);
+                mapRef.current?.panTo(center)
                 zoom = 10;
             }
 
@@ -287,7 +287,7 @@ const AdminTripDetails: FC = () => {
                 lat: Number(points[0].lat),
                 lng: Number(points[0].lng)
             }
-            setMapCenter(prev => center);
+            mapRef.current?.panTo(center)
             zoom = 8;
         }
 
