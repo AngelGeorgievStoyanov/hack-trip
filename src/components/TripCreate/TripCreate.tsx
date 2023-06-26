@@ -96,7 +96,6 @@ const CreateTrip: FC = () => {
     const { userL } = useContext(LoginContext);
     const [imageBackground, setImageBackground] = useState<string>()
 
-
     const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
@@ -106,6 +105,8 @@ const CreateTrip: FC = () => {
     }
 
     const iconFotoCamera = useMediaQuery('(max-width:600px)');
+
+    const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
 
     useEffect(() => {
         API_TRIP.backgroundImages().then((data) => {
@@ -142,6 +143,7 @@ const CreateTrip: FC = () => {
         if (!files) return;
         if (files.length === 0) return
 
+
         while (files.some((x) => !x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/))) {
             setErrorMessageImage('Please select valid file image');
 
@@ -160,10 +162,28 @@ const CreateTrip: FC = () => {
             files = files.slice(0, 9 - fileSelected.length)
         }
 
+        let indexSize: number = 0;
+        let totalSize: number = 0;
+
+        if (mobile) {
+            files.map((x, i) => {
+                totalSize += x.size;
+
+                if (totalSize > 40000000 && indexSize === 0) {
+                    indexSize = i - 1;
+                }
+            });
+
+        }
 
 
-        let compress = files.map(async (x: File) => {
+        if (indexSize > 0) {
+            files = files.slice(0, indexSize)
 
+        }
+
+
+        files.map(async (x: File) => {
 
             if (x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
 
@@ -179,7 +199,10 @@ const CreateTrip: FC = () => {
                     }
                     try {
                         const compressedFile = await imageCompression(x, options)
-                        return new File([compressedFile], options.name, { type: x.type })
+                       
+                        let compressFile = new File([compressedFile], options.name, { type: x.type })
+                      
+                        return setFileSelected(prev => [...prev, compressFile]);
 
                     } catch (err) {
                         console.log(err);
@@ -189,7 +212,10 @@ const CreateTrip: FC = () => {
                         name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
                             x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
                     }
-                    return new File([x], options.name, { type: x.type })
+                    let file = new File([x], options.name, { type: x.type });
+                   
+                    return setFileSelected(prev => [...prev, file]);
+
                 }
             } else if (!x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
                 setErrorMessageImage('Please select valid file image');
@@ -197,31 +223,7 @@ const CreateTrip: FC = () => {
             }
         })
 
-
-
-        Promise.all(compress).then((data: any) => {
-            let imagesConcat: File[] = []
-            if (data) {
-                data.map((x: File) => {
-                    if (x !== undefined) {
-                        imagesConcat.push(x)
-                    }
-                })
-
-
-                let images = fileSelected.concat(imagesConcat)
-
-                if (images.length > 9) {
-                    images = fileSelected.slice(0, 9)
-                }
-                setFileSelected(prev => [...images]);
-
-            }
-        })
-
-
     }
-
 
 
 

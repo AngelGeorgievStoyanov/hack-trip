@@ -56,7 +56,8 @@ const AboutUs: FC = () => {
 
         <>
             <Helmet>
-                <title>About us Hack Trip</title>
+                <title>Hack Trip About</title>
+                <meta name='description' content='Hack Trip is an app where you can share your trips or get valuable tips for your future trips. These are our TOP 5 most liked in Hack Trips!' />
                 <meta property="og:title" content="Hack Trip" />
                 <meta property="og:url" content="https://www.hack-trip.com" />
                 <meta property="og:image:url" content="https://www.hack-trip.com" />
@@ -68,7 +69,6 @@ const AboutUs: FC = () => {
                 <meta property="og:locale" content="en_US" />
                 <meta property="og:hashtag" content={'#HackTrip'} />
                 <meta property="og:site_name" content="Hack-Trip" />
-
                 <link rel="canonical" href="/about" />
             </Helmet>
             <Grid onTouchStart={onTouchStart} container sx={!isIphone ?

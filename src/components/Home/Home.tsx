@@ -18,8 +18,6 @@ type decode = {
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
 
 
-
-
 const Home: FC = () => {
 
     const [trips, setTrips] = useState<Trip[]>()
@@ -133,7 +131,6 @@ const Home: FC = () => {
                             : ''}
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
-
 
                         {trips !== undefined ?
                             <TripList trips={trips} /> : ''

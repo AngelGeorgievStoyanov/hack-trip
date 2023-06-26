@@ -85,6 +85,8 @@ const PointEdit: FC = () => {
 
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
+    const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
+
     const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
 
@@ -168,8 +170,6 @@ const PointEdit: FC = () => {
     }
 
 
-
-
     const searchInp = async (e: React.MouseEvent) => {
 
         let findAddress = '';
@@ -241,12 +241,7 @@ const PointEdit: FC = () => {
     }
 
 
-
-
     if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}><Typography sx={{ fontFamily: 'Space Mono, monospace' }} variant='h4'>MAP LOADING ...</Typography></Grid>
-
-
-
 
 
     const handleFilesChange = async (event: BaseSyntheticEvent) => {
@@ -274,12 +269,27 @@ const PointEdit: FC = () => {
             files = files.slice(0, 9 - (fileSelected.length) - (images !== undefined ? images?.length : 0))
         }
 
+        let indexSize: number = 0;
+        let totalSize: number = 0;
+
+        if (mobile) {
+            files.map((x, i) => {
+                totalSize += x.size;
+
+                if (totalSize > 40000000 && indexSize === 0) {
+                    indexSize = i - 1;
+                }
+            });
+
+        }
+
+        if (indexSize > 0) {
+            files = files.slice(0, indexSize)
+
+        }
 
 
-
-        let compress = files.map(async (x: File) => {
-
-
+        files.map(async (x: File) => {
 
             if (x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
 
@@ -295,7 +305,10 @@ const PointEdit: FC = () => {
                     }
                     try {
                         const compressedFile = await imageCompression(x, options)
-                        return new File([compressedFile], options.name, { type: x.type })
+
+                        let compressFile = new File([compressedFile], options.name, { type: x.type })
+
+                        return setFileSelected(prev => [...prev, compressFile]);
 
                     } catch (err) {
                         console.log(err);
@@ -305,37 +318,15 @@ const PointEdit: FC = () => {
                         name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
                             x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
                     }
-                    return new File([x], options.name, { type: x.type })
+                    let file = new File([x], options.name, { type: x.type });
+
+                    return setFileSelected(prev => [...prev, file]);
                 }
             } else if (!x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
                 setErrorMessageImage('Please select valid file image');
                 return
             }
         })
-
-
-
-        Promise.all(compress).then((data: any) => {
-            let imagesConcat: File[] = []
-            if (data) {
-                data.map((x: File) => {
-                    if (x !== undefined) {
-                        imagesConcat.push(x)
-                    }
-                })
-
-
-                let images = fileSelected.concat(imagesConcat)
-
-                if (images.length > 9) {
-                    images = fileSelected.slice(0, 9)
-                }
-                setFileSelected(prev => [...images]);
-
-            }
-        })
-
-
 
     }
 
