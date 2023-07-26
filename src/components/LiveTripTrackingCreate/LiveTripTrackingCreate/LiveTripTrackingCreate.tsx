@@ -1,10 +1,10 @@
 
-import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, Marker, PolylineF, useJsApiLoader } from "@react-google-maps/api";
 import React, { FC, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { containerStyle, options } from "../../settings";
 import { IdType } from "../../../shared/common-types";
-import { Box, Button, Container, Grid, IconButton,  Typography } from "@mui/material";
+import { Box, Button, Container, Grid, IconButton, Typography } from "@mui/material";
 import FormInputText from "../../FormFields/FormInputText";
 import FormTextArea from "../../FormFields/FormTextArea";
 import { useForm } from "react-hook-form";
@@ -56,7 +56,7 @@ const schema = yup.object({
 let userId: string | undefined;
 
 
-type positionStart = {
+type positionsPoints = {
     lng: number,
     lat: number,
     alt: number | null,
@@ -72,6 +72,7 @@ let optionsPosition = {
     timeout: 5000,
     maximumAge: 0,
 };
+let sum: number = 0
 
 const LiveTripTrackingCreate: FC = () => {
 
@@ -80,8 +81,8 @@ const LiveTripTrackingCreate: FC = () => {
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const [imageBackground, setImageBackground] = useState<string>()
     const [errorMessageGPS, setErrorMessageGPS] = useState<string | undefined>();
-    const [startPosition, setStartPosition] = useState<positionStart | undefined>()
-    const [liveTrackingPositions, setLiveTrackingPositions] = useState<positionStart[]>([])
+    const [startPosition, setStartPosition] = useState<positionsPoints | undefined>()
+    const [liveTrackingPositions, setLiveTrackingPositions] = useState<positionsPoints[]>([])
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
@@ -94,8 +95,6 @@ const LiveTripTrackingCreate: FC = () => {
     }
 
 
-
-
     useEffect(() => {
         API_TRIP.backgroundImages().then((data) => {
             setImageBackground(data[Math.floor(Math.random() * data.length)])
@@ -104,7 +103,6 @@ const LiveTripTrackingCreate: FC = () => {
             console.log(err)
         });
     }, [])
-
 
 
     const { control, formState: { errors } } = useForm<FormData>({
@@ -118,10 +116,12 @@ const LiveTripTrackingCreate: FC = () => {
     });
 
 
+    const pathPoints = (liveTrackingPositions?.length) && (liveTrackingPositions !== undefined) ? liveTrackingPositions?.sort((a, b) => Number(a.timestamp) - Number(b.timestamp)).map((x) => { return { lat: Number(x.lat), lng: Number(x.lng) } }) : [];
+
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral);
 
     const navigate = useNavigate();
-   
+
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
 
@@ -149,7 +149,6 @@ const LiveTripTrackingCreate: FC = () => {
     }
 
 
-
     const removeMarker = () => {
         setClickedPos(undefined);
         center = {
@@ -158,8 +157,6 @@ const LiveTripTrackingCreate: FC = () => {
         }
         zoom = 8;
     }
-
-
 
 
     if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}><Typography sx={{ fontFamily: 'Space Mono, monospace' }} variant='h4'>MAP LOADING ...</Typography></Grid>
@@ -174,13 +171,11 @@ const LiveTripTrackingCreate: FC = () => {
     }
 
 
-
     if (errorMessageImage) {
 
         setTimeout(() => {
             setErrorMessageImage(undefined)
         }, 5000)
-
 
     }
 
@@ -190,7 +185,6 @@ const LiveTripTrackingCreate: FC = () => {
         setTimeout(() => {
             setErrorMessageGPS(undefined)
         }, 5000)
-
 
     }
 
@@ -253,6 +247,47 @@ const LiveTripTrackingCreate: FC = () => {
 
 
 
+    const distanceBeetweenTwoCordinates = (lat1: number, lat2: number, lng1: number, lng2: number) => {
+        // Degrees to radians
+        lng1 = lng1 * (Math.PI / 180); //(Math.PI / 180) ~ 57,29577951
+        lng2 = lng2 * (Math.PI / 180);
+        lat1 = lat1 * (Math.PI / 180);
+        lat2 = lat2 * (Math.PI / 180);
+
+
+        //Haversine formula
+        let dlng = lng2 - lng1;
+        let dlat = lat2 - lat1;
+        let a = Math.pow(Math.sin(dlat / 2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlng / 2), 2);
+
+        let c = 2 * Math.asin(Math.sqrt(a));
+
+        let r = 6371;//TODO this is in km
+
+
+        return (c * r);
+    }
+
+
+
+    if (liveTrackingPositions.length > 0) {
+
+        let point: positionsPoints | undefined;
+        sum = 0;
+
+        liveTrackingPositions.forEach((x, i) => {
+            if (point !== undefined) {
+                let distanceBeetewTwoPoints = distanceBeetweenTwoCordinates(point.lat, x.lat, point.lng, x.lng);
+                sum += distanceBeetewTwoPoints;
+                point = x;
+            } else {
+                point = x;
+            }
+        })
+    }
+
+
+
     return (
         <>
             <Grid container sx={!isIphone ?
@@ -296,6 +331,7 @@ const LiveTripTrackingCreate: FC = () => {
                             >
                                 {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
                                 {startPosition?.lat ? <Marker position={startPosition} /> : ''}
+                                {pathPoints ? <PolylineF path={pathPoints} /> : null}
                             </GoogleMap>
                         </Box>
                         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
@@ -341,6 +377,7 @@ const LiveTripTrackingCreate: FC = () => {
                                         <Typography>GPS altitue :  {liveTrackingPositions[liveTrackingPositions.length - 1].alt ? liveTrackingPositions[liveTrackingPositions.length - 1].alt : 'null'}</Typography>
                                         <Typography>GPS Speed : {liveTrackingPositions[liveTrackingPositions.length - 1].speed ? Math.floor(Number(liveTrackingPositions[liveTrackingPositions.length - 1].speed) * 3.6) + '  km/h' : 'null'}</Typography>
                                         <Typography>GPS Timestamp : {liveTrackingPositions[liveTrackingPositions.length - 1].timestamp ? new Date(liveTrackingPositions[liveTrackingPositions.length - 1].timestamp) + '' : 'null'}</Typography>
+                                        <Typography>GPS total km : {sum < 1 ? Number(sum.toFixed(3)) * 1000 + ' m' : sum.toFixed(3) + ' km'}</Typography>
                                     </>
                                     :
                                     ''}
