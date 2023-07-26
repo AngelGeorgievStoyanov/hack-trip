@@ -120,9 +120,11 @@ const Header: FC = () => {
             <Divider />
             <Button component={Link} to={'/trips'} color="inherit" >TRIPS</Button>
             <Divider />
-            <Button component={Link} to={'/create-trip'} color="inherit" >CREATE TRIPS</Button>
+            <Button component={Link} to={'/create-trip'} color="inherit" >CREATE TRIP</Button>
             <Divider />
             <Button component={Link} to={'/my-trips'} color="inherit" >MY TRIPS</Button>
+            <Divider />
+            <Button component={Link} to={'/create-live-trip'} color="inherit" >LIVE TRIP TRACKING</Button>
             <Divider />
             <Button component={Link} to={'/favorites'} color="inherit" >MY FAVORITES</Button>
             <Divider />
@@ -188,24 +190,25 @@ const Header: FC = () => {
 
                                         }
                                     </Typography>
-                                    <Button component={Link} to={'/'} color="inherit"  >HOME</Button>
-                                    <Button component={Link} to={'/trips'} color="inherit" >TRIPS</Button>
-                                    <Button component={Link} to={'/create-trip'} color="inherit" >CREATE TRIPS</Button>
-                                    <Button component={Link} to={'/my-trips'} color="inherit" >MY TRIPS</Button>
-                                    <Button component={Link} to={'/favorites'} color="inherit" >MY FAVORITES</Button>
-                                    <Button component={Link} to={'/about'} color="inherit" >ABOUT US</Button>
-                                    {((role === 'admin') || (role === 'manager')) ? <Button component={Link} to={'/admin'} color="inherit" >ADMIN</Button> : ''}
-                                    <Button onClick={logout} color="inherit" >LOGOUT</Button>
+                                    <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/'} color="inherit"  >HOME</Button>
+                                    <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/trips'} color="inherit" >TRIPS</Button>
+                                    <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/create-trip'} color="inherit" >CREATE TRIP</Button>
+                                    <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/my-trips'} color="inherit" >MY TRIPS</Button>
+                                    <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/create-live-trip'} color="inherit" >LIVE TRIP TRACKING</Button>
+                                    <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/favorites'} color="inherit" >MY FAVORITES</Button>
+                                    <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/about'} color="inherit" >ABOUT US</Button>
+                                    {((role === 'admin') || (role === 'manager')) ? <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/admin'} color="inherit" >ADMIN</Button> : ''}
+                                    <Button onClick={logout} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} color="inherit" >LOGOUT</Button>
                                 </>
                             }
                         </>
                         :
                         <>
-                            <Button component={Link} to={'/'} color="inherit" >HOME</Button>
-                            <Button component={Link} to={'/trips'} color="inherit" >TRIPS</Button>
-                            <Button component={Link} to={'/login'} color="inherit" >LOGIN</Button>
-                            <Button component={Link} to={'/register'} color="inherit" >REGISTER</Button>
-                            <Button component={Link} to={'/about'} color="inherit" >ABOUT US</Button>
+                            <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/'} color="inherit" >HOME</Button>
+                            <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/trips'} color="inherit" >TRIPS</Button>
+                            <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/login'} color="inherit" >LOGIN</Button>
+                            <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/register'} color="inherit" >REGISTER</Button>
+                            <Button component={Link} sx={{ margin: '2px', padding: '2px', boxSizing: 'content-box' }} to={'/about'} color="inherit" >ABOUT US</Button>
                         </>}
 
                 </Toolbar>

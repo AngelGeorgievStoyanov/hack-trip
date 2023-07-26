@@ -185,7 +185,7 @@ const AdminTripDetails: FC = () => {
 
     if (trip !== undefined) {
 
-        if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null) && (points === undefined)) {
+        if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lat !== null) && (points === undefined)) {
 
             center = {
                 lat: Number(trip.lat),
