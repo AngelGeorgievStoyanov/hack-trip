@@ -47,6 +47,7 @@ import ForgotPassword from './components/ForgotPassword/ForgotPassword';
 import ReSendVerifyEmail from './components/ReSendVerifyEmail/ReSendVerifyEmail';
 import Login from './components/Login/Login';
 import Register from './components/Register/Register';
+import LiveTripTrackingCreate from './components/LiveTripTrackingCreate/LiveTripTrackingCreate/LiveTripTrackingCreate';
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
@@ -395,6 +396,17 @@ const router = createBrowserRouter([
         ]
       },
       {
+        path: '/create-live-trip',
+        element: <GuardedRoute />,
+        children: [
+          {
+            path: '',
+            element: <LiveTripTrackingCreate />,
+            errorElement: <NotFound />
+          }
+        ]
+      },
+      {
         path: '*',
         element: <NotFound />
       },
@@ -413,11 +425,11 @@ const App: FC = () => {
   const [userL, setUserL] = useState<null | User>(null)
   return (
     <>
-        <ErrorBoundary>
-          <LoginContext.Provider value={{ userL, setUserL }}>
-            <RouterProvider router={router} />
-          </LoginContext.Provider>
-        </ErrorBoundary>
+      <ErrorBoundary>
+        <LoginContext.Provider value={{ userL, setUserL }}>
+          <RouterProvider router={router} />
+        </LoginContext.Provider>
+      </ErrorBoundary>
     </>
   );
 

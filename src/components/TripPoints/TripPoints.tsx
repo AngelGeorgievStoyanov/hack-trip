@@ -83,10 +83,10 @@ const TripPoints: FC = () => {
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const [imageBackground, setImageBackground] = useState<string>()
-
+    const [errorMessageGPS, setErrorMessageGPS] = useState<string | undefined>();
 
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
-  
+
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
 
     const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
@@ -444,6 +444,16 @@ const TripPoints: FC = () => {
 
     }
 
+
+    if (errorMessageGPS) {
+
+        setTimeout(() => {
+            setErrorMessageGPS(undefined)
+        }, 5000)
+
+
+    }
+
     const onDeleteAllImage = () => {
         setFileSelected([])
     }
@@ -469,6 +479,24 @@ const TripPoints: FC = () => {
                 <DeleteForeverIcon color="primary" fontSize="large" onClick={onDeleteAllImage} />
             </Tooltip>
         )
+    }
+
+    const getPosition = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showGPS, gpsError)
+        } else {
+            setErrorMessageGPS('No GPS Funtionality.')
+        }
+    }
+
+    function showGPS(position: any) {
+        setClickedPos({ lat: position.coords.latitude, lng: position.coords.longitude });
+        center = { lat: position.coords.latitude, lng: position.coords.longitude };
+        zoom = 16;
+    }
+
+    function gpsError(error: any) {
+        setErrorMessageGPS('GPS Error: ' + error.code + ', ' + error.message)
     }
 
 
@@ -524,10 +552,13 @@ const TripPoints: FC = () => {
 
 
                             <Autocomplete>
-                                <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+                                <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px', margin: '2px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
                             </Autocomplete>
-                            <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
-                            <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
+                            <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' }, margin: '2px' }}>Search</Button>
+                            <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '2px' }}  >Remove Marker</Button>
+                            <Button variant="contained" onClick={getPosition} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '2px' }}  >Gps position</Button>
+                            {errorMessageGPS ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageGPS}</Typography> : ''}
+
                         </Box>
                         <Box component='form'
                             sx={{
@@ -553,7 +584,7 @@ const TripPoints: FC = () => {
                                 ADD POINT
                             </Typography>
                             <span >
-                                <FormInputText name='name' type="search" label='NEME OF CITY, PLACE, LANDMARK OR ANOTHER' control={control} error={errors.name?.message} id='inputAddPointName'
+                                <FormInputText name='name' type="search" label='NAME OF CITY, PLACE, LANDMARK OR ANOTHER' control={control} error={errors.name?.message} id='inputAddPointName'
                                 />
                             </span>
                             <Button variant="contained" onClick={findInMap} sx={{ ':hover': { background: '#4daf30' } }}>FIND IN MAP</Button>
