@@ -1,5 +1,5 @@
 
-import { GoogleMap, Marker, PolylineF, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, Marker, MarkerF, PolylineF, useJsApiLoader } from "@react-google-maps/api";
 import React, { FC, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { containerStyle, options } from "../../settings";
@@ -16,7 +16,8 @@ import * as tripService from '../../../services/tripService';
 import { Trip } from '../../../model/trip';
 import { ApiTrip } from '../../../services/tripService';
 import PlayCircleFilledTwoToneIcon from '@mui/icons-material/PlayCircleFilledTwoTone';
-
+import StopCircleTwoToneIcon from '@mui/icons-material/StopCircleTwoTone';
+import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 type decode = {
     _id: string,
 }
@@ -74,6 +75,14 @@ let optionsPosition = {
 };
 let sum: number = 0
 
+interface ctr {
+    lat: number;
+    lng: number;
+}
+
+const dateRegExp = new RegExp('[0-9]{2}:[0-9]{2}:[0-9]{2}')
+
+
 const LiveTripTrackingCreate: FC = () => {
 
 
@@ -83,6 +92,10 @@ const LiveTripTrackingCreate: FC = () => {
     const [errorMessageGPS, setErrorMessageGPS] = useState<string | undefined>();
     const [startPosition, setStartPosition] = useState<positionsPoints | undefined>()
     const [liveTrackingPositions, setLiveTrackingPositions] = useState<positionsPoints[]>([])
+    const [centerP, setCenterP] = useState<ctr | undefined>()
+    const [stopTracking, setStopTracking] = useState<boolean>(false)
+    const [mypos, setMypos] = useState<boolean>(false)
+    const [showBtn, setShowBtn] = useState<boolean>(false)
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
@@ -139,14 +152,16 @@ const LiveTripTrackingCreate: FC = () => {
         mapRef.current = null;
     }
 
-    const onMapClick = (e: google.maps.MapMouseEvent) => {
+    // const onMapClick = (e: google.maps.MapMouseEvent) => {
 
 
-        if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
+    //     if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
 
-            setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-        }
-    }
+    //         // center = { lat: e.latLng.lat(), lng: e.latLng.lng() };
+    //         setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+    //         setCenterP({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+    //     }
+    // }
 
 
     const removeMarker = () => {
@@ -241,8 +256,7 @@ const LiveTripTrackingCreate: FC = () => {
 
     const onStopTracking = () => {
         navigator.geolocation.clearWatch(watchPos);
-        setStartPosition(undefined)
-        setLiveTrackingPositions([])
+        setStopTracking(true)
     }
 
 
@@ -286,7 +300,30 @@ const LiveTripTrackingCreate: FC = () => {
         })
     }
 
+    const onDragMap = () => {
+        setCenterP(undefined)
+        setMypos(false)
+        setShowBtn(true)
+    }
 
+
+    const onDeleteTracking = () => {
+        setStartPosition(undefined)
+        setStopTracking(false)
+        setLiveTrackingPositions([])
+    }
+
+
+
+    const onMyLocationCenter = () => {
+        setMypos(true)
+        setShowBtn(false)
+    }
+
+
+    if (mypos && liveTrackingPositions.length) {
+        center = { lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng }
+    }
 
     return (
         <>
@@ -319,27 +356,44 @@ const LiveTripTrackingCreate: FC = () => {
 
                         <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 920px)': { maxWidth: '97%' } }} >
 
-
                             <GoogleMap
                                 mapContainerStyle={containerStyle}
                                 options={options as google.maps.MapOptions}
-                                center={center}
+                                center={centerP || center}
                                 zoom={zoom}
                                 onLoad={onLoad}
                                 onUnmount={onUnmount}
-                                onClick={onMapClick}
+                                // onClick={onMapClick}
+                                onDragStart={onDragMap}
                             >
                                 {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
                                 {startPosition?.lat ? <Marker position={startPosition} /> : ''}
                                 {pathPoints ? <PolylineF path={pathPoints} /> : null}
+                                {liveTrackingPositions.length ? <MarkerF icon={{ url: 'https://storage.googleapis.com/hack-trip-background-images/car-svgrepo-com.svg', size: new google.maps.Size(40, 40), scaledSize: new google.maps.Size(40, 40) }} position={{ lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng }} /> : ''}
+
                             </GoogleMap>
                         </Box>
                         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
-                            <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '2px' }}  >Remove Marker</Button>
-                            <Button variant="contained" onClick={getPosition} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '2px' }}  >Gps position</Button>
+                            {!liveTrackingPositions.length ?
+                                <>
+                                    <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '2px' }}  >Remove Marker</Button>
+                                    <Button variant="contained" onClick={getPosition} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '2px' }}  >Gps position</Button>
+                                </>
+                                : ''}
                             {errorMessageGPS ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageGPS}</Typography> : ''}
 
                         </Box>
+
+                        {showBtn ?
+
+                            <IconButton >
+                                <MyLocationRoundedIcon onClick={onMyLocationCenter} sx={{ fontSize: 55 }} />
+
+
+                            </IconButton>
+                            : ''}
+
+
                         <Box component='form'
                             sx={{
                                 margin: '30px',
@@ -372,31 +426,49 @@ const LiveTripTrackingCreate: FC = () => {
                                 liveTrackingPositions.length > 0 ?
                                     <>
                                         <Typography>This is test: live tracking</Typography>
-                                        <Typography>GPS latitude : {liveTrackingPositions[liveTrackingPositions.length - 1].lat ? liveTrackingPositions[liveTrackingPositions.length - 1].lat : 'null'}</Typography>
-                                        <Typography>GPS longitude :  {liveTrackingPositions[liveTrackingPositions.length - 1].lng ? liveTrackingPositions[liveTrackingPositions.length - 1].lng : 'null'}</Typography>
-                                        <Typography>GPS altitue :  {liveTrackingPositions[liveTrackingPositions.length - 1].alt ? liveTrackingPositions[liveTrackingPositions.length - 1].alt : 'null'}</Typography>
-                                        <Typography>GPS Speed : {liveTrackingPositions[liveTrackingPositions.length - 1].speed ? Math.floor(Number(liveTrackingPositions[liveTrackingPositions.length - 1].speed) * 3.6) + '  km/h' : 'null'}</Typography>
-                                        <Typography>GPS Timestamp : {liveTrackingPositions[liveTrackingPositions.length - 1].timestamp ? new Date(liveTrackingPositions[liveTrackingPositions.length - 1].timestamp) + '' : 'null'}</Typography>
-                                        <Typography>GPS total km : {sum < 1 ? Number(sum.toFixed(3)) * 1000 + ' m' : sum.toFixed(3) + ' km'}</Typography>
+                                        <Typography>GPS latitude: {liveTrackingPositions[liveTrackingPositions.length - 1].lat ? liveTrackingPositions[liveTrackingPositions.length - 1].lat.toFixed(7) : 'null'}</Typography>
+                                        <Typography>GPS longitude:  {liveTrackingPositions[liveTrackingPositions.length - 1].lng ? liveTrackingPositions[liveTrackingPositions.length - 1].lng.toFixed(7) : 'null'}</Typography>
+                                        <Typography>GPS altitue:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt ? (liveTrackingPositions[liveTrackingPositions.length - 1].alt)?.toFixed(0) + ' m' : 'null'}</Typography>
+                                        <Typography>GPS Speed: {liveTrackingPositions[liveTrackingPositions.length - 1].speed ? Math.floor(Number(liveTrackingPositions[liveTrackingPositions.length - 1].speed) * 3.6) + '  km/h' : 'null'}</Typography>
+                                        <Typography>GPS Times: {liveTrackingPositions[liveTrackingPositions.length - 1].timestamp ? (new Date(liveTrackingPositions[liveTrackingPositions.length - 1].timestamp) + '').match(dateRegExp) : 'null'}</Typography>
+                                        <Typography>GPS total km: {sum < 1 ? Number(sum.toFixed(3)) * 1000 + ' m' : sum.toFixed(3) + ' km'}</Typography>
+                                        <Typography>GPS altitue:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt && liveTrackingPositions[0].alt ? (liveTrackingPositions[0].alt)?.toFixed(0) + ' m  start : ' + (Math.round(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt)) - Math.round(liveTrackingPositions[0].alt)) + ' m from start' : 'null'}</Typography>
                                     </>
                                     :
                                     ''}
                             <Box component='div' sx={{ display: 'flex', '@media(max-width: 600px)': { flexDirection: 'column', alignItems: 'center' } }}>
                                 {mobile ?
                                     <>
-                                        <IconButton disabled={liveTrackingPositions.length > 0 ? true : false}>
+                                        <Box>
 
-                                            < PlayCircleFilledTwoToneIcon onClick={onStartTracking} sx={{ fontSize: 55 }} />
-                                        </IconButton>
-                                        {liveTrackingPositions.length ?
-                                            <Button variant="contained" onClick={onStopTracking} >STOP</Button>
+                                            <IconButton disabled={liveTrackingPositions.length > 0 ? true : false}>
+
+                                                < PlayCircleFilledTwoToneIcon onClick={onStartTracking} sx={{ fontSize: 55 }} />
+                                            </IconButton>
+                                            {liveTrackingPositions.length ?
+                                                <>
+                                                    {/* <Button variant="contained" onClick={onStopTracking} disabled={stopTracking}>STOP</Button> */}
+                                                    <IconButton disabled={stopTracking}>
+                                                        < StopCircleTwoToneIcon onClick={onStopTracking} sx={{ fontSize: 55 }} />
+                                                    </IconButton>
+
+                                                </>
+                                                : ''}
+                                        </Box>
+
+
+                                        {stopTracking ?
+                                            <Button variant="contained" onClick={onDeleteTracking} >DELETE TRACKING</Button>
                                             : ''}
                                     </>
                                     :
                                     <>
                                         <Button variant="contained" onClick={onStartTracking} sx={{ ':hover': { background: '#4daf30' } }} disabled={liveTrackingPositions.length > 0 ? true : false}>START</Button>
                                         {liveTrackingPositions.length ?
-                                            <Button variant="contained" onClick={onStopTracking}>STOP</Button>
+                                            <Button variant="contained" onClick={onStopTracking} disabled={stopTracking}>STOP</Button>
+                                            : ''}
+                                        {stopTracking ?
+                                            <Button variant="contained" onClick={onDeleteTracking} >DELETE TRACKING</Button>
                                             : ''}
                                     </>
                                 }
