@@ -66,7 +66,7 @@ type positionsPoints = {
 
 }
 
-let watchPos: any
+let watchPos: number
 
 let optionsPosition = {
     enableHighAccuracy: false,
@@ -82,6 +82,7 @@ interface ctr {
 
 const dateRegExp = new RegExp('[0-9]{2}:[0-9]{2}:[0-9]{2}')
 
+let wakelock: WakeLockSentinel | null;
 
 const LiveTripTrackingCreate: FC = () => {
 
@@ -96,6 +97,8 @@ const LiveTripTrackingCreate: FC = () => {
     const [stopTracking, setStopTracking] = useState<boolean>(false)
     const [mypos, setMypos] = useState<boolean>(false)
     const [showBtn, setShowBtn] = useState<boolean>(false)
+
+
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
@@ -106,6 +109,7 @@ const LiveTripTrackingCreate: FC = () => {
         const decode: decode = jwt_decode(accessToken);
         userId = decode._id;
     }
+
 
 
     useEffect(() => {
@@ -223,6 +227,7 @@ const LiveTripTrackingCreate: FC = () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(getSTART, gpsError, optionsPosition)
             watchPos = navigator.geolocation.watchPosition(startWatch, gpsError)
+            lockWakeState()
         } else {
             setErrorMessageGPS('No GPS Funtionality.')
         }
@@ -257,6 +262,7 @@ const LiveTripTrackingCreate: FC = () => {
     const onStopTracking = () => {
         navigator.geolocation.clearWatch(watchPos);
         setStopTracking(true)
+        releaseWakeState()
     }
 
 
@@ -303,7 +309,9 @@ const LiveTripTrackingCreate: FC = () => {
     const onDragMap = () => {
         setCenterP(undefined)
         setMypos(false)
-        setShowBtn(true)
+        if (liveTrackingPositions.length) {
+            setShowBtn(true)
+        }
     }
 
 
@@ -323,6 +331,31 @@ const LiveTripTrackingCreate: FC = () => {
 
     if (mypos && liveTrackingPositions.length) {
         center = { lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng }
+    }
+
+    if (showBtn === false && liveTrackingPositions.length) {
+        center = { lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng }
+    }
+
+
+    const canWakeLock = () => 'wakeLock' in navigator;
+
+    const lockWakeState = async () => {
+        if (!canWakeLock()) return;
+        try {
+            wakelock = await navigator.wakeLock.request('screen');
+            wakelock.addEventListener('release', () => {
+                console.log('Screen Wake State Locked:', wakelock ? 'false' : 'true');
+            });
+            console.log('Screen Wake State Locked:', wakelock ? 'true' : 'false');
+        } catch (err: any) {
+            console.error('Failed to lock wake state with reason:', err.message);
+        }
+    }
+
+    const releaseWakeState = () => {
+        if (wakelock) wakelock.release();
+        wakelock = null;
     }
 
     return (
@@ -367,9 +400,9 @@ const LiveTripTrackingCreate: FC = () => {
                                 onDragStart={onDragMap}
                             >
                                 {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
-                                {startPosition?.lat ? <Marker position={startPosition} /> : ''}
+                                {startPosition?.lat ? <Marker position={startPosition} icon={{ url: 'https://storage.googleapis.com/hack-trip/plug-outlet-svgrepo-com.svg', anchor: new google.maps.Point(46, 46) }} /> : ''}
                                 {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                                {liveTrackingPositions.length ? <MarkerF icon={{ url: 'https://storage.googleapis.com/hack-trip-background-images/car-svgrepo-com.svg', size: new google.maps.Size(40, 40), scaledSize: new google.maps.Size(40, 40) }} position={{ lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng }} /> : ''}
+                                {liveTrackingPositions.length ? <MarkerF icon={{ url: 'https://storage.googleapis.com/hack-trip/electric-car-electric-vehicle-svgrepo-com.svg', size: new google.maps.Size(50, 50), scaledSize: new google.maps.Size(50, 50), anchor: new google.maps.Point(25, 40) }} position={{ lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng }} /> : ''}
 
                             </GoogleMap>
                         </Box>
@@ -428,18 +461,20 @@ const LiveTripTrackingCreate: FC = () => {
                                         <Typography>This is test: live tracking</Typography>
                                         <Typography>GPS latitude: {liveTrackingPositions[liveTrackingPositions.length - 1].lat ? liveTrackingPositions[liveTrackingPositions.length - 1].lat.toFixed(7) : 'null'}</Typography>
                                         <Typography>GPS longitude:  {liveTrackingPositions[liveTrackingPositions.length - 1].lng ? liveTrackingPositions[liveTrackingPositions.length - 1].lng.toFixed(7) : 'null'}</Typography>
-                                        <Typography>GPS altitue:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt ? (liveTrackingPositions[liveTrackingPositions.length - 1].alt)?.toFixed(0) + ' m' : 'null'}</Typography>
-                                        <Typography>GPS Speed: {liveTrackingPositions[liveTrackingPositions.length - 1].speed ? Math.floor(Number(liveTrackingPositions[liveTrackingPositions.length - 1].speed) * 3.6) + '  km/h' : 'null'}</Typography>
                                         <Typography>GPS Times: {liveTrackingPositions[liveTrackingPositions.length - 1].timestamp ? (new Date(liveTrackingPositions[liveTrackingPositions.length - 1].timestamp) + '').match(dateRegExp) : 'null'}</Typography>
+                                        <Typography>GPS Speed: {liveTrackingPositions[liveTrackingPositions.length - 1].speed ? Math.floor(Number(liveTrackingPositions[liveTrackingPositions.length - 1].speed) * 3.6) + '  km/h' : 'null'}</Typography>
                                         <Typography>GPS total km: {sum < 1 ? Number(sum.toFixed(3)) * 1000 + ' m' : sum.toFixed(3) + ' km'}</Typography>
-                                        <Typography>GPS altitue:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt && liveTrackingPositions[0].alt ? (liveTrackingPositions[0].alt)?.toFixed(0) + ' m  start : ' + (Math.round(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt)) - Math.round(liveTrackingPositions[0].alt)) + ' m from start' : 'null'}</Typography>
+                                        <Typography>GPS altitude now:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt ? (liveTrackingPositions[liveTrackingPositions.length - 1].alt)?.toFixed(0) + ' m' : 'null'}</Typography>
+                                        <Typography>GPS altitude from start:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt && liveTrackingPositions[0].alt ? (liveTrackingPositions[0].alt)?.toFixed(0) + ' m ' : 'null'}</Typography>
+                                        <Typography>GPS alt diff from start:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt && liveTrackingPositions[0].alt ? (Math.round(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt)) - Math.round(liveTrackingPositions[0].alt)) + ' m' : 'null'}</Typography>
+
                                     </>
                                     :
                                     ''}
                             <Box component='div' sx={{ display: 'flex', '@media(max-width: 600px)': { flexDirection: 'column', alignItems: 'center' } }}>
                                 {mobile ?
                                     <>
-                                        <Box>
+                                        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'space-around' }}>
 
                                             <IconButton disabled={liveTrackingPositions.length > 0 ? true : false}>
 

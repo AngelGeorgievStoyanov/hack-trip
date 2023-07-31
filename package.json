@@ -60,6 +60,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@types/dom-screen-wake-lock": "^1.0.1",
     "@types/googlemaps": "^3.43.3"
   }
 }
