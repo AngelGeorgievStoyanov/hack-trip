@@ -69,7 +69,7 @@ type positionsPoints = {
 let watchPos: number
 
 let optionsPosition = {
-    enableHighAccuracy: false,
+    enableHighAccuracy: true,
     timeout: 5000,
     maximumAge: 0,
 };
@@ -79,6 +79,8 @@ interface ctr {
     lat: number;
     lng: number;
 }
+let start: number | undefined;
+let str: string | undefined
 
 const dateRegExp = new RegExp('[0-9]{2}:[0-9]{2}:[0-9]{2}')
 
@@ -97,7 +99,6 @@ const LiveTripTrackingCreate: FC = () => {
     const [stopTracking, setStopTracking] = useState<boolean>(false)
     const [mypos, setMypos] = useState<boolean>(false)
     const [showBtn, setShowBtn] = useState<boolean>(false)
-
 
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
@@ -191,19 +192,17 @@ const LiveTripTrackingCreate: FC = () => {
 
 
     if (errorMessageImage) {
-
         setTimeout(() => {
-            setErrorMessageImage(undefined)
-        }, 5000)
+            setErrorMessageImage(undefined);
+        }, 5000);
 
     }
 
 
     if (errorMessageGPS) {
-
         setTimeout(() => {
-            setErrorMessageGPS(undefined)
-        }, 5000)
+            setErrorMessageGPS(undefined);
+        }, 5000);
 
     }
 
@@ -225,31 +224,36 @@ const LiveTripTrackingCreate: FC = () => {
 
     const onStartTracking = () => {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(getSTART, gpsError, optionsPosition)
-            watchPos = navigator.geolocation.watchPosition(startWatch, gpsError)
-            lockWakeState()
+            navigator.geolocation.getCurrentPosition(getSTART, gpsError, optionsPosition);
+            watchPos = navigator.geolocation.watchPosition(startWatch, gpsError);
+            setStopTracking(false);
+            lockWakeState();
+            if (liveTrackingPositions.length === 0) {
+                start = Date.parse(new Date() + '')
+
+            }
         } else {
-            setErrorMessageGPS('No GPS Funtionality.')
+            setErrorMessageGPS('No GPS Funtionality.');
         }
     }
 
 
 
     const startWatch = (position: any) => {
-        setLiveTrackingPositions(prev => [...prev, { lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed }])
+        setLiveTrackingPositions(prev => [...prev, { lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed }]);
 
     }
 
 
     const getSTART = (position: any) => {
-        removeMarker()
-        setStartPosition({ lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed })
+        removeMarker();
+        setStartPosition({ lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed });
         center = { lat: position.coords.latitude, lng: position.coords.longitude };
         zoom = 16;
     }
 
     const gpsError = (error: any) => {
-        setErrorMessageGPS('GPS Error: ' + error.code + ', ' + error.message)
+        setErrorMessageGPS('GPS Error: ' + error.code + ', ' + error.message);
     }
 
 
@@ -261,8 +265,8 @@ const LiveTripTrackingCreate: FC = () => {
 
     const onStopTracking = () => {
         navigator.geolocation.clearWatch(watchPos);
-        setStopTracking(true)
-        releaseWakeState()
+        setStopTracking(true);
+        releaseWakeState();
     }
 
 
@@ -287,7 +291,27 @@ const LiveTripTrackingCreate: FC = () => {
 
         return (c * r);
     }
+    if (start) {
+        let now = new Date().getTime()
+        const sec = Math.floor((now - start) / 1000)
+        const min = Math.floor(sec / 60)
+        const hours = Math.floor(min / 60)
+        const days = Math.floor(hours / 24)
+        if (days > 0) {
+            str = (days > 1 ? days + 'days ' : days + 'day ') + (hours % 24 < 10 ? '0' + hours % 24 + 'h:' : hours % 24 + 'h:') + (min % 60 < 10 ? '0' + min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
+        } else if (hours > 0) {
+            str = (hours % 24 < 10 ? '0' + hours % 24 + 'h:' : hours % 24 + 'h:') + (min % 60 < 10 ? '0' + min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
 
+        } else if (min > 0) {
+            str = (min % 60 < 10 ? '0' + min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
+
+        } else {
+            str = (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
+
+        }
+        console.log(str)
+
+    }
 
 
     if (liveTrackingPositions.length > 0) {
@@ -304,28 +328,29 @@ const LiveTripTrackingCreate: FC = () => {
                 point = x;
             }
         })
+
     }
 
     const onDragMap = () => {
-        setCenterP(undefined)
-        setMypos(false)
+        setCenterP(undefined);
+        setMypos(false);
         if (liveTrackingPositions.length) {
-            setShowBtn(true)
+            setShowBtn(true);
         }
     }
 
 
     const onDeleteTracking = () => {
-        setStartPosition(undefined)
-        setStopTracking(false)
-        setLiveTrackingPositions([])
+        setStartPosition(undefined);
+        setStopTracking(false);
+        setLiveTrackingPositions([]);
     }
 
 
 
     const onMyLocationCenter = () => {
-        setMypos(true)
-        setShowBtn(false)
+        setMypos(true);
+        setShowBtn(false);
     }
 
 
@@ -357,6 +382,7 @@ const LiveTripTrackingCreate: FC = () => {
         if (wakelock) wakelock.release();
         wakelock = null;
     }
+
 
     return (
         <>
@@ -437,6 +463,7 @@ const LiveTripTrackingCreate: FC = () => {
                                 minHeight: '250px',
                                 maxHeight: '1100px',
                                 padding: '30px',
+
                                 backgroundColor: '#eee7e79e',
                                 boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                                 '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
@@ -461,7 +488,8 @@ const LiveTripTrackingCreate: FC = () => {
                                         <Typography>This is test: live tracking</Typography>
                                         <Typography>GPS latitude: {liveTrackingPositions[liveTrackingPositions.length - 1].lat ? liveTrackingPositions[liveTrackingPositions.length - 1].lat.toFixed(7) : 'null'}</Typography>
                                         <Typography>GPS longitude:  {liveTrackingPositions[liveTrackingPositions.length - 1].lng ? liveTrackingPositions[liveTrackingPositions.length - 1].lng.toFixed(7) : 'null'}</Typography>
-                                        <Typography>GPS Times: {liveTrackingPositions[liveTrackingPositions.length - 1].timestamp ? (new Date(liveTrackingPositions[liveTrackingPositions.length - 1].timestamp) + '').match(dateRegExp) : 'null'}</Typography>
+                                        <Typography>GPS Time: {liveTrackingPositions[liveTrackingPositions.length - 1].timestamp ? (new Date(liveTrackingPositions[liveTrackingPositions.length - 1].timestamp) + '').match(dateRegExp) : 'null'}</Typography>
+                                        <Typography>GPS Time from start: {' '+ str}</Typography>
                                         <Typography>GPS Speed: {liveTrackingPositions[liveTrackingPositions.length - 1].speed ? Math.floor(Number(liveTrackingPositions[liveTrackingPositions.length - 1].speed) * 3.6) + '  km/h' : 'null'}</Typography>
                                         <Typography>GPS total km: {sum < 1 ? Number(sum.toFixed(3)) * 1000 + ' m' : sum.toFixed(3) + ' km'}</Typography>
                                         <Typography>GPS altitude now:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt ? (liveTrackingPositions[liveTrackingPositions.length - 1].alt)?.toFixed(0) + ' m' : 'null'}</Typography>
@@ -471,18 +499,17 @@ const LiveTripTrackingCreate: FC = () => {
                                     </>
                                     :
                                     ''}
-                            <Box component='div' sx={{ display: 'flex', '@media(max-width: 600px)': { flexDirection: 'column', alignItems: 'center' } }}>
+                            <Box component='div' sx={{ display: 'flex', '@media(max-width: 600px)': { flexDirection: 'column', alignItems: 'center', boxSizing: 'content-box' } }}>
                                 {mobile ?
                                     <>
                                         <Box sx={{ display: 'flex', width: '100%', justifyContent: 'space-around' }}>
 
-                                            <IconButton disabled={liveTrackingPositions.length > 0 ? true : false}>
+                                            <IconButton disabled={liveTrackingPositions.length < 1 ? false : liveTrackingPositions.length > 0 && stopTracking === false ? true : false}>
 
                                                 < PlayCircleFilledTwoToneIcon onClick={onStartTracking} sx={{ fontSize: 55 }} />
                                             </IconButton>
                                             {liveTrackingPositions.length ?
                                                 <>
-                                                    {/* <Button variant="contained" onClick={onStopTracking} disabled={stopTracking}>STOP</Button> */}
                                                     <IconButton disabled={stopTracking}>
                                                         < StopCircleTwoToneIcon onClick={onStopTracking} sx={{ fontSize: 55 }} />
                                                     </IconButton>
@@ -495,20 +522,30 @@ const LiveTripTrackingCreate: FC = () => {
                                         {stopTracking ?
                                             <Button variant="contained" onClick={onDeleteTracking} >DELETE TRACKING</Button>
                                             : ''}
+                                        <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+
                                     </>
                                     :
-                                    <>
-                                        <Button variant="contained" onClick={onStartTracking} sx={{ ':hover': { background: '#4daf30' } }} disabled={liveTrackingPositions.length > 0 ? true : false}>START</Button>
-                                        {liveTrackingPositions.length ?
-                                            <Button variant="contained" onClick={onStopTracking} disabled={stopTracking}>STOP</Button>
-                                            : ''}
-                                        {stopTracking ?
-                                            <Button variant="contained" onClick={onDeleteTracking} >DELETE TRACKING</Button>
-                                            : ''}
-                                    </>
-                                }
 
-                                <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'center' }}>
+
+                                            <Button variant="contained" onClick={onStartTracking} sx={{ ':hover': { background: '#4daf30' } }} disabled={liveTrackingPositions.length < 1 ? false : liveTrackingPositions.length > 0 && stopTracking === false ? true : false}>START</Button>
+                                            {liveTrackingPositions.length ?
+                                                <Button variant="contained" onClick={onStopTracking} disabled={stopTracking}>STOP</Button>
+                                                : ''}
+                                        </Box>
+                                        <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'center' }}>
+                                            {stopTracking ?
+                                                <Button variant="contained" onClick={onDeleteTracking} >DELETE TRACKING</Button>
+                                                : ''}
+                                            <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                                        </Box>
+                                        <Box />
+
+
+                                    </Box>
+                                }
                             </Box>
                         </Box>
                     </Box>
