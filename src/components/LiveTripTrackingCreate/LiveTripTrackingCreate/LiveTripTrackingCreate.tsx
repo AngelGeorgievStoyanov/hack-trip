@@ -99,7 +99,9 @@ const LiveTripTrackingCreate: FC = () => {
     const [stopTracking, setStopTracking] = useState<boolean>(false)
     const [mypos, setMypos] = useState<boolean>(false)
     const [showBtn, setShowBtn] = useState<boolean>(false)
-
+    const [maxAlt, setMaxAlt] = useState<number | undefined>()
+    const [minAlt, setMinAlt] = useState<number | undefined>()
+   
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
@@ -183,9 +185,7 @@ const LiveTripTrackingCreate: FC = () => {
 
 
     const dragMarker = (e: google.maps.MapMouseEvent) => {
-
         if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
-
             setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
         }
     }
@@ -224,13 +224,11 @@ const LiveTripTrackingCreate: FC = () => {
 
     const onStartTracking = () => {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(getSTART, gpsError, optionsPosition);
-            watchPos = navigator.geolocation.watchPosition(startWatch, gpsError);
+            watchPos = navigator.geolocation.watchPosition(startWatch, gpsError, optionsPosition);
             setStopTracking(false);
             lockWakeState();
             if (liveTrackingPositions.length === 0) {
                 start = Date.parse(new Date() + '')
-
             }
         } else {
             setErrorMessageGPS('No GPS Funtionality.');
@@ -238,19 +236,21 @@ const LiveTripTrackingCreate: FC = () => {
     }
 
 
-
     const startWatch = (position: any) => {
         setLiveTrackingPositions(prev => [...prev, { lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed }]);
-
+        if (liveTrackingPositions.length) {
+            setStartPosition({ lat: liveTrackingPositions[0].lat, lng: liveTrackingPositions[0].lng, alt: liveTrackingPositions[0].alt, timestamp: liveTrackingPositions[0].timestamp, speed: liveTrackingPositions[0].speed });
+            center = { lat: liveTrackingPositions[0].lat, lng: liveTrackingPositions[0].lng };
+            zoom = 16;
+        } else {
+            setStartPosition({ lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed });
+            center = { lat: position.coords.latitude, lng: position.coords.longitude };
+            zoom = 16;
+            setMaxAlt(position.coords.altitude);
+            setMinAlt(position.coords.altitude);
+        }
     }
 
-
-    const getSTART = (position: any) => {
-        removeMarker();
-        setStartPosition({ lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed });
-        center = { lat: position.coords.latitude, lng: position.coords.longitude };
-        zoom = 16;
-    }
 
     const gpsError = (error: any) => {
         setErrorMessageGPS('GPS Error: ' + error.code + ', ' + error.message);
@@ -291,6 +291,7 @@ const LiveTripTrackingCreate: FC = () => {
 
         return (c * r);
     }
+
     if (start) {
         let now = new Date().getTime()
         const sec = Math.floor((now - start) / 1000)
@@ -300,17 +301,14 @@ const LiveTripTrackingCreate: FC = () => {
         if (days > 0) {
             str = (days > 1 ? days + 'days ' : days + 'day ') + (hours % 24 < 10 ? '0' + hours % 24 + 'h:' : hours % 24 + 'h:') + (min % 60 < 10 ? '0' + min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
         } else if (hours > 0) {
-            str = (hours % 24 < 10 ? '0' + hours % 24 + 'h:' : hours % 24 + 'h:') + (min % 60 < 10 ? '0' + min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
+            str = (hours % 24 < 10 ? hours % 24 + 'h:' : hours % 24 + 'h:') + (min % 60 < 10 ? '0' + min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
 
         } else if (min > 0) {
-            str = (min % 60 < 10 ? '0' + min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
+            str = (min % 60 < 10 ? min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
 
         } else {
-            str = (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
-
+            str = (sec % 60 < 10 ? sec % 60 + 'sec' : sec % 60 + 'sec')
         }
-        console.log(str)
-
     }
 
 
@@ -381,6 +379,15 @@ const LiveTripTrackingCreate: FC = () => {
     const releaseWakeState = () => {
         if (wakelock) wakelock.release();
         wakelock = null;
+    }
+
+    if ((liveTrackingPositions.length > 0) && liveTrackingPositions[liveTrackingPositions.length - 1].alt && liveTrackingPositions[liveTrackingPositions.length - 1].alt !== null && (liveTrackingPositions[liveTrackingPositions.length - 1].alt !== undefined)) {
+        if (maxAlt && (liveTrackingPositions[liveTrackingPositions.length - 1].alt! > maxAlt)) {
+            setMaxAlt(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt))
+        }
+        if (minAlt && (liveTrackingPositions[liveTrackingPositions.length - 1].alt! < minAlt)) {
+            setMinAlt(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt))
+        }
     }
 
 
@@ -489,12 +496,14 @@ const LiveTripTrackingCreate: FC = () => {
                                         <Typography>GPS latitude: {liveTrackingPositions[liveTrackingPositions.length - 1].lat ? liveTrackingPositions[liveTrackingPositions.length - 1].lat.toFixed(7) : 'null'}</Typography>
                                         <Typography>GPS longitude:  {liveTrackingPositions[liveTrackingPositions.length - 1].lng ? liveTrackingPositions[liveTrackingPositions.length - 1].lng.toFixed(7) : 'null'}</Typography>
                                         <Typography>GPS Time: {liveTrackingPositions[liveTrackingPositions.length - 1].timestamp ? (new Date(liveTrackingPositions[liveTrackingPositions.length - 1].timestamp) + '').match(dateRegExp) : 'null'}</Typography>
-                                        <Typography>GPS Time from start: {' '+ str}</Typography>
+                                        <Typography>GPS Time from start: {' ' + str}</Typography>
                                         <Typography>GPS Speed: {liveTrackingPositions[liveTrackingPositions.length - 1].speed ? Math.floor(Number(liveTrackingPositions[liveTrackingPositions.length - 1].speed) * 3.6) + '  km/h' : 'null'}</Typography>
                                         <Typography>GPS total km: {sum < 1 ? Number(sum.toFixed(3)) * 1000 + ' m' : sum.toFixed(3) + ' km'}</Typography>
                                         <Typography>GPS altitude now:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt ? (liveTrackingPositions[liveTrackingPositions.length - 1].alt)?.toFixed(0) + ' m' : 'null'}</Typography>
                                         <Typography>GPS altitude from start:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt && liveTrackingPositions[0].alt ? (liveTrackingPositions[0].alt)?.toFixed(0) + ' m ' : 'null'}</Typography>
                                         <Typography>GPS alt diff from start:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt && liveTrackingPositions[0].alt ? (Math.round(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt)) - Math.round(liveTrackingPositions[0].alt)) + ' m' : 'null'}</Typography>
+                                        <Typography>GPS max alt:  {maxAlt ? maxAlt.toFixed(0) + ' m' : 'null'}</Typography>
+                                        <Typography>GPS min alt:  {minAlt ? minAlt.toFixed(0) + ' m' : 'null'}</Typography>
 
                                     </>
                                     :
