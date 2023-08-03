@@ -99,9 +99,9 @@ const LiveTripTrackingCreate: FC = () => {
     const [stopTracking, setStopTracking] = useState<boolean>(false)
     const [mypos, setMypos] = useState<boolean>(false)
     const [showBtn, setShowBtn] = useState<boolean>(false)
-    const [maxAlt, setMaxAlt] = useState<number | undefined>()
-    const [minAlt, setMinAlt] = useState<number | undefined>()
-   
+    const [maxAlt, setMaxAlt] = useState<number | null>()
+    const [minAlt, setMinAlt] = useState<number | null>()
+
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
@@ -238,17 +238,8 @@ const LiveTripTrackingCreate: FC = () => {
 
     const startWatch = (position: any) => {
         setLiveTrackingPositions(prev => [...prev, { lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed }]);
-        if (liveTrackingPositions.length) {
-            setStartPosition({ lat: liveTrackingPositions[0].lat, lng: liveTrackingPositions[0].lng, alt: liveTrackingPositions[0].alt, timestamp: liveTrackingPositions[0].timestamp, speed: liveTrackingPositions[0].speed });
-            center = { lat: liveTrackingPositions[0].lat, lng: liveTrackingPositions[0].lng };
-            zoom = 16;
-        } else {
-            setStartPosition({ lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed });
-            center = { lat: position.coords.latitude, lng: position.coords.longitude };
-            zoom = 16;
-            setMaxAlt(position.coords.altitude);
-            setMinAlt(position.coords.altitude);
-        }
+        center = { lat: position.coords.latitude, lng: position.coords.longitude };
+        zoom = 16;
     }
 
 
@@ -326,6 +317,12 @@ const LiveTripTrackingCreate: FC = () => {
                 point = x;
             }
         })
+
+        if (startPosition === undefined) {
+            setStartPosition({ lat: liveTrackingPositions[0].lat, lng: liveTrackingPositions[0].lng, alt: liveTrackingPositions[0].alt, timestamp: liveTrackingPositions[0].timestamp, speed: liveTrackingPositions[0].speed });
+            setMaxAlt(liveTrackingPositions[0].alt);
+            setMinAlt(liveTrackingPositions[0].alt);
+        }
 
     }
 
