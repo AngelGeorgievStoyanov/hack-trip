@@ -228,8 +228,8 @@ const TripEdit: FC = () => {
             files = files.slice(0, indexSize)
 
         }
-       
-       
+
+
         files.map(async (x: File) => {
 
 
@@ -248,11 +248,11 @@ const TripEdit: FC = () => {
                     }
                     try {
                         const compressedFile = await imageCompression(x, options)
-                       
+
                         let compressFile = new File([compressedFile], options.name, { type: x.type })
-                      
+
                         return setFileSelected(prev => [...prev, compressFile]);
-                 
+
                     } catch (err) {
                         console.log(err);
                     }
@@ -262,7 +262,7 @@ const TripEdit: FC = () => {
                             x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
                     }
                     let file = new File([x], options.name, { type: x.type });
-                   
+
                     return setFileSelected(prev => [...prev, file]);
 
                 }
@@ -535,12 +535,12 @@ const TripEdit: FC = () => {
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
                         <Autocomplete>
-                            <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+                            <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px', margin: '2px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
 
                         </Autocomplete>
 
-                        <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
-                        <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
+                        <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' }, margin: '2px' }}>Search</Button>
+                        <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, margin: '2px', background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
 
                     </Box>
                     <Box component='div' sx={{

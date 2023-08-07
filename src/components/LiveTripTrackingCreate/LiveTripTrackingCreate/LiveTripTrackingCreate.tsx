@@ -238,7 +238,6 @@ const LiveTripTrackingCreate: FC = () => {
 
     const startWatch = (position: any) => {
         setLiveTrackingPositions(prev => [...prev, { lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed }]);
-        center = { lat: position.coords.latitude, lng: position.coords.longitude };
         zoom = 16;
     }
 
@@ -371,6 +370,7 @@ const LiveTripTrackingCreate: FC = () => {
         } catch (err: any) {
             console.error('Failed to lock wake state with reason:', err.message);
         }
+
     }
 
     const releaseWakeState = () => {
@@ -385,6 +385,10 @@ const LiveTripTrackingCreate: FC = () => {
         if (minAlt && (liveTrackingPositions[liveTrackingPositions.length - 1].alt! < minAlt)) {
             setMinAlt(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt))
         }
+    }
+
+    if (wakelock?.released && liveTrackingPositions.length) {
+        lockWakeState()
     }
 
 

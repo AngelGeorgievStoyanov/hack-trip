@@ -199,9 +199,9 @@ const CreateTrip: FC = () => {
                     }
                     try {
                         const compressedFile = await imageCompression(x, options)
-                       
+
                         let compressFile = new File([compressedFile], options.name, { type: x.type })
-                      
+
                         return setFileSelected(prev => [...prev, compressFile]);
 
                     } catch (err) {
@@ -213,7 +213,7 @@ const CreateTrip: FC = () => {
                             x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
                     }
                     let file = new File([x], options.name, { type: x.type });
-                   
+
                     return setFileSelected(prev => [...prev, file]);
 
                 }
@@ -478,13 +478,13 @@ const CreateTrip: FC = () => {
 
 
                         <Autocomplete>
-                            <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+                            <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px', margin: '2px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
 
                         </Autocomplete>
 
-                        <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
+                        <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' }, margin: '2px' }}>Search</Button>
 
-                        <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
+                        <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, margin: '2px', background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
 
 
                     </Box>
@@ -501,10 +501,10 @@ const CreateTrip: FC = () => {
                             boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                             '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
                             '& .MuiButton-root': { m: 1, width: '32ch' },
+                            marginBottom: '5px'
                         }}
                         encType="multipart/form-data"
                         method="post"
-
                         noValidate
                         autoComplete='0ff'
                         onSubmit={handleSubmit(createTripSubmitHandler)}
