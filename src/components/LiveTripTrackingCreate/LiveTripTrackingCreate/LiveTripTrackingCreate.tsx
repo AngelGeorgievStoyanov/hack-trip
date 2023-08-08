@@ -85,6 +85,7 @@ let str: string | undefined
 const dateRegExp = new RegExp('[0-9]{2}:[0-9]{2}:[0-9]{2}')
 
 let wakelock: WakeLockSentinel | null;
+let startWatchPos = true
 
 const LiveTripTrackingCreate: FC = () => {
 
@@ -93,14 +94,14 @@ const LiveTripTrackingCreate: FC = () => {
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const [imageBackground, setImageBackground] = useState<string>()
     const [errorMessageGPS, setErrorMessageGPS] = useState<string | undefined>();
-    const [startPosition, setStartPosition] = useState<positionsPoints | undefined>()
-    const [liveTrackingPositions, setLiveTrackingPositions] = useState<positionsPoints[]>([])
-    const [centerP, setCenterP] = useState<ctr | undefined>()
-    const [stopTracking, setStopTracking] = useState<boolean>(false)
-    const [mypos, setMypos] = useState<boolean>(false)
-    const [showBtn, setShowBtn] = useState<boolean>(false)
-    const [maxAlt, setMaxAlt] = useState<number | null>()
-    const [minAlt, setMinAlt] = useState<number | null>()
+    const [startPosition, setStartPosition] = useState<positionsPoints | undefined>();
+    const [liveTrackingPositions, setLiveTrackingPositions] = useState<positionsPoints[]>([]);
+    const [centerP, setCenterP] = useState<ctr | undefined>();
+    const [stopTracking, setStopTracking] = useState<boolean>(false);
+    const [mypos, setMypos] = useState<boolean>(false);
+    const [showBtn, setShowBtn] = useState<boolean>(false);
+    const [maxAlt, setMaxAlt] = useState<number | null>();
+    const [minAlt, setMinAlt] = useState<number | null>();
 
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
@@ -117,10 +118,10 @@ const LiveTripTrackingCreate: FC = () => {
 
     useEffect(() => {
         API_TRIP.backgroundImages().then((data) => {
-            setImageBackground(data[Math.floor(Math.random() * data.length)])
+            setImageBackground(data[Math.floor(Math.random() * data.length)]);
 
         }).catch((err) => {
-            console.log(err)
+            console.log(err);
         });
     }, [])
 
@@ -209,7 +210,7 @@ const LiveTripTrackingCreate: FC = () => {
 
     const getPosition = () => {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(getGPS, gpsError)
+            navigator.geolocation.getCurrentPosition(getGPS, gpsError);
         } else {
             setErrorMessageGPS('No GPS Funtionality.')
         }
@@ -228,7 +229,7 @@ const LiveTripTrackingCreate: FC = () => {
             setStopTracking(false);
             lockWakeState();
             if (liveTrackingPositions.length === 0) {
-                start = Date.parse(new Date() + '')
+                start = Date.parse(new Date() + '');
             }
         } else {
             setErrorMessageGPS('No GPS Funtionality.');
@@ -237,10 +238,16 @@ const LiveTripTrackingCreate: FC = () => {
 
 
     const startWatch = (position: any) => {
-        setLiveTrackingPositions(prev => [...prev, { lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed }]);
-        zoom = 16;
-    }
+        if (position.coords.speed !== null && Number(position.coords.speed > 2)) {
+            setLiveTrackingPositions(prev => [...prev, { lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed }]);
+            zoom = 16;
 
+        } else if (startWatchPos) {
+            setLiveTrackingPositions(prev => [...prev, { lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed }]);
+            zoom = 16;
+            startWatchPos = false;
+        }
+    }
 
     const gpsError = (error: any) => {
         setErrorMessageGPS('GPS Error: ' + error.code + ', ' + error.message);
@@ -283,21 +290,21 @@ const LiveTripTrackingCreate: FC = () => {
     }
 
     if (start) {
-        let now = new Date().getTime()
-        const sec = Math.floor((now - start) / 1000)
-        const min = Math.floor(sec / 60)
-        const hours = Math.floor(min / 60)
-        const days = Math.floor(hours / 24)
+        let now = new Date().getTime();
+        const sec = Math.floor((now - start) / 1000);
+        const min = Math.floor(sec / 60);
+        const hours = Math.floor(min / 60);
+        const days = Math.floor(hours / 24);
         if (days > 0) {
-            str = (days > 1 ? days + 'days ' : days + 'day ') + (hours % 24 < 10 ? '0' + hours % 24 + 'h:' : hours % 24 + 'h:') + (min % 60 < 10 ? '0' + min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
+            str = (days > 1 ? days + 'days ' : days + 'day ') + (hours % 24 < 10 ? '0' + hours % 24 + 'h:' : hours % 24 + 'h:') + (min % 60 < 10 ? '0' + min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec');
         } else if (hours > 0) {
-            str = (hours % 24 < 10 ? hours % 24 + 'h:' : hours % 24 + 'h:') + (min % 60 < 10 ? '0' + min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
+            str = (hours % 24 < 10 ? hours % 24 + 'h:' : hours % 24 + 'h:') + (min % 60 < 10 ? '0' + min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec');
 
         } else if (min > 0) {
-            str = (min % 60 < 10 ? min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec')
+            str = (min % 60 < 10 ? min % 60 + 'min:' : min % 60 + 'min:') + (sec % 60 < 10 ? '0' + sec % 60 + 'sec' : sec % 60 + 'sec');
 
         } else {
-            str = (sec % 60 < 10 ? sec % 60 + 'sec' : sec % 60 + 'sec')
+            str = (sec % 60 < 10 ? sec % 60 + 'sec' : sec % 60 + 'sec');
         }
     }
 
@@ -349,11 +356,11 @@ const LiveTripTrackingCreate: FC = () => {
 
 
     if (mypos && liveTrackingPositions.length) {
-        center = { lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng }
+        center = { lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng };
     }
 
     if (showBtn === false && liveTrackingPositions.length) {
-        center = { lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng }
+        center = { lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng };
     }
 
 
@@ -380,17 +387,16 @@ const LiveTripTrackingCreate: FC = () => {
 
     if ((liveTrackingPositions.length > 0) && liveTrackingPositions[liveTrackingPositions.length - 1].alt && liveTrackingPositions[liveTrackingPositions.length - 1].alt !== null && (liveTrackingPositions[liveTrackingPositions.length - 1].alt !== undefined)) {
         if (maxAlt && (liveTrackingPositions[liveTrackingPositions.length - 1].alt! > maxAlt)) {
-            setMaxAlt(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt))
+            setMaxAlt(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt));
         }
         if (minAlt && (liveTrackingPositions[liveTrackingPositions.length - 1].alt! < minAlt)) {
-            setMinAlt(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt))
+            setMinAlt(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt));
         }
     }
 
     if (wakelock?.released && liveTrackingPositions.length) {
-        lockWakeState()
+        lockWakeState();
     }
-
 
     return (
         <>
