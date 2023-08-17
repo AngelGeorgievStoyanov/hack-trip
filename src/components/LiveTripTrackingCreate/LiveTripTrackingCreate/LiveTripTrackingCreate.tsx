@@ -66,26 +66,28 @@ type positionsPoints = {
 
 }
 
-let watchPos: number
+let watchPos: number;
 
 let optionsPosition = {
     enableHighAccuracy: true,
     timeout: 5000,
     maximumAge: 0,
 };
-let sum: number = 0
+
+let sum: number = 0;
 
 interface ctr {
     lat: number;
     lng: number;
 }
+
 let start: number | undefined;
-let str: string | undefined
+
+let str: string | undefined;
 
 const dateRegExp = new RegExp('[0-9]{2}:[0-9]{2}:[0-9]{2}')
 
 let wakelock: WakeLockSentinel | null;
-let startWatchPos = true
 
 const LiveTripTrackingCreate: FC = () => {
 
@@ -102,6 +104,7 @@ const LiveTripTrackingCreate: FC = () => {
     const [showBtn, setShowBtn] = useState<boolean>(false);
     const [maxAlt, setMaxAlt] = useState<number | null>();
     const [minAlt, setMinAlt] = useState<number | null>();
+    const [currentPoint, setCurrentPoint] = useState<positionsPoints | undefined>();
 
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
@@ -160,18 +163,7 @@ const LiveTripTrackingCreate: FC = () => {
         mapRef.current = null;
     }
 
-    // const onMapClick = (e: google.maps.MapMouseEvent) => {
-
-
-    //     if (e.latLng?.lat() !== undefined && (typeof (e.latLng?.lat()) === 'number')) {
-
-    //         // center = { lat: e.latLng.lat(), lng: e.latLng.lng() };
-    //         setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-    //         setCenterP({ lat: e.latLng.lat(), lng: e.latLng.lng() })
-    //     }
-    // }
-
-
+    
     const removeMarker = () => {
         setClickedPos(undefined);
         center = {
@@ -238,21 +230,13 @@ const LiveTripTrackingCreate: FC = () => {
 
 
     const startWatch = (position: any) => {
-        if (position.coords.speed !== null && Number(position.coords.speed > 2)) {
-            setLiveTrackingPositions(prev => [...prev, { lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed }]);
-            zoom = 16;
-
-        } else if (startWatchPos) {
-            setLiveTrackingPositions(prev => [...prev, { lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed }]);
-            zoom = 16;
-            startWatchPos = false;
-        }
+        setCurrentPoint({ lat: position.coords.latitude, lng: position.coords.longitude, alt: position.coords.altitude, timestamp: position.timestamp, speed: position.coords.speed });
+        zoom = 16;
     }
 
     const gpsError = (error: any) => {
         setErrorMessageGPS('GPS Error: ' + error.code + ', ' + error.message);
     }
-
 
 
     const goBack = () => {
@@ -309,20 +293,14 @@ const LiveTripTrackingCreate: FC = () => {
     }
 
 
-    if (liveTrackingPositions.length > 0) {
+    if (liveTrackingPositions.length > 0 && currentPoint !== undefined) {
 
-        let point: positionsPoints | undefined;
-        sum = 0;
+        let distance = distanceBeetweenTwoCordinates(liveTrackingPositions[liveTrackingPositions.length - 1].lat, currentPoint.lat, liveTrackingPositions[liveTrackingPositions.length - 1].lng, currentPoint.lng);
 
-        liveTrackingPositions.forEach((x, i) => {
-            if (point !== undefined) {
-                let distanceBeetewTwoPoints = distanceBeetweenTwoCordinates(point.lat, x.lat, point.lng, x.lng);
-                sum += distanceBeetewTwoPoints;
-                point = x;
-            } else {
-                point = x;
-            }
-        })
+        if (((distance * 1000) > 5) && ((liveTrackingPositions[liveTrackingPositions.length - 1].lat !== currentPoint.lat) || (liveTrackingPositions[liveTrackingPositions.length - 1].lng !== currentPoint.lng))) {
+
+            setLiveTrackingPositions(prev => [...prev, { lat: currentPoint.lat, lng: currentPoint.lng, alt: currentPoint.alt, timestamp: currentPoint.timestamp, speed: currentPoint.speed }]);
+        }
 
         if (startPosition === undefined) {
             setStartPosition({ lat: liveTrackingPositions[0].lat, lng: liveTrackingPositions[0].lng, alt: liveTrackingPositions[0].alt, timestamp: liveTrackingPositions[0].timestamp, speed: liveTrackingPositions[0].speed });
@@ -330,7 +308,12 @@ const LiveTripTrackingCreate: FC = () => {
             setMinAlt(liveTrackingPositions[0].alt);
         }
 
+    } else {
+        if (currentPoint !== undefined) {
+            setLiveTrackingPositions([currentPoint]);
+        }
     }
+
 
     const onDragMap = () => {
         setCenterP(undefined);
@@ -345,6 +328,7 @@ const LiveTripTrackingCreate: FC = () => {
         setStartPosition(undefined);
         setStopTracking(false);
         setLiveTrackingPositions([]);
+        setCurrentPoint(undefined);
     }
 
 
@@ -396,6 +380,23 @@ const LiveTripTrackingCreate: FC = () => {
 
     if (wakelock?.released && liveTrackingPositions.length) {
         lockWakeState();
+    }
+
+    if (liveTrackingPositions.length > 0) {
+
+        let point: positionsPoints | undefined;
+      
+        sum = 0;
+
+        liveTrackingPositions.forEach((x, i) => {
+            if (point !== undefined) {
+                let distanceBeetewTwoPoints = distanceBeetweenTwoCordinates(point.lat, x.lat, point.lng, x.lng);
+                sum += distanceBeetewTwoPoints;
+                point = x;
+            } else {
+                point = x;
+            }
+        })
     }
 
     return (
@@ -566,6 +567,7 @@ const LiveTripTrackingCreate: FC = () => {
                         </Box>
                     </Box>
                 </Container>
+                <audio loop autoPlay></audio>
             </Grid>
         </>
     )
