@@ -44,7 +44,7 @@ const Header: FC = () => {
 
     let role = 'user';
 
-    const iconMenu = useMediaQuery('(max-width:600px)');
+    const iconMenu = useMediaQuery('(max-width:900px)');
 
 
     if (accessToken) {

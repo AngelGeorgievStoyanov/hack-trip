@@ -114,8 +114,6 @@ const LiveTripTrackingCreate: FC = () => {
     const [activeStep, setActiveStep] = useState(0);
     const [touchStart, setTouchStart] = useState<number>(0);
     const [touchEnd, setTouchEnd] = useState<number>(0);
-    const [screenHeight, setScreenHeight] = useState(window.innerHeight);
-    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
     const minSwipeDistance = 45;
 
@@ -131,7 +129,6 @@ const LiveTripTrackingCreate: FC = () => {
 
     const footer = document.getElementsByTagName('footer')[0];
 
-    const root = document.getElementById('root') as HTMLElement;
 
 
     if (accessToken) {
@@ -139,11 +136,6 @@ const LiveTripTrackingCreate: FC = () => {
         userId = decode._id;
     }
 
-    const handleResize = () => {
-        console.log(window.screen)
-        setScreenHeight(window.screen.height);
-        setScreenWidth(window.screen.width);
-    }
 
 
     useEffect(() => {
@@ -153,13 +145,6 @@ const LiveTripTrackingCreate: FC = () => {
         }).catch((err) => {
             console.log(err);
         });
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('orientationchange',handleResize);
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            window.removeEventListener('orientationchange', handleResize);
-        };
-       
     }, [])
 
 
@@ -435,26 +420,22 @@ const LiveTripTrackingCreate: FC = () => {
 
     if (header && footer) {
         if (window.screen.orientation.type === 'portrait-primary') {
-            boxSize = (screenHeight - header.clientHeight - footer.clientHeight) + 'px';
-
-        } else {
             if (activeStep === 0) {
                 boxSize = '100%';
             } else {
-                boxSize = (screenHeight - header.clientHeight - footer.clientHeight) + 'px';
+                boxSize = (window.screen.height - header.clientHeight - footer.clientHeight) + 'px';
+            }
+        } else {
+            if (activeStep === 0) {
+                boxSize = 'undefined';
+            } else {
+                boxSize = (window.screen.height - header.clientHeight - footer.clientHeight) + 'px';
             }
 
         }
 
     }
 
-    if (window.screen.orientation.type === 'landscape-primary') {
-
-        root.style.cssText = `width: ${screenWidth}px`
-    } else {
-        root.style.cssText = `width: ${screenWidth}px`
-
-    }
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -574,7 +555,6 @@ const LiveTripTrackingCreate: FC = () => {
                                             <Typography>GPS alt diff from start:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt && liveTrackingPositions[0].alt ? (Math.round(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt)) - Math.round(liveTrackingPositions[0].alt)) + ' m' : 'null'}</Typography>
                                             <Typography>GPS max alt:  {maxAlt ? maxAlt.toFixed(0) + ' m' : 'null'}</Typography>
                                             <Typography>GPS min alt:  {minAlt ? minAlt.toFixed(0) + ' m' : 'null'}</Typography>
-
                                         </>
                                         :
                                         ''}
@@ -785,7 +765,6 @@ const LiveTripTrackingCreate: FC = () => {
                                                 <Typography>GPS alt diff from start:  {liveTrackingPositions[liveTrackingPositions.length - 1].alt && liveTrackingPositions[0].alt ? (Math.round(Number(liveTrackingPositions[liveTrackingPositions.length - 1].alt)) - Math.round(liveTrackingPositions[0].alt)) + ' m' : 'null'}</Typography>
                                                 <Typography>GPS max alt:  {maxAlt ? maxAlt.toFixed(0) + ' m' : 'null'}</Typography>
                                                 <Typography>GPS min alt:  {minAlt ? minAlt.toFixed(0) + ' m' : 'null'}</Typography>
-
                                             </>
                                             :
                                             ''}
