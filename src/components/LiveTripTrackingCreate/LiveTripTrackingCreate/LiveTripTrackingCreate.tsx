@@ -95,6 +95,8 @@ let screen = window.screen;
 
 let boxSize: string;
 
+let html = document.querySelector('html') as HTMLElement;
+
 const LiveTripTrackingCreate: FC = () => {
 
 
@@ -114,7 +116,7 @@ const LiveTripTrackingCreate: FC = () => {
     const [activeStep, setActiveStep] = useState(0);
     const [touchStart, setTouchStart] = useState<number>(0);
     const [touchEnd, setTouchEnd] = useState<number>(0);
-
+    const [screenHeigth, setScreenHeigth] = useState(window.screen.height)
     const minSwipeDistance = 45;
 
     const theme = useTheme();
@@ -144,6 +146,10 @@ const LiveTripTrackingCreate: FC = () => {
 
         }).catch((err) => {
             console.log(err);
+        });
+        window.addEventListener('resize', () => {
+            console.log(window.screen.height)
+            setScreenHeigth(window.screen.height)
         });
     }, [])
 
@@ -239,6 +245,10 @@ const LiveTripTrackingCreate: FC = () => {
             setStopTracking(false);
             lockWakeState();
             setClickedPos(undefined);
+            if (mobile) {
+                html.style.height = '100%';
+                html.style.removeProperty('minHeight');
+            }
             if (liveTrackingPositions.length === 0) {
                 start = Date.parse(new Date() + '');
             }
@@ -259,6 +269,10 @@ const LiveTripTrackingCreate: FC = () => {
 
 
     const goBack = () => {
+        if (mobile) {
+            html.style.minHeight = '100%';
+            html.style.removeProperty('height');
+        }
         navigate(-1);
     }
 
@@ -267,6 +281,7 @@ const LiveTripTrackingCreate: FC = () => {
         navigator.geolocation.clearWatch(watchPos);
         setStopTracking(true);
         releaseWakeState();
+
     }
 
 
@@ -348,6 +363,10 @@ const LiveTripTrackingCreate: FC = () => {
         setStopTracking(false);
         setLiveTrackingPositions([]);
         setCurrentPoint(undefined);
+        if (mobile) {
+            html.style.minHeight = '100%';
+            html.style.removeProperty('height');
+        }
     }
 
 
@@ -402,6 +421,8 @@ const LiveTripTrackingCreate: FC = () => {
     }
 
     if (liveTrackingPositions.length > 0) {
+
+        // root.style.display = 'grid'
 
         let point: positionsPoints | undefined;
         sum = 0;
