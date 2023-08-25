@@ -148,7 +148,6 @@ const LiveTripTrackingCreate: FC = () => {
             console.log(err);
         });
         window.addEventListener('resize', () => {
-            console.log(window.screen.height)
             setScreenHeigth(window.screen.height)
         });
     }, [])

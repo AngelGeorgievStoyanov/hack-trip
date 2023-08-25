@@ -34,7 +34,7 @@ type decode = {
     role: string
 }
 
-let zoom = 8;
+let zoom = 12;
 
 let center = {
     lat: 42.697866831005435,
@@ -95,11 +95,9 @@ const AdminTripDetails: FC = () => {
     const minSwipeDistance = 45;
 
 
-
     const { userL } = useContext(LoginContext)
 
     const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
-
     let role = 'user';
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
@@ -127,26 +125,22 @@ const AdminTripDetails: FC = () => {
 
                     API_POINT.findByTripId(data._id).then((data) => {
 
-                        if (data) {
-                            if (typeof data === "object") {
-                                const arrPoints = data as any as Point[];
+                        if (data && Array.isArray(data)) {
+                            const arrPoints = data as Point[];
 
-                                if (arrPoints !== undefined && arrPoints.length > 0) {
+                            if (arrPoints !== undefined && arrPoints.length > 0) {
 
-                                    arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
-
-
-                                    center = {
-                                        lat: Number(arrPoints[0].lat),
-                                        lng: Number(arrPoints[0].lng)
-                                    }
+                                arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
 
 
-
-                                    setPoints(arrPoints);
+                                center = {
+                                    lat: Number(arrPoints[0].lat),
+                                    lng: Number(arrPoints[0].lng)
                                 }
 
+                                setPoints(arrPoints);
                             }
+
                         }
                         setMapCenter(center);
                     }).catch((err) => {
@@ -154,12 +148,8 @@ const AdminTripDetails: FC = () => {
                     });
 
                     API_COMMENT.findByTripId(data._id, userId).then(async (data) => {
-                        if (data) {
-
-                            if (typeof data === "object") {
-
-                                setComments(data);
-                            }
+                        if (data && Array.isArray(data)) {
+                            setComments(data);
                         }
 
 
@@ -170,8 +160,6 @@ const AdminTripDetails: FC = () => {
             }).catch((err) => {
                 console.log(err)
             })
-
-
 
         }
 
@@ -231,17 +219,16 @@ const AdminTripDetails: FC = () => {
 
     const onLoad = (map: google.maps.Map): void => {
         mapRef.current = map;
-
-
+        const bounds = new google.maps.LatLngBounds();
+        points?.forEach(({ lat, lng }) => bounds.extend({ lat: Number(lat), lng: Number(lng) }));
+        map.fitBounds(bounds);
     }
 
     const onUnmount = (): void => {
         mapRef.current = null;
     }
+
     if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}><Typography sx={{ fontFamily: 'Space Mono, monospace' }} variant='h4'>MAP LOADING ...</Typography></Grid>
-
-
-
 
     const onMarkerClick = (id: string, positionNumber: number) => {
 
@@ -260,8 +247,9 @@ const AdminTripDetails: FC = () => {
                     lng: Number(currentPoint[0].lng)
                 }
 
-                mapRef.current?.panTo(center)
-                zoom = 10;
+                mapRef.current?.panTo(center);
+               
+                mapRef.current?.set('zoom', 14);
             }
 
         } else if (positionNumber) {
@@ -276,8 +264,9 @@ const AdminTripDetails: FC = () => {
                     lng: Number(currentPoint[0].lng)
                 }
 
-                mapRef.current?.panTo(center)
-                zoom = 10;
+                mapRef.current?.panTo(center);
+               
+                mapRef.current?.set('zoom', 14);
             }
 
         } else if (positionNumber === 0) {
@@ -287,8 +276,11 @@ const AdminTripDetails: FC = () => {
                 lat: Number(points[0].lat),
                 lng: Number(points[0].lng)
             }
-            mapRef.current?.panTo(center)
-            zoom = 8;
+            mapRef.current?.panTo(center);
+            
+            const bounds = new google.maps.LatLngBounds();
+            points?.forEach(({ lat, lng }) => bounds.extend({ lat: Number(lat), lng: Number(lng) }));
+            mapRef.current?.fitBounds(bounds);
         }
 
     }

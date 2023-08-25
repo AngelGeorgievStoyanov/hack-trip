@@ -86,7 +86,6 @@ const Home: FC = () => {
                 <meta property="og:locale" content="en_US" />
                 <meta property="og:hashtag" content={'#HackTrip'} />
                 <meta property="og:site_name" content="Hack-Trip" />
-                <link rel="canonical" href="/" />
             </Helmet>
 
             <Grid onTouchStart={onTouchStart} container sx={!isIphone ?

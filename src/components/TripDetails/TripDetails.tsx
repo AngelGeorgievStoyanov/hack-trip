@@ -139,38 +139,33 @@ const TripDetails: FC = () => {
 
                     API_POINT.findByTripId(data._id).then((data) => {
 
-                        if (data) {
+                        if (data && Array.isArray(data)) {
+                            const arrPoints = data as Point[];
 
-                            if (typeof data === "object") {
-                                const arrPoints = data as any as Point[];
+                            if (arrPoints !== undefined && arrPoints.length > 0) {
 
-                                if (arrPoints !== undefined && arrPoints.length > 0) {
-
-                                    arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
+                                arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
 
 
-                                    center = {
-                                        lat: Number(arrPoints[0].lat),
-                                        lng: Number(arrPoints[0].lng)
-                                    }
-
-
-                                    setPoints(arrPoints);
+                                center = {
+                                    lat: Number(arrPoints[0].lat),
+                                    lng: Number(arrPoints[0].lng)
                                 }
 
+
+                                setPoints(arrPoints);
                             }
+
+
+                            setMapCenter(center);
                         }
-                        setMapCenter(center);
                     }).catch((err) => {
                         console.log(err);
                     });
 
                     API_COMMENT.findByTripId(data._id, userId).then(async (data) => {
-                        if (data) {
-
-                            if (typeof data === "object") {
-                                setComments(data);
-                            }
+                        if (data && Array.isArray(data)) {
+                            setComments(data);
                         }
 
 
@@ -263,6 +258,9 @@ const TripDetails: FC = () => {
 
     const onLoad = (map: google.maps.Map): void => {
         mapRef.current = map;
+        const bounds = new google.maps.LatLngBounds();
+        points?.forEach(({ lat, lng }) => bounds.extend({ lat: Number(lat), lng: Number(lng) }));
+        map.fitBounds(bounds);
     }
 
     const onUnmount = (): void => {
@@ -287,8 +285,10 @@ const TripDetails: FC = () => {
                     lng: Number(currentPoint[0].lng)
                 }
 
-                mapRef.current?.panTo(center)
-                zoom = 14;
+                mapRef.current?.panTo(center);
+
+                mapRef.current?.set('zoom', 14);
+
             }
 
         } else if (positionNumber) {
@@ -303,8 +303,9 @@ const TripDetails: FC = () => {
                     lng: Number(currentPoint[0].lng)
                 }
 
-                mapRef.current?.panTo(center)
-                zoom = 14;
+                mapRef.current?.panTo(center);
+
+                mapRef.current?.set('zoom', 14);
             }
 
         } else if (positionNumber === 0) {
@@ -314,10 +315,11 @@ const TripDetails: FC = () => {
                 lat: Number(points[0].lat),
                 lng: Number(points[0].lng)
             }
-            mapRef.current?.panTo(center)
+            mapRef.current?.panTo(center);
 
-
-            zoom = 10;
+            const bounds = new google.maps.LatLngBounds();
+            points?.forEach(({ lat, lng }) => bounds.extend({ lat: Number(lat), lng: Number(lng) }));
+            mapRef.current?.fitBounds(bounds);
         }
 
     }
@@ -907,8 +909,6 @@ const TripDetails: FC = () => {
                                         zoom={zoom}
                                         onLoad={onLoad}
                                         onUnmount={onUnmount}
-
-
                                     >
                                         {pathPoints ? <PolylineF path={pathPoints} /> : null}
                                         {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip && trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}

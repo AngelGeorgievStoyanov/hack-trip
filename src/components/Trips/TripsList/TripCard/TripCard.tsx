@@ -27,22 +27,23 @@ const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType
 
 let userId: string | undefined;
 
-const slideInEllipticBottom = keyframes` 
-0% {
-    -webkit-transform: translateY(600px) rotateX(-30deg) scale(6.5);
-            transform: translateY(600px) rotateX(-30deg) scale(6.5);
-    -webkit-transform-origin: 50% -100%;
-            transform-origin: 50% -100%;
-    opacity: 0;
-  }
-  100% {
-    -webkit-transform: translateY(0) rotateX(0) scale(1);
-            transform: translateY(0) rotateX(0) scale(1);
-    -webkit-transform-origin: 50% 500px;
-            transform-origin: 50% 500px;
-    opacity: 1;
-  }
-`;
+// const slideInEllipticBottom = keyframes` 
+// 0% {
+//     -webkit-transform: translateY(600px) rotateX(-30deg) scale(6.5);
+//             transform: translateY(600px) rotateX(-30deg) scale(6.5);
+//     -webkit-transform-origin: 50% -100%;
+//             transform-origin: 50% -100%;
+//     opacity: 0;
+//   }
+//   100% {
+//     -webkit-transform: translateY(0) rotateX(0) scale(1);
+//             transform: translateY(0) rotateX(0) scale(1);
+//     -webkit-transform-origin: 50% 500px;
+//             transform-origin: 50% 500px;
+//     opacity: 1;
+//   }
+// `;
+
 const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
 
     const [userVerId, setUserVerId] = useState<boolean>(false)
@@ -134,7 +135,7 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                     height: isMobile ? 'fit-content' : 'auto',
                     padding: '25px 0px 0px 0px', backgroundColor: '#eee7e79e',
                     boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
-                    animation: `${slideInEllipticBottom} 1.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s both`
+                    // animation: `${slideInEllipticBottom} 1.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s both`
                 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: isMobile ? 'auto' : '-webkit-fill-available', justifyContent: 'space-evenly' }}>
 
@@ -147,7 +148,7 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                     </Box>
                     {trip.imageFile?.length && trip.imageFile.length > 0 ?
                         <>
-                            <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStep]}`} alt='hack trip' title='hack trip' loading="lazy" width='300px' height='200px' />
+                            <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStep]}`} alt='hack trip' title='hack trip' loading="lazy" width='300px' height='200px' style={{ aspectRatio: '1/1' }} />
 
                             <MobileStepper
                                 variant="dots"
