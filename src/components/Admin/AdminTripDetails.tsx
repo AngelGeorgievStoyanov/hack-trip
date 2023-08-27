@@ -173,7 +173,7 @@ const AdminTripDetails: FC = () => {
 
     if (trip !== undefined) {
 
-        if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lat !== null) && (points === undefined)) {
+        if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lat !== null) && (Array.from(points).length === 0)) {
 
             center = {
                 lat: Number(trip.lat),
@@ -219,9 +219,14 @@ const AdminTripDetails: FC = () => {
 
     const onLoad = (map: google.maps.Map): void => {
         mapRef.current = map;
-        const bounds = new google.maps.LatLngBounds();
-        points?.forEach(({ lat, lng }) => bounds.extend({ lat: Number(lat), lng: Number(lng) }));
-        map.fitBounds(bounds);
+
+        if (points.length === 0 && trip) {
+            mapRef.current.setCenter({ lat: Number(trip.lat), lng: Number(trip.lng) });
+        } else {
+            const bounds = new google.maps.LatLngBounds();
+            points?.forEach(({ lat, lng }) => bounds.extend({ lat: Number(lat), lng: Number(lng) }));
+            map.fitBounds(bounds);
+        }
     }
 
     const onUnmount = (): void => {
@@ -229,6 +234,17 @@ const AdminTripDetails: FC = () => {
     }
 
     if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}><Typography sx={{ fontFamily: 'Space Mono, monospace' }} variant='h4'>MAP LOADING ...</Typography></Grid>
+
+
+    if (trip !== undefined && points.length > 0 && activeStep === 0 && mapRef.current) {
+        const bounds = new google.maps.LatLngBounds();
+        points?.forEach(({ lat, lng }) => bounds.extend({ lat: Number(lat), lng: Number(lng) }));
+        mapRef.current?.fitBounds(bounds);
+    }
+
+    if (points.length === 0 && trip && mapRef.current) {
+        mapRef.current.setCenter({ lat: Number(trip.lat), lng: Number(trip.lng) });
+    }
 
     const onMarkerClick = (id: string, positionNumber: number) => {
 
@@ -248,7 +264,7 @@ const AdminTripDetails: FC = () => {
                 }
 
                 mapRef.current?.panTo(center);
-               
+
                 mapRef.current?.set('zoom', 14);
             }
 
@@ -265,7 +281,7 @@ const AdminTripDetails: FC = () => {
                 }
 
                 mapRef.current?.panTo(center);
-               
+
                 mapRef.current?.set('zoom', 14);
             }
 
@@ -277,7 +293,7 @@ const AdminTripDetails: FC = () => {
                 lng: Number(points[0].lng)
             }
             mapRef.current?.panTo(center);
-            
+
             const bounds = new google.maps.LatLngBounds();
             points?.forEach(({ lat, lng }) => bounds.extend({ lat: Number(lat), lng: Number(lng) }));
             mapRef.current?.fitBounds(bounds);
