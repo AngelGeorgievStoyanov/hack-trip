@@ -421,8 +421,6 @@ const LiveTripTrackingCreate: FC = () => {
 
     if (liveTrackingPositions.length > 0) {
 
-        // root.style.display = 'grid'
-
         let point: positionsPoints | undefined;
         sum = 0;
 
@@ -441,21 +439,20 @@ const LiveTripTrackingCreate: FC = () => {
     if (header && footer) {
         if (window.screen.orientation.type === 'portrait-primary') {
             if (activeStep === 0) {
-                boxSize = '100%';
+                boxSize = (window.innerHeight - header.clientHeight - footer.clientHeight) + 'px';
             } else {
-                boxSize = (window.screen.height - header.clientHeight - footer.clientHeight) + 'px';
+                boxSize = (window.innerHeight - header.clientHeight - footer.clientHeight) + 'px';
             }
         } else {
             if (activeStep === 0) {
                 boxSize = 'undefined';
             } else {
-                boxSize = (window.screen.height - header.clientHeight - footer.clientHeight) + 'px';
+                boxSize = (window.innerHeight - header.clientHeight - footer.clientHeight) + 'px';
             }
 
         }
 
     }
-
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -658,7 +655,7 @@ const LiveTripTrackingCreate: FC = () => {
                                     </GoogleMap>
                                     {showBtn ?
 
-                                        <IconButton onClick={onMyLocationCenter} sx={{ position: 'absolute', marginTop: '-' + footer.clientHeight + 'px', marginLeft: ((screen.width / 2) - 27.5) + 'px' }} >
+                                        <IconButton onClick={onMyLocationCenter} sx={{ position: 'absolute', marginTop: '-' + footer.clientHeight + 'px', marginLeft: '50%', transform: 'translate(-27px,0px)' }} >
                                             <MyLocationRoundedIcon sx={{ fontSize: 55 }} />
 
 

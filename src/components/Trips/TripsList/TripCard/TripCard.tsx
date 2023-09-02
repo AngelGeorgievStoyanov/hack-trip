@@ -1,5 +1,5 @@
 
-import { Box, Button, Card, CardContent, MobileStepper, Typography, keyframes, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, Card, CardContent, MobileStepper, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Trip } from '../../../../model/trip';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from '../../../../App';
