@@ -2,26 +2,48 @@ import { FC, useEffect, useRef, useState } from 'react'
 import './Footer.css'
 
 const Footer: FC = () => {
-    
-    const [screenOrientation, setScreenOrientation] = useState<string>((window.screen.orientation.type).toString())
+
+    const [screenOrientation, setScreenOrientation] = useState<string>()
     const refFooter = useRef<HTMLElement | null>(null);
     const isIphoneIpad = /\b(iPhone|iPad)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
-    const isLandscape = /landscape/.test(screenOrientation)
+    const isLandscape = /landscape/.test(screenOrientation ? screenOrientation : '');
     const root = document.getElementById('root') as HTMLDivElement;
 
+
     useEffect(() => {
+
         window.addEventListener('resize', () => {
-            setScreenOrientation(window.screen.orientation.type);
+            if (window.screen && (window.screen.orientation !== null) && (window.screen.orientation.type !== null)) {
+                setScreenOrientation(window.screen.orientation.type);
+            } else {
+                if (window.matchMedia('(orientation: landscape)').matches) {
+                    setScreenOrientation('landscape');
+                } else {
+                    setScreenOrientation('portrait');
+                }
+            }
             onTouchEnd();
         });
 
         window.addEventListener('touchend', () => {
-            setScreenOrientation(window.screen.orientation.type);
+            if (window.screen && (window.screen.orientation !== null) && (window.screen.orientation.type !== null)) {
+                setScreenOrientation(window.screen.orientation.type);
+            } else {
+                if (window.matchMedia('(orientation: landscape)').matches) {
+                    setScreenOrientation('landscape');
+                } else {
+                    setScreenOrientation('portrait');
+                }
+            }
             onTouchEnd();
         });
 
+
+
     }, []);
 
+   
+   
     const onTouchEnd = () => {
 
         if (isIphoneIpad && (window.screen.orientation.angle !== 0 || isLandscape) && refFooter.current && (refFooter.current?.getBoundingClientRect().bottom < window.screen.width + 5)) {
