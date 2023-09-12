@@ -494,8 +494,8 @@ const CreateTrip: FC = () => {
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'space-between',
-                            maxWidth: '600px',
-                            maxHeight: '1050px',
+                            width: 'fit-content',
+                            height: 'fit-content',
                             padding: '30px',
                             backgroundColor: '#eee7e79e',
                             boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
@@ -580,7 +580,7 @@ const CreateTrip: FC = () => {
                         </> : ''}
 
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
-                        <span>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
                             {buttonAdd === true ?
                                 <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!isDirty || !isValid}>ADD TRIP</Button>
                                 : <LoadingButton variant="contained" loading={loading}   >
@@ -589,7 +589,7 @@ const CreateTrip: FC = () => {
                             }
                             <Button variant="contained" disabled={!isValid} onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}>ADD POINT`S FOR THE TRIP</Button>
 
-                        </span>
+                        </Box>
                     </Box>
                 </Container>
             </Grid>

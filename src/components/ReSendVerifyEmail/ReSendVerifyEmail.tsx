@@ -1,4 +1,4 @@
-import { Box, Button, Container, Grid, Typography, useMediaQuery } from "@mui/material";
+import { Alert, Box, Button, Container, Grid, Snackbar, Typography, useMediaQuery } from "@mui/material";
 import { User } from "../../model/users";
 import { IdType, mouseover, touchStart } from "../../shared/common-types";
 import FormInputText from "../FormFields/FormInputText";
@@ -82,27 +82,6 @@ const ReSendVerifyEmail: FC = () => {
 
     }
 
-    if (errorApi) {
-
-        setTimeout(() => {
-            setErrorApi(undefined)
-        }, 5000)
-    }
-
-
-
-
-
-    if (registerMessage) {
-
-        setTimeout(() => {
-            setErrorApi(undefined);
-            setRegisterMessage(undefined);
-            navigate('/login')
-        }, 5000)
-
-    }
-
 
     const onChangeReCAPTCHA = (value: any) => {
         if (value !== null) {
@@ -126,6 +105,23 @@ const ReSendVerifyEmail: FC = () => {
 
     const onTouchStart = () => {
         touchStart(h1HackRef)
+    }
+
+    const handleCloseApi = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setErrorApi(undefined);
+    }
+
+    const handleCloseRegister = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setRegisterMessage(undefined);
+        navigate('/login')
     }
 
     return (
@@ -162,26 +158,22 @@ const ReSendVerifyEmail: FC = () => {
                             <h1 ref={h1HackRef} data-value="Hack Trip!" style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Hack Trip!</h1>
                         </>
                     }
-                    {errorApi ?
-                        <Box component='div' sx={{ backgroundColor: 'red', color: 'black', padding: '10px 20px', borderRadius: '9px', margin: '20px' }}>
-                            <Typography component='h4'>
-                                {errorApi}
-                            </Typography>
-                        </Box>
-                        : ''}
-                    {registerMessage ?
-                        <Box component='div' sx={{ backgroundColor: '#1976d2', color: 'white', padding: '10px 20px', borderRadius: '9px', margin: '20px' }}>
-                            <Typography component='h3'>
-                                {registerMessage}
-                            </Typography>
-                        </Box>
-                        : ''}
+
+
+                    <Snackbar sx={{ position: 'relative' }} open={errorApi ? true : false} autoHideDuration={5000} onClose={handleCloseApi} >
+                        <Alert onClose={handleCloseApi} severity="error">{errorApi}</Alert>
+                    </Snackbar>
+
+                    <Snackbar sx={{ position: 'relative' }} open={registerMessage ? true : false} autoHideDuration={5000} onClose={handleCloseRegister} >
+                        <Alert onClose={handleCloseRegister} severity="success">{registerMessage}</Alert>
+                    </Snackbar>
+
                     <Box component="form" sx={{
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
                         maxWidth: '700px',
-                        maxHeight: '385px',
+                        height: 'fit-content',
                         padding: '30px',
                         backgroundColor: '#e5e3e3d9',
                         boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',

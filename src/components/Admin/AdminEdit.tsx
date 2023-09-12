@@ -348,7 +348,7 @@ const AdminEdit: FC = () => {
                     justifyContent: 'space-between',
                     margin: '20px',
                     maxWidth: '600px',
-                    maxHeight: '700px',
+                    height: 'fit-content',
                     padding: '30px',
                     backgroundColor: '#8d868670',
                     boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',

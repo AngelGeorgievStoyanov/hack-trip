@@ -554,9 +554,8 @@ const TripEdit: FC = () => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'space-between',
-                                maxWidth: '430px',
-                                minHeight: '250px',
-                                maxHeight: '1100px',
+                                width: 'fit-content',
+                                height: 'fit-content',
                                 padding: '30px',
                                 backgroundColor: '#eee7e79e',
                                 boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
@@ -628,7 +627,7 @@ const TripEdit: FC = () => {
                             </> : ''}
 
                             <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
-                            <Box component='div' sx={{ display: 'flex', '@media(max-width: 600px)': { flexDirection: 'column' } }}>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
                                 {buttonAdd === true ?
                                     <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={(fileSelected.length > 0 ? false : (!isDirty || !isValid))} >EDIT YOUR TRIP</Button>
                                     : <LoadingButton variant="contained" loading={loading}   >

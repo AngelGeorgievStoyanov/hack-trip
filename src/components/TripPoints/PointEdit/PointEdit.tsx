@@ -515,10 +515,10 @@ const PointEdit: FC = () => {
 
 
                         <Autocomplete>
-                            <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+                            <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px', margin: '2px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
                         </Autocomplete>
-                        <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' } }}>Search</Button>
-                        <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
+                        <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' }, margin: '2px' }}>Search</Button>
+                        <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, margin: '2px', background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
                     </Box>
                     <Box component='div' sx={{
                         display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 1020px)': {
@@ -532,9 +532,8 @@ const PointEdit: FC = () => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'space-between',
-                                maxWidth: '430px',
-                                minHeight: '250px',
-                                maxHeight: '1100px',
+                                width: 'fit-content',
+                                height: 'fit-content',
                                 padding: '30px',
                                 backgroundColor: '#eee7e79e',
                                 boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
@@ -594,14 +593,14 @@ const PointEdit: FC = () => {
                                 }
 
                             </> : ''}
-                            <span>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
                                 {buttonAdd === true ?
                                     <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={(fileSelected.length > 0 ? false : (!isDirty || !isValid))}>EDIT POINT</Button>
                                     : <LoadingButton variant="contained" loading={loading}   >
                                         <span>disabled</span>
                                     </LoadingButton>}
                                 <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-                            </span>
+                            </Box>
                         </Box>
 
                         {(point.imageFile?.length && point.imageFile?.length > 0) ?

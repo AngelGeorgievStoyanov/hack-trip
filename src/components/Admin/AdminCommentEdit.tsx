@@ -48,7 +48,7 @@ const AdminCommentEdit: FC = () => {
     const { userL } = useContext(LoginContext);
 
 
-   const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
 
     if (accessToken) {
@@ -129,7 +129,7 @@ const AdminCommentEdit: FC = () => {
                         flexDirection: 'column',
                         justifyContent: 'space-between',
                         maxWidth: '600px',
-                        maxHeight: '380px',
+                        height: 'fit-content',
                         padding: '30px',
                         marginTop: '50px',
                         backgroundColor: '#8d868670',

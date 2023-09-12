@@ -522,7 +522,7 @@ const AdminTipEdit: FC = () => {
                                 justifyContent: 'space-between',
                                 maxWidth: '430px',
                                 minHeight: '250px',
-                                maxHeight: '1100px',
+                                height: 'fit-content',
                                 padding: '30px',
                                 backgroundColor: '#8d868670',
                                 boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',

@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { Box, Button, Container, Grid, Typography, useMediaQuery } from '@mui/material';
+import { Alert, Box, Button, Container, Grid, Snackbar, Typography, useMediaQuery } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import FormInputText from '../FormFields/FormInputText';
 import * as userService from '../../services/userService';
@@ -99,14 +99,6 @@ const Login: FC = () => {
 
     }
 
-    if (errorApi) {
-
-        setTimeout(() => {
-            setErrorApi(undefined)
-        }, 5000)
-
-
-    }
 
     const onmouseover = (e: BaseSyntheticEvent) => {
         mouseover(e, h1HackRef)
@@ -117,6 +109,15 @@ const Login: FC = () => {
     const onTouchStart = () => {
         touchStart(h1HackRef)
     }
+
+    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setErrorApi(undefined);
+    };
+
 
     return (
         <>
@@ -154,20 +155,16 @@ const Login: FC = () => {
                             <h1 ref={h1HackRef} data-value="Hack Trip!" style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Hack Trip!</h1>
                         </>
                     }
-                    {errorApi ?
-                        <Box component='div' sx={{ backgroundColor: 'red', color: 'black', padding: '10px 20px', borderRadius: '9px', margin: '20px' }}>
-                            <Typography component='h4'>
-                                {errorApi}
-                            </Typography>
-                        </Box>
-                        : ''}
+                    <Snackbar sx={{ position: 'relative' }} open={errorApi ? true : false} autoHideDuration={5000} onClose={handleClose} >
+                        <Alert onClose={handleClose} severity="error">{errorApi}</Alert>
+                    </Snackbar>
 
                     <Box component="form" sx={{
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
                         maxWidth: '700px',
-                        maxHeight: '385px',
+                        height: 'fit-content',
                         padding: '30px',
                         backgroundColor: '#e5e3e3d9',
                         boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
@@ -190,7 +187,7 @@ const Login: FC = () => {
                         <FormInputText name='password' type='password' label='Password' control={control} error={errors.password?.message}
                             rules={{ required: true }} />
 
-                        <Box sx={{ '@media(max-width: 490px)': { display: 'flex', flexDirection: 'column' } }}>
+                        <Box sx={{ display: 'flex', '@media(max-width: 490px)': { display: 'flex', flexDirection: 'column' } }}>
                             <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, margin: '5px' }} disabled={!isDirty || !isValid}>Sign Up</Button>
                             <Button variant="contained" component={Link} to={'/register'} sx={{ ':hover': { color: 'rgb(248 245 245)' }, margin: '5px', background: 'rgb(194 194 224)', color: 'black' }}  >Don't Have An Account? Sign up!</Button>
                             <Button variant="contained" component={Link} to={'/forgot-password'} sx={{ ':hover': { color: 'rgb(248 245 245)' }, margin: '5px', background: 'rgb(194 194 224)', color: 'black' }}  >Forgot Password</Button>
