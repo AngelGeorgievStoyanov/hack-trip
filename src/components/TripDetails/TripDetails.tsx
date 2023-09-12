@@ -14,7 +14,7 @@ import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Backdrop, Box, Button, Card, CardActions, CardContent, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography, useMediaQuery } from "@mui/material";
+import { Backdrop, Box, Button, Card, CardActions, CardContent, CircularProgress, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography, useMediaQuery } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { styled, useTheme } from '@mui/material/styles';
@@ -94,6 +94,8 @@ const TripDetails: FC = () => {
     const [touchEnd, setTouchEnd] = useState<number>(0)
     const [maxSteps, setMaxSteps] = useState<number>(0)
     const [open, setOpen] = useState(false);
+    const [loadPointFullImage, setLoadFullImage] = useState<boolean>(false)
+    const [loadTripFullImage, setLoadTripFullImage] = useState<boolean>(false)
 
 
     const minSwipeDistance = 45;
@@ -280,7 +282,7 @@ const TripDetails: FC = () => {
         mapRef.current?.fitBounds(bounds);
     }
 
-  
+
     const onMarkerClick = (id: string, positionNumber: number) => {
 
         if (id) {
@@ -629,10 +631,15 @@ const TripDetails: FC = () => {
 
     const handleNextImage = () => {
         setActiveStepImage((prevActiveStep) => prevActiveStep + 1);
+        setLoadFullImage(false);
+        setLoadTripFullImage(false);
     }
 
     const handleBackImage = () => {
         setActiveStepImage((prevActiveStep) => prevActiveStep - 1);
+        setLoadFullImage(false);
+        setLoadTripFullImage(false);
+
     }
 
 
@@ -654,18 +661,20 @@ const TripDetails: FC = () => {
         if (isLeftSwipe === true) {
 
             if (activeStepImage < maxSteps - 1) {
-
+                setLoadFullImage(false);
+                setLoadTripFullImage(false);
                 setActiveStepImage((prevActiveStep) => prevActiveStep + 1);
             }
 
         } else if (isRightSwipe === true) {
 
             if (activeStepImage > 0) {
+                setLoadFullImage(false);
+                setLoadTripFullImage(false);
                 setActiveStepImage((prevActiveStep) => prevActiveStep - 1);
             }
         }
-
-
+       
     }
 
 
@@ -673,6 +682,8 @@ const TripDetails: FC = () => {
         setFullImage(false);
         setPointFullImage(false);
         setOpen(false);
+        setLoadFullImage(false);
+        setLoadTripFullImage(false);
     }
 
     const onClickPointImage = (e: BaseSyntheticEvent) => {
@@ -690,6 +701,16 @@ const TripDetails: FC = () => {
     const handleOpen = () => {
         setOpen(true);
     };
+
+    const onLoadFullPointImage = () => {
+        setLoadFullImage(true)
+    }
+    const onLoadFullTripImage = () => {
+        setLoadTripFullImage(true);
+
+    }
+
+
 
     return (
         <>
@@ -945,7 +966,8 @@ const TripDetails: FC = () => {
                                     sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                                     open={open}
                                 >
-                                    <Box sx={{ position: 'relative', display: 'flex' }}>
+                                    {!loadTripFullImage ? <CircularProgress sx={{ position: 'absolute', margin: '0 auto' }} /> : ''}
+                                    <Box sx={{ position: 'relative', display: loadTripFullImage ? 'flex' : 'none' }}>
                                         <ArrowBackIosIcon onClick={handleBackImage} sx={{
                                             cursor: 'pointer', fontSize: 35, position: 'absolute', left: 7, top: '50%',
                                             zIndex: 1, display: (activeStepImage === 0) ? 'none' : 'block',
@@ -957,10 +979,10 @@ const TripDetails: FC = () => {
                                             color: '#ffffffed'
 
                                         }} />
-                                        <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
+                                        <img onLoad={onLoadFullTripImage} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
                                         <CloseIcon sx={{
                                             cursor: 'pointer', position: 'absolute', fontSize: 35,
-                                            top: 5, left: '45%', color: '#ffffffed'
+                                            top: 5, marginLeft: '50%', transform: 'translate(-17px,0px)', color: '#ffffffed'
 
                                         }} onClick={onClickClose} />
                                     </Box>
@@ -975,22 +997,26 @@ const TripDetails: FC = () => {
                                         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                                         open={open}
                                     >
-                                        <Box sx={{ position: 'relative', display: 'flex' }}>
+                                        {!loadPointFullImage ? <CircularProgress sx={{ position: 'absolute', margin: '0 auto' }} /> : ''}
+                                        <Box sx={{ position: 'relative', display: loadPointFullImage ? 'flex' : 'none' }}>
+
                                             <ArrowBackIosIcon onClick={handleBackImage} sx={{
                                                 cursor: 'pointer', fontSize: 35, position: 'absolute', left: 7, top: '50%',
                                                 zIndex: 1, display: (activeStepImage === 0) ? 'none' : 'block',
                                                 color: '#ffffffed'
                                             }} />
+
                                             <ArrowForwardIosIcon onClick={handleNextImage} sx={{
                                                 cursor: 'pointer', fontSize: 35, position: 'absolute', right: 0, top: '50%',
                                                 zIndex: 1, display: (activeStepImage === maxSteps - 1) ? 'none' : 'block',
                                                 color: '#ffffffed'
 
                                             }} />
-                                            <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${pointCard.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
+                                            <img onLoad={onLoadFullPointImage} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${pointCard.imageFile[activeStepImage]}`} alt='Trip' style={{ position: 'relative', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} />
+
                                             <CloseIcon sx={{
                                                 cursor: 'pointer', position: 'absolute', fontSize: 35,
-                                                top: 5, left: '47%', color: '#ffffffed'
+                                                top: 5, marginLeft: '50%', transform: 'translate(-17px,0px)', color: '#ffffffed'
 
                                             }} onClick={onClickClose} />
 
@@ -1004,7 +1030,7 @@ const TripDetails: FC = () => {
                             : ''
 
                 }
-            </Grid>
+            </Grid >
         </>
     )
 }

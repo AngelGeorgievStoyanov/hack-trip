@@ -90,7 +90,7 @@ const EditComment: FC = () => {
             <Grid container sx={{
                 backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                 backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
-                backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px',                minHeight: '100vh',
+                backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh',
                 '@media(max-width: 600px)': { display: 'flex', padding: '50px', margin: '-25px 0px 0px 0px' }
             }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box component='form'
@@ -99,7 +99,7 @@ const EditComment: FC = () => {
                         flexDirection: 'column',
                         justifyContent: 'space-between',
                         maxWidth: '600px',
-                        maxHeight: '280px',
+                        height: 'fit-content',
                         padding: '30px',
                         marginTop: '50px',
                         backgroundColor: '#eee7e79e',

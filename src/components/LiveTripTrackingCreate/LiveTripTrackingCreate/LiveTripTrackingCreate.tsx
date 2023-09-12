@@ -268,6 +268,13 @@ const LiveTripTrackingCreate: FC = () => {
 
 
     const goBack = () => {
+        if (liveTrackingPositions.length > 0) {
+            setStartPosition(undefined);
+            setStopTracking(false);
+            setLiveTrackingPositions([]);
+            setCurrentPoint(undefined);
+
+        }
         if (mobile) {
             html.style.minHeight = '100%';
             html.style.removeProperty('height');
@@ -785,10 +792,10 @@ const LiveTripTrackingCreate: FC = () => {
                                             </>
                                             :
                                             ''}
-                                    <Box component='div' sx={{ display: 'flex', '@media(max-width: 600px)': { flexDirection: 'column', alignItems: 'center', boxSizing: 'content-box' } }}>
+                                    <Box component='div' sx={{ display: 'flex', flexDirection: liveTrackingPositions.length ? 'column' : 'row', alignItems: 'center', boxSizing: 'content-box', justifyContent: !liveTrackingPositions.length ? 'space-around' : '', '@media(max-width: 600px)': { display: 'flex', flexDirection: liveTrackingPositions.length ? 'column' : 'row', alignItems: 'center', boxSizing: 'content-box', justifyContent: !liveTrackingPositions.length ? 'space-around' : '' } }}>
                                         {mobile ?
                                             <>
-                                                <Box sx={{ display: 'flex', width: '100%', justifyContent: 'space-around' }}>
+                                                <Box sx={{ display: 'flex', width: liveTrackingPositions.length ? '100%' : 'auto', justifyContent: 'space-around' }}>
 
                                                     <IconButton onClick={onStartTracking} disabled={liveTrackingPositions.length < 1 ? false : liveTrackingPositions.length > 0 && stopTracking === false ? true : false}>
 
@@ -808,7 +815,14 @@ const LiveTripTrackingCreate: FC = () => {
                                                 {stopTracking ?
                                                     <Button variant="contained" onClick={onDeleteTracking} >DELETE TRACKING</Button>
                                                     : ''}
-                                                <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                                                {mobile ?
+                                                    <IconButton onClick={goBack}>
+                                                        <Tooltip title='BACK' placement={liveTrackingPositions.length > 0 ? 'right' : 'bottom'} arrow open={true}>
+                                                            <UTurnLeftTwoToneIcon sx={{ fontSize: 50 }} />
+                                                        </Tooltip>
+                                                    </IconButton> :
+                                                    <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                                                }
 
                                             </>
                                             :

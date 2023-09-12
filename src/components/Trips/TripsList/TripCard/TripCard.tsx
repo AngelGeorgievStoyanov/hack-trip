@@ -132,7 +132,7 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                     justifyContent: 'flex-end',
                     alignItems: 'center',
                     maxWidth: '300px', margin: '20px',
-                    height: isMobile ? 'fit-content' : 'auto',
+                    height: 'fit-content',
                     padding: '25px 0px 0px 0px', backgroundColor: '#eee7e79e',
                     boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                     // animation: `${slideInEllipticBottom} 1.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s both`

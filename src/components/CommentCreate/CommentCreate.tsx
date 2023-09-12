@@ -141,7 +141,7 @@ const CreateComment: FC = () => {
                         flexDirection: 'column',
                         justifyContent: 'space-between',
                         maxWidth: '600px',
-                        maxHeight: '280px',
+                        height: 'fit-content',
                         padding: '30px',
                         marginTop: '50px',
                         backgroundColor: '#eee7e79e',
