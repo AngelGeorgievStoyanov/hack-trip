@@ -1,5 +1,5 @@
 import { Box, Button } from "@mui/material";
-import { FC, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { User } from "../../model/users";
 import UsersList from "../UsersList/UsersList";
@@ -12,77 +12,42 @@ import * as commentService from '../../services/commentService'
 import { CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { LoginContext } from "../../App";
-import jwt_decode from "jwt-decode";
-import * as userService from '../../services/userService';
-import { ApiClient } from "../../services/userService";
-
 
 
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
 const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
-const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
-type decode = {
-    _id: string;
-}
+export default function Admin() {
 
-
-
-let userId: string;
-
-
-
-const Admin: FC = () => {
-
-    // const users = useLoaderData() as User[];
+    const users = useLoaderData() as User[];
     const navigate = useNavigate();
-
-    const { userL } = useContext(LoginContext);
-
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
-
-    if (accessToken) {
-        const decode: decode = jwt_decode(accessToken);
-        userId = decode._id;
-    }
-
+    const userId = sessionStorage.getItem('userId') + ''
 
     const [trips, setTrips] = useState<Trip[]>();
     const [hideUsersList, setHideUsersList] = useState<boolean>(true);
     const [hideTripsList, setHideTripsList] = useState<boolean>(true);
     const [hideCommentsList, setHideCommentsList] = useState<boolean>(true);
-    const [comments, setComments] = useState<CommentCreate[]>();
+    const [comments, setComments] = useState<CommentCreate[]>()
     const [reportedComment, setReportedComment] = useState<boolean>(false);
-    const [users, setUsers] = useState<User[]>()
 
 
 
     useEffect(() => {
 
-        API_CLIENT.findAll(userId).then((data) => {
-            setUsers(data)
-        }).catch(err => {
-            console.log(err)
-        });
-
-        API_TRIP.getAllReportTrips(userId).then((data) => {
+        API_TRIP.getAllReportTrips().then((data) => {
             setTrips(data);
-        }).catch(err => {
-            console.log(err)
-        });
+        }).catch(err => console.log(err));
 
-        API_COMMENT.getAllReportComments(userId).then((data) => {
+        API_COMMENT.getAllReportComments().then((data) => {
             setComments(data)
-        }).catch(err => {
-            console.log(err)
-        });
+        }).catch(err => console.log(err));
 
-    }, []);
+    }, [])
 
 
     const hideUsers = () => {
+
         setHideUsersList(!hideUsersList);
 
     }
@@ -103,7 +68,7 @@ const Admin: FC = () => {
 
         API_COMMENT.reportComment(comment._id, comment).then((data) => {
             setReportedComment(true);
-            setComments(data);
+            setComments(data)
 
         }).catch((err) => {
             console.log(err);
@@ -151,9 +116,7 @@ const Admin: FC = () => {
                     setComments(copyComments);
                 }
 
-            }).catch((err) => {
-                console.log(err)
-            });
+            }).catch((err) => console.log(err));
         }
 
     }
@@ -165,36 +128,40 @@ const Admin: FC = () => {
 
     }
 
-
     return (
         <>
             <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px', maxWidth: '100vW' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px' }}>
 
-                    <Button variant="contained" onClick={hideUsers} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideUsersList ? 'HIDE USERS' : 'SHOW USERS'} </Button>
+                    <Button variant="contained" onClick={hideUsers} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hideUsersList ? 'HIDE USERS' : 'SHOW USERS'} </Button>
                     {trips !== undefined && trips.length > 0 ?
-                        <Button variant="contained" onClick={hideTrips} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideTripsList ? 'HIDE TRIPS' : 'SHOW TRIPS'} </Button>
-                        : <h4>NO TRIPS REPORTED</h4>}
+                        <Button variant="contained" onClick={hideTrips} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hideTripsList ? 'HIDE TRIPS' : 'SHOW TRIPS'} </Button>
+                        : 'NO TRIPS REPORTED'}
 
 
 
                     {comments !== undefined && comments.length > 0 ?
-                        <Button variant="contained" onClick={hideComments} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideCommentsList ? 'HIDE COMMENTS' : 'SHOW COMMENTS'} </Button>
-                        : <h4>NO COMMENTS REPORTED</h4>
+                        <Button variant="contained" onClick={hideComments} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hideCommentsList ? 'HIDE COMMENTS' : 'SHOW COMMENTS'} </Button>
+                        : 'NO COMMENTS REPORTED'
                     }
                 </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'row', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '95%' } }}>
+                <Box sx={{ display: 'flex', flexDirection: 'row', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', maxWidth: '95%' } }}>
 
-                    {hideUsersList && (users !== undefined) && (users.length > 0) ?
-                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '95%' } }}>
+
+                    {hideUsersList ?
+                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
+
+
                             <UsersList users={users} />
 
+
                         </Box>
+
                         : ''}
 
 
                     {hideTripsList ?
-                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '95%' } }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', }}>
                             {trips !== undefined && trips.length > 0 ?
                                 <TripList trips={trips} />
                                 : ''}
@@ -203,20 +170,35 @@ const Admin: FC = () => {
                         : ''}
 
                 </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'row', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', maxWidth: '95%' } }}>
+                <Box sx={{ display: 'flex', flexDirection: 'row', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', maxWidth: '95%' } }}>
 
 
                     {hideCommentsList ?
-                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '95%' } }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
+
+
 
                             {(comments !== undefined && comments.length > 0) ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} onUnReportClickHandlerComment={unReportClickHandlerComment} onReportClickHandlerComment={reportClickHandlerComment} reportedComment={reportedComment} userId={userId} />) : ''}
+
+
+
+
+                        </Box>
+
+                        : ''}
+
+
+                    {hideTripsList ?
+                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', }}>
+                            {trips !== undefined && trips.length > 0 ?
+                                <TripList trips={trips} />
+                                : ''}
+
                         </Box>
                         : ''}
 
                 </Box>
-            </Box >
+            </Box>
         </>
     )
 }
-
-export default Admin;

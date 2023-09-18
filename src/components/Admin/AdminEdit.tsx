@@ -36,6 +36,7 @@ const USER_SELECT_OPTIONS_ROLE: SelectOption[] = Object.keys(UserRole)
 
 type decode = {
     role: string;
+    _id: string;
 }
 
 
@@ -64,7 +65,7 @@ const schema = yup.object({
 }).required();
 
 
-
+let userId: string;
 
 
 const AdminEdit: FC = () => {
@@ -76,13 +77,11 @@ const AdminEdit: FC = () => {
 
     const [fileSelected, setFileSelected] = useState<File | null>(null);
     const [user, setUser] = useState<User>();
-    const navigate = useNavigate();
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
 
-
+    const navigate = useNavigate();
 
     const { userL } = useContext(LoginContext);
-
 
     const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
@@ -90,12 +89,18 @@ const AdminEdit: FC = () => {
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         role = decode.role;
+        userId = decode._id
 
     }
 
 
 
     const iconFotoCamera = useMediaQuery('(max-width:600px)');
+
+
+    let oneDay = 60 * 60 * 24 * 1000
+    let timeCreatedPlusOneDay = Date.parse(userEdit.timeCreated ? userEdit.timeCreated : new Date().toISOString()) + oneDay
+    let now = Date.parse(new Date().toISOString())
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
 
@@ -313,6 +318,15 @@ const AdminEdit: FC = () => {
     }
 
 
+    const deleteClickHandler = () => {
+
+        API_CLIENT.deleteUserById(userId, userEdit._id).then((data) => {
+            navigate('/admin')
+        }).catch((err) => {
+            console.log(err)
+        })
+    }
+
     return (
 
         <>
@@ -365,8 +379,8 @@ const AdminEdit: FC = () => {
                     <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
                         User ID:   {userEdit._id}
                     </Typography>
-                    <FormInputText name='email' label='Email' control={control} error={errors.email?.message}
-                        rules={{ required: true, minLength: 5 }} />
+                    <FormInputText color={userEdit.verifyEmail === 0 && (timeCreatedPlusOneDay < now) ? 'error' : 'primary'} name='email' label='Email' control={control} error={errors.email?.message}
+                        rules={{ required: true, minLength: 5 }} autoFocus={userEdit.verifyEmail === 0 && (timeCreatedPlusOneDay < now) ? true : false} />
                     <FormInputText name='firstName' label='First Name' control={control} error={errors.firstName?.message}
                         rules={{ required: true, minLength: 2, maxLength: 15 }} />
 
@@ -389,7 +403,7 @@ const AdminEdit: FC = () => {
                         {iconFotoCamera ?
                             <MuiTooltipIconFotoCamera />
                             :
-                            <Button variant="contained" component="label"  >
+                            <Button variant="contained" component="label" sx={{ margin: '2px' }} >
                                 Upload
                                 <input hidden accept="image/*" multiple type="file" onChange={handleFileChange} />
                             </Button>
@@ -419,7 +433,9 @@ const AdminEdit: FC = () => {
 
 
                     <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
+                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30', margin: '2px' } }}>EDIT PROFILE</Button>
+                        <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE USER</Button>
+
                         <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
 
                     </Box >

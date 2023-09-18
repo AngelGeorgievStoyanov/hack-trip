@@ -130,18 +130,6 @@ export async function commentLoaderById({ params }: LoaderFunctionArgs) {
 }
 
 
-
-export async function userLoader() {
-
-  try {
-
-    return await API_CLIENT.findAll();
-  } catch (err: any) {
-    throw new Error(err.message);
-  }
-
-
-}
 export async function userIdLoader({ params }: LoaderFunctionArgs) {
 
   if (params.userId) {
@@ -336,7 +324,6 @@ const router = createBrowserRouter([
         children: [
           {
             path: '',
-            loader: userLoader,
             element: <Admin />
           }
         ]

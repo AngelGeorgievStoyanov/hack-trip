@@ -9,15 +9,15 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
     findAll(search: string, typeOfGroup: string, typeOfTransportSelect: string): Promise<K>;
     findById(id: K, userId: K): Promise<V>;
     create(entityWithoutId: TripCreate): Promise<any>;
-    update(id: K, entity: Trip): Promise<V>;
+    update(id: K, entity: Trip, userId: K): Promise<V>;
     updateLikes(id: K, userId: K): Promise<V>;
-    deleteById(id: K): Promise<void>;
+    deleteById(id: K, userId: K): Promise<void>;
     reportTrip(id: K, entity: Trip): Promise<V>;
     findTopTrips(userId: K | undefined): Promise<V[]>;
     findAllMyTrips(id: K): Promise<V[]>;
     sendFile(entityWithoutId: FormData): Promise<string[]>;
     editImages(id: K, oneImage: string[]): Promise<V>;
-    getAllReportTrips(): Promise<V[]>;
+    getAllReportTrips(id: K): Promise<V[]>;
     deleteReportTrip(id: K, entity: []): Promise<V>;
     updateFavorites(id: K, entity: Trip): Promise<V>;
     findAllMyFavorites(id: K): Promise<V[]>;
@@ -98,24 +98,24 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         return result
     }
 
-    async deleteById(id: K): Promise<void> {
+    async deleteById(id: K, userId: K): Promise<void> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}/${userId}`, {
             method: 'DELETE',
 
         });
 
         if (response.status >= 400) {
             const result = await response.json();
-            throw new Error(result.message);
+            throw new Error(result);
         }
         return await response.json();
     }
 
 
-    async update(id: K, entity: Trip): Promise<V> {
+    async update(id: K, entity: Trip, userId: K): Promise<V> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}/${userId}`, {
             method: 'PUT',
             headers: {
                 'content-type': 'application/json'
@@ -209,8 +209,8 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
     }
 
 
-    async getAllReportTrips(): Promise<V[]> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/reports`);
+    async getAllReportTrips(id: K): Promise<V[]> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/reports/${id}`);
         return response.json();
     }
 

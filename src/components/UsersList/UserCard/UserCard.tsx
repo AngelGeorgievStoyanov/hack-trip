@@ -23,8 +23,12 @@ const UserCard: FC<UserCardProps> = ({ user }): ReactElement => {
         return date.split('.')[0].split('T')[0].split('-').reverse().join('-');
     }
 
-    const { userL } = useContext(LoginContext);
 
+    let oneDay = 60 * 60 * 24 * 1000
+    let timeCreatedPlusOneDay = Date.parse(user.timeCreated ? user.timeCreated : new Date().toISOString()) + oneDay
+    let now = Date.parse(new Date().toISOString())
+
+    const { userL } = useContext(LoginContext);
 
     const userRole = user.role as any as string;
 
@@ -65,7 +69,7 @@ const UserCard: FC<UserCardProps> = ({ user }): ReactElement => {
                             alt="USER"
                         />
                         : ''}
-                    <Typography gutterBottom variant="h5" component="div">
+                    <Typography gutterBottom variant="h5" color={user.verifyEmail===0 && (timeCreatedPlusOneDay < now)? 'red':''} component="div">
                         Email: {user.email}
                     </Typography> <Typography gutterBottom variant="subtitle1" component="div">
                         Profile created on: {dateFormat(user.timeCreated!)}

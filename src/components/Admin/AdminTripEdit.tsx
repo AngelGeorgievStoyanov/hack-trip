@@ -392,7 +392,7 @@ const AdminTipEdit: FC = () => {
 
         editTrip.id = trip._id as any as Trip;
 
-        API_TRIP.update(trip._id, editTrip).then((data) => {
+        API_TRIP.update(trip._id, editTrip, userId).then((data) => {
             navigate(-1);
         }).catch((err) => {
             console.log(err);

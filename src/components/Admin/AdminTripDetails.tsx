@@ -187,9 +187,9 @@ const AdminTripDetails: FC = () => {
     const deleteClickHandler = () => {
 
         if (trip === undefined) return;
-        API_TRIP.deleteById(trip._id).then((data) => {
-            API_POINT.deleteByTripId(trip._id).then((data) => {
-                API_COMMENT.deleteByTripId(trip._id).then((data) => {
+        API_TRIP.deleteById(trip._id,userId).then((data) => {
+            API_POINT.deleteByTripId(trip._id,userId).then((data) => {
+                API_COMMENT.deleteByTripId(trip._id,userId).then((data) => {
 
                 }).catch((err) => {
                     console.log(err);

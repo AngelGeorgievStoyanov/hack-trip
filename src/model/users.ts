@@ -26,6 +26,7 @@ export class User implements Identifiable<IdType> {
         public lastTimeLogin?: string,
         public countOfLogs?: string,
         public imageFile?: string,
+        public verifyEmail?: number
     ) { }
 }
 

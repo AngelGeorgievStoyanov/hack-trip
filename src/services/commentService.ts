@@ -11,10 +11,10 @@ export interface ApiComment<K, V extends Identifiable<K>> {
     update(id: K, entity: Comment): Promise<V>;
     deleteById(id: K): Promise<void>;
     findByPointId(id: K): Promise<V>;
-    deleteByTripId(id: K): Promise<void>;
+    deleteByTripId(id: K, userId: K): Promise<void>;
     findById(id: K): Promise<V>;
     reportComment(id: K, entity: Comment): Promise<V[]>;
-    getAllReportComments(): Promise<V[]>;
+    getAllReportComments(id: K): Promise<V[]>;
     deleteReportComment(id: K, entity: []): Promise<V>;
     findUserImage(id: K): Promise<string>;
 
@@ -98,9 +98,9 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
     findByPointId(id: K): Promise<V> {
         throw new Error("Method not implemented.");
     }
-    async deleteByTripId(id: K): Promise<void> {
+    async deleteByTripId(id: K, userId: K): Promise<void> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trip/${id}`, {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trip/${id}/${userId}`, {
             method: 'DELETE',
 
         });
@@ -130,9 +130,9 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
     }
 
 
-    async getAllReportComments(): Promise<V[]> {
+    async getAllReportComments(id: K): Promise<V[]> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/reports`);
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/reports/${id}`);
         return response.json();
     }
 

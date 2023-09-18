@@ -18,7 +18,7 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     updateUser(id: K, entity: UserRegister): Promise<V>;
     changePassword(id: K, password: string): Promise<V>;
     deleteProfileImage(id: K, image: string): Promise<V>;
-    findAll(): Promise<V>;
+    findAll(id: K): Promise<V[]>;
     updateUserAdmin(id: K, entity: UserEditAdmin): Promise<V>;
     guardedRoute(id: K, role: string): Promise<boolean>;
     findUserId(id: K): Promise<boolean>;
@@ -26,11 +26,13 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     newPassword(id: K, token: string, password: string): Promise<V>;
     verifyEmail(id: K, token: string): Promise<boolean>;
     resendVerEmail(email: string): Promise<string>;
+    deleteUserById(adminId:K,editedUserId: K): Promise<void>;
+
 }
 
 
 
-export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K, V> {
+export class ApiClientImpl<K, V extends Identifiable < K >> implements ApiClient < K, V > {
     constructor(public apiCollectionSuffix: string) { }
 
 
@@ -202,8 +204,10 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
 
 
-    async findAll(): Promise<V> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin`);
+    async findAll(id: K): Promise<V[]> {
+
+     
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/${id}`);
 
         if (response.status >= 400) {
             const result = await response.json();
@@ -306,6 +310,22 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         }
 
         return response.json();
+    }
+
+
+    async deleteUserById(adminId:K,editedUserId: K): Promise<void> {
+
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/${adminId}/${editedUserId}`, {
+            method: 'DELETE',
+
+        });
+
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
+        return await response.json();
     }
 
 

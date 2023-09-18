@@ -13,7 +13,7 @@ interface PointListProps {
 const PointList: FC<PointListProps> = ({ points }): ReactElement => {
 
 
-    let sortList = points.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber));
+    let sortList = points && points.length > 1 ? points.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber)) : points;
     return (
         <>
             {sortList.length > 0 ?

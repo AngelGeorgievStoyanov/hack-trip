@@ -1,5 +1,5 @@
 import { GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
-import React, { FC, ReactElement } from "react";
+import React, { FC, ReactElement, useContext } from "react";
 import { Point } from "../../../../model/point";
 import { ApiPoint } from "../../../../services/pointService";
 import { IdType } from "../../../../shared/common-types";
@@ -9,6 +9,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Card, Grid, Typography } from "@mui/material";
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
+import { LoginContext } from "../../../../App";
+import jwt_decode from "jwt-decode";
 
 
 interface PointCardProps {
@@ -29,17 +31,33 @@ const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType,
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 
+let userId: string | undefined;
 
-const PointEdit: FC<PointCardProps> = ({ point, length }): ReactElement => {
+
+type decode = {
+    _id: string,
+}
+
+
+const PointCard: FC<PointCardProps> = ({ point, length }): ReactElement => {
 
 
     const idTrip = useParams().tripId;
 
+    const { userL } = useContext(LoginContext);
 
     const navigate = useNavigate();
     let center = {
         lat: Number(point.lat),
         lng: Number(point.lng)
+    }
+
+
+    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+
+    if (accessToken) {
+        const decode: decode = jwt_decode(accessToken);
+        userId = decode._id;
     }
 
 
@@ -65,11 +83,13 @@ const PointEdit: FC<PointCardProps> = ({ point, length }): ReactElement => {
 
 
     const deleteClickHandler = () => {
-        API_POINT.deleteById(point._id, idTrip + '').then((data) => {
-            navigate(`/trip/points/${idTrip}`);
-        }).catch((err) => {
-            console.log(err);
-        });
+        if (idTrip && userId) {
+            API_POINT.deleteById(point._id, idTrip, userId).then((data) => {
+                navigate(`/trip/points/${idTrip}`);
+            }).catch((err) => {
+                console.log(err);
+            });
+        }
 
     }
 
@@ -187,4 +207,4 @@ const PointEdit: FC<PointCardProps> = ({ point, length }): ReactElement => {
     )
 }
 
-export default PointEdit;
+export default PointCard;

@@ -11,9 +11,9 @@ export interface ApiPoint<K, V extends Identifiable<K>> {
     findByTripId(id: K): Promise<V>;
     create(entityWithoutId: PointCreate): Promise<any>;
     update(id: K, entity: Point): Promise<V>;
-    deleteById(id: K, idTrip: K): Promise<void>;
+    deleteById(id: K, idTrip: K, userId: K): Promise<void>;
     findByPointId(id: K): Promise<V>;
-    deleteByTripId(id: K): Promise<void>;
+    deleteByTripId(id: K, userId: K): Promise<void>;
     editPointPosition(id: K, entity: points): Promise<V>;
     sendFile(entityWithoutId: FormData): Promise<string[]>;
     editImages(id: K, oneImage: string[]): Promise<V>;
@@ -99,21 +99,21 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
 
 
 
-    async deleteById(id: K, idTrip: K): Promise<void> {
+    async deleteById(id: K, idTrip: K, userId:K): Promise<void> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'DELETE',
             headers: {
                 'content-type': 'application/json'
             },
-            body: JSON.stringify({ idTrip })
+            body: JSON.stringify({ idTrip, userId })
 
         });
 
         if (response.status >= 400) {
             const result = await response.json();
 
-            throw new Error(result.message);
+            throw new Error(result);
         }
         return await response.json();
     }

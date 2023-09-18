@@ -409,13 +409,14 @@ const TripEdit: FC = () => {
         const editTrip = { ...data } as any;
 
         editTrip.id = trip._id as any as Trip;
-
-        API_TRIP.update(trip._id, editTrip).then((data) => {
-            setButtonAdd(true)
-            navigate(`/trip/details/${trip._id}`);
-        }).catch((err) => {
-            console.log(err);
-        });
+        if (userId) {
+            API_TRIP.update(trip._id, editTrip, userId).then((data) => {
+                setButtonAdd(true)
+                navigate(`/trip/details/${trip._id}`);
+            }).catch((err) => {
+                console.log(err);
+            });
+        }
     }
 
     const goBack = () => {

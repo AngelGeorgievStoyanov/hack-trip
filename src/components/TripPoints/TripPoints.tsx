@@ -73,7 +73,6 @@ let userId: string | undefined;
 const TripPoints: FC = () => {
 
     const points = useLoaderData() as Point[]
-
     const { userL } = useContext(LoginContext);
 
     const idTrip = useParams().tripId;

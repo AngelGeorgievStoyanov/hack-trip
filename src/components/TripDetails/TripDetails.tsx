@@ -225,9 +225,9 @@ const TripDetails: FC = () => {
 
         if (trip === undefined) return;
         const tripId = trip._id
-        API_TRIP.deleteById(tripId).then((data) => {
-            API_POINT.deleteByTripId(tripId).then((data) => {
-                API_COMMENT.deleteByTripId(tripId).then((data) => {
+        API_TRIP.deleteById(tripId, userId).then((data) => {
+            API_POINT.deleteByTripId(tripId, userId).then((data) => {
+                API_COMMENT.deleteByTripId(tripId, userId).then((data) => {
 
                 }).catch((err) => {
                     console.log(err);
@@ -383,7 +383,6 @@ const TripDetails: FC = () => {
     const onLikeTrip = () => {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
-
 
             API_TRIP.updateLikes(trip._id, userId).then((data) => {
                 setTrip(data)
@@ -674,7 +673,7 @@ const TripDetails: FC = () => {
                 setActiveStepImage((prevActiveStep) => prevActiveStep - 1);
             }
         }
-       
+
     }
 
 
@@ -709,7 +708,6 @@ const TripDetails: FC = () => {
         setLoadTripFullImage(true);
 
     }
-
 
 
     return (
