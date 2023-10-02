@@ -26,13 +26,13 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     newPassword(id: K, token: string, password: string): Promise<V>;
     verifyEmail(id: K, token: string): Promise<boolean>;
     resendVerEmail(email: string): Promise<string>;
-    deleteUserById(adminId:K,editedUserId: K): Promise<void>;
-
+    deleteUserById(adminId: K, editedUserId: K): Promise<void>;
+    getFailedLogs(adminId: K): Promise<any[]>
 }
 
 
 
-export class ApiClientImpl<K, V extends Identifiable < K >> implements ApiClient < K, V > {
+export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K, V> {
     constructor(public apiCollectionSuffix: string) { }
 
 
@@ -206,8 +206,21 @@ export class ApiClientImpl<K, V extends Identifiable < K >> implements ApiClient
 
     async findAll(id: K): Promise<V[]> {
 
-     
+
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/${id}`);
+
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
+        return response.json();
+    }
+   
+   
+    async getFailedLogs(adminId: K): Promise<V[]> {
+
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/failedlogs/${adminId}`);
 
         if (response.status >= 400) {
             const result = await response.json();
@@ -313,7 +326,7 @@ export class ApiClientImpl<K, V extends Identifiable < K >> implements ApiClient
     }
 
 
-    async deleteUserById(adminId:K,editedUserId: K): Promise<void> {
+    async deleteUserById(adminId: K, editedUserId: K): Promise<void> {
 
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/${adminId}/${editedUserId}`, {

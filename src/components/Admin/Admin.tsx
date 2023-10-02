@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material";
+import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { FC, useContext, useEffect, useState } from "react";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { User } from "../../model/users";
@@ -55,7 +55,9 @@ const Admin: FC = () => {
     const [hideCommentsList, setHideCommentsList] = useState<boolean>(true);
     const [comments, setComments] = useState<CommentCreate[]>();
     const [reportedComment, setReportedComment] = useState<boolean>(false);
-    const [users, setUsers] = useState<User[]>()
+    const [users, setUsers] = useState<User[]>();
+    const [failedLogs, setFailedLogs] = useState<any[]>()
+    const [hideFailedLogsList, setHideFailedLogsList] = useState<boolean>(true);
 
 
 
@@ -63,6 +65,12 @@ const Admin: FC = () => {
 
         API_CLIENT.findAll(userId).then((data) => {
             setUsers(data)
+        }).catch(err => {
+            console.log(err)
+        });
+
+        API_CLIENT.getFailedLogs(userId).then((data) => {
+            setFailedLogs(data)
         }).catch(err => {
             console.log(err)
         });
@@ -96,6 +104,11 @@ const Admin: FC = () => {
     const hideComments = () => {
 
         setHideCommentsList(!hideCommentsList)
+    }
+
+    const hideFailedLOgs = () => {
+
+        setHideFailedLogsList(!hideFailedLogsList)
     }
 
 
@@ -166,9 +179,11 @@ const Admin: FC = () => {
     }
 
 
+
+
     return (
         <>
-            <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px', maxWidth: '100vW' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px', maxWidth: '100vW', alignContent: 'center', alignItems: 'center' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px' }}>
 
                     <Button variant="contained" onClick={hideUsers} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideUsersList ? 'HIDE USERS' : 'SHOW USERS'} </Button>
@@ -182,11 +197,16 @@ const Admin: FC = () => {
                         <Button variant="contained" onClick={hideComments} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideCommentsList ? 'HIDE COMMENTS' : 'SHOW COMMENTS'} </Button>
                         : <h4>NO COMMENTS REPORTED</h4>
                     }
+                    {failedLogs !== undefined && failedLogs.length > 0 ?
+                        <Button variant="contained" onClick={hideFailedLOgs} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideFailedLogsList ? 'HIDE LOGS' : 'SHOW LOGS'} </Button>
+                        : <h4>NO FAILED LOGS</h4>
+                    }
+
                 </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'row', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '95%' } }}>
+                <Box sx={{ display: 'flex', flexDirection: 'row', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center' } }}>
 
                     {hideUsersList && (users !== undefined) && (users.length > 0) ?
-                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '95%' } }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center' } }}>
                             <UsersList users={users} />
 
                         </Box>
@@ -194,7 +214,7 @@ const Admin: FC = () => {
 
 
                     {hideTripsList ?
-                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '95%' } }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center' } }}>
                             {trips !== undefined && trips.length > 0 ?
                                 <TripList trips={trips} />
                                 : ''}
@@ -207,9 +227,48 @@ const Admin: FC = () => {
 
 
                     {hideCommentsList ?
-                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '95%' } }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center' } }}>
 
                             {(comments !== undefined && comments.length > 0) ? comments.map((x) => <CommentCard key={x._id} comment={x} onDeleteCom={onDeleteComment} onEditCom={onEditComment} onUnReportClickHandlerComment={unReportClickHandlerComment} onReportClickHandlerComment={reportClickHandlerComment} reportedComment={reportedComment} userId={userId} />) : ''}
+                        </Box>
+                        : ''}
+
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '95%', marginBottom: '15px', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignContent: 'center', alignItems: 'center' } }}>
+
+
+                    {hideFailedLogsList ?
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '95%', alignContent: 'center' } }}>
+
+                            {(failedLogs !== undefined && failedLogs.length > 0) ?
+                                <TableContainer component={Paper}>
+                                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Date</TableCell>
+                                                <TableCell align="left">Email</TableCell>
+                                                <TableCell align="left">IP</TableCell>
+                                                <TableCell align="left">User Agent</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {failedLogs.map((row, i) => (
+                                                <TableRow
+                                                    key={i}
+                                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                                >
+                                                    <TableCell component="th" scope="row">
+                                                        {row.date}
+                                                    </TableCell>
+                                                    <TableCell align="right">{row.email}</TableCell>
+                                                    <TableCell align="right">{row.ip}</TableCell>
+                                                    <TableCell align="right">{row.userAgent}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                                : ''}
                         </Box>
                         : ''}
 
