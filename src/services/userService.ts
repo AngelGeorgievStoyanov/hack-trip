@@ -5,13 +5,22 @@ import { CONNECTIONURL } from "../utils/baseUrl";
 const baseUrl = CONNECTIONURL;
 
 
-
+export type UserGeolocation = {
+    IPv4: string,
+    city: string,
+    country_code: string,
+    country_name: string,
+    latitude: number,
+    longitude: number,
+    postal: string,
+    state: string
+}
 
 export interface ApiClient<K, V extends Identifiable<K>> {
 
 
     register(entityWithoutId: UserRegister): Promise<string>
-    login(email: K, password: K): Promise<V>;
+    login(email: K, password: K, userGeolocation: UserGeolocation): Promise<V>;
     logout(accessToken: string): Promise<V>;
     findById(id: K): Promise<V>;
     sendFile(entityWithoutId: FormData): Promise<string[]>;
@@ -37,14 +46,14 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
 
 
-    async login(email: K, password: K): Promise<V> {
+    async login(email: K, password: K, userGeolocation: UserGeolocation): Promise<V> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/login`, {
             method: 'POST',
             headers: {
                 "content-type": "application/json"
             },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password, userGeolocation })
         });
 
         if (response.status >= 400) {
@@ -215,8 +224,8 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         }
         return response.json();
     }
-   
-   
+
+
     async getFailedLogs(adminId: K): Promise<V[]> {
 
 

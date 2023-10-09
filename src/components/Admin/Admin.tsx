@@ -36,7 +36,6 @@ let userId: string;
 
 const Admin: FC = () => {
 
-    // const users = useLoaderData() as User[];
     const navigate = useNavigate();
 
     const { userL } = useContext(LoginContext);

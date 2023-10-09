@@ -26,7 +26,16 @@ type FormData = {
 
 };
 
-
+interface IUserGeolocation {
+    IPv4: string,
+    city: string,
+    country_code: string,
+    country_name: string,
+    latitude: number,
+    longitude: number,
+    postal: string,
+    state: string
+}
 
 const schema = yup.object({
     email: yup.string().required().email(),
@@ -43,6 +52,7 @@ const Login: FC = () => {
     const [errorApi, setErrorApi] = useState<string>();
     const [imageBackground, setImageBackground] = useState<string>()
     const h1HackRef = useRef<HTMLHeadingElement | null>(null)
+    const [userGeolocation, setUserGeolocation] = useState<IUserGeolocation>()
 
     const madiaQuery = useMediaQuery('(min-width:480px)');
 
@@ -53,6 +63,13 @@ const Login: FC = () => {
         }).catch((err) => {
             console.log(err)
         });
+
+        fetch('https://geolocation-db.com/json/')
+            .then(res => res.json())
+            .then(data => {
+                setUserGeolocation(data)
+            })
+            .catch(err => console.log(err))
     }, [])
 
 
@@ -72,33 +89,31 @@ const Login: FC = () => {
         data.email = data.email.trim();
         data.password = data.password.trim();
 
+        if (userGeolocation) {
+            API_CLIENT.login(data.email, data.password, userGeolocation)
+                .then((user) => {
+                    localStorage.setItem('userId', user._id.toString());
+                    localStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
+                    if (user !== undefined) {
 
 
-        API_CLIENT.login(data.email, data.password)
-            .then((user) => {
-                localStorage.setItem('userId', user._id.toString());
-                localStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
-                if (user !== undefined) {
+                        loginContext?.setUserL({ ...user });
+                    }
 
+                    setErrorApi(undefined);
+                    navigate('/');
+                }).catch((err) => {
+                    if (err.message === 'Failed to fetch') {
+                        err.message = 'No internet connection with server.Please try again later.'
+                    }
+                    setErrorApi(err.message);
+                    console.log(err.message);
 
-                    loginContext?.setUserL({ ...user });
-                }
+                });
 
-                setErrorApi(undefined);
-                navigate('/');
-            }).catch((err) => {
-                if (err.message === 'Failed to fetch') {
-                    err.message = 'No internet connection with server.Please try again later.'
-                }
-                setErrorApi(err.message);
-                console.log(err.message);
-
-            });
-
-
+        }
 
     }
-
 
     const onmouseover = (e: BaseSyntheticEvent) => {
         mouseover(e, h1HackRef)
