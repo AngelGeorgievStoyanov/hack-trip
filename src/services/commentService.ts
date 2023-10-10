@@ -17,6 +17,7 @@ export interface ApiComment<K, V extends Identifiable<K>> {
     getAllReportComments(id: K): Promise<V[]>;
     deleteReportComment(id: K, entity: []): Promise<V>;
     findUserImage(id: K): Promise<string>;
+    adminUnReportComment(id: K, entity: Comment): Promise<V[]>;
 
 }
 
@@ -128,6 +129,24 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
 
         return result;
     }
+
+
+    async adminUnReportComment(id: K, entity: Comment): Promise<V[]> {
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/report/${id}`, {
+            method: 'PUT',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(entity)
+        });
+
+        const result = await response.json();
+
+
+        return result;
+    }
+
 
 
     async getAllReportComments(id: K): Promise<V[]> {

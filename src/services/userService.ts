@@ -1,3 +1,4 @@
+import { GridRowId } from "@mui/x-data-grid/models/gridRows";
 import { User, UserEditAdmin, UserRegister } from "../model/users";
 import { Identifiable } from "../shared/common-types";
 import { CONNECTIONURL } from "../utils/baseUrl";
@@ -37,6 +38,7 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     resendVerEmail(email: string): Promise<string>;
     deleteUserById(adminId: K, editedUserId: K): Promise<void>;
     getFailedLogs(adminId: K): Promise<any[]>
+    deleteFailedLogs(adminId: K, failedLogsArr:  GridRowId[]): Promise<string[]>;
 }
 
 
@@ -348,6 +350,24 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
             throw new Error(result);
         }
         return await response.json();
+    }
+
+
+    async deleteFailedLogs(id: K, failedLogsArr:  GridRowId[]): Promise<string[]> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/delete/failedlogs/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(failedLogsArr)
+        });
+
+        if (response.status >= 400) {
+            const result = await response.json()
+
+            throw new Error(result.message)
+        }
+        return await response.json()
     }
 
 

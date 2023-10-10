@@ -65,3 +65,19 @@ export class UserEditAdmin implements Identifiable<IdType> {
         public imageFile?: string,
     ) { }
 }
+
+
+
+export interface IFailedLogs {
+    _id?: string,
+    date: string,
+    email: string,
+    ip: string,
+    userAgent: string,
+    country_code: string,
+    country_name: string,
+    city: string,
+    latitude: number,
+    longitude: number,
+    state: string
+}
