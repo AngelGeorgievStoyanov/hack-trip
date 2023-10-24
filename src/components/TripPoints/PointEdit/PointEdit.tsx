@@ -6,7 +6,7 @@ import { IdType } from "../../../shared/common-types";
 import { containerStyle, options } from "../../settings";
 import * as pointService from '../../../services/pointService';
 import { ApiPoint } from "../../../services/pointService";
-import { Box, Button, Container, Grid, IconButton, ImageList, ImageListItem, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, Container, Grid, IconButton, ImageList, ImageListItem, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import FormInputText from "../../FormFields/FormInputText";
 import { useForm } from "react-hook-form";
 import FormTextArea from "../../FormFields/FormTextArea";
@@ -38,7 +38,7 @@ type decode = {
 }
 
 const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
-const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
+const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data');
 
 const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
@@ -51,6 +51,7 @@ type FormData = {
     lng: string;
     pointNumber: IdType;
     imageFile: string[] | undefined;
+    _ownerId?: string;
 };
 
 const schema = yup.object({
@@ -79,6 +80,7 @@ const PointEdit: FC = () => {
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const [imageBackground, setImageBackground] = useState<string>()
+    const [errorApi, setErrorApi] = useState<string>();
 
 
     const { userL } = useContext(LoginContext);
@@ -348,6 +350,9 @@ const PointEdit: FC = () => {
             })
         }).catch((err) => {
             console.log(err);
+            setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
+            setLoading(false);
+            setButtonAdd(true);
         });
 
         let imagesNew = imagesNames as unknown as any as string[];
@@ -367,6 +372,9 @@ const PointEdit: FC = () => {
 
         if (!data.lat) {
             setErrorMessageSearch('Plece enter exact name location or click in map');
+            setErrorApi('Plece enter exact name location or click in map');
+            setLoading(false);
+            setButtonAdd(true);
             return;
         } else {
             setErrorMessageSearch('');
@@ -375,6 +383,7 @@ const PointEdit: FC = () => {
         data.pointNumber = point.pointNumber;
         data.name = data.name.trim();
         data.description = data.description.trim();
+        data._ownerId = userId;
 
         const editedPoint = { ...data } as Point;
 
@@ -386,15 +395,16 @@ const PointEdit: FC = () => {
             editedPoint.name = editedPoint.name.split(' - ')[0];
         }
 
-
-
         API_POINT.update(point._id, editedPoint).then((point) => {
             setButtonAdd(true)
 
             navigate(`/trip/points/${point._ownerTripId}`);
 
         }).catch((err) => {
-            console.log(err);
+            console.log(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!')
+            setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
+            setLoading(false);
+            setButtonAdd(true);
         });
     }
 
@@ -475,6 +485,13 @@ const PointEdit: FC = () => {
         }, 5000);
     }
 
+    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setErrorApi(undefined);
+    };
+
     return (
 
         <>
@@ -520,86 +537,93 @@ const PointEdit: FC = () => {
                         <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' }, margin: '2px' }}>Search</Button>
                         <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, margin: '2px', background: 'rgb(194 194 224)', color: 'black' }}  >Remove Marker</Button>
                     </Box>
+
                     <Box component='div' sx={{
                         display: 'flex', flexDirection: 'row', justifyContent: 'space-around', minHeight: '100vh', '@media(max-width: 1020px)': {
                             display: 'flex', flexDirection: 'column-reverse', width: '100vw', alignItems: 'center'
                         }
                     }}>
+                        <Box>
+                            <Box sx={{ position: 'relative', marginTop: '20px', display: 'flex', flexDirection: 'column', alignContent: 'center', alignItems: 'center', boxSizing: 'border-box' }}>
+                                <Snackbar sx={{ position: 'relative', left: '0px', right: '0px' }} open={errorApi ? true : false} autoHideDuration={5000} onClose={handleClose} >
+                                    <Alert onClose={handleClose} severity="error">{errorApi}</Alert>
+                                </Snackbar>
+                            </Box>
+                            <Box component='form'
+                                sx={{
+                                    margin: '30px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between',
+                                    width: 'fit-content',
+                                    height: 'fit-content',
+                                    padding: '30px',
+                                    backgroundColor: '#eee7e79e',
+                                    boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
+                                    '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+                                    '& .MuiButton-root': { m: 1, width: '32ch' },
+                                }}
+                                noValidate
+                                autoComplete="off"
+                                onSubmit={handleSubmit(editPointSubmitHandler)}
+                            >
+                                <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h4">
+                                    EDIT POINT
+                                </Typography>
+                                <span >
+                                    <FormInputText name='name' type="search" label='NAME OF CITY,PLACE,LANDMARK OR ANOTHER' control={control} error={errors.name?.message} id='inputAddPointName'
+                                    />
+                                </span>
+                                <Button variant="contained" onClick={findInMap} sx={{ ':hover': { background: '#4daf30' } }}>FIND IN MAP</Button>
+                                <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
 
-                        <Box component='form'
-                            sx={{
-                                margin: '30px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'space-between',
-                                width: 'fit-content',
-                                height: 'fit-content',
-                                padding: '30px',
-                                backgroundColor: '#eee7e79e',
-                                boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
-                                '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
-                                '& .MuiButton-root': { m: 1, width: '32ch' },
-                            }}
-                            noValidate
-                            autoComplete="off"
-                            onSubmit={handleSubmit(editPointSubmitHandler)}
-                        >
-                            <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h4">
-                                EDIT POINT
-                            </Typography>
-                            <span >
-                                <FormInputText name='name' type="search" label='NAME OF CITY,PLACE,LANDMARK OR ANOTHER' control={control} error={errors.name?.message} id='inputAddPointName'
-                                />
-                            </span>
-                            <Button variant="contained" onClick={findInMap} sx={{ ':hover': { background: '#4daf30' } }}>FIND IN MAP</Button>
-                            <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
-
-                            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                {iconFotoCamera ?
-                                    <MuiTooltipIconFotoCamera />
-                                    :
-                                    <Box sx={{ width: '30ch' }}>
-                                        <Button variant="contained" component="label" disabled={((images ? images.length : 0) + fileSelected.length) >= 9 ? true : false} >
-                                            Upload
-                                            <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
-                                        </Button>
-                                    </Box>
-                                }
-                                <Typography variant="overline" display="block" gutterBottom style={{ marginRight: '15px' }}>     {((images ? images.length : 0) + fileSelected.length)}/9 uploaded images</Typography>
-                            </Box >
-                            {((images ? images.length : 0) + fileSelected.length) >= 9 ? <Typography style={{ color: 'red', marginLeft: '12px' }}>9 images are the maximum number to upload.</Typography> : ''}
-                            {errorMessageImage ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageImage}</Typography> : ''}
-                            {fileSelected.length > 0 ? <>
-                                <Box component='div' id='box-images' sx={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    maxHeight: "200px",
-                                    overflow: "hidden",
-                                    overflowY: 'auto',
-                                    padding: '6px',
-                                    border: 'solid 1px black',
-                                    margin: '6px',
-                                    borderRadius: '5px',
-                                }}>
-                                    {fileSelected.map((x, i) => { return <li style={{ 'listStyle': 'none', display: 'flex', justifyContent: 'space-between', margin: '5px 0px', alignItems: 'center' }} key={i}><img src={URL.createObjectURL(x)} style={{ borderRadius: '5px' }} alt={x.name} height='45px' width='55px' /> {x.name.length > 60 ? '...' + x.name.slice(-60) : x.name} <HighlightOffSharpIcon sx={{ cursor: 'pointer', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={onDeleteImage} key={x.name} id={x.name} /></li> }
-                                    )}
+                                <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    {iconFotoCamera ?
+                                        <MuiTooltipIconFotoCamera />
+                                        :
+                                        <Box sx={{ width: '30ch' }}>
+                                            <Button variant="contained" component="label" disabled={((images ? images.length : 0) + fileSelected.length) >= 9 ? true : false} >
+                                                Upload
+                                                <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
+                                            </Button>
+                                        </Box>
+                                    }
+                                    <Typography variant="overline" display="block" gutterBottom style={{ marginRight: '15px' }}>     {((images ? images.length : 0) + fileSelected.length)}/9 uploaded images</Typography>
                                 </Box >
-                                {iconFotoCamera ?
-                                    <MuiTooltipIconRemoveAll />
-                                    :
-                                    <Box component='div' sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                        <Button variant="contained" onClick={onDeleteAllImage}>Remove all images</Button>
-                                    </Box>
-                                }
+                                {((images ? images.length : 0) + fileSelected.length) >= 9 ? <Typography style={{ color: 'red', marginLeft: '12px' }}>9 images are the maximum number to upload.</Typography> : ''}
+                                {errorMessageImage ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageImage}</Typography> : ''}
+                                {fileSelected.length > 0 ? <>
+                                    <Box component='div' id='box-images' sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        maxHeight: "200px",
+                                        overflow: "hidden",
+                                        overflowY: 'auto',
+                                        padding: '6px',
+                                        border: 'solid 1px black',
+                                        margin: '6px',
+                                        borderRadius: '5px',
+                                    }}>
+                                        {fileSelected.map((x, i) => { return <li style={{ 'listStyle': 'none', display: 'flex', justifyContent: 'space-between', margin: '5px 0px', alignItems: 'center' }} key={i}><img src={URL.createObjectURL(x)} style={{ borderRadius: '5px' }} alt={x.name} height='45px' width='55px' /> {x.name.length > 60 ? '...' + x.name.slice(-60) : x.name} <HighlightOffSharpIcon sx={{ cursor: 'pointer', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={onDeleteImage} key={x.name} id={x.name} /></li> }
+                                        )}
+                                    </Box >
+                                    {iconFotoCamera ?
+                                        <MuiTooltipIconRemoveAll />
+                                        :
+                                        <Box component='div' sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                            <Button variant="contained" onClick={onDeleteAllImage}>Remove all images</Button>
+                                        </Box>
+                                    }
 
-                            </> : ''}
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-                                {buttonAdd === true ?
-                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={(fileSelected.length > 0 ? false : (!isDirty || !isValid))}>EDIT POINT</Button>
-                                    : <LoadingButton variant="contained" loading={loading}   >
-                                        <span>disabled</span>
-                                    </LoadingButton>}
-                                <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                                </> : ''}
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+                                    {buttonAdd === true ?
+                                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={(fileSelected.length > 0 ? false : (!isDirty || !isValid))}>EDIT POINT</Button>
+                                        : <LoadingButton variant="contained" loading={loading}   >
+                                            <span>disabled</span>
+                                        </LoadingButton>}
+                                    <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                                </Box>
                             </Box>
                         </Box>
 

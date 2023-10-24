@@ -50,7 +50,7 @@ import Register from './components/Register/Register';
 import LiveTripTrackingCreate from './components/LiveTripTrackingCreate/LiveTripTrackingCreate/LiveTripTrackingCreate';
 
 
-const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
+const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data');
 
 const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
 

@@ -4,7 +4,7 @@ import { IdType, toIsoDate } from "../../shared/common-types";
 import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
 import { containerStyle, options } from "../settings";
-import { Box, Button, Container, Grid, IconButton, ImageList, ImageListItem, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, Container, Grid, IconButton, ImageList, ImageListItem, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import FormTextArea from "../FormFields/FormTextArea";
@@ -30,7 +30,7 @@ type decode = {
 }
 
 
-const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
+const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data');
 
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
@@ -99,6 +99,7 @@ const TripEdit: FC = () => {
     const [buttonAdd, setButtonAdd] = useState<boolean>(true);
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const [imageBackground, setImageBackground] = useState<string>()
+    const [errorApi, setErrorApi] = useState<string>();
 
     const { userL } = useContext(LoginContext);
 
@@ -414,7 +415,10 @@ const TripEdit: FC = () => {
                 setButtonAdd(true)
                 navigate(`/trip/details/${trip._id}`);
             }).catch((err) => {
-                console.log(err);
+                console.log(err.message);
+                setErrorApi(err.message ? err.message : typeof err === 'string' ? err : 'Something went wrong!');
+                setLoading(false);
+                setButtonAdd(true);
             });
         }
     }
@@ -493,6 +497,13 @@ const TripEdit: FC = () => {
             setErrorMessageImage(undefined);
         }, 5000);
     }
+
+    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setErrorApi(undefined);
+    };
 
     return (
         <>
@@ -637,6 +648,11 @@ const TripEdit: FC = () => {
                                 }
 
                                 <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                            </Box>
+                            <Box sx={{ position: 'relative', marginTop: '20px', display: 'flex', flexDirection: 'column', alignContent: 'center', alignItems: 'center', boxSizing: 'border-box' }}>
+                                <Snackbar sx={{ position: 'relative' }} open={errorApi ? true : false} autoHideDuration={5000} onClose={handleClose} >
+                                    <Alert onClose={handleClose} severity="error">{errorApi}</Alert>
+                                </Snackbar>
                             </Box>
                         </Box>
 

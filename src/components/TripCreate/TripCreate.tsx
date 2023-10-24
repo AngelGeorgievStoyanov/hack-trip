@@ -6,7 +6,7 @@ import { containerStyle, options } from "../settings";
 import * as tripService from '../../services/tripService'
 import { TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
-import { Box, Button, Container, Grid, IconButton, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, Container, Grid, IconButton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
@@ -23,7 +23,7 @@ import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
-const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
+const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data');
 
 
 
@@ -95,6 +95,7 @@ const CreateTrip: FC = () => {
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const { userL } = useContext(LoginContext);
     const [imageBackground, setImageBackground] = useState<string>()
+    const [errorApi, setErrorApi] = useState<string>();
 
     const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
@@ -370,7 +371,11 @@ const CreateTrip: FC = () => {
 
 
         }).catch((err) => {
-            console.log(err);
+            console.log(typeof err === 'string' ? err : typeof err.message === 'string' ? err.message : 'Something went wrong!');
+            setErrorApi(err && typeof err === 'string' ? err : 'Something went wrong!');
+
+            setLoading(false);
+            setButtonAdd(true);
         })
     }
 
@@ -445,6 +450,15 @@ const CreateTrip: FC = () => {
             </Tooltip>
         )
     }
+
+
+    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setErrorApi(undefined);
+    };
+
 
 
     return (
@@ -589,6 +603,11 @@ const CreateTrip: FC = () => {
                             }
                             <Button variant="contained" disabled={!isValid} onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}>ADD POINT`S FOR THE TRIP</Button>
 
+                        </Box>
+                        <Box sx={{ position: 'relative', marginTop: '20px', display: 'flex', flexDirection: 'column', alignContent: 'center', alignItems: 'center', boxSizing: 'border-box' }}>
+                            <Snackbar sx={{ position: 'relative', left: '0px', right: '0px' }} open={errorApi ? true : false} autoHideDuration={5000} onClose={handleClose} >
+                                <Alert onClose={handleClose} severity="error">{errorApi}</Alert>
+                            </Snackbar>
                         </Box>
                     </Box>
                 </Container>

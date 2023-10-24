@@ -6,7 +6,7 @@ import { ApiTrip } from "../../services/tripService";
 import { Trip } from "../../model/trip";
 import * as tripService from '../../services/tripService';
 
-const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
+const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data');
 
 const rotateHorCenter = keyframes`
 0% {

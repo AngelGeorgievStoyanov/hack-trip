@@ -7,7 +7,7 @@ import { Point, PointCreate } from "../../model/point";
 import * as pointService from '../../services/pointService';
 import { ApiPoint } from "../../services/pointService";
 import PointList from "./PointList/PointList";
-import { Box, Button, Container, Grid, IconButton, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, Container, Grid, IconButton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormTextArea from "../FormFields/FormTextArea";
 import { useForm } from "react-hook-form";
@@ -33,7 +33,7 @@ type decode = {
 
 
 const API_POINT: ApiPoint<IdType, PointCreate> = new pointService.ApiPointImpl<IdType, PointCreate>('data/points');
-const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data/trips');
+const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data');
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 let zoom = 8;
@@ -83,6 +83,7 @@ const TripPoints: FC = () => {
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const [imageBackground, setImageBackground] = useState<string>()
     const [errorMessageGPS, setErrorMessageGPS] = useState<string | undefined>();
+    const [errorApi, setErrorApi] = useState<string>();
 
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
@@ -350,6 +351,9 @@ const TripPoints: FC = () => {
             })
         }).catch((err) => {
             console.log(err);
+            setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
+            setLoading(false);
+            setButtonAdd(true);
         });
 
         if (imagesNames) {
@@ -367,6 +371,9 @@ const TripPoints: FC = () => {
 
         if (!data.lat) {
             setErrorMessageSearch('Plece enter exact name location or click in map');
+            setErrorApi('Plece enter exact name location or click in map');
+            setLoading(false);
+            setButtonAdd(true);
             return;
         } else {
             setErrorMessageSearch('');
@@ -392,7 +399,6 @@ const TripPoints: FC = () => {
             newPoint.name = newPoint.name.split('-')[0];
         }
 
-
         API_POINT.create(newPoint).then((point) => {
             setClickedPos(undefined);
             setButtonAdd(true)
@@ -407,7 +413,11 @@ const TripPoints: FC = () => {
             setFileSelected([])
             navigate(`/trip/points/${idTrip}`);
         }).catch((err) => {
-            console.log(err);
+            console.log(err.message);
+            setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
+
+            setLoading(false);
+            setButtonAdd(true);
         });
     }
 
@@ -498,7 +508,12 @@ const TripPoints: FC = () => {
         setErrorMessageGPS('GPS Error: ' + error.code + ', ' + error.message)
     }
 
-
+    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setErrorApi(undefined);
+    };
 
     return (
         <>
@@ -558,6 +573,11 @@ const TripPoints: FC = () => {
                             <Button variant="contained" onClick={getPosition} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '2px' }}  >Gps position</Button>
                             {errorMessageGPS ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageGPS}</Typography> : ''}
 
+                        </Box>
+                        <Box sx={{ position: 'relative', marginTop: '20px', display: 'flex', flexDirection: 'column', alignContent: 'center', alignItems: 'center', boxSizing: 'border-box' }}>
+                            <Snackbar sx={{ position: 'relative', left: '0px', right: '0px' }} open={errorApi ? true : false} autoHideDuration={5000} onClose={handleClose} >
+                                <Alert onClose={handleClose} severity="error">{errorApi}</Alert>
+                            </Snackbar>
                         </Box>
                         <Box component='form'
                             sx={{

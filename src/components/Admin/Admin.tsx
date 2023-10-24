@@ -1,5 +1,5 @@
-import { Box, Button } from "@mui/material";
-import { FC, useContext, useEffect, useState } from "react";
+import { Box, Button, ImageList, ImageListItem, Typography } from "@mui/material";
+import { FC, RefObject, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IFailedLogs, User } from "../../model/users";
 import UsersList from "../UsersList/UsersList";
@@ -20,7 +20,7 @@ import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 
 
 
-const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
+const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data');
 const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
 
@@ -32,7 +32,18 @@ type decode = {
 
 let userId: string;
 
+export type GcloudImage = {
+    name: string;
+    generation: string;
+    timeCreated: string;
+    updated: string;
+    timeStorageClassUpdated: string;
+};
 
+export type CommonImagesData = {
+    dbOnlyImages: string[];
+    cloudOnlyImages: string[];
+};
 
 const Admin: FC = () => {
 
@@ -60,6 +71,14 @@ const Admin: FC = () => {
     const [selectedRow, setSelectedRow] = useState<GridRowSelectionModel>([]);
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [pageSize, setPageSize] = useState<number>(5);
+    const [dbImages, setDbImages] = useState<string[]>();
+    const [gcloudImages, setGcloudImages] = useState<GcloudImage[]>();
+    const [commonImages, setCommonImages] = useState<CommonImagesData>();
+    const [hideDBImages, setHideDBImages] = useState<boolean>(true);
+    const [hideGCImages, setHideGCImages] = useState<boolean>(true);
+    const [hideCommonImages, setHideCommonImages] = useState<boolean>(true);
+    const [colsDB, setColsDB] = useState<number>(4);
+    const [colsGC, setColsGC] = useState<number>(4);
 
 
     useEffect(() => {
@@ -88,7 +107,53 @@ const Admin: FC = () => {
             console.log(err);
         });
 
+        API_TRIP.getDBImages(userId).then((data) => {
+            setDbImages(data)
+        }).catch(err => {
+            console.log(err.message)
+        })
+
+        API_TRIP.getGCImages(userId).then((data) => {
+            setGcloudImages(data)
+        }).catch(err => {
+            console.log(err.message)
+        })
+
+        API_TRIP.getCommonImages(userId).then((data) => {
+            setCommonImages(data)
+        }).catch(err => {
+            console.log(err.message)
+        })
+
+        const updateColsDB = () => {
+
+            const newColsDB = Math.floor(window.innerWidth / 100) || 3;
+            setColsDB(newColsDB);
+
+        };
+
+        const updateColsGC = () => {
+
+            const newColsGC = Math.floor(window.innerWidth / 100) || 3;
+            setColsGC(newColsGC);
+
+        };
+
+        const handleResize = () => {
+            updateColsDB();
+            updateColsGC();
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        handleResize();
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+
     }, []);
+
 
 
     const hideUsers = () => {
@@ -107,6 +172,16 @@ const Admin: FC = () => {
 
     const hideFailedLOgs = () => {
         setHideFailedLogsList(!hideFailedLogsList);
+    }
+
+    const hideDBImg = () => {
+        setHideDBImages(!hideDBImages);
+    }
+    const hideGCImg = () => {
+        setHideGCImages(!hideGCImages);
+    }
+    const hideCommImg = () => {
+        setHideCommonImages(!hideCommonImages);
     }
 
 
@@ -183,8 +258,8 @@ const Admin: FC = () => {
         { field: 'country_code', headerName: 'C Code' },
         { field: 'city', headerName: 'City' },
         { field: 'postal', headerName: 'Postual' },
-        { field: 'latitude', headerName: 'Lat', width: 130, type: 'number' },
-        { field: 'longitude', headerName: 'Lng', width: 130, type: 'number' },
+        { field: 'latitude', headerName: 'Lat', width: 130 },
+        { field: 'longitude', headerName: 'Lng', width: 130 },
         { field: 'state', headerName: 'State', width: 130 }
     ];
 
@@ -221,14 +296,12 @@ const Admin: FC = () => {
     return (
         <>
             <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: '#cfe8fc', minHeight: '100vh', marginTop: '-24px', maxWidth: '100vW', alignContent: 'center', alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', margin: '20px' }}>
 
                     <Button variant="contained" onClick={hideUsers} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideUsersList ? 'HIDE USERS' : 'SHOW USERS'} </Button>
                     {trips !== undefined && trips.length > 0 ?
                         <Button variant="contained" onClick={hideTrips} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideTripsList ? 'HIDE TRIPS' : 'SHOW TRIPS'} </Button>
                         : <h4 style={{ margin: '15px' }}>NO TRIPS REPORTED</h4>}
-
-
 
                     {comments !== undefined && comments.length > 0 ?
                         <Button variant="contained" onClick={hideComments} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideCommentsList ? 'HIDE COMMENTS' : 'SHOW COMMENTS'} </Button>
@@ -237,6 +310,18 @@ const Admin: FC = () => {
                     {failedLogs !== undefined && failedLogs.length > 0 ?
                         <Button variant="contained" onClick={hideFailedLOgs} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideFailedLogsList ? 'HIDE LOGS' : 'SHOW LOGS'} </Button>
                         : <h4 style={{ margin: '15px' }}>NO FAILED LOGS</h4>
+                    }
+                    {dbImages !== undefined && dbImages.length > 0 ?
+                        <Button variant="contained" onClick={hideDBImg} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideDBImages ? 'HIDE DB IMAGES' : 'SHOW DB IMAGES'} </Button>
+                        : <h4 style={{ margin: '15px' }}>NO DB IMAGES</h4>
+                    }
+                    {gcloudImages !== undefined && gcloudImages.length > 0 ?
+                        <Button variant="contained" onClick={hideGCImg} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideGCImages ? 'HIDE GC IMAGES' : 'SHOW GC IMAGES'} </Button>
+                        : <h4 style={{ margin: '15px' }}>NO GC IMAGES</h4>
+                    }
+                    {commonImages && (commonImages.dbOnlyImages.length > 0 || commonImages.cloudOnlyImages.length > 0) ?
+                        <Button variant="contained" onClick={hideCommImg} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideCommonImages ? 'HIDE COMM IMAGES' : 'SHOW COMM IMAGES'} </Button>
+                        : <h4 style={{ margin: '15px' }}>NO COMMON IMAGES</h4>
                     }
 
                 </Box>
@@ -304,8 +389,106 @@ const Admin: FC = () => {
                         </Box>
                         : ''}
 
+                    {hideDBImages ?
+                        <>
+
+                            {(dbImages && dbImages.length > 0) ?
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <Typography variant="subtitle1" align={'center'}>DB IMAGES</Typography>
+
+                                    <ImageList sx={{ maxWidth: '95%', height: 'auto', '@media(max-width: 600px)': { width: '100%', height: 'auto' } }} cols={colsGC} rowHeight={'auto'}>
+                                        {dbImages.map((item, i) => (
+                                            <ImageListItem key={i}>
+                                                <img
+                                                    src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&q=50`}
+                                                    srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&q=50&dpr=2 2x`}
+                                                    alt={item}
+                                                    loading="lazy"
+                                                    // onClick={onClickImage}
+                                                    style={{ cursor: 'pointer' }}
+                                                />
+                                            </ImageListItem>
+                                        ))}
+                                    </ImageList>
+                                </Box>
+
+                                : ''}
+                        </>
+                        : ''}
+
+                    {hideGCImages ?
+                        <>
+
+                            {(gcloudImages && gcloudImages.length > 0) ?
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <Typography variant="subtitle1" align={'center'}>GC IMAGES</Typography>
+                                    <ImageList sx={{ maxWidth: '95%', height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={colsGC} rowHeight={'auto'}>
+                                        {gcloudImages.map((item, i) => (
+                                            <ImageListItem key={i}>
+                                                <img
+                                                    src={`https://storage.googleapis.com/hack-trip/${item.name}?w=164&h=164&fit=crop&auto=format&q=70`}
+                                                    srcSet={`https://storage.googleapis.com/hack-trip/${item.name}?w=164&h=164&fit=crop&auto=format&q=70&dpr=2 2x`}
+                                                    alt={item.name}
+                                                    loading="lazy"
+                                                    // onClick={onClickImage}
+                                                    style={{ cursor: 'pointer' }}
+                                                />
+                                            </ImageListItem>
+                                        ))}
+                                    </ImageList>
+                                </Box>
+
+                                : ''}
+                        </>
+                        : ''}
+                    {hideCommonImages ?
+                        <>
+                            {(commonImages && commonImages.dbOnlyImages.length > 0) ?
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <Typography variant="subtitle1" align={'center'}>DB IMAGES</Typography>
+                                    <ImageList sx={{ maxWidth: '95%', height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={colsDB} rowHeight={'auto'}>
+                                        {commonImages.dbOnlyImages.map((item: string, i: number) => (
+                                            <ImageListItem key={i}>
+                                                <img
+                                                    src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&q=70`}
+                                                    srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&q=70&dpr=2 2x`}
+                                                    alt={item}
+                                                    loading="lazy"
+                                                    // onClick={onClickImage}
+                                                    style={{ cursor: 'pointer' }}
+                                                />
+                                            </ImageListItem>
+                                        ))}
+                                    </ImageList>
+                                </Box> :
+                                <Typography variant="subtitle1" align={'center'}>NO DB IMAGES</Typography>
+                            }
+                            {(commonImages && commonImages.cloudOnlyImages.length > 0) ?
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <Typography variant="subtitle1">GC IMAGES</Typography>
+                                    <ImageList sx={{ maxWidth: '95%', height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={colsGC} rowHeight={'auto'}>
+                                        {commonImages.cloudOnlyImages.map((item: string, i: number) => (
+                                            <ImageListItem key={i}>
+                                                <img
+                                                    src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&q=70`}
+                                                    srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&q=70&dpr=2 2x`}
+                                                    alt={item}
+                                                    loading="lazy"
+                                                    // onClick={onClickImage}
+                                                    style={{ cursor: 'pointer' }}
+                                                />
+                                            </ImageListItem>
+                                        ))}
+                                    </ImageList>
+                                </Box> :
+                                <Typography variant="subtitle1" align={'center'} >NO GC IMAGES</Typography>
+                            }
+                        </>
+
+                        : ''}
                 </Box>
-            </Box >
+
+            </Box>
         </>
     )
 }

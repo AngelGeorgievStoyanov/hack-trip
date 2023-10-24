@@ -69,7 +69,7 @@ const AdminTripDetails: FC = () => {
     const navigate = useNavigate();
     const idTrip = useParams().tripId;
 
-    const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data/trips');
+    const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data');
     const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
     const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
 
@@ -187,9 +187,9 @@ const AdminTripDetails: FC = () => {
     const deleteClickHandler = () => {
 
         if (trip === undefined) return;
-        API_TRIP.deleteById(trip._id,userId).then((data) => {
-            API_POINT.deleteByTripId(trip._id,userId).then((data) => {
-                API_COMMENT.deleteByTripId(trip._id,userId).then((data) => {
+        API_TRIP.deleteById(trip._id, userId).then((data) => {
+            API_POINT.deleteByTripId(trip._id, userId).then((data) => {
+                API_COMMENT.deleteByTripId(trip._id, userId).then((data) => {
 
                 }).catch((err) => {
                     console.log(err);
