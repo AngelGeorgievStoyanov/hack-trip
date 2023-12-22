@@ -81,9 +81,9 @@ const AdminEdit: FC = () => {
 
     const navigate = useNavigate();
 
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
     if (accessToken) {

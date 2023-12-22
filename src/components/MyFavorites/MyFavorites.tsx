@@ -27,11 +27,11 @@ const MyFavorites: FC = () => {
     const [trips, setTrips] = useState<Trip[]>([]);
     const [imageBackground, setImageBackground] = useState<string>()
 
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
 
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);

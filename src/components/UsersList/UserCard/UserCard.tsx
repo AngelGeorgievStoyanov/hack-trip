@@ -28,11 +28,11 @@ const UserCard: FC<UserCardProps> = ({ user }): ReactElement => {
     let timeCreatedPlusOneDay = Date.parse(user.timeCreated ? user.timeCreated : new Date().toISOString()) + oneDay
     let now = Date.parse(new Date().toISOString())
 
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
 
     const userRole = user.role as any as string;
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
     if (accessToken) {
@@ -69,7 +69,7 @@ const UserCard: FC<UserCardProps> = ({ user }): ReactElement => {
                             alt="USER"
                         />
                         : ''}
-                    <Typography gutterBottom variant="h5" color={user.verifyEmail===0 && (timeCreatedPlusOneDay < now)? 'red':''} component="div">
+                    <Typography gutterBottom variant="h5" color={user.verifyEmail === 0 && (timeCreatedPlusOneDay < now) ? 'red' : ''} component="div">
                         Email: {user.email}
                     </Typography> <Typography gutterBottom variant="subtitle1" component="div">
                         Profile created on: {dateFormat(user.timeCreated!)}

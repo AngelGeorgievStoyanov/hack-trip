@@ -21,7 +21,7 @@ import EditComment from './components/CommentEdit/CommentEdit';
 import { ApiComment } from './services/commentService';
 import { Comment } from './model/comment';
 import * as commentService from './services/commentService'
-import { useState, createContext, FC } from 'react';
+import { useState, createContext, FC, useEffect, useContext } from 'react';
 import { User } from './model/users';
 import MyTrips from './components/MyTrips/MyTrips';
 import GuardedRoute from './components/GuardedRoute/GuardedRoute';
@@ -48,6 +48,7 @@ import ReSendVerifyEmail from './components/ReSendVerifyEmail/ReSendVerifyEmail'
 import Login from './components/Login/Login';
 import Register from './components/Register/Register';
 import LiveTripTrackingCreate from './components/LiveTripTrackingCreate/LiveTripTrackingCreate/LiveTripTrackingCreate';
+import jwt_decode from "jwt-decode";
 
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data');
@@ -61,20 +62,66 @@ const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType
 
 
 type LoginContext = {
-  userL: User | null;
-  setUserL: React.Dispatch<React.SetStateAction<User | null>>
+  token: string | null;
+  setToken: React.Dispatch<React.SetStateAction<string | null>>
+  loginUser: (authToken: string) => void;
+  logoutUser: () => void;
 }
+
 
 export const LoginContext = createContext({} as LoginContext);
 
+export const LoginProvider = ({ children }: any) => {
+  const [token, setToken] = useState<string | null>(null);
 
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
+
+  const loginUser = (authToken: string) => {
+    setToken(authToken);
+    localStorage.setItem('accessToken', authToken);
+  };
+
+  const logoutUser = () => {
+    setToken(null);
+    localStorage.removeItem('accessToken');
+  };
+
+  const contextValue: LoginContext = {
+    token,
+    setToken,
+    loginUser,
+    logoutUser
+  };
+
+  return (
+    <LoginContext.Provider value={contextValue}>
+      {children}
+    </LoginContext.Provider>
+  );
+};
+
+
+type decode = {
+  _id: string;
+}
+
+let userId: string | undefined;
 export async function tripLoader({ params }: LoaderFunctionArgs) {
 
 
 
-  const userId = localStorage.getItem('userId')
+  const accessToken = localStorage.getItem('accessToken')
 
-
+  if (accessToken) {
+    const decode: decode = jwt_decode(accessToken);
+    userId = decode._id;
+  }
 
   if (params.tripId && userId !== null && userId !== undefined) {
 
@@ -408,19 +455,36 @@ const router = createBrowserRouter([
 
 
 const App: FC = () => {
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loginContextValue, setLoginContextValue] = useState<LoginContext>({
+    token: null,
+    setToken: () => { },
+    loginUser: (authToken: string) => { },
+    logoutUser: () => { },
+  });
 
-  const [userL, setUserL] = useState<null | User>(null)
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    if (storedToken) {
+      setToken(storedToken);
+    }
+
+    setLoading(false);
+  }, []);
+
+
+
   return (
     <>
       <ErrorBoundary>
-        <LoginContext.Provider value={{ userL, setUserL }}>
+        <LoginProvider>
           <RouterProvider router={router} />
-        </LoginContext.Provider>
+        </LoginProvider>
       </ErrorBoundary>
     </>
   );
+};
 
-
-}
 
 export default App;

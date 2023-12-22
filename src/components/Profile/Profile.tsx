@@ -78,10 +78,10 @@ const Profile: FC = () => {
 
     const navigate = useNavigate();
 
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);

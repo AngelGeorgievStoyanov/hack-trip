@@ -44,7 +44,7 @@ const PointCard: FC<PointCardProps> = ({ point, length }): ReactElement => {
 
     const idTrip = useParams().tripId;
 
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
 
     const navigate = useNavigate();
     let center = {
@@ -53,7 +53,7 @@ const PointCard: FC<PointCardProps> = ({ point, length }): ReactElement => {
     }
 
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);

@@ -1,5 +1,5 @@
 import { FC, useContext } from 'react';
-import {  Outlet, useLoaderData } from 'react-router-dom';
+import { Outlet, useLoaderData } from 'react-router-dom';
 import { LoginContext } from '../../App';
 import { Comment } from '../../model/comment';
 import NotFound from '../NotFound/NotFound';
@@ -22,8 +22,8 @@ const GuardedRouteComment: FC = () => {
     const comment = useLoaderData() as Comment;
 
 
-    const { userL } = useContext(LoginContext);
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const { token } = useContext(LoginContext);
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
 
     if (accessToken) {
@@ -31,7 +31,7 @@ const GuardedRouteComment: FC = () => {
         userId = decode._id !== undefined ? decode._id : undefined;
     }
 
-    return (comment._ownerId === userId) ? <Outlet /> :  <NotFound />
+    return (comment._ownerId === userId) ? <Outlet /> : <NotFound />
 
 }
 export default GuardedRouteComment

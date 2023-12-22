@@ -47,29 +47,22 @@ type decode = {
 let userId: string;
 
 
-
-
 const CreateComment: FC = () => {
-
 
     const idTrip = useParams().tripId;
 
-
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
 
     const [loading, setLoading] = useState<boolean>(true);
     const [nameAuthor, setNameAuthor] = useState<string>()
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
     const [imageBackground, setImageBackground] = useState<string>()
 
-
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
-
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         userId = decode._id;
-
     }
 
     useEffect(() => {

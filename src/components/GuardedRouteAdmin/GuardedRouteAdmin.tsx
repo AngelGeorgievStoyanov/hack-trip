@@ -22,18 +22,16 @@ let userId: IdType;
 const GuardedRouteAdmin: FC = () => {
 
     const [guard, setGuard] = useState<boolean>(false);
-    const { userL } = useContext(LoginContext);
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const { token } = useContext(LoginContext);
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
 
-    
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         role = decode.role;
         userId = decode._id;
     }
-    
 
 
     useEffect(() => {

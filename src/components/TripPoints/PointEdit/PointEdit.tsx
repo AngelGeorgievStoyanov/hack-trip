@@ -83,13 +83,13 @@ const PointEdit: FC = () => {
     const [errorApi, setErrorApi] = useState<string>();
 
 
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
 
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
 
     if (accessToken) {

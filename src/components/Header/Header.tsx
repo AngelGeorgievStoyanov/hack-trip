@@ -33,14 +33,14 @@ type Anchor = 'left';
 const Header: FC = () => {
 
 
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
     const [userVerId, setUserVerId] = useState<boolean>(false)
     const [side, setSide] = useState({ left: false })
 
     const navigate = useNavigate();
     const loginContext = useContext(LoginContext);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
 
@@ -75,14 +75,7 @@ const Header: FC = () => {
 
             API_CLIENT.logout(accessToken)
                 .then((data) => {
-
-
-                    localStorage.clear();
-
-                    loginContext?.setUserL(null);
-                    email = undefined;
-                    userId = undefined;
-
+                    loginContext?.logoutUser();
                     navigate('/login');
                 }).catch((err) => {
                     console.log(err);

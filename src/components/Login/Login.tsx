@@ -69,7 +69,9 @@ const Login: FC = () => {
             .then(data => {
                 setUserGeolocation(data)
             })
-            .catch(err => console.log(err))
+            .catch((err) => {
+                console.log(err)
+            })
     }, [])
 
 
@@ -92,16 +94,14 @@ const Login: FC = () => {
         if (userGeolocation) {
             API_CLIENT.login(data.email, data.password, userGeolocation)
                 .then((user) => {
-                    localStorage.setItem('userId', user._id.toString());
-                    localStorage.setItem('accessToken', user.accessToken ? user.accessToken : '');
-                    if (user !== undefined) {
-
-
-                        loginContext?.setUserL({ ...user });
+                    if (user !== undefined && user.accessToken) {
+                        loginContext?.loginUser(user.accessToken);
+                        setErrorApi(undefined);
+                        navigate('/');
+                    } else {
+                        setErrorApi('Login failed. Invalid user or access token.');
                     }
 
-                    setErrorApi(undefined);
-                    navigate('/');
                 }).catch((err) => {
                     if (err.message === 'Failed to fetch') {
                         err.message = 'No internet connection with server.Please try again later.'

@@ -64,7 +64,6 @@ const Register: FC = () => {
 
     const userId = useParams().userId;
     const token = useParams().token;
-
     const navigate = useNavigate();
 
     const [errorApi, setErrorApi] = useState<string>();
@@ -117,9 +116,6 @@ const Register: FC = () => {
 
         } else {
 
-
-
-
             data.timeCreated = toIsoDate(new Date());
             data.timeEdited = toIsoDate(new Date());
             data.lastTimeLogin = toIsoDate(new Date());
@@ -134,7 +130,6 @@ const Register: FC = () => {
 
             API_CLIENT.register({ ...newUser })
                 .then((message) => {
-
                     setErrorApi(undefined);
                     setRegisterMessage(message)
                 }).catch((err) => {

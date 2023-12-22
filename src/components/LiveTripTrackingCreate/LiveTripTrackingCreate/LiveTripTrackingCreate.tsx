@@ -91,8 +91,6 @@ const dateRegExp = new RegExp('[0-9]{2}:[0-9]{2}:[0-9]{2}')
 
 let wakelock: WakeLockSentinel | null;
 
-let screen = window.screen;
-
 let boxSize: string;
 
 let html = document.querySelector('html') as HTMLElement;
@@ -100,7 +98,7 @@ let html = document.querySelector('html') as HTMLElement;
 const LiveTripTrackingCreate: FC = () => {
 
 
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const [imageBackground, setImageBackground] = useState<string>()
     const [errorMessageGPS, setErrorMessageGPS] = useState<string | undefined>();
@@ -125,7 +123,7 @@ const LiveTripTrackingCreate: FC = () => {
 
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     const header = document.getElementsByTagName('header')[0];
 

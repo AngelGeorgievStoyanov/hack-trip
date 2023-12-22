@@ -73,7 +73,7 @@ let userId: string | undefined;
 const TripPoints: FC = () => {
 
     const points = useLoaderData() as Point[]
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
 
     const idTrip = useParams().tripId;
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
@@ -89,7 +89,7 @@ const TripPoints: FC = () => {
 
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);

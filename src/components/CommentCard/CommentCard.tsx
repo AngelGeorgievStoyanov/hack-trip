@@ -48,9 +48,9 @@ const CommentCard: FC<CommentCardProps> = ({ comment, onDeleteCom, onEditCom, on
 
     const [user, setUser] = useState<User>()
 
-    const { userL } = useContext(LoginContext)
+    const { token } = useContext(LoginContext)
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
     if (accessToken) {

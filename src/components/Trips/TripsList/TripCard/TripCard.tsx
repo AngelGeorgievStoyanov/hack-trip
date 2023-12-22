@@ -53,10 +53,10 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
 
     const minSwipeDistance = 45;
     const theme = useTheme();
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
     const isMobile = useMediaQuery('(max-width:900px)');
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
     if (accessToken) {

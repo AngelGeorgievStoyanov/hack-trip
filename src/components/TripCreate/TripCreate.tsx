@@ -93,11 +93,11 @@ const CreateTrip: FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
     const [imageBackground, setImageBackground] = useState<string>()
     const [errorApi, setErrorApi] = useState<string>();
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);

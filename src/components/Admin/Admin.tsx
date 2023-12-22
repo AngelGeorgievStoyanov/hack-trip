@@ -1,5 +1,5 @@
 import { Box, Button, ImageList, ImageListItem, Typography } from "@mui/material";
-import { FC, RefObject, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { FC, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IFailedLogs, User } from "../../model/users";
 import UsersList from "../UsersList/UsersList";
@@ -49,10 +49,9 @@ const Admin: FC = () => {
 
     const navigate = useNavigate();
 
-    const { userL } = useContext(LoginContext);
+    const { token } = useContext(LoginContext);
 
-    const accessToken = userL?.accessToken ? userL.accessToken : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
-
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         userId = decode._id;
