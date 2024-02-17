@@ -18,13 +18,11 @@ const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType
 
 let userId: IdType;
 
-
 const GuardedRouteAdmin: FC = () => {
 
     const [guard, setGuard] = useState<boolean>(false);
     const { token } = useContext(LoginContext);
     const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
-
     let role = 'user';
 
     if (accessToken) {
@@ -33,19 +31,21 @@ const GuardedRouteAdmin: FC = () => {
         userId = decode._id;
     }
 
-
     useEffect(() => {
+        if ((role === 'admin' || role === 'manager') && token) {
+            API_CLIENT.guardedRoute(userId, role, token).then((data) => {
+                setGuard(data);
+            })
+        } else {
+            setGuard(false)
+        }
 
-        API_CLIENT.guardedRoute(userId, role).then((data) => {
-            setGuard(data);
-        })
 
-
-    }, [])
+    }, [token, guard])
 
 
 
     return (((role === 'admin') || (role === 'manager')) && (guard === true)) ? <Outlet /> : <NotFound />
 
 }
-export default GuardedRouteAdmin
+export default GuardedRouteAdmin;

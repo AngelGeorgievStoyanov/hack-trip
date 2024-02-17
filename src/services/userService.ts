@@ -30,7 +30,7 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     deleteProfileImage(id: K, image: string): Promise<V>;
     findAll(id: K): Promise<V[]>;
     updateUserAdmin(id: K, entity: UserEditAdmin): Promise<V>;
-    guardedRoute(id: K, role: string): Promise<boolean>;
+    guardedRoute(id: K, role: string, token:string): Promise<boolean>;
     findUserId(id: K): Promise<boolean>;
     forgotPassword(email: string): Promise<string>;
     newPassword(id: K, token: string, password: string): Promise<V>;
@@ -241,12 +241,13 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     }
 
 
-    async guardedRoute(id: K, role: string): Promise<boolean> {
+    async guardedRoute(id: K, role: string,token:string): Promise<boolean> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/guard`, {
             method: 'POST',
             headers: {
-                "content-type": "application/json"
+                "content-type": "application/json",
+                "Authorization": `Bearer ${token}`,
             },
             body: JSON.stringify({ id, role })
         });
