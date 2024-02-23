@@ -1,5 +1,14 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
+Disallow: /
+
+User-agent: Googlebot
 Allow: /
 Allow: /trips
 Allow: /about
+Allow: /trip/details/
+Allow: /login
+Allow: /register
+Allow: /forgot-password
+Allow: /resend-email
+Allow: /term-privacy-policy

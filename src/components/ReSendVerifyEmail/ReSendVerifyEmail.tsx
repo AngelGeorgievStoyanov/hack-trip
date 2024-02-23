@@ -13,7 +13,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import * as tripService from '../../services/tripService';
 import { Trip } from '../../model/trip';
 import { ApiTrip } from '../../services/tripService';
-import { Helmet } from "react-helmet-async";
+import HelmetWrapper from "../Helmet/HelmetWrapper";
 
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
@@ -126,23 +126,15 @@ const ReSendVerifyEmail: FC = () => {
 
     return (
         <>
-            <Helmet>
-                <title>Hack Trip</title>
-                <meta name='description' content='Hack Trip is an app where you can share your trips or get valuable tips for your future trips. These are our TOP 5 most liked in Hack Trips!' />
-                <meta property="og:title" content="Hack Trip" />
-                <meta property="og:url" content="https://www.hack-trip.com" />
-                <meta property="og:image:url" content="https://www.hack-trip.com" />
-                <meta property="og:image" content={`https://storage.googleapis.com/hack-trip-background-images/${imageBackground}`} />
-                <meta property="og:type" content="website" />
-                <meta property="og:description"
-                    content="Hack Trip is an app where you can share your trips or get valuable tips for your future trips. These are our TOP 5 most liked in Hack Trips!" />
-                <meta property="quote" content={'Hack Trip'} />
-                <meta property="og:locale" content="en_US" />
-                <meta property="og:hashtag" content={'#HackTrip'} />
-                <meta property="og:site_name" content="Hack-Trip" />
-                <link rel="canonical" href="/resend-email" />
-            </Helmet>
-
+            <HelmetWrapper
+                title={'Hack Trip'}
+                description={' Hack Trip'}
+                url={`https://www.hack-trip.com/resend-email`}
+                images={imageBackground && imageBackground.length > 0 ? Array(imageBackground) : []}
+                hashtag={'#HackTrip'}
+                keywords={'Hack Trip, Travel, Adventure'}
+                canonical={`https://www.hack-trip.com/resend-email`}
+            />
             <Grid onTouchStart={onTouchStart} container sx={{
                 backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                 backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",

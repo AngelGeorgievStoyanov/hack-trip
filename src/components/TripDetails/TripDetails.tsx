@@ -32,6 +32,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CloseIcon from '@mui/icons-material/Close';
+import HelmetWrapper from "../Helmet/HelmetWrapper";
 
 let zoom = 12;
 
@@ -131,8 +132,6 @@ const TripDetails: FC = () => {
 
 
         if (idTrip !== undefined) {
-
-
 
             API_TRIP.findById(idTrip, userId).then((data) => {
 
@@ -712,6 +711,14 @@ const TripDetails: FC = () => {
 
     return (
         <>
+
+            <HelmetWrapper
+                title={trip ? trip.title : 'Hack Trip'}
+                description={trip ? trip.description : 'Hack Trip'}
+                url={trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : `https://www.hack-trip.com`}
+                images={trip && trip.imageFile ? trip.imageFile : []} hashtag={'#HackTrip'}
+                keywords={'Hack Trip, Travel, Adventure'}
+                canonical={trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : `https://www.hack-trip.com`} />
             <Grid container sx={!isIphone ?
                 {
                     boxSizing: 'border-box',
@@ -884,6 +891,8 @@ const TripDetails: FC = () => {
                                                     loading="lazy"
                                                     onClick={onClickImage}
                                                     style={{ cursor: 'pointer' }}
+                                                    height={'auto'}
+                                                    width={'auto'}
                                                 />
                                             </ImageListItem>
                                         )) : ''}

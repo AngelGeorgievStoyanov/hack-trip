@@ -13,7 +13,7 @@ import InputBase from '@mui/material/InputBase';
 import { LoginContext } from "../../App";
 import jwt_decode from "jwt-decode";
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { Helmet } from "react-helmet-async";
+import HelmetWrapper from "../Helmet/HelmetWrapper";
 
 
 
@@ -156,24 +156,15 @@ const Trips: FC = () => {
 
     return (
         <>
-
-            <Helmet>
-                <title>Hack Trip</title>
-                <meta name='description' content='All Hack Trips page, hack trip . Hack Trip is an app where you can share your trips or get valuable tips for your future trips...' />
-                <meta property="og:title" content="Hack Trip" />
-                <meta property="og:url" content="https://www.hack-trip.com" />
-                <meta property="og:image:url" content="https://www.hack-trip.com" />
-                <meta property="og:image" content={`https://storage.googleapis.com/hack-trip-background-images/${imageBackground}`} />
-                <meta property="og:type" content="website" />
-                <meta property="og:description"
-                    content="Hack Trip is an app where you can share your trips or get valuable tips for your future trips. These are our TOP 5 most liked in Hack Trips!" />
-                <meta property="quote" content={'Hack Trip'} />
-                <meta property="og:locale" content="en_US" />
-                <meta property="og:hashtag" content={'#HackTrip'} />
-                <meta property="og:site_name" content="Hack-Trip" />
-                <link rel="canonical" href="/trips" />
-            </Helmet>
-
+            <HelmetWrapper
+                title={trips && trips?.length > 0 ? trips[0].title : 'Hack Trip'}
+                description={trips && trips?.length > 0 ? trips[0].description : 'Hack Trip'}
+                url={`https://www.hack-trip.com/trips`}
+                images={trips && trips?.length > 0 && trips[0].imageFile ? trips[0].imageFile : []}
+                hashtag={'#HackTrip'}
+                keywords={'Hack Trip, Travel, Adventure'}
+                canonical={`https://www.hack-trip.com/trips`}
+            />
             <AppBar position="sticky" sx={{ marginTop: '-25px' }}>
                 <Toolbar sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', '@media(max-width: 670px)': {

@@ -1,10 +1,10 @@
 import { Grid, Box, CardMedia, useMediaQuery, keyframes } from "@mui/material";
 import { BaseSyntheticEvent, FC, useEffect, useRef, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { IdType, mouseover, touchStart } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
 import { Trip } from "../../model/trip";
 import * as tripService from '../../services/tripService';
+import HelmetWrapper from "../Helmet/HelmetWrapper";
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data');
 
@@ -55,22 +55,15 @@ const AboutUs: FC = () => {
     return (
 
         <>
-            <Helmet>
-                <title>Hack Trip About</title>
-                <meta name='description' content='Hack Trip is an app where you can share your trips or get valuable tips for your future trips. These are our TOP 5 most liked in Hack Trips!' />
-                <meta property="og:title" content="Hack Trip" />
-                <meta property="og:url" content="https://www.hack-trip.com" />
-                <meta property="og:image:url" content="https://www.hack-trip.com" />
-                <meta property="og:image" content={`https://storage.googleapis.com/hack-trip-background-images/${imageBackground}`} />
-                <meta property="og:type" content="website" />
-                <meta property="og:description"
-                    content="The idea of ​Hack Trip is to help all travelers, if you want to visit a certain destination, city or area, enter to search for information and see other travelers..." />
-                <meta property="quote" content={'Hack Trip'} />
-                <meta property="og:locale" content="en_US" />
-                <meta property="og:hashtag" content={'#HackTrip'} />
-                <meta property="og:site_name" content="Hack-Trip" />
-                <link rel="canonical" href="/about" />
-            </Helmet>
+            <HelmetWrapper
+                title={'About'}
+                description={' Hack Trip'}
+                url={`https://www.hack-trip.com/about`}
+                images={imageBackground && imageBackground.length > 0 ? Array(imageBackground) : []}
+                hashtag={'#HackTrip'}
+                keywords={'Hack Trip, Travel, Adventure'}
+                canonical={`https://www.hack-trip.com/about`}
+            />
             <Grid onTouchStart={onTouchStart} container sx={!isIphone ?
                 {
                     padding: '30px', margin: '-25px 0px 0px 0px',
@@ -113,6 +106,8 @@ const AboutUs: FC = () => {
                         title="hack trip"
                         alt="hack trip"
                         loading="lazy"
+                        height={'240px'}
+                        width={'auto'}
                     />
                     <h4 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}> It's integrated for you Google Maps and you can add points Markers.</h4>
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', '@media(max-width: 1050px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
@@ -123,6 +118,8 @@ const AboutUs: FC = () => {
                             title="hack trip"
                             alt="hack trip"
                             loading="lazy"
+                            height={'240px'}
+                            width={'auto'}
                         />
 
                         <CardMedia
@@ -132,6 +129,8 @@ const AboutUs: FC = () => {
                             title="hack trip"
                             alt="hack trip"
                             loading="lazy"
+                            height={'240px'}
+                            width={'auto'}
                         />
                     </Box>
                     <h4 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}> As you can mark everything you want, a city, hotel, restaurant, shop,
@@ -147,6 +146,8 @@ const AboutUs: FC = () => {
                             title="hack trip"
                             alt="hack trip"
                             loading="lazy"
+                            height={'240px'}
+                            width={'auto'}
                         />
                         <CardMedia
                             component="img"
@@ -155,6 +156,8 @@ const AboutUs: FC = () => {
                             title="hack trip"
                             alt="hack trip"
                             loading="lazy"
+                            height={'240px'}
+                            width={'auto'}
                         />
                     </Box>
                     <h4 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>
@@ -169,6 +172,8 @@ const AboutUs: FC = () => {
                         title="hack trip"
                         alt="hack trip"
                         loading="lazy"
+                        height={'240px'}
+                        width={'auto'}
                     />
                     <h5 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Enjoy the Hack Trip !</h5>
                     <h5 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>You can contact us at email:  www.hack.trip@gmail.com</h5>
