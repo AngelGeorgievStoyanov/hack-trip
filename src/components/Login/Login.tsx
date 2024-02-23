@@ -91,13 +91,20 @@ const Login: FC = () => {
         data.email = data.email.trim();
         data.password = data.password.trim();
 
+        const pathname = sessionStorage.getItem('pathname');
+
         if (userGeolocation) {
             API_CLIENT.login(data.email, data.password, userGeolocation)
                 .then((user) => {
                     if (user !== undefined && user.accessToken) {
                         loginContext?.loginUser(user.accessToken);
                         setErrorApi(undefined);
-                        navigate('/');
+                        if (pathname && pathname !== '/login' && pathname !== '/registration') {
+                            sessionStorage.removeItem('pathname')
+                            navigate(pathname);
+                        } else {
+                            navigate('/');
+                        }
                     } else {
                         setErrorApi('Login failed. Invalid user or access token.');
                     }

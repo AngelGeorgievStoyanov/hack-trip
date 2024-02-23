@@ -1,4 +1,4 @@
-import { GoogleMap, Marker, useJsApiLoader, Autocomplete, } from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader, Autocomplete, MarkerF, } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiTrip } from "../../services/tripService";
@@ -485,7 +485,7 @@ const CreateTrip: FC = () => {
 
                         >
 
-                            {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
+                            {clickedPos?.lat ? <MarkerF position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
                         </GoogleMap>
                     </Box>
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>

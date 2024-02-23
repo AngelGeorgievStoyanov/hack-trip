@@ -90,6 +90,7 @@ export const LoginProvider = ({ children }: any) => {
   const logoutUser = () => {
     setToken(null);
     localStorage.removeItem('accessToken');
+    sessionStorage.removeItem('pathname');
   };
 
   const contextValue: LoginContext = {

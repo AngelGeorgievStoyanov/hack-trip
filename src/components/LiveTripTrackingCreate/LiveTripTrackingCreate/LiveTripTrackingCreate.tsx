@@ -1,5 +1,5 @@
 
-import { GoogleMap, Marker, MarkerF, PolylineF, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, MarkerF, PolylineF, useJsApiLoader } from "@react-google-maps/api";
 import React, { FC, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { containerStyle, options } from "../../settings";
@@ -652,8 +652,8 @@ const LiveTripTrackingCreate: FC = () => {
                                         // onClick={onMapClick}
                                         onDragStart={onDragMap}
                                     >
-                                        {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
-                                        {startPosition?.lat ? <Marker position={startPosition} icon={{ url: 'https://storage.googleapis.com/hack-trip/plug-outlet-svgrepo-com.svg', anchor: new google.maps.Point(46, 46) }} /> : ''}
+                                        {clickedPos?.lat ? <MarkerF position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
+                                        {startPosition?.lat ? <MarkerF position={startPosition} icon={{ url: 'https://storage.googleapis.com/hack-trip/plug-outlet-svgrepo-com.svg', anchor: new google.maps.Point(46, 46) }} /> : ''}
                                         {pathPoints ? <PolylineF path={pathPoints} /> : null}
                                         {liveTrackingPositions.length ? <MarkerF icon={{ url: 'https://storage.googleapis.com/hack-trip/electric-car-electric-vehicle-svgrepo-com.svg', size: new google.maps.Size(50, 50), scaledSize: new google.maps.Size(50, 50), anchor: new google.maps.Point(25, 40) }} position={{ lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng }} /> : ''}
 
@@ -715,8 +715,8 @@ const LiveTripTrackingCreate: FC = () => {
                                         // onClick={onMapClick}
                                         onDragStart={onDragMap}
                                     >
-                                        {clickedPos?.lat ? <Marker position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
-                                        {startPosition?.lat ? <Marker position={startPosition} icon={{ url: 'https://storage.googleapis.com/hack-trip/plug-outlet-svgrepo-com.svg', anchor: new google.maps.Point(46, 46) }} /> : ''}
+                                        {clickedPos?.lat ? <MarkerF position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
+                                        {startPosition?.lat ? <MarkerF position={startPosition} icon={{ url: 'https://storage.googleapis.com/hack-trip/plug-outlet-svgrepo-com.svg', anchor: new google.maps.Point(46, 46) }} /> : ''}
                                         {pathPoints ? <PolylineF path={pathPoints} /> : null}
                                         {liveTrackingPositions.length ? <MarkerF icon={{ url: 'https://storage.googleapis.com/hack-trip/electric-car-electric-vehicle-svgrepo-com.svg', size: new google.maps.Size(50, 50), scaledSize: new google.maps.Size(50, 50), anchor: new google.maps.Point(25, 40) }} position={{ lat: liveTrackingPositions[liveTrackingPositions.length - 1].lat, lng: liveTrackingPositions[liveTrackingPositions.length - 1].lng }} /> : ''}
 

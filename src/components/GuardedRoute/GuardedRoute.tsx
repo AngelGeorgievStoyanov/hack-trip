@@ -22,6 +22,8 @@ const GuardedRoute: FC = () => {
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         userId = decode._id !== undefined ? decode._id : undefined;
+    } else {
+        sessionStorage.setItem('pathname', window.location.pathname);
     }
 
 
