@@ -130,7 +130,7 @@ const ReSendVerifyEmail: FC = () => {
                 title={'Hack Trip'}
                 description={' Hack Trip'}
                 url={`https://www.hack-trip.com/resend-email`}
-                images={imageBackground && imageBackground.length > 0 ? Array(imageBackground) : []}
+                image={imageBackground ? imageBackground : ''}
                 hashtag={'#HackTrip'}
                 keywords={'Hack Trip, Travel, Adventure'}
                 canonical={`https://www.hack-trip.com/resend-email`}

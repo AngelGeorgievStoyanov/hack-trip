@@ -194,7 +194,7 @@ const Register: FC = () => {
                 title={'Register page'}
                 description={' Hack Trip'}
                 url={`https://www.hack-trip.com/register`}
-                images={imageBackground && imageBackground.length > 0 ? Array(imageBackground) : []}
+                image={imageBackground ? imageBackground : ''}
                 hashtag={'#HackTrip'}
                 keywords={'Hack Trip, Travel, Adventure'}
                 canonical={`https://www.hack-trip.com/register`}

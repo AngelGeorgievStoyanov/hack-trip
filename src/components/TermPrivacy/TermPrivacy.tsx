@@ -30,7 +30,7 @@ const TermPrivacy: FC = () => {
                 title={'term privacy policy'}
                 description={' Hack Trip'}
                 url={`https://www.hack-trip.com/term-privacy-policy`}
-                images={[]}
+                image={''}
                 hashtag={'#HackTrip'}
                 keywords={'Hack Trip, Travel, Adventure'}
                 canonical={`https://www.hack-trip.com/term-privacy-policy`}

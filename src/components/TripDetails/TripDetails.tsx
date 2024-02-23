@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
-import { IdType, sliceDescription } from "../../shared/common-types";
+import { IdType, getRandomTripAndImage, sliceDescription } from "../../shared/common-types";
 import * as tripService from '../../services/tripService';
 import * as pointService from '../../services/pointService';
 import { Point } from "../../model/point";
@@ -33,6 +33,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CloseIcon from '@mui/icons-material/Close';
 import HelmetWrapper from "../Helmet/HelmetWrapper";
+import { FacebookIcon, FacebookShareButton, ViberIcon, ViberShareButton } from "react-share";
 
 let zoom = 12;
 
@@ -97,6 +98,7 @@ const TripDetails: FC = () => {
     const [open, setOpen] = useState(false);
     const [loadPointFullImage, setLoadFullImage] = useState<boolean>(false)
     const [loadTripFullImage, setLoadTripFullImage] = useState<boolean>(false)
+    const [randomImage, setRandomImage] = useState<string>()
 
 
     const minSwipeDistance = 45;
@@ -137,7 +139,7 @@ const TripDetails: FC = () => {
 
                 if (data) {
                     setTrip(data)
-
+                    setRandomImage(getRandomTripAndImage(Array(data)))
                     API_POINT.findByTripId(data._id).then((data) => {
 
                         if (data && Array.isArray(data)) {
@@ -195,7 +197,6 @@ const TripDetails: FC = () => {
 
 
     }, [favorite]);
-
 
     useEffect(() => {
 
@@ -716,9 +717,11 @@ const TripDetails: FC = () => {
                 title={trip ? trip.title : 'Hack Trip'}
                 description={trip ? trip.description : 'Hack Trip'}
                 url={trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : `https://www.hack-trip.com`}
-                images={trip && trip.imageFile ? trip.imageFile : []} hashtag={'#HackTrip'}
+                image={randomImage ? randomImage : ''}
+                hashtag={'#HackTrip'}
                 keywords={'Hack Trip, Travel, Adventure'}
-                canonical={trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : `https://www.hack-trip.com`} />
+                canonical={trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : `https://www.hack-trip.com`}
+            />
             <Grid container sx={!isIphone ?
                 {
                     boxSizing: 'border-box',
@@ -1037,6 +1040,26 @@ const TripDetails: FC = () => {
                             : ''
 
                 }
+                <Box sx={{ display: 'flex', margin: '10px' }}>
+                    <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Facebook</h3>
+                    <FacebookShareButton
+                        url={randomImage  ? `https://storage.googleapis.com/hack-trip/${randomImage}` : 'https://storage.googleapis.com/hack-trip/hack-trip-home-page.png'}
+                        quote={`Hack Trip - ${trip?.title} - ${trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : 'https://www.hack-trip.com'}`}
+                        hashtag='#HackTrip'
+                    >
+                        <FacebookIcon size={38} round />
+                    </FacebookShareButton>
+                </Box>
+                <Box sx={{ display: 'flex', margin: '10px' }}>
+                    <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Viber</h3>
+                    <ViberShareButton
+                        title={`Hack Trip - ${trip?.title}`}
+                        separator={' - '}
+                        url={trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : 'https://www.hack-trip.com'}
+                    >
+                        <ViberIcon size={38} round />
+                    </ViberShareButton>
+                </Box>
             </Grid >
         </>
     )

@@ -1,4 +1,5 @@
 import { BaseSyntheticEvent } from "react";
+import { Trip } from "../model/trip";
 
 export function toIsoDate(date: Date) {
     return date.toJSON();
@@ -104,4 +105,20 @@ export function touchStart(element: React.MutableRefObject<HTMLHeadingElement | 
             iterations += 1 / 3;
         }
     }, 30);
+}
+
+export function getRandomTripAndImage(trips: Trip[] | []) {
+  if (!trips || trips.length === 0) return  
+  
+
+  const randomTripIndex = Math.floor(Math.random() * trips.length);
+  const randomTrip = trips[randomTripIndex];
+  const randomImage =
+    randomTrip.imageFile && randomTrip.imageFile.length > 0
+      ? randomTrip.imageFile[
+          Math.floor(Math.random() * randomTrip.imageFile.length)
+        ]
+      : "";
+
+  return randomImage;
 }

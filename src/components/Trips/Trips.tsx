@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import { useEffect, useRef, useState, useContext, FC } from "react";
 import * as tripService from '../../services/tripService';
-import { IdType } from "../../shared/common-types";
+import { IdType, getRandomTripAndImage } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
 import SearchIcon from '@mui/icons-material/Search';
 import InputBase from '@mui/material/InputBase';
@@ -36,6 +36,7 @@ const Trips: FC = () => {
     const [typeOfPeopleSelect, setTypeOfPeopleSelect] = useState<string>('');
     const [typeOfTransportSelect, setTypeOfTransportSelect] = useState<string>('');
     const [imageBackground, setImageBackground] = useState<string>()
+    const [randomImage, setRandomImage] = useState<string>()
 
     const { token } = useContext(LoginContext);
 
@@ -66,6 +67,7 @@ const Trips: FC = () => {
 
         API_TRIP.findAllPagination(page, searchInput, typeOfPeopleSelect, typeOfTransportSelect, userId).then((data) => {
             setTrips(data);
+            setRandomImage(getRandomTripAndImage(data))
             API_TRIP.findAll(searchInput, typeOfPeopleSelect, typeOfTransportSelect).then((data) => {
                 setAllPageNumber(data);
             })
@@ -160,7 +162,7 @@ const Trips: FC = () => {
                 title={trips && trips?.length > 0 ? trips[0].title : 'Hack Trip'}
                 description={trips && trips?.length > 0 ? trips[0].description : 'Hack Trip'}
                 url={`https://www.hack-trip.com/trips`}
-                images={trips && trips?.length > 0 && trips[0].imageFile ? trips[0].imageFile : []}
+                image={randomImage ? randomImage : ''}
                 hashtag={'#HackTrip'}
                 keywords={'Hack Trip, Travel, Adventure'}
                 canonical={`https://www.hack-trip.com/trips`}

@@ -128,7 +128,7 @@ const ForgotPassword: FC = () => {
                 title={' Hack Trip'}
                 description={' Hack Trip'}
                 url={`https://www.hack-trip.com/forgot-password`}
-                images={imageBackground && imageBackground.length > 0 ? Array(imageBackground) : []}
+                image={imageBackground && imageBackground.length > 0 ? imageBackground : ''}
                 hashtag={'#HackTrip'}
                 keywords={'Hack Trip, Travel, Adventure'}
                 canonical={`https://www.hack-trip.com/forgot-password`}

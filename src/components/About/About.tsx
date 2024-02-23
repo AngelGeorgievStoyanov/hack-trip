@@ -59,7 +59,7 @@ const AboutUs: FC = () => {
                 title={'About'}
                 description={' Hack Trip'}
                 url={`https://www.hack-trip.com/about`}
-                images={imageBackground && imageBackground.length > 0 ? Array(imageBackground) : []}
+                image={imageBackground && imageBackground.length > 0 ? imageBackground : ''}
                 hashtag={'#HackTrip'}
                 keywords={'Hack Trip, Travel, Adventure'}
                 canonical={`https://www.hack-trip.com/about`}

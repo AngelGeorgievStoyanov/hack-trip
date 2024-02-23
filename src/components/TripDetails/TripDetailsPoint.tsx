@@ -5,7 +5,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { styled } from '@mui/material/styles';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import { BaseSyntheticEvent, FC, ReactElement, useState } from "react";
-import HelmetWrapper from "../Helmet/HelmetWrapper";
 
 
 interface PointCardProps {
@@ -45,14 +44,6 @@ const TripDetailsPointCard: FC<PointCardProps> = ({ point, onClickPointImage, re
 
     return (
         <>
-            <HelmetWrapper
-                title={point ? point.name : 'Hack Trip'}
-                description={point ? point.description : 'Hack Trip'}
-                url={point ? `https://www.hack-trip.com/trip/points/${point._ownerTripId}` : `https://www.hack-trip.com`}
-                images={point && point.imageFile ? point.imageFile : []} hashtag={'#HackTrip'}
-                keywords={'Hack Trip, Travel, Adventure'}
-                canonical={point ? `https://www.hack-trip.com/trip/points/${point._ownerTripId}` : `https://www.hack-trip.com`}
-            />
             <Card ref={refPoint} sx={{
                 display: 'flex',
                 flexDirection: 'column',

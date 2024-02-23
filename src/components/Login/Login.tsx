@@ -140,7 +140,7 @@ const Login: FC = () => {
                 title={'Login page'}
                 description={' Hack Trip'}
                 url={`https://www.hack-trip.com/login`}
-                images={imageBackground && imageBackground.length > 0 ? Array(imageBackground) : []}
+                image={imageBackground ? imageBackground : ''}
                 hashtag={'#HackTrip'}
                 keywords={'Hack Trip, Travel, Adventure'}
                 canonical={`https://www.hack-trip.com/login`}

@@ -4,10 +4,10 @@ import { Trip } from '../../model/trip';
 import TripList from '../Trips/TripsList/TripsList';
 import jwt_decode from "jwt-decode";
 import { BaseSyntheticEvent, FC, useContext, useEffect, useRef, useState } from 'react';
-import { IdType, mouseover, touchStart } from '../../shared/common-types';
+import { IdType, getRandomTripAndImage, mouseover, touchStart } from '../../shared/common-types';
 import * as tripService from '../../services/tripService';
 import { ApiTrip } from '../../services/tripService';
-import { FacebookShareButton, FacebookIcon } from 'react-share';
+import { FacebookShareButton, FacebookIcon, ViberShareButton, ViberIcon } from 'react-share';
 import HelmetWrapper from '../Helmet/HelmetWrapper';
 
 type decode = {
@@ -22,7 +22,7 @@ const Home: FC = () => {
 
     const [trips, setTrips] = useState<Trip[]>()
     const [imageBackground, setImageBackground] = useState<string>()
-
+    const [randomImage, setRandomImage] = useState<string>()
     const { token } = useContext(LoginContext);
 
 
@@ -53,6 +53,7 @@ const Home: FC = () => {
 
         API_TRIP.findTopTrips(userId).then((data) => {
             setTrips(data)
+            setRandomImage(getRandomTripAndImage(data))
         }).catch((err) => {
             console.log(err)
         });
@@ -60,6 +61,10 @@ const Home: FC = () => {
 
     }, [])
 
+    useEffect(() => {
+        let randomImage = getRandomTripAndImage(trips || [])
+        console.log(randomImage)
+    }, [trips])
 
     const onmouseover = (e: BaseSyntheticEvent) => {
         mouseover(e, h1HackRef)
@@ -76,7 +81,7 @@ const Home: FC = () => {
                 title={trips && trips?.length > 0 ? trips[0].title : 'Hack Trip'}
                 description={trips && trips?.length > 0 ? trips[0].description : 'Hack Trip'}
                 url={`https://www.hack-trip.com`}
-                images={trips && trips?.length > 0 && trips[0].imageFile ? trips[0].imageFile : []}
+                image={randomImage ? randomImage : ''}
                 hashtag={'#HackTrip'}
                 keywords={'Hack Trip, Travel, Adventure'}
                 canonical={`https://www.hack-trip.com`}
@@ -129,16 +134,25 @@ const Home: FC = () => {
                         }
 
                     </Box>
-                    <Box sx={{ display: 'flex' }}>
+                    <Box sx={{ display: 'flex', margin: '10px' }}>
                         <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Facebook</h3>
                         <FacebookShareButton
-
-                            url={'https://www.hack-trip.com'}
-                            quote={'Hack Trip'}
+                            url={randomImage ? `https://storage.googleapis.com/hack-trip/${randomImage}` : 'https://storage.googleapis.com/hack-trip/hack-trip-home-page.png'}
+                            quote={`Hack Trip -  https://www.hack-trip.com`}
                             hashtag='#HackTrip'
                         >
                             <FacebookIcon size={38} round />
                         </FacebookShareButton>
+                    </Box>
+                    <Box sx={{ display: 'flex', margin: '10px' }}>
+                        <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Viber</h3>
+                        <ViberShareButton
+                            title={`Hack Trip `}
+                            separator={' - '}
+                            url={'https://www.hack-trip.com'}
+                        >
+                            <ViberIcon size={38} round />
+                        </ViberShareButton>
                     </Box>
                 </Box>
             </Grid>
