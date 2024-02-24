@@ -54,7 +54,7 @@ const Footer: FC = () => {
     return (
 
         <footer ref={refFooter} className="footer">
-            <h4 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1' }}>{"Copyright © "} 2022 - 2023  "HACK-TRIP" by Angel Stoyanov.  All rights reserved.</h4>
+            <h4 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1' }}>{"Copyright © "} 2022 - {new Date().getFullYear()}  "HACK-TRIP" by Angel Stoyanov.  All rights reserved.</h4>
         </footer>
     )
 }
