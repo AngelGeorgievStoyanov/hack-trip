@@ -61,11 +61,6 @@ const Home: FC = () => {
 
     }, [])
 
-    useEffect(() => {
-        let randomImage = getRandomTripAndImage(trips || [])
-        console.log(randomImage)
-    }, [trips])
-
     const onmouseover = (e: BaseSyntheticEvent) => {
         mouseover(e, h1HackRef)
     }

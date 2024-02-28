@@ -1,8 +1,7 @@
-import { GoogleMap, useJsApiLoader, Autocomplete, MarkerF, } from "@react-google-maps/api";
+import { useJsApiLoader, Autocomplete, } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiTrip } from "../../services/tripService";
-import { containerStyle, options } from "../settings";
 import * as tripService from '../../services/tripService'
 import { TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
@@ -22,6 +21,7 @@ import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data');
 
@@ -471,23 +471,17 @@ const CreateTrip: FC = () => {
                 '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '-25px 0px 0px 0px' }
             }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
-                    <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 900px)': { maxWidth: '97%', marginTop: '10px' } }} >
 
-
-                        <GoogleMap
-                            mapContainerStyle={containerStyle}
-                            options={options as google.maps.MapOptions}
-                            center={center}
-                            zoom={zoom}
-                            onLoad={onLoad}
-                            onUnmount={onUnmount}
-                            onClick={onMapClick}
-
-                        >
-
-                            {clickedPos?.lat ? <MarkerF position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
-                        </GoogleMap>
-                    </Box>
+                    <GoogleMapWrapper
+                        center={center}
+                        zoom={zoom}
+                        onLoad={onLoad}
+                        onUnmount={onUnmount}
+                        onMapClick={onMapClick}
+                        dragMarker={dragMarker}
+                        clickedPos={clickedPos}
+                    />
+                  
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 

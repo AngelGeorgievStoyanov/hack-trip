@@ -389,7 +389,7 @@ const Profile: FC = () => {
                         {iconFotoCamera ?
                             <MuiTooltipIconFotoCamera />
                             :
-                            <Button variant="contained" component="label"  >
+                            <Button variant="contained" component="label" sx={{ margin: '2px' }} >
                                 Upload
                                 <input hidden accept="image/*" multiple type="file" onChange={handleFileChange} />
                             </Button>
@@ -417,9 +417,9 @@ const Profile: FC = () => {
 
                     </> : ''}
                     <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Button variant="contained" type='submit' disabled={!isDirty || !isValid} sx={{ ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
-                        <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-                        <Button variant="contained" onClick={changePass} disabled={user?.email === 'test@abv.bg' ? true : false} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hide ? 'HIDE CHANGE PASSWORD' : 'CHANGE PASSWORD'}</Button>
+                        <Button variant="contained" type='submit' disabled={!isDirty || !isValid} sx={{ margin: '2px', ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
+                        <Button variant="contained" onClick={goBack} sx={{ margin: '2px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                        <Button variant="contained" onClick={changePass} disabled={user?.email === 'test@abv.bg' ? true : false} sx={{ margin: '2px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hide ? 'HIDE CHANGE PASSWORD' : 'CHANGE PASSWORD'}</Button>
                     </Box >
                 </Box>
             </Box>

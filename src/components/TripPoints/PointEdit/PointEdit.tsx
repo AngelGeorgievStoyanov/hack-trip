@@ -1,9 +1,8 @@
-import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
+import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { Point } from "../../../model/point";
 import { IdType } from "../../../shared/common-types";
-import { containerStyle, options } from "../../settings";
 import * as pointService from '../../../services/pointService';
 import { ApiPoint } from "../../../services/pointService";
 import { Alert, Box, Button, Container, Grid, IconButton, ImageList, ImageListItem, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
@@ -23,6 +22,7 @@ import jwt_decode from "jwt-decode";
 import { ApiTrip } from "../../../services/tripService";
 import * as tripService from "../../../services/tripService";
 import { TripCreate } from "../../../model/trip";
+import GoogleMapWrapper from "../../GoogleMapWrapper/GoogleMapWrapper";
 
 
 let zoom = 8;
@@ -514,20 +514,20 @@ const PointEdit: FC = () => {
                 }
             } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding: '0px' }}>
-                    <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 600px)': { maxWidth: '97%' } }} >
-                        <GoogleMap
-                            mapContainerStyle={containerStyle}
-                            options={options as google.maps.MapOptions}
-                            center={center}
-                            zoom={zoom}
-                            onLoad={onLoad}
-                            onUnmount={onUnmount}
-                            onClick={onMapClick}
-                        >
-                            {positionPoint?.lat ? <MarkerF visible={visible} animation={google.maps.Animation.DROP} position={initialPoint} draggable onDragEnd={dragMarker} /> :
-                                clickedPos?.lat ? <MarkerF animation={google.maps.Animation.DROP} visible={visible} position={clickedPos} draggable onDragEnd={dragMarker} /> : null}
-                        </GoogleMap>
-                    </Box>
+
+                    <GoogleMapWrapper
+                        center={center}
+                        zoom={zoom}
+                        onLoad={onLoad}
+                        onUnmount={onUnmount}
+                        onMapClick={onMapClick}
+                        dragMarker={dragMarker}
+                        clickedPos={clickedPos}
+                        positionPoint={positionPoint}
+                        visible={visible}
+                        initialPoint={initialPoint}
+                    />
+                 
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 

@@ -7,9 +7,8 @@ import * as pointService from '../../services/pointService';
 import { Point } from "../../model/point";
 import { ApiPoint } from "../../services/pointService";
 import { BaseSyntheticEvent, FC, useContext, useEffect, useState, TouchEvent } from "react";
-import { GoogleMap, MarkerF, PolylineF, useJsApiLoader } from "@react-google-maps/api";
+import { useJsApiLoader } from "@react-google-maps/api";
 import React from "react";
-import { containerStyle, options } from "../settings";
 import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
@@ -27,6 +26,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CloseIcon from '@mui/icons-material/Close';
+import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
 
 
 type decode = {
@@ -564,10 +564,17 @@ const AdminTripDetails: FC = () => {
 
     }
 
+    const body = document.querySelector('body');
+    if ((fullImage || fullPointImage) && body) {
+        body.style.overflow = 'hidden';
+    } else if (!fullImage && !fullPointImage && body) {
+        body.style.overflow = 'auto';
+    }
+
     return (
         <>
             <Grid container sx={{
-                justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh',
+                justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', alignItems: 'center',
                 '@media(max-width: 900px)': { display: 'flex', alignItems: 'center', width: '100vw', padding: '0', paddingBottom: '15px', margin: '-25px 0px 0px 0px' }
             }}
                 spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
@@ -766,20 +773,17 @@ const AdminTripDetails: FC = () => {
                                         }
                                     />
                                     : ''}
-                                <Box sx={{ display: 'flex', maxWidth: '600px', }}>
-
-                                    <GoogleMap
-                                        mapContainerStyle={containerStyle}
-                                        options={options as google.maps.MapOptions}
-                                        center={mapCenter !== undefined ? mapCenter : center}
-                                        zoom={zoom}
-                                        onLoad={onLoad}
-                                        onUnmount={onUnmount}
-                                    >
-                                        {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                                        {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.pointNumber + ''} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip !== undefined) && (trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
-                                    </GoogleMap>
-                                </Box>
+                              
+                                <GoogleMapWrapper
+                                    center={mapCenter !== undefined ? mapCenter : center}
+                                    zoom={zoom}
+                                    onLoad={onLoad}
+                                    onUnmount={onUnmount}
+                                    points={points}
+                                    trip={trip}
+                                    pathPoints={pathPoints}
+                                    onMarkerClick={onMarkerClick}
+                                />
                             </Box>
 
                             <Box component='section' id="point-section-add">
@@ -799,7 +803,7 @@ const AdminTripDetails: FC = () => {
                                 <>
                                     {!loadTripFullImage ? <CircularProgress sx={{ position: 'absolute', margin: '0 auto' }} /> : ''}
 
-                                    <Box sx={{ position: 'relative', display: loadTripFullImage ? 'flex' : 'none' }}>
+                                    <Box sx={{ position: 'relative', display: loadTripFullImage ? 'flex' : 'none', height: 'fit-content' }}>
                                         <ArrowBackIosIcon onClick={handleBackImage} sx={{
                                             cursor: 'pointer', fontSize: 35, position: 'absolute', left: 7, top: '50%',
                                             zIndex: 1, display: (activeStepImage === 0) ? 'none' : 'block',

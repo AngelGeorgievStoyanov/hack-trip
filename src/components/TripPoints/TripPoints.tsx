@@ -1,7 +1,6 @@
-import { GoogleMap, useJsApiLoader, Autocomplete, MarkerF } from "@react-google-maps/api";
+import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
 import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
-import { containerStyle, options } from "../settings";
 import { IdType } from "../../shared/common-types";
 import { Point, PointCreate } from "../../model/point";
 import * as pointService from '../../services/pointService';
@@ -24,6 +23,7 @@ import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import * as tripService from '../../services/tripService';
 import { Trip } from '../../model/trip';
 import { ApiTrip } from '../../services/tripService';
+import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
 
 
 
@@ -547,21 +547,16 @@ const TripPoints: FC = () => {
                     </Box>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '100%' }}>
 
-                        <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 920px)': { maxWidth: '97%' } }} >
+                        <GoogleMapWrapper
+                            center={center}
+                            zoom={zoom}
+                            onLoad={onLoad}
+                            onUnmount={onUnmount}
+                            onMapClick={onMapClick}
+                            dragMarker={dragMarker}
+                            clickedPos={clickedPos}
+                        />
 
-
-                            <GoogleMap
-                                mapContainerStyle={containerStyle}
-                                options={options as google.maps.MapOptions}
-                                center={center}
-                                zoom={zoom}
-                                onLoad={onLoad}
-                                onUnmount={onUnmount}
-                                onClick={onMapClick}
-                            >
-                                {clickedPos?.lat ? <MarkerF position={clickedPos} animation={google.maps.Animation.DROP} draggable onDragEnd={dragMarker} /> : null}
-                            </GoogleMap>
-                        </Box>
                         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 

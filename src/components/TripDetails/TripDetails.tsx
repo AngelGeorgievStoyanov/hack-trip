@@ -6,10 +6,9 @@ import * as tripService from '../../services/tripService';
 import * as pointService from '../../services/pointService';
 import { Point } from "../../model/point";
 import { ApiPoint } from "../../services/pointService";
-import { BaseSyntheticEvent, FC, useContext, useEffect, useState, TouchEvent } from "react";
-import { GoogleMap, MarkerF, PolylineF, useJsApiLoader } from "@react-google-maps/api";
+import { BaseSyntheticEvent, FC, useContext, useEffect, useState, TouchEvent, useRef } from "react";
+import { useJsApiLoader } from "@react-google-maps/api";
 import React from "react";
-import { containerStyle, options } from "../settings";
 import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
@@ -34,6 +33,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CloseIcon from '@mui/icons-material/Close';
 import HelmetWrapper from "../Helmet/HelmetWrapper";
 import { FacebookIcon, FacebookShareButton, ViberIcon, ViberShareButton } from "react-share";
+import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
 
 let zoom = 12;
 
@@ -127,7 +127,7 @@ const TripDetails: FC = () => {
     };
 
 
-    const refPoint = React.useRef<HTMLDivElement | null>()
+    const refPoint = useRef<HTMLDivElement | null>()
 
 
     useEffect(() => {
@@ -709,6 +709,12 @@ const TripDetails: FC = () => {
 
     }
 
+    const body = document.querySelector('body');
+    if ((fullImage || fullPointImage) && body) {
+        body.style.overflow = 'hidden';
+    } else if (!fullImage && !fullPointImage && body) {
+        body.style.overflow = 'auto';
+    }
 
     return (
         <>
@@ -943,20 +949,18 @@ const TripDetails: FC = () => {
                                         }
                                     />
                                     : ''}
-                                <Box sx={{ display: 'flex', maxWidth: '600px' }}>
 
-                                    <GoogleMap
-                                        mapContainerStyle={containerStyle}
-                                        options={options as google.maps.MapOptions}
-                                        center={mapCenter !== undefined ? mapCenter : center}
-                                        zoom={zoom}
-                                        onLoad={onLoad}
-                                        onUnmount={onUnmount}
-                                    >
-                                        {pathPoints ? <PolylineF path={pathPoints} /> : null}
-                                        {points?.length > 0 ? points.map((x, i) => { return <MarkerF key={x._id} title={x.name} position={{ lat: Number(x.lat), lng: Number(x.lng) }} label={x.pointNumber + ''} animation={google.maps.Animation.DROP} onClick={() => onMarkerClick(x._id + '', i + 1)} /> }) : ((trip && trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) ? <MarkerF position={{ lat: Number(trip.lat), lng: Number(trip.lng) }} /> : ''}
-                                    </GoogleMap>
-                                </Box>
+                                <GoogleMapWrapper
+                                    center={mapCenter !== undefined ? mapCenter : center}
+                                    zoom={zoom}
+                                    onLoad={onLoad}
+                                    onUnmount={onUnmount}
+                                    points={points}
+                                    trip={trip}
+                                    pathPoints={pathPoints}
+                                    onMarkerClick={onMarkerClick}
+                                />
+                          
                             </Box>
 
                             <Box component='section' id="point-section-add">
@@ -1043,7 +1047,7 @@ const TripDetails: FC = () => {
                 <Box sx={{ display: 'flex', margin: '10px' }}>
                     <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Facebook</h3>
                     <FacebookShareButton
-                        url={randomImage  ? `https://storage.googleapis.com/hack-trip/${randomImage}` : 'https://storage.googleapis.com/hack-trip/hack-trip-home-page.png'}
+                        url={randomImage ? `https://storage.googleapis.com/hack-trip/${randomImage}` : 'https://storage.googleapis.com/hack-trip/hack-trip-home-page.png'}
                         quote={`Hack Trip - ${trip?.title} - ${trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : 'https://www.hack-trip.com'}`}
                         hashtag='#HackTrip'
                     >

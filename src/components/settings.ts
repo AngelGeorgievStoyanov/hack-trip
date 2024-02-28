@@ -16,7 +16,7 @@ export const options = {
 
 
 export const optionsPoint = {
-    zoomControl: false,
+    zoomControl: true,
     mapTypeControl: false,
     scaleControl: false,
     streetViewControl: false,
