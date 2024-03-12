@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { GoogleMap, MarkerF, PolylineF} from "@react-google-maps/api";
+import { GoogleMap, MarkerF, PolylineF } from "@react-google-maps/api";
 import { FC } from "react";
 import { containerStyle, options } from "../settings";
 import { Point } from "../../model/point";
@@ -25,10 +25,10 @@ interface GoogleMapWrapperProps {
 
 
 const GoogleMapWrapper: FC<GoogleMapWrapperProps> = ({ center, zoom, onLoad, onUnmount, onMapClick, onMarkerClick, dragMarker, clickedPos, pathPoints, points, trip, positionPoint, initialPoint, visible }) => {
-   
+
     return (
         <>
-            <Box sx={{ display: 'flex', maxWidth: '600px', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 900px)': { maxWidth: '97%', marginTop: '10px' } }} >
+            <Box sx={{ display: 'flex', maxWidth: '600px' }} >
                 <GoogleMap
                     mapContainerStyle={containerStyle}
                     options={options as google.maps.MapOptions}

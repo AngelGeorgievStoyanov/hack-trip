@@ -20,9 +20,17 @@ interface UserCardProps {
 const UserCard: FC<UserCardProps> = ({ user }): ReactElement => {
 
     const dateFormat = (date: string) => {
-        return date.split('.')[0].split('T')[0].split('-').reverse().join('-');
+        const isoDate = new Date(date);
+        let timePart = '';
+        if (!isNaN(isoDate.getTime())) {
+            const hours = isoDate.getHours().toString().padStart(2, '0');
+            const minutes = isoDate.getMinutes().toString().padStart(2, '0');
+            const seconds = isoDate.getSeconds().toString().padStart(2, '0');
+            timePart = `${hours}:${minutes}:${seconds} `;
+        }
+        const formattedDate = `${timePart}${isoDate.getDate()}-${isoDate.getMonth() + 1}-${isoDate.getFullYear()}`;
+        return formattedDate;
     }
-
 
     let oneDay = 60 * 60 * 24 * 1000
     let timeCreatedPlusOneDay = Date.parse(user.timeCreated ? user.timeCreated : new Date().toISOString()) + oneDay
