@@ -263,10 +263,13 @@ const TripDetails: FC = () => {
 
         if (points.length === 0 && trip) {
             mapRef.current.setCenter({ lat: Number(trip.lat), lng: Number(trip.lng) });
-        } else {
+        } else if (points.length > 0 && activeStep === 0) {
             const bounds = new google.maps.LatLngBounds();
             points?.forEach(({ lat, lng }) => bounds.extend({ lat: Number(lat), lng: Number(lng) }));
             map.fitBounds(bounds);
+        } else if (activeStep > 0) {
+            mapRef.current.setCenter(center);
+            mapRef.current?.set('zoom', 14);
         }
     }
 
@@ -1044,26 +1047,29 @@ const TripDetails: FC = () => {
                             : ''
 
                 }
-                <Box sx={{ display: 'flex', margin: '10px' }}>
-                    <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Facebook</h3>
-                    <FacebookShareButton
-                        url={randomImage ? `https://storage.googleapis.com/hack-trip/${randomImage}` : 'https://storage.googleapis.com/hack-trip/hack-trip-home-page.png'}
-                        quote={`Hack Trip - ${trip?.title} - ${trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : 'https://www.hack-trip.com'}`}
-                        hashtag='#HackTrip'
-                    >
-                        <FacebookIcon size={38} round />
-                    </FacebookShareButton>
-                </Box>
-                <Box sx={{ display: 'flex', margin: '10px' }}>
-                    <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Viber</h3>
-                    <ViberShareButton
-                        title={`Hack Trip - ${trip?.title}`}
-                        separator={' - '}
-                        url={trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : 'https://www.hack-trip.com'}
-                    >
-                        <ViberIcon size={38} round />
-                    </ViberShareButton>
-                </Box>
+                {!fullImage && !fullPointImage ?
+                    <>
+                        <Box sx={{ display: 'flex', margin: '10px' }}>
+                            <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Facebook</h3>
+                            <FacebookShareButton
+                                url={randomImage ? `https://storage.googleapis.com/hack-trip/${randomImage}` : 'https://storage.googleapis.com/hack-trip/hack-trip-home-page.png'}
+                                quote={`Hack Trip - ${trip?.title} - ${trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : 'https://www.hack-trip.com'}`}
+                                hashtag='#HackTrip'
+                            >
+                                <FacebookIcon size={38} round />
+                            </FacebookShareButton>
+                        </Box>
+                        <Box sx={{ display: 'flex', margin: '10px' }}>
+                            <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Viber</h3>
+                            <ViberShareButton
+                                title={`Hack Trip - ${trip?.title}`}
+                                separator={' - '}
+                                url={trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : 'https://www.hack-trip.com'}
+                            >
+                                <ViberIcon size={38} round />
+                            </ViberShareButton>
+                        </Box>
+                    </> : ''}
             </Grid >
         </>
     )
