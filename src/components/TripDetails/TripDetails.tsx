@@ -126,9 +126,8 @@ const TripDetails: FC = () => {
         setExpanded(!expanded);
     };
 
-
-    const refPoint = useRef<HTMLDivElement | null>()
-
+    const mobileStepperRef = useRef<HTMLDivElement | null>(null)
+    const refPoint = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
 
@@ -199,11 +198,12 @@ const TripDetails: FC = () => {
     }, [favorite]);
 
     useEffect(() => {
-
-        if (refPoint.current && scrollMedia) {
-            refPoint.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-        }
-    }, [pointCard])
+        setTimeout(() => {
+            if ((refPoint && refPoint.current !== null) && scrollMedia && (mobileStepperRef && mobileStepperRef.current !== null)) {
+                mobileStepperRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }
+        }, 500)
+    }, [pointCard, fullPointImage])
 
 
     if (trip !== undefined) {
@@ -924,7 +924,7 @@ const TripDetails: FC = () => {
                         }} >
                             <Box component='div' sx={{ boxSizing: "content-box", height: 'fit-content', border: 'solid 1px', boxShadow: '3px 2px 5px black', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', width: '94vW' } }}>
                                 {points?.length > 0 ?
-                                    <MobileStepper
+                                    <MobileStepper ref={mobileStepperRef}
                                         variant="progress"
                                         steps={points.length + 1}
                                         position="static"
