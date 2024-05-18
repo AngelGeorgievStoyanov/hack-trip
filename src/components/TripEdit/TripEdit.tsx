@@ -34,7 +34,7 @@ const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType
 
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
-const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
+const libraries: Array<"drawing" | "places" | "geometry"> = [ "places"]
 
 let zoom = 8;
 

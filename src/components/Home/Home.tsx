@@ -83,7 +83,7 @@ const Home: FC = () => {
             />
             <Grid onTouchStart={onTouchStart} container sx={!isIphone ?
                 {
-                    padding: '30px', margin: '-25px 0px 0px 0px',
+                    padding: '30px', margin: '0px 0px 0px 0px',
                     backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center",
                     backgroundSize: "cover", backgroundAttachment: 'fixed', justifyContent: 'center',
@@ -92,7 +92,7 @@ const Home: FC = () => {
                 :
                 {
                     padding: '30px',
-                    margin: '-25px 0px 0px 0px',
+                    margin: '0px 0px 0px 0px',
                     backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                     backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover",
                     justifyContent: 'center',

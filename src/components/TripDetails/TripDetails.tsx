@@ -45,8 +45,7 @@ let center = {
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 
-const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
-
+const libraries: Array<"drawing" | "places" | "geometry"> = [ "places"]
 type decode = {
     _id: string,
 }

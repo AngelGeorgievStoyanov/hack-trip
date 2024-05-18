@@ -28,7 +28,7 @@ export interface points {
 }
 
 const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
-const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
+const libraries: Array<"drawing" | "places" | "geometry"> = [ "places"]
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 
 let userId: string | undefined;

@@ -6,43 +6,37 @@ import './NotFound.css';
 
 const NotFound: FC = () => {
 
-
-    let internalSec: ReturnType<typeof setInterval>;
-    let internal: ReturnType<typeof setTimeout>;
-    const initalState = 10;
-    const [count, setCount] = useState(initalState);
-    const counterRef = useRef(initalState);
+    const internalSec = useRef<NodeJS.Timeout>();
+    const internal = useRef<NodeJS.Timeout>();
+    const initialState = 10;
+    const [count, setCount] = useState(initialState);
+    const counterRef = useRef(initialState);
     const navigate = useNavigate();
 
     useEffect(() => {
         counterRef.current = count;
-    });
-
-
+    }, [count]);
     useEffect(() => {
+        internalSec.current = setInterval(() => {
+            setCount(prevCount => prevCount - 1);
+        }, 1000);
 
-
-        internalSec = setInterval(() => {
-            setCount(counterRef.current - 1)
-
-        }, 1000)
-
-
-
-        internal = setTimeout(() => (
-            navigate('/')
-        ), 10000)
+        internal.current = setTimeout(() => {
+            navigate('/');
+        }, 10000);
 
         return () => {
-            clearTimeout(internal);
-            clearInterval(internalSec)
+            clearTimeout(internal.current!);
+            clearInterval(internalSec.current!);
         };
 
-    }, [])
+    }, [navigate]);
+
     const goHome = () => {
-        clearInterval(internalSec)
-        clearTimeout(internal)
-        navigate('/')
+        clearInterval(internalSec.current!);
+        clearTimeout(internal.current!);
+        
+        navigate('/');
     }
 
     return (

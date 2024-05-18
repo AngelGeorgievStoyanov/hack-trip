@@ -1,8 +1,8 @@
 import TextField from '@mui/material/TextField';
-import { Control, Controller, FieldPath, FieldValues, Path, RegisterOptions, UnPackAsyncDefaultValues } from "react-hook-form";
+import { Control, Controller, FieldPath, FieldValues, Path, RegisterOptions } from "react-hook-form";
 
 interface FormInputTextProps<TFieldValues extends FieldValues> {
-    name: Path<UnPackAsyncDefaultValues<TFieldValues>>
+    name: Path<TFieldValues>;
     control: Control<TFieldValues, any>;
     label: string;
     rules?: Omit<RegisterOptions<TFieldValues, FieldPath<TFieldValues>>, 'valueAsNumber' | 'valueAsDate' | 'setValueAs' | 'disabled'>;

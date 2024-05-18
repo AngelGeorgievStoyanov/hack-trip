@@ -1,4 +1,4 @@
-import { Control, Controller, FieldPath, FieldValues, Path, RegisterOptions, UnPackAsyncDefaultValues } from "react-hook-form";
+import { Control, Controller, FieldPath, FieldValues, Path, RegisterOptions } from "react-hook-form";
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 
 export interface SelectOption {
@@ -8,7 +8,7 @@ export interface SelectOption {
 
 
 interface FormInputSelectProps<TFieldValues extends FieldValues> {
-    name: Path<UnPackAsyncDefaultValues<TFieldValues>>
+    name: Path<TFieldValues>;
     control: Control<TFieldValues, any>;
     label: string;
     options: SelectOption[];

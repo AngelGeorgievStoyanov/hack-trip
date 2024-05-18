@@ -58,7 +58,7 @@ type FormData = {
 };
 
 
-const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["places"];
+const libraries: Array<"drawing" | "places" | "geometry"> = [ "places"]
 
 
 const schema = yup.object({

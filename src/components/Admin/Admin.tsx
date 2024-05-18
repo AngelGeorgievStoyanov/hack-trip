@@ -250,7 +250,7 @@ const Admin: FC = () => {
 
 
     const columns: GridColDef[] = [
-        { field: 'date', headerName: 'Data', width: 230 },
+        { field: 'date', headerName: 'Date', width: 230 },
         { field: 'email', headerName: 'Email', width: 250 },
         { field: 'ip', headerName: 'IP', width: 180 },
         { field: 'userAgent', headerName: 'User Agent', width: 380 },
