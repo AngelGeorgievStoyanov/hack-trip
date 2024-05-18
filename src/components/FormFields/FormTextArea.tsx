@@ -20,17 +20,15 @@ function FormTextArea<TFieldValues extends FieldValues>(
     { name, control, label, rules = {}, disabled = false, size = 'medium', error = undefined, type = 'text', multiline, rows }:
         FormTextAreaProps<TFieldValues>) {
     return (
-        (
-            <Controller
-                name={name}
-                control={control}
-                render={({ field }) =>
-                    <TextField label={label} disabled={disabled} size={size} error={!!error} multiline={multiline} rows={rows}
-                        helperText={error || ''} type={type} {...field} />
-                }
-                rules={rules}
-            />
-        )
+        <Controller
+            name={name}
+            control={control}
+            render={({ field }) =>
+                <TextField label={label} disabled={disabled} size={size} error={!!error} multiline={multiline} rows={rows}
+                    helperText={error || ''} type={type} {...field} />
+            }
+            rules={rules}
+        />
     )
 }
 
