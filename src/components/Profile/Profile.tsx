@@ -115,13 +115,22 @@ const Profile: FC = () => {
     const { control, handleSubmit, formState: { errors, isDirty, isValid }, reset } = useForm<FormData>({
 
         defaultValues: { email: '', firstName: '', lastName: '', password: '', confirmpass: '' },
-
-        values: { email: user?.email!, firstName: user?.firstName!, lastName: user?.lastName!, oldpassword: '', password: '', confirmpass: '', imageFile: '', timeEdited: '', timeCreated: '' },
-
         mode: 'onChange',
         resolver: yupResolver(hide === true ? schema1 : schema2),
     });
 
+    useEffect(() => {
+        if (user) {
+            reset({
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                oldpassword: '',
+                password: '',
+                confirmpass: ''
+            });
+        }
+    }, [user, reset]);
 
     const editProfileSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
 
@@ -181,7 +190,7 @@ const Profile: FC = () => {
         if (userId) {
 
             API_CLIENT.updateUser(userId, editedUser).then((data) => {
-                setUser(prev => data);
+                setUser(data);
                 setFileSelected(null);
                 reset({ oldpassword: '', password: '', confirmpass: '' });
                 setHide(false);
@@ -417,7 +426,7 @@ const Profile: FC = () => {
 
                     </> : ''}
                     <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Button variant="contained" type='submit' disabled={!isDirty || !isValid} sx={{ margin: '2px', ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
+                        <Button variant="contained" type='submit' disabled={(!isDirty || !isValid) && !fileSelected} sx={{ margin: '2px', ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
                         <Button variant="contained" onClick={goBack} sx={{ margin: '2px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                         <Button variant="contained" onClick={changePass} disabled={user?.email === 'test@abv.bg' ? true : false} sx={{ margin: '2px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hide ? 'HIDE CHANGE PASSWORD' : 'CHANGE PASSWORD'}</Button>
                     </Box >

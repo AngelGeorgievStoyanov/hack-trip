@@ -1,5 +1,5 @@
 import { GridRowId } from "@mui/x-data-grid/models/gridRows";
-import { User, UserEditAdmin, UserRegister } from "../model/users";
+import { IRouteNotFoundLogs, User, UserEditAdmin, UserRegister } from "../model/users";
 import { Identifiable } from "../shared/common-types";
 import { CONNECTIONURL } from "../utils/baseUrl";
 
@@ -39,6 +39,7 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     deleteUserById(adminId: K, editedUserId: K): Promise<void>;
     getFailedLogs(adminId: K): Promise<any[]>
     deleteFailedLogs(adminId: K, failedLogsArr:  GridRowId[]): Promise<string[]>;
+    getRouteNotFoundLogs(adminId: K): Promise<IRouteNotFoundLogs[]> ;    
 }
 
 
@@ -370,6 +371,20 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         }
         return await response.json()
     }
+
+
+    async getRouteNotFoundLogs(adminId: K): Promise<IRouteNotFoundLogs[]> {
+
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/routenotfoundlogs/${adminId}`);
+
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
+        return response.json();
+    }
+
 
 
 }

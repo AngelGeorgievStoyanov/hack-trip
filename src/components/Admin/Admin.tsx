@@ -1,7 +1,7 @@
 import { Box, Button, ImageList, ImageListItem, Typography } from "@mui/material";
 import { FC, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { IFailedLogs, User } from "../../model/users";
+import { IFailedLogs, IRouteNotFoundLogs, User } from "../../model/users";
 import UsersList from "../UsersList/UsersList";
 import * as tripService from '../../services/tripService';
 import { IdType } from "../../shared/common-types";
@@ -78,7 +78,8 @@ const Admin: FC = () => {
     const [hideCommonImages, setHideCommonImages] = useState<boolean>(true);
     const [colsDB, setColsDB] = useState<number>(4);
     const [colsGC, setColsGC] = useState<number>(4);
-
+    const [routeNotFoundLogs, setRouteNotFoundLogs] = useState<IRouteNotFoundLogs[]>()
+    const [hideRouteNotFoundLogsList, setHideRouteNotFoundLogsList] = useState<boolean>(true);
 
     useEffect(() => {
 
@@ -120,6 +121,13 @@ const Admin: FC = () => {
 
         API_TRIP.getCommonImages(userId).then((data) => {
             setCommonImages(data)
+        }).catch(err => {
+            console.log(err.message)
+        })
+
+        API_CLIENT.getRouteNotFoundLogs(userId).then((data) => {
+            setRouteNotFoundLogs(data)
+            console.log(data)
         }).catch(err => {
             console.log(err.message)
         })
@@ -171,6 +179,10 @@ const Admin: FC = () => {
 
     const hideFailedLOgs = () => {
         setHideFailedLogsList(!hideFailedLogsList);
+    }
+
+    const hideRouteNotFoundLogs = () => {
+        setHideRouteNotFoundLogsList(!hideRouteNotFoundLogsList);
     }
 
     const hideDBImg = () => {
@@ -262,6 +274,19 @@ const Admin: FC = () => {
         { field: 'state', headerName: 'State', width: 130 }
     ];
 
+    const columnsRnFlogs: GridColDef[] = [
+        { field: 'date', headerName: 'Date', width: 230 },
+        { field: 'reqBody', headerName: 'Body', width: 250 },
+        { field: 'reqHeaders', headerName: 'Headers', width: 380 },
+        { field: 'reqIp', headerName: 'IP', width: 180 },
+        { field: 'reqMethod', headerName: 'Method' },
+        { field: 'reqParams', headerName: 'Params' },
+        { field: 'reqQuery', headerName: 'Query' },
+        { field: 'reqUrl', headerName: 'Url', width: 130 },
+        { field: 'reqUserEmail', headerName: 'Email', width: 130 },
+        { field: '_id', headerName: 'User ID', width: 130 }
+    ];
+
     const handleSelectionModelChange = (selectionModel: GridRowSelectionModel) => {
 
         setSelectedRow(selectionModel);
@@ -309,6 +334,10 @@ const Admin: FC = () => {
                     {failedLogs !== undefined && failedLogs.length > 0 ?
                         <Button variant="contained" onClick={hideFailedLOgs} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideFailedLogsList ? 'HIDE LOGS' : 'SHOW LOGS'} </Button>
                         : <h4 style={{ margin: '15px' }}>NO FAILED LOGS</h4>
+                    }
+                    {routeNotFoundLogs !== undefined && routeNotFoundLogs.length > 0 ?
+                        <Button variant="contained" onClick={hideRouteNotFoundLogs} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideRouteNotFoundLogsList ? 'HIDE RNF LOGS' : 'SHOW RNF LOGS'} </Button>
+                        : <h4 style={{ margin: '15px' }}>NO RounteNotFound LOGS</h4>
                     }
                     {dbImages !== undefined && dbImages.length > 0 ?
                         <Button variant="contained" onClick={hideDBImg} sx={{ maxWidth: '150px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '4px' }}  >{hideDBImages ? 'HIDE DB IMAGES' : 'SHOW DB IMAGES'} </Button>
@@ -387,7 +416,34 @@ const Admin: FC = () => {
                                 : ''}
                         </Box>
                         : ''}
+                    {hideRouteNotFoundLogsList ?
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '98%', '@media(max-width: 750px)': { display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '95%', alignContent: 'center' } }}>
 
+                            {(routeNotFoundLogs !== undefined && routeNotFoundLogs.length > 0) ?
+                                <>
+                                    <DataGrid
+                                        key={currentPage}
+                                        sx={{ maxWidth: '100%', bgcolor: 'white' }}
+                                        rows={routeNotFoundLogs.map((log, index) => ({ id: log._id || index, ...log }))}
+                                        columns={columnsRnFlogs}
+                                        initialState={{
+                                            pagination: {
+                                                paginationModel: { page: currentPage !== undefined ? currentPage : 0, pageSize: pageSize !== undefined ? pageSize : 5 }
+                                            },
+                                        }}
+
+                                        pageSizeOptions={[5, 10]}
+                                        checkboxSelection
+                                        onRowSelectionModelChange={handleSelectionModelChange}
+
+                                        onPaginationModelChange={(newPage: any) => changePage(newPage)}
+
+
+                                    />
+                                </>
+                                : ''}
+                        </Box>
+                        : ''}
                     {hideDBImages ?
                         <>
 
