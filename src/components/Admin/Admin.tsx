@@ -127,7 +127,6 @@ const Admin: FC = () => {
 
         API_CLIENT.getRouteNotFoundLogs(userId).then((data) => {
             setRouteNotFoundLogs(data)
-            console.log(data)
         }).catch(err => {
             console.log(err.message)
         })
@@ -276,15 +275,15 @@ const Admin: FC = () => {
 
     const columnsRnFlogs: GridColDef[] = [
         { field: 'date', headerName: 'Date', width: 230 },
-        { field: 'reqBody', headerName: 'Body', width: 250 },
-        { field: 'reqHeaders', headerName: 'Headers', width: 380 },
-        { field: 'reqIp', headerName: 'IP', width: 180 },
+        { field: 'reqBody', headerName: 'Body', width: 650 },
+        { field: 'reqHeaders', headerName: 'Headers', width: 2300 },
+        { field: 'reqIp', headerName: 'IP', width: 700 },
         { field: 'reqMethod', headerName: 'Method' },
         { field: 'reqParams', headerName: 'Params' },
         { field: 'reqQuery', headerName: 'Query' },
-        { field: 'reqUrl', headerName: 'Url', width: 130 },
-        { field: 'reqUserEmail', headerName: 'Email', width: 130 },
-        { field: '_id', headerName: 'User ID', width: 130 }
+        { field: 'reqUrl', headerName: 'Url', width: 230 },
+        { field: 'reqUserEmail', headerName: 'Email', width: 430 },
+        { field: '_id', headerName: 'User ID', width: 330 }
     ];
 
     const handleSelectionModelChange = (selectionModel: GridRowSelectionModel) => {
