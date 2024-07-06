@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Trip, TripCreate } from "../../model/trip";
+import { CurrencyCodeName, Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
 import { IdType, sliceDescription } from "../../shared/common-types";
 import * as tripService from '../../services/tripService';
@@ -27,6 +27,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CloseIcon from '@mui/icons-material/Close';
 import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
+import InfoIcon from '@mui/icons-material/Info';
 
 
 type decode = {
@@ -45,7 +46,7 @@ let userId: string;
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 
-const libraries: Array<"drawing" | "places" | "geometry"> = [ "places"]
+const libraries: Array<"drawing" | "places" | "geometry"> = ["places"]
 
 
 interface ExpandMoreProps extends IconButtonProps {
@@ -436,6 +437,15 @@ const AdminTripDetails: FC = () => {
         )
     }
 
+    const currencyName = CurrencyCodeName[trip?.currency as keyof typeof CurrencyCodeName];
+
+    const MuiTooltipCurrency = () => {
+        return (
+            <Tooltip title={currencyName} arrow>
+                <InfoIcon color="primary" fontSize="small" sx={{ marginLeft: '5px' }} />
+            </Tooltip>
+        )
+    }
 
     const reportClickHandlerComment = (comment: Comment) => {
         if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
@@ -597,9 +607,12 @@ const AdminTripDetails: FC = () => {
                                 <Typography gutterBottom variant="h5" component="div">
                                     TRIP NAME : {trip?.title}
                                 </Typography>
-                                <Typography gutterBottom variant="subtitle1" component="h5">
-                                    PRICE OF THE TRIP: {trip?.price ? trip.price + 'euro' : 'missing price'}
-                                </Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                                    <Typography gutterBottom variant="subtitle1" component="h5">
+                                        PRICE OF THE TRIP: {trip?.price ? `${trip.price} ${trip.currency || 'missing currency'}` : 'missing price'}
+                                    </Typography>
+                                    <MuiTooltipCurrency />
+                                </Box>
                                 <Typography gutterBottom variant="subtitle1" component="div">
                                     TRANSPORT WITH: {trip?.transport}
                                 </Typography>
@@ -773,7 +786,7 @@ const AdminTripDetails: FC = () => {
                                         }
                                     />
                                     : ''}
-                              
+
                                 <GoogleMapWrapper
                                     center={mapCenter !== undefined ? mapCenter : center}
                                     zoom={zoom}

@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Trip, TripCreate } from "../../model/trip";
+import { CurrencyCodeName, Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
 import { IdType, getRandomTripAndImage, sliceDescription } from "../../shared/common-types";
 import * as tripService from '../../services/tripService';
@@ -13,7 +13,7 @@ import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Backdrop, Box, Button, Card, CardActions, CardContent, CircularProgress, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography, useMediaQuery } from "@mui/material";
+import { Backdrop, Box, Button, CardActions, CardContent, CircularProgress, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography, useMediaQuery } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { styled, useTheme } from '@mui/material/styles';
@@ -34,7 +34,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import HelmetWrapper from "../Helmet/HelmetWrapper";
 import { FacebookIcon, FacebookShareButton, ViberIcon, ViberShareButton } from "react-share";
 import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
-
+import InfoIcon from '@mui/icons-material/Info';
 let zoom = 12;
 
 let center = {
@@ -45,7 +45,7 @@ let center = {
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 
-const libraries: Array<"drawing" | "places" | "geometry"> = [ "places"]
+const libraries: Array<"drawing" | "places" | "geometry"> = ["places"]
 type decode = {
     _id: string,
 }
@@ -579,6 +579,14 @@ const TripDetails: FC = () => {
         )
     }
 
+    const MuiTooltipCurrency = () => {
+        return (
+            <Tooltip title={currencyName} arrow>
+                <InfoIcon color="primary" fontSize="small" sx={{ marginLeft: '5px' }} />
+            </Tooltip>
+        )
+    }
+
     const reportClickHandlerComment = (comment: Comment) => {
 
         if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
@@ -718,6 +726,9 @@ const TripDetails: FC = () => {
         body.style.overflow = 'auto';
     }
 
+
+    const currencyName = CurrencyCodeName[trip?.currency as keyof typeof CurrencyCodeName];
+
     return (
         <>
 
@@ -758,7 +769,7 @@ const TripDetails: FC = () => {
                             }
                         }}>
 
-                            <Card sx={{
+                            <Box sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 minWidth: '200px',
@@ -777,9 +788,12 @@ const TripDetails: FC = () => {
                                         }
                                     </>
                                 </Box>
-                                <Typography gutterBottom variant="subtitle1" component="h5">
-                                    PRICE OF THE TRIP: {trip?.price ? trip.price + 'euro' : 'missing price'}
-                                </Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                                    <Typography gutterBottom variant="subtitle1" component="h5">
+                                        PRICE OF THE TRIP: {trip?.price ? `${trip.price} ${trip.currency || 'missing currency'}` : 'missing price'}
+                                    </Typography>
+                                    <MuiTooltipCurrency />
+                                </Box>
                                 <Typography gutterBottom variant="subtitle1" component="div">
                                     TRANSPORT WITH: {trip?.transport}
                                 </Typography>
@@ -888,7 +902,7 @@ const TripDetails: FC = () => {
                                         </>
                                         : ''}
                                 </Box>
-                            </Card>
+                            </Box>
 
                             {(trip && trip.imageFile?.length && trip.imageFile?.length > 0) ?
                                 <>

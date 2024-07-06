@@ -174,8 +174,11 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
 
     async findUserImage(id: K): Promise<string> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/image-user/${id}`);
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result.message);
+        }
         return response.json();
     }
-
 
 }

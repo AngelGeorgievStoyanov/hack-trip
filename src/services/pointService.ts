@@ -118,9 +118,9 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
         return await response.json();
     }
 
-    async deleteByTripId(id: K): Promise<void> {
+    async deleteByTripId(id: K, userId: K): Promise<void> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trip/${id}`, {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trip/${id}/${userId}`, {
             method: 'DELETE',
 
         });

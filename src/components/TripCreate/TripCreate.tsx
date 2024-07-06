@@ -3,7 +3,7 @@ import React, { BaseSyntheticEvent, FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiTrip } from "../../services/tripService";
 import * as tripService from '../../services/tripService'
-import { TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
+import { CurrencyCode, TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
 import { Alert, Box, Button, Container, Grid, IconButton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
@@ -28,7 +28,7 @@ const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType
 
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
-const libraries: Array<"drawing" | "places" | "geometry"> = [ "places"]
+const libraries: Array<"drawing" | "places" | "geometry"> = ["places"]
 
 
 
@@ -46,9 +46,16 @@ type FormData = {
     lat: number | string | undefined;
     lng: number | string | undefined;
     imageFile: string[] | undefined;
-
+    currency: string;
 
 };
+
+const TRIP_SELECT_OPTIONS_CURRENCY: SelectOption[] = Object.keys(CurrencyCode)
+    .map(key => ({
+        key: key,
+        value: CurrencyCode[key as keyof typeof CurrencyCode]
+    }));
+
 const TRIP_SELECT_OPTIONS_TRANSPORT: SelectOption[] = Object.keys(TripTransport)
     .filter((item) => !isNaN(Number(item)))
     .map((ordinal: string) => parseInt(ordinal))
@@ -125,7 +132,7 @@ const CreateTrip: FC = () => {
         defaultValues: {
             title: '', _ownerId: '', countPeoples: '', timeCreated: '', lat: '', lng: '',
             timeEdited: '', typeOfPeople: TripTipeOfGroup["Another type"] + '', description: '', destination: '',
-            price: '', transport: TripTransport["Another type"] + '', imageFile: []
+            price: '', transport: TripTransport["Another type"] + '', imageFile: [], currency: CurrencyCode.EUR
         },
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -315,7 +322,6 @@ const CreateTrip: FC = () => {
         event?.preventDefault();
 
         let formData = new FormData();
-
 
         if (fileSelected) {
 
@@ -525,8 +531,12 @@ const CreateTrip: FC = () => {
 
                         <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
                         />
-                        <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
-                        />
+                        <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                            <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
+                            />
+                            <FormInputSelect name='currency' label='currency' control={control} error={errors.transport?.message}
+                                options={TRIP_SELECT_OPTIONS_CURRENCY} />
+                        </Box>
                         <FormInputSelect name='transport' label='TRANSPORT' control={control} error={errors.transport?.message}
                             options={TRIP_SELECT_OPTIONS_TRANSPORT} defaultOptionIndex={1} />
                         <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}

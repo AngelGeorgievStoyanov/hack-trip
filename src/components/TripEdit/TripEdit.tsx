@@ -1,5 +1,5 @@
 import { useLoaderData, useNavigate } from "react-router-dom";
-import { Trip, TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
+import { CurrencyCode, Trip, TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
@@ -34,7 +34,7 @@ const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType
 
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
-const libraries: Array<"drawing" | "places" | "geometry"> = [ "places"]
+const libraries: Array<"drawing" | "places" | "geometry"> = ["places"]
 
 let zoom = 8;
 
@@ -58,7 +58,7 @@ type FormData = {
     lat: number | undefined;
     lng: number | undefined;
     imageFile: string[] | undefined;
-
+    currency: string;
 };
 const TRIP_SELECT_OPTIONS_TRANSPORT: SelectOption[] = Object.keys(TripTransport)
     .filter((item) => !isNaN(Number(item)))
@@ -69,6 +69,12 @@ const TRIP_SELECT_OPTIONS_TYPE_GROUPE: SelectOption[] = Object.keys(TripTipeOfGr
     .filter((item) => !isNaN(Number(item)))
     .map((ordinal: string) => parseInt(ordinal))
     .map((ordinal: number) => ({ key: ordinal, value: TripTipeOfGroup[ordinal] }));
+
+const TRIP_SELECT_OPTIONS_CURRENCY: SelectOption[] = Object.keys(CurrencyCode)
+    .map(key => ({
+        key: key,
+        value: CurrencyCode[key as keyof typeof CurrencyCode]
+    }));
 
 const schema = yup.object({
     title: yup.string().required().min(2).max(60).matches(/^(?!\s+$).*(\S{3})/, 'Title cannot be empty string and must contain at least 3 characters .'),
@@ -155,7 +161,7 @@ const TripEdit: FC = () => {
             timeEdited: trip.timeEdited, typeOfPeople: TripTipeOfGroup[trip.typeOfPeople],
             description: trip.description, destination: trip.destination,
             price: +trip.price, transport: TripTransport[trip.transport],
-            imageFile: trip.imageFile
+            imageFile: trip.imageFile, currency: trip.currency
         },
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -583,8 +589,13 @@ const TripEdit: FC = () => {
 
                             <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
                             />
-                            <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
-                            />
+                            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+
+                                <FormInputText name='price' label='PRICE' type="number" control={control} error={errors.price?.message}
+                                />
+                                <FormInputSelect name='currency' label='currency' control={control} error={errors.transport?.message}
+                                    options={TRIP_SELECT_OPTIONS_CURRENCY} />
+                            </Box>
                             <FormInputSelect name='transport' label='TRANSPORT' control={control} error={errors.transport?.message}
                                 options={TRIP_SELECT_OPTIONS_TRANSPORT} defaultOptionIndex={1} />
 

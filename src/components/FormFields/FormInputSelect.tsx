@@ -3,7 +3,7 @@ import { Control, Controller, FieldPath, FieldValues, Path, RegisterOptions } fr
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 
 export interface SelectOption {
-    key: number;
+    key: number | string;
     value: string;
 }
 
