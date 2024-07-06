@@ -94,6 +94,7 @@ const AdminTripDetails: FC = () => {
     const [maxSteps, setMaxSteps] = useState<number>(0)
     const [loadPointFullImage, setLoadFullImage] = useState<boolean>(false)
     const [loadTripFullImage, setLoadTripFullImage] = useState<boolean>(false)
+    const [openCurrency, setOpenCurrency] = useState(false);
 
     const minSwipeDistance = 45;
 
@@ -439,10 +440,23 @@ const AdminTripDetails: FC = () => {
 
     const currencyName = CurrencyCodeName[trip?.currency as keyof typeof CurrencyCodeName];
 
+    const handleClick = () => {
+        if (scrollMedia) {
+            setOpenCurrency((prev) => !prev);
+        }
+    };
+
+    const handleTooltipClose = () => {
+        setOpenCurrency(false);
+    };
     const MuiTooltipCurrency = () => {
         return (
-            <Tooltip title={currencyName} arrow>
-                <InfoIcon color="primary" fontSize="small" sx={{ marginLeft: '5px' }} />
+            <Tooltip title={currencyName} arrow
+                open={scrollMedia ? openCurrency : undefined}
+                onClose={handleTooltipClose}
+                disableHoverListener={scrollMedia}
+                disableFocusListener={scrollMedia}>
+                <InfoIcon color="primary" fontSize="small" sx={{ marginLeft: '5px' }} onClick={handleClick} />
             </Tooltip>
         )
     }

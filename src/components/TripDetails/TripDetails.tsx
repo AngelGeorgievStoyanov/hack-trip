@@ -98,7 +98,7 @@ const TripDetails: FC = () => {
     const [loadPointFullImage, setLoadFullImage] = useState<boolean>(false)
     const [loadTripFullImage, setLoadTripFullImage] = useState<boolean>(false)
     const [randomImage, setRandomImage] = useState<string>()
-
+    const [openCurrency, setOpenCurrency] = useState(false);
 
     const minSwipeDistance = 45;
     const { token } = useContext(LoginContext);
@@ -578,11 +578,24 @@ const TripDetails: FC = () => {
             </Tooltip>
         )
     }
+    const handleClick = () => {
+        if (scrollMedia) {
+            setOpenCurrency((prev) => !prev);
+        }
+    };
+   
+    const handleTooltipClose = () => {
+        setOpenCurrency(false);
+    };
 
     const MuiTooltipCurrency = () => {
         return (
-            <Tooltip title={currencyName} arrow>
-                <InfoIcon color="primary" fontSize="small" sx={{ marginLeft: '5px' }} />
+            <Tooltip title={currencyName} arrow
+                open={scrollMedia ? openCurrency : undefined}
+                onClose={handleTooltipClose}
+                disableHoverListener={scrollMedia}
+                disableFocusListener={scrollMedia}>
+                <InfoIcon color="primary" fontSize="small" sx={{ marginLeft: '5px' }} onClick={handleClick} />
             </Tooltip>
         )
     }
@@ -976,7 +989,7 @@ const TripDetails: FC = () => {
                                     pathPoints={pathPoints}
                                     onMarkerClick={onMarkerClick}
                                 />
-                          
+
                             </Box>
 
                             <Box component='section' id="point-section-add">
