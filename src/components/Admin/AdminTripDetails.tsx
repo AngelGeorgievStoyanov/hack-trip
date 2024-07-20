@@ -16,7 +16,7 @@ import CommentCard from "../CommentCard/CommentCard";
 import { Box, Button, Card, CardActions, CardContent, CircularProgress, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Tooltip, Typography, useMediaQuery } from "@mui/material";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { styled, useTheme } from '@mui/material/styles';
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
 import TripDetailsPointCard from "../TripDetails/TripDetailsPoint";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
@@ -120,14 +120,14 @@ const AdminTripDetails: FC = () => {
 
 
     useEffect(() => {
-        if (idTrip !== undefined) {
+        if (idTrip !== undefined && accessToken) {
 
 
-            API_TRIP.findById(idTrip, userId).then((data) => {
+            API_TRIP.findById(idTrip, userId, accessToken).then((data) => {
                 if (data) {
                     setTrip(data)
 
-                    API_POINT.findByTripId(data._id).then((data) => {
+                    API_POINT.findByTripId(data._id, accessToken).then((data) => {
 
                         if (data && Array.isArray(data)) {
                             const arrPoints = data as Point[];
@@ -151,7 +151,7 @@ const AdminTripDetails: FC = () => {
                         console.log(err);
                     });
 
-                    API_COMMENT.findByTripId(data._id, userId).then(async (data) => {
+                    API_COMMENT.findByTripId(data._id, userId, accessToken).then(async (data) => {
                         if (data && Array.isArray(data)) {
                             setComments(data);
                         }
@@ -188,10 +188,10 @@ const AdminTripDetails: FC = () => {
 
     const deleteClickHandler = () => {
 
-        if (trip === undefined) return;
-        API_TRIP.deleteById(trip._id, userId).then((data) => {
-            API_POINT.deleteByTripId(trip._id, userId).then((data) => {
-                API_COMMENT.deleteByTripId(trip._id, userId).then((data) => {
+        if (trip === undefined || !accessToken) return;
+        API_TRIP.deleteById(trip._id, userId, accessToken).then((data) => {
+            API_POINT.deleteByTripId(trip._id, userId, accessToken).then((data) => {
+                API_COMMENT.deleteByTripId(trip._id, userId, accessToken).then((data) => {
 
                 }).catch((err) => {
                     console.log(err);
@@ -318,25 +318,26 @@ const AdminTripDetails: FC = () => {
 
     const onDeleteComment = async (comment: Comment) => {
 
+        if (accessToken) {
 
-        API_COMMENT.deleteById(comment._id).then((data) => {
-            if (data !== undefined) {
+            API_COMMENT.deleteById(comment._id, accessToken).then((data) => {
+                if (data !== undefined) {
 
 
-                const copyComments = [...comments];
-                const index = copyComments.findIndex(cmt => {
-                    return cmt._id === comment._id;
-                });
+                    const copyComments = [...comments];
+                    const index = copyComments.findIndex(cmt => {
+                        return cmt._id === comment._id;
+                    });
 
-                copyComments.splice(index, 1);
+                    copyComments.splice(index, 1);
 
-                setComments(copyComments);
+                    setComments(copyComments);
 
-            }
-        }).catch((err) => {
-            console.log(err)
-        });
-
+                }
+            }).catch((err) => {
+                console.log(err)
+            });
+        }
 
 
     }
@@ -349,10 +350,10 @@ const AdminTripDetails: FC = () => {
 
     const onLikeTrip = () => {
 
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
             trip.likes.push(userId);
 
-            API_TRIP.updateLikes(trip._id, userId).then((data) => {
+            API_TRIP.updateLikes(trip._id, userId, accessToken).then((data) => {
                 setTrip(data);
                 setLiked(prev => true);
 
@@ -366,9 +367,9 @@ const AdminTripDetails: FC = () => {
 
     const onUnLikeTrip = () => {
 
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
 
-            API_TRIP.updateLikes(trip._id, userId).then((data) => {
+            API_TRIP.updateLikes(trip._id, userId, accessToken).then((data) => {
 
                 setTrip(data);
                 setLiked(prev => false);
@@ -382,10 +383,10 @@ const AdminTripDetails: FC = () => {
 
     const deleteReportClickHandler = () => {
 
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
             const reports: [] = [];
 
-            API_TRIP.deleteReportTrip(trip._id, reports).then((data) => {
+            API_TRIP.deleteReportTrip(trip._id, reports, accessToken).then((data) => {
                 setTripReports(data);
             }).catch((err) => {
                 console.log(err);
@@ -462,10 +463,10 @@ const AdminTripDetails: FC = () => {
     }
 
     const reportClickHandlerComment = (comment: Comment) => {
-        if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (comment !== undefined) && (userId !== null) && accessToken) {
             comment.reportComment?.push(userId);
 
-            API_COMMENT.reportComment(comment._id, comment).then((data) => {
+            API_COMMENT.reportComment(comment._id, comment, accessToken).then((data) => {
 
                 setReportedComment(true);
 
@@ -481,7 +482,7 @@ const AdminTripDetails: FC = () => {
 
     const unReportClickHandlerComment = (comment: Comment) => {
 
-        if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (comment !== undefined) && (userId !== null) && accessToken) {
 
             if (comment.reportComment !== undefined) {
 
@@ -489,7 +490,7 @@ const AdminTripDetails: FC = () => {
 
                 comment.reportComment.splice(index, 1);
 
-                API_COMMENT.reportComment(comment._id, comment).then((data) => {
+                API_COMMENT.reportComment(comment._id, comment, accessToken).then((data) => {
 
                     setReportedComment(false);
                     setComments(data)

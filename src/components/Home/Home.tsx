@@ -1,5 +1,5 @@
 import { Box, Grid, useMediaQuery } from '@mui/material';
-import { LoginContext } from '../../App';
+import { LoginContext } from '../../hooks/LoginContext';
 import { Trip } from '../../model/trip';
 import TripList from '../Trips/TripsList/TripsList';
 import jwt_decode from "jwt-decode";

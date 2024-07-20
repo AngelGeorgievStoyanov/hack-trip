@@ -1,6 +1,6 @@
 import { FC, useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { LoginContext } from '../../App';
+import { LoginContext } from "../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
 
 type decode = {

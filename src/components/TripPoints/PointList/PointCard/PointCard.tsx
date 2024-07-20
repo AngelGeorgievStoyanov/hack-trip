@@ -9,7 +9,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Card, Grid, Typography } from "@mui/material";
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
-import { LoginContext } from "../../../../App";
+import { LoginContext } from "../../../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
 
 
@@ -28,7 +28,7 @@ export interface points {
 }
 
 const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
-const libraries: Array<"drawing" | "places" | "geometry"> = [ "places"]
+const libraries: Array<"drawing" | "places" | "geometry"> = ["places"]
 const googleKey = process.env.REACT_APP_GOOGLE_KEY
 
 let userId: string | undefined;
@@ -83,8 +83,8 @@ const PointCard: FC<PointCardProps> = ({ point, length }): ReactElement => {
 
 
     const deleteClickHandler = () => {
-        if (idTrip && userId) {
-            API_POINT.deleteById(point._id, idTrip, userId).then((data) => {
+        if (idTrip && userId && accessToken) {
+            API_POINT.deleteById(point._id, idTrip, userId, accessToken).then((data) => {
                 navigate(`/trip/points/${idTrip}`);
             }).catch((err) => {
                 console.log(err);
@@ -94,60 +94,64 @@ const PointCard: FC<PointCardProps> = ({ point, length }): ReactElement => {
     }
 
     const editPositionUp = async (e: React.MouseEvent, pointPosition: number, id: IdType) => {
+        if (accessToken) {
 
-        let card = e.currentTarget.parentElement?.children[(pointPosition * 3) - 5];
-        let idCardUp = card?.getAttribute('id');
-        if (idCardUp !== null && idCardUp !== undefined) {
+            let card = e.currentTarget.parentElement?.children[(pointPosition * 3) - 5];
+            let idCardUp = card?.getAttribute('id');
+            if (idCardUp !== null && idCardUp !== undefined) {
 
-            let currentCardId = id;
-            let currentIdNewPosition = pointPosition - 1;
-            let upCurrentCardId = idCardUp;
-            let upCurrentCardNewPosition = +pointPosition;
+                let currentCardId = id;
+                let currentIdNewPosition = pointPosition - 1;
+                let upCurrentCardId = idCardUp;
+                let upCurrentCardNewPosition = +pointPosition;
 
-            let points = {
-                currentCardId,
-                currentIdNewPosition,
-                upCurrentCardId,
-                upCurrentCardNewPosition
-            } as points;
+                let points = {
+                    currentCardId,
+                    currentIdNewPosition,
+                    upCurrentCardId,
+                    upCurrentCardNewPosition
+                } as points;
 
-            await API_POINT.editPointPosition(id, points).then((data) => {
+                await API_POINT.editPointPosition(id, points, accessToken).then((data) => {
 
-                navigate(`/trip/points/${idTrip}`);
-            }).catch(err => {
-                console.log(err)
-            });
+                    navigate(`/trip/points/${idTrip}`);
+                }).catch(err => {
+                    console.log(err)
+                });
+            }
         }
     }
 
 
     const editPositionDwn = async (e: React.MouseEvent, pointPosition: number, id: IdType) => {
 
+        if (accessToken) {
 
-        let card = e.currentTarget.parentElement?.children[(pointPosition * 3) + 1];
-        let idCardUp = card?.getAttribute('id');
-
-
-        if (idCardUp !== null && idCardUp !== undefined) {
-
-            let currentCardId = id;
-            let currentIdNewPosition = pointPosition + 1;
-            let upCurrentCardId = idCardUp;
-            let upCurrentCardNewPosition = +pointPosition;
-
-            let points = {
-                currentCardId,
-                currentIdNewPosition,
-                upCurrentCardId,
-                upCurrentCardNewPosition
-            } as points
+            let card = e.currentTarget.parentElement?.children[(pointPosition * 3) + 1];
+            let idCardUp = card?.getAttribute('id');
 
 
-            await API_POINT.editPointPosition(id, points).then((data) => {
-                navigate(`/trip/points/${idTrip}`);
-            }).catch(err => {
-                console.log(err)
-            });
+            if (idCardUp !== null && idCardUp !== undefined) {
+
+                let currentCardId = id;
+                let currentIdNewPosition = pointPosition + 1;
+                let upCurrentCardId = idCardUp;
+                let upCurrentCardNewPosition = +pointPosition;
+
+                let points = {
+                    currentCardId,
+                    currentIdNewPosition,
+                    upCurrentCardId,
+                    upCurrentCardNewPosition
+                } as points
+
+
+                await API_POINT.editPointPosition(id, points, accessToken).then((data) => {
+                    navigate(`/trip/points/${idTrip}`);
+                }).catch(err => {
+                    console.log(err)
+                });
+            }
         }
 
     }

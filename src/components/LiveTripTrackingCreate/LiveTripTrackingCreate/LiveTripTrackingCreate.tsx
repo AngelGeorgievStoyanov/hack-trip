@@ -10,7 +10,7 @@ import FormTextArea from "../../FormFields/FormTextArea";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
-import { LoginContext } from "../../../App";
+import { LoginContext } from "../../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
 import * as tripService from '../../../services/tripService';
 import { Trip } from '../../../model/trip';

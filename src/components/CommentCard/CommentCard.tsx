@@ -9,7 +9,7 @@ import { stringAvatar } from '../../shared/common-types';
 import ReportGmailerrorredIcon from '@mui/icons-material/ReportGmailerrorred';
 import ReportOffIcon from '@mui/icons-material/ReportOff';
 import jwt_decode from "jwt-decode";
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import { Link } from "react-router-dom";
 import * as commentService from '../../services/commentService'
 import { ApiComment } from "../../services/commentService";
@@ -69,8 +69,8 @@ const CommentCard: FC<CommentCardProps> = ({ comment, onDeleteCom, onEditCom, on
 
 
     useEffect(() => {
-        if (comment._id) {
-            API_COMMENT.findUserImage(comment._id).then((data) => {
+        if (comment._id && accessToken) {
+            API_COMMENT.findUserImage(comment._id, accessToken).then((data) => {
                 setUserImg(data)
             }).catch(err => {
                 console.log(err)

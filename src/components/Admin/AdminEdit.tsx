@@ -10,7 +10,7 @@ import * as userService from '../../services/userService'
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import imageCompression from "browser-image-compression";
@@ -127,80 +127,82 @@ const AdminEdit: FC = () => {
 
 
     const editProfileSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
+        if (accessToken) {
 
 
-        let formData = new FormData();
-        let imagesNames
-        if (fileSelected) {
+            let formData = new FormData();
+            let imagesNames
+            if (fileSelected) {
 
-            formData.append('file', fileSelected);
+                formData.append('file', fileSelected);
 
-            imagesNames = await API_CLIENT.sendFile(formData).then((data) => {
-                let imageName = data as unknown as any as any[];
-                return imageName.map((x) => {
-                    return x.destination;
+                imagesNames = await API_CLIENT.sendFile(formData, accessToken).then((data) => {
+                    let imageName = data as unknown as any as any[];
+                    return imageName.map((x) => {
+                        return x.destination;
+                    })
+                }).catch((err) => {
+                    console.log(err);
                 })
-            }).catch((err) => {
-                console.log(err);
-            })
-        }
+            }
 
-        if (imagesNames !== undefined && imagesNames.length > 0) {
-            data.imageFile = imagesNames[0];
+            if (imagesNames !== undefined && imagesNames.length > 0) {
+                data.imageFile = imagesNames[0];
 
-        } else {
-            if ((user?.imageFile !== undefined) && (user.imageFile !== null) && (user.imageFile !== '')) {
-                data.imageFile = user?.imageFile
+            } else {
+                if ((user?.imageFile !== undefined) && (user.imageFile !== null) && (user.imageFile !== '')) {
+                    data.imageFile = user?.imageFile
+                }
+
+            }
+
+
+            data.timeEdited = toIsoDate(new Date());
+            data.firstName = data.firstName.trim();
+            data.lastName = data.lastName.trim();
+            data.status = UserStatus[parseInt(data.status)];
+
+            if (data.status === undefined) {
+                if ((user !== undefined) && (user.status !== undefined)) {
+                    data.status = user.status + '';
+                }
+            }
+
+            data.role = UserRole[parseInt(data.role)];
+
+
+            if (data.role === undefined) {
+                if ((user !== undefined) && (user.role !== undefined)) {
+                    data.role = user.role + '';
+                }
+            }
+
+
+            const userEditRole = userEdit.role as any as string;
+
+            if (userEditRole === 'admin') {
+                data.status = UserStatus[UserStatus.ACTIVE];
+                data.role = UserRole[UserRole.admin];
+            }
+
+            const editedUser = { ...data } as any;
+
+
+            if (userEdit._id) {
+
+
+                API_CLIENT.updateUserAdmin(userEdit._id, editedUser, accessToken).then((data) => {
+
+                    setUser(prev => data);
+                    setFileSelected(null);
+
+                }).catch((err) => {
+                    console.log(err)
+                });
+
             }
 
         }
-
-
-        data.timeEdited = toIsoDate(new Date());
-        data.firstName = data.firstName.trim();
-        data.lastName = data.lastName.trim();
-        data.status = UserStatus[parseInt(data.status)];
-
-        if (data.status === undefined) {
-            if ((user !== undefined) && (user.status !== undefined)) {
-                data.status = user.status + '';
-            }
-        }
-
-        data.role = UserRole[parseInt(data.role)];
-
-
-        if (data.role === undefined) {
-            if ((user !== undefined) && (user.role !== undefined)) {
-                data.role = user.role + '';
-            }
-        }
-
-
-        const userEditRole = userEdit.role as any as string;
-
-        if (userEditRole === 'admin') {
-            data.status = UserStatus[UserStatus.ACTIVE];
-            data.role = UserRole[UserRole.admin];
-        }
-
-        const editedUser = { ...data } as any;
-
-
-        if (userEdit._id) {
-
-
-            API_CLIENT.updateUserAdmin(userEdit._id, editedUser).then((data) => {
-
-                setUser(prev => data);
-                setFileSelected(null);
-
-            }).catch((err) => {
-                console.log(err)
-            });
-
-        }
-
 
     }
 
@@ -275,9 +277,9 @@ const AdminEdit: FC = () => {
     const deleteImage = (e: React.MouseEvent) => {
 
         const img = e.currentTarget.id;
-        if (userEdit._id) {
+        if (userEdit._id && accessToken) {
 
-            API_CLIENT.deleteProfileImage(userEdit._id + '', img).then((data) => {
+            API_CLIENT.deleteProfileImage(userEdit._id + '', img, accessToken).then((data) => {
 
                 setUser(data);
                 userEdit.imageFile = undefined;
@@ -319,12 +321,14 @@ const AdminEdit: FC = () => {
 
 
     const deleteClickHandler = () => {
+        if (accessToken) {
 
-        API_CLIENT.deleteUserById(userId, userEdit._id).then((data) => {
-            navigate('/admin')
-        }).catch((err) => {
-            console.log(err)
-        })
+            API_CLIENT.deleteUserById(userId, userEdit._id, accessToken).then((data) => {
+                navigate('/admin')
+            }).catch((err) => {
+                console.log(err)
+            })
+        }
     }
 
     return (

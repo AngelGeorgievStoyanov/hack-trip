@@ -9,7 +9,7 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
 import { BaseSyntheticEvent, FC } from "react";
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import { useContext } from 'react'
 import jwt_decode from "jwt-decode";
 
@@ -69,16 +69,18 @@ const AdminCommentEdit: FC = () => {
 
 
     const editCommentSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
+        if (accessToken) {
 
-        data.comment = data.comment.trim();
-        const editComment = { ...data } as any as Comment;
+            data.comment = data.comment.trim();
+            const editComment = { ...data } as any as Comment;
 
-        API_COMMENT.update(comment._id, editComment).then((data) => {
-            navigate(-1);
-        }).catch((err) => {
-            console.log(err)
-        });
+            API_COMMENT.update(comment._id, editComment, accessToken).then((data) => {
+                navigate(-1);
+            }).catch((err) => {
+                console.log(err)
+            });
 
+        }
     }
 
 
@@ -89,24 +91,25 @@ const AdminCommentEdit: FC = () => {
 
     const handeleDelete = () => {
 
-        API_COMMENT.deleteById(comment._id).then((data) => {
+        if (accessToken) {
 
-            navigate(-1)
+            API_COMMENT.deleteById(comment._id, accessToken).then((data) => {
 
-        }).catch((err) => {
-            console.log(err)
-        });
+                navigate(-1)
 
-
+            }).catch((err) => {
+                console.log(err)
+            });
+        }
 
     }
 
     const handeleDeleteReports = () => {
 
-        if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (comment !== undefined) && (userId !== null) && accessToken) {
             const reports: [] = [];
 
-            API_COMMENT.deleteReportComment(comment._id, reports).then((data) => {
+            API_COMMENT.deleteReportComment(comment._id, reports, accessToken).then((data) => {
                 navigate(-1)
 
             }).catch((err) => {
@@ -128,7 +131,7 @@ const AdminCommentEdit: FC = () => {
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        maxWidth: '600px',
+                        maxWidth: '620px',
                         height: 'fit-content',
                         padding: '30px',
                         marginTop: '50px',
@@ -148,13 +151,13 @@ const AdminCommentEdit: FC = () => {
                     <Typography gutterBottom variant="subtitle1" component="div">
                         Reported by IDs : {comment?.reportComment?.join(', ')}
                     </Typography>
-                    <span>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
 
                         <Button variant="contained" onClick={handeleDeleteReports} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE REPORTS COMMENT</Button>
                         <Button variant="contained" onClick={handeleDelete} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE COMMENT</Button>
                         <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }}>ADMIN EDIT COMMENT</Button>
                         <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-                    </span>
+                    </Box>
 
                 </Box>
 

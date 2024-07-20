@@ -15,7 +15,7 @@ import FormTextArea from "../FormFields/FormTextArea";
 import LoadingButton from '@mui/lab/LoadingButton';
 import imageCompression from 'browser-image-compression';
 import jwt_decode from "jwt-decode";
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import { useContext } from 'react';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
@@ -317,72 +317,75 @@ const CreateTrip: FC = () => {
 
 
     const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined, addPoints?: boolean) => {
+        if (accessToken) {
+            setButtonAdd(false)
+            event?.preventDefault();
 
-        setButtonAdd(false)
-        event?.preventDefault();
+            let formData = new FormData();
 
-        let formData = new FormData();
+            let imagesNames;
 
-        if (fileSelected) {
+            if (fileSelected && fileSelected.length > 0) {
 
-            fileSelected.forEach((file) => {
-                formData.append('file', file);
+                fileSelected.forEach((file) => {
+                    formData.append('file', file);
+                }
+                );
+
+
+                imagesNames = await API_TRIP.sendFile(formData, accessToken).then((data) => {
+                    let imageName = data as unknown as any as any[];
+                    return imageName.map((x) => {
+                        return x.destination;
+                    })
+                }).catch((err) => {
+                    console.log(err);
+                });
+
+                if (imagesNames) {
+                    data.imageFile = imagesNames;
+                }
             }
-            );
-        }
+
+            if (clickedPos) {
+                data.lat = clickedPos.lat;
+                data.lng = clickedPos.lng;
+            }
 
 
-        const imagesNames = await API_TRIP.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[];
-            return imageName.map((x) => {
-                return x.destination;
+            if (_ownerId) {
+                data._ownerId = _ownerId;
+            }
+
+            data.title = data.title.trim();
+            data.destination = data.destination.trim();
+            data.description = data.description.trim();
+
+            data.timeCreated = toIsoDate(new Date());
+            data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)];
+            data.transport = TripTransport[parseInt(data.transport)];
+            const newTrip = { ...data } as any as TripCreate;
+
+            API_TRIP.create(newTrip, accessToken).then((trip) => {
+                setButtonAdd(true)
+                if (addPoints === true) {
+                    navigate(`/trip/points/${trip._id}`);
+
+                } else {
+
+                    navigate(`/trip/details/${trip._id}`);
+                }
+
+
+
+            }).catch((err) => {
+                console.log(typeof err === 'string' ? err : typeof err.message === 'string' ? err.message : 'Something went wrong!');
+                setErrorApi(err && typeof err === 'string' ? err : typeof err.message === 'string' ? err.message : 'Something went wrong!');
+
+                setLoading(false);
+                setButtonAdd(true);
             })
-        }).catch((err) => {
-            console.log(err);
-        });
-
-        if (imagesNames) {
-            data.imageFile = imagesNames;
         }
-
-        if (clickedPos) {
-            data.lat = clickedPos.lat;
-            data.lng = clickedPos.lng;
-        }
-
-
-        if (_ownerId) {
-            data._ownerId = _ownerId;
-        }
-
-        data.title = data.title.trim();
-        data.destination = data.destination.trim();
-        data.description = data.description.trim();
-
-        data.timeCreated = toIsoDate(new Date());
-        data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)];
-        data.transport = TripTransport[parseInt(data.transport)];
-        const newTrip = { ...data } as any as TripCreate;
-
-        API_TRIP.create(newTrip).then((trip) => {
-            setButtonAdd(true)
-            if (addPoints === true) {
-                navigate(`/trip/points/${trip._id}`);
-
-            } else {
-
-                navigate(`/trip/details/${trip._id}`);
-            }
-
-
-
-        }).catch((err) => {
-            console.log(typeof err === 'string' ? err : typeof err.message === 'string' ? err.message : 'Something went wrong!');
-            setErrorApi(err && typeof err === 'string' ? err : 'Something went wrong!');
-
-            setLoading(false);
-            setButtonAdd(true);
-        })
     }
 
 
@@ -487,7 +490,7 @@ const CreateTrip: FC = () => {
                         dragMarker={dragMarker}
                         clickedPos={clickedPos}
                     />
-                  
+
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 

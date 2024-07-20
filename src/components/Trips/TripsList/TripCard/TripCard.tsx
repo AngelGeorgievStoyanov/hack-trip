@@ -2,7 +2,7 @@
 import { Box, Button, Card, CardContent, MobileStepper, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Trip } from '../../../../model/trip';
 import jwt_decode from "jwt-decode";
-import { LoginContext } from '../../../../App';
+import { LoginContext } from '../../../../hooks/LoginContext';
 import { FC, ReactElement, useContext, useState, TouchEvent } from 'react';
 import { IdType } from '../../../../shared/common-types';
 import { User } from '../../../../model/users';
@@ -66,8 +66,8 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
     }
 
 
-    if (userId !== undefined && userId !== null) {
-        API_CLIENT.findUserId(userId).then((data) => {
+    if (userId !== undefined && userId !== null && accessToken) {
+        API_CLIENT.findUserId(userId, accessToken).then((data) => {
 
             setUserVerId(data)
         }).catch((err) => {
@@ -133,7 +133,7 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                     alignItems: 'center',
                     maxWidth: '300px', margin: '20px',
                     height: isMobile ? 'fit-content' : 'auto',
-                    maxHeight:'500px',
+                    maxHeight: '500px',
                     width: '-webkit-fill-available',
                     padding: '25px 0px 0px 0px', backgroundColor: '#eee7e79e',
                     boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',

@@ -17,7 +17,7 @@ import imageCompression from "browser-image-compression";
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import { LoginContext } from "../../../App";
+import { LoginContext } from "../../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
 import { ApiTrip } from "../../../services/tripService";
 import * as tripService from "../../../services/tripService";
@@ -40,7 +40,7 @@ type decode = {
 const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data');
 
-const libraries: Array<"drawing" | "places" | "geometry"> = [ "places"]
+const libraries: Array<"drawing" | "places" | "geometry"> = ["places"]
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 
 
@@ -100,9 +100,9 @@ const PointEdit: FC = () => {
 
 
     useEffect(() => {
-        if (userId) {
+        if (userId && accessToken) {
 
-            API_POINT.findByPointId(point._id).then((data) => {
+            API_POINT.findByPointId(point._id, accessToken).then((data) => {
                 setImages(data.imageFile);
             }).catch((err) => {
                 console.log(err)
@@ -333,79 +333,84 @@ const PointEdit: FC = () => {
     }
 
     const editPointSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
-        setButtonAdd(false)
-        let formData = new FormData();
+        if (accessToken) {
 
-        if (fileSelected) {
-            fileSelected.forEach((file) => {
-                formData.append('file', file);
+
+            setButtonAdd(false)
+            let formData = new FormData();
+
+            let imagesNames;
+            if (fileSelected && fileSelected.length > 0) {
+                fileSelected.forEach((file) => {
+                    formData.append('file', file);
+                });
+
+
+                imagesNames = await API_POINT.sendFile(formData, accessToken).then((data) => {
+                    let imageName = data as unknown as any as any[] | [];
+                    return imageName.map((x) => {
+                        return x.destination;
+                    })
+                }).catch((err) => {
+                    console.log(err);
+                    setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
+                    setLoading(false);
+                    setButtonAdd(true);
+                });
+            }
+
+            let imagesNew = imagesNames as unknown as any as string[];
+
+            if (imagesNew !== undefined && imagesNew.length > 0) {
+                data.imageFile = images?.concat(imagesNew);
+            } else {
+                data.imageFile = images;
+            }
+
+            data.lat = point.lat;
+            data.lng = point.lng;
+            if (clickedPos?.lat !== undefined) {
+                data.lat = clickedPos.lat + '';
+                data.lng = clickedPos.lng + '';
+            }
+
+            if (!data.lat) {
+                setErrorMessageSearch('Plece enter exact name location or click in map');
+                setErrorApi('Plece enter exact name location or click in map');
+                setLoading(false);
+                setButtonAdd(true);
+                return;
+            } else {
+                setErrorMessageSearch('');
+            }
+
+            data.pointNumber = point.pointNumber;
+            data.name = data.name.trim();
+            data.description = data.description.trim();
+            data._ownerId = userId;
+
+            const editedPoint = { ...data } as Point;
+
+
+            if (editedPoint.name.split(',').length > 1) {
+                editedPoint.name = editedPoint.name.split(',')[0];
+
+            } else if (editedPoint.name.split(' - ').length > 1) {
+                editedPoint.name = editedPoint.name.split(' - ')[0];
+            }
+
+            API_POINT.update(point._id, editedPoint, accessToken).then((point) => {
+                setButtonAdd(true)
+
+                navigate(`/trip/points/${point._ownerTripId}`);
+
+            }).catch((err) => {
+                console.log(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!')
+                setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
+                setLoading(false);
+                setButtonAdd(true);
             });
         }
-
-
-        let imagesNames = await API_POINT.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[] | [];
-            return imageName.map((x) => {
-                return x.destination;
-            })
-        }).catch((err) => {
-            console.log(err);
-            setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
-            setLoading(false);
-            setButtonAdd(true);
-        });
-
-        let imagesNew = imagesNames as unknown as any as string[];
-
-        if (imagesNew !== undefined && imagesNew.length > 0) {
-            data.imageFile = images?.concat(imagesNew);
-        } else {
-            data.imageFile = images;
-        }
-
-        data.lat = point.lat;
-        data.lng = point.lng;
-        if (clickedPos?.lat !== undefined) {
-            data.lat = clickedPos.lat + '';
-            data.lng = clickedPos.lng + '';
-        }
-
-        if (!data.lat) {
-            setErrorMessageSearch('Plece enter exact name location or click in map');
-            setErrorApi('Plece enter exact name location or click in map');
-            setLoading(false);
-            setButtonAdd(true);
-            return;
-        } else {
-            setErrorMessageSearch('');
-        }
-
-        data.pointNumber = point.pointNumber;
-        data.name = data.name.trim();
-        data.description = data.description.trim();
-        data._ownerId = userId;
-
-        const editedPoint = { ...data } as Point;
-
-
-        if (editedPoint.name.split(',').length > 1) {
-            editedPoint.name = editedPoint.name.split(',')[0];
-
-        } else if (editedPoint.name.split(' - ').length > 1) {
-            editedPoint.name = editedPoint.name.split(' - ')[0];
-        }
-
-        API_POINT.update(point._id, editedPoint).then((point) => {
-            setButtonAdd(true)
-
-            navigate(`/trip/points/${point._ownerTripId}`);
-
-        }).catch((err) => {
-            console.log(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!')
-            setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
-            setLoading(false);
-            setButtonAdd(true);
-        });
     }
 
 
@@ -415,18 +420,20 @@ const PointEdit: FC = () => {
 
 
     const deleteImage = (e: React.MouseEvent) => {
+        if (accessToken) {
 
-        const index = images?.indexOf(e.currentTarget.id);
-        if (index !== undefined) {
-            const deletedImage = images?.slice(index, index + 1);
+            const index = images?.indexOf(e.currentTarget.id);
+            if (index !== undefined) {
+                const deletedImage = images?.slice(index, index + 1);
 
-            if (deletedImage) {
+                if (deletedImage) {
 
-                API_POINT.editImages(point._id, deletedImage).then((data) => {
-                    setImages(data.imageFile);
-                }).catch((err) => {
-                    console.log(err);
-                });
+                    API_POINT.editImages(point._id, deletedImage, accessToken).then((data) => {
+                        setImages(data.imageFile);
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+                }
             }
         }
     }
@@ -527,7 +534,7 @@ const PointEdit: FC = () => {
                         visible={visible}
                         initialPoint={initialPoint}
                     />
-                 
+
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 

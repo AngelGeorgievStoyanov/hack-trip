@@ -6,7 +6,7 @@ import { FC, useEffect, useState } from "react";
 import { IdType } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
 import jwt_decode from "jwt-decode";
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import { useContext } from 'react';
 
 
@@ -42,9 +42,9 @@ const MyFavorites: FC = () => {
     useEffect(() => {
 
 
-        if (userId !== undefined) {
+        if (userId !== undefined && token) {
 
-            API_TRIP.findAllMyFavorites(userId).then((data) => {
+            API_TRIP.findAllMyFavorites(userId, token).then((data) => {
                 setTrips(data);
 
             }).catch((err) => {

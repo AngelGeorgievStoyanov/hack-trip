@@ -5,37 +5,33 @@ import { CONNECTIONURL } from "../utils/baseUrl";
 const baseUrl = CONNECTIONURL;
 
 export interface ApiComment<K, V extends Identifiable<K>> {
-    findAll(): Promise<V[]>;
-    findByTripId(id: K, userId: K): Promise<V[]>;
-    create(entityWithoutId: CommentCreate): Promise<any>;
-    update(id: K, entity: Comment): Promise<V>;
-    deleteById(id: K): Promise<void>;
-    findByPointId(id: K): Promise<V>;
-    deleteByTripId(id: K, userId: K): Promise<void>;
-    findById(id: K): Promise<V>;
-    reportComment(id: K, entity: Comment): Promise<V[]>;
-    getAllReportComments(id: K): Promise<V[]>;
-    deleteReportComment(id: K, entity: []): Promise<V>;
-    findUserImage(id: K): Promise<string>;
-    adminUnReportComment(id: K, entity: Comment): Promise<V[]>;
+    findByTripId(id: K, userId: K, token: string): Promise<V[]>;
+    create(entityWithoutId: CommentCreate, token: string): Promise<any>;
+    update(id: K, entity: Comment, token: string): Promise<V>;
+    deleteById(id: K, token: string): Promise<void>;
+    deleteByTripId(id: K, userId: K, token: string): Promise<void>;
+    findById(id: K, token: string): Promise<V>;
+    reportComment(id: K, entity: Comment, token: string): Promise<V[]>;
+    getAllReportComments(id: K, token: string): Promise<V[]>;
+    deleteReportComment(id: K, entity: [], token: string): Promise<V>;
+    findUserImage(id: K, token: string): Promise<string>;
+    adminUnReportComment(id: K, entity: Comment, token: string): Promise<V[]>;
 
 }
 
 
 export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<K, V> {
     constructor(public apiCollectionSuffix: string) { }
-    findAll(): Promise<V[]> {
-        throw new Error("Method not implemented.");
-    }
-    async findByTripId(id: K, userId: K): Promise<V[]> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trip/${id}/${userId}`);
-        const res = await response.json()
-        return res;
-    }
+    async findByTripId(id: K, userId: K, token: string): Promise<V[]> {
 
-    async findById(id: K): Promise<V> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`);
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trip/${id}/${userId}`, {
+            method: 'GET',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        });
         if (response.status >= 400) {
             const result = await response.json();
 
@@ -44,11 +40,28 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
         return response.json();
     }
 
-    async create(entityWithoutId: CommentCreate): Promise<any> {
+    async findById(id: K, token: string): Promise<V> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
+            method: 'GET',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        });
+        if (response.status >= 400) {
+            const result = await response.json();
+
+            throw new Error(result.message);
+        }
+        return response.json();
+    }
+
+    async create(entityWithoutId: CommentCreate, token: string): Promise<any> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`, {
             method: 'POST',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(entityWithoutId)
         });
@@ -62,11 +75,12 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
         return response.json();
     }
 
-    async update(id: K, entity: Comment): Promise<V> {
+    async update(id: K, entity: Comment, token: string): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'PUT',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(entity)
         });
@@ -80,11 +94,14 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
     }
 
 
-    async deleteById(id: K): Promise<void> {
+    async deleteById(id: K, token: string): Promise<void> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'DELETE',
-
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
         });
 
         if (response.status >= 400) {
@@ -96,14 +113,13 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
     }
 
 
-    findByPointId(id: K): Promise<V> {
-        throw new Error("Method not implemented.");
-    }
-    async deleteByTripId(id: K, userId: K): Promise<void> {
-
+    async deleteByTripId(id: K, userId: K, token: string): Promise<void> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trip/${id}/${userId}`, {
             method: 'DELETE',
-
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
         });
 
         if (response.status >= 400) {
@@ -114,12 +130,13 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
         return await response.json();
     }
 
-    async reportComment(id: K, entity: Comment): Promise<V[]> {
+    async reportComment(id: K, entity: Comment, token: string): Promise<V[]> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/report/${id}`, {
             method: 'PUT',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(entity)
         });
@@ -131,12 +148,13 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
     }
 
 
-    async adminUnReportComment(id: K, entity: Comment): Promise<V[]> {
+    async adminUnReportComment(id: K, entity: Comment, token: string): Promise<V[]> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/report/${id}`, {
             method: 'PUT',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(entity)
         });
@@ -149,31 +167,50 @@ export class ApiCommentImpl<K, V extends Identifiable<K>> implements ApiComment<
 
 
 
-    async getAllReportComments(id: K): Promise<V[]> {
+    async getAllReportComments(id: K, token: string): Promise<V[]> {
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/reports/${id}`);
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/reports/${id}`, {
+            method: 'GET',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        });
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result.message);
+        }
         return response.json();
     }
 
 
-    async deleteReportComment(id: K, entity: []): Promise<V> {
+    async deleteReportComment(id: K, entity: [], token: string): Promise<V> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/delete-report/${id}`, {
             method: 'PUT',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(entity)
         });
 
-        const result = await response.json();
-
-        return result;
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result.message);
+        }
+        return response.json();
     }
 
 
-    async findUserImage(id: K): Promise<string> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/image-user/${id}`);
+    async findUserImage(id: K, token: string): Promise<string> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/image-user/${id}`, {
+            method: 'GET',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        });
         if (response.status >= 400) {
             const result = await response.json();
             throw new Error(result.message);

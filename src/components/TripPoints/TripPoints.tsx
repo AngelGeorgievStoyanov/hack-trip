@@ -12,7 +12,7 @@ import FormTextArea from "../FormFields/FormTextArea";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import LoadingButton from "@mui/lab/LoadingButton";
 import imageCompression from "browser-image-compression";
 import jwt_decode from "jwt-decode";
@@ -58,7 +58,7 @@ type FormData = {
 };
 
 
-const libraries: Array<"drawing" | "places" | "geometry"> = [ "places"]
+const libraries: Array<"drawing" | "places" | "geometry"> = ["places"]
 
 
 const schema = yup.object({
@@ -334,91 +334,96 @@ const TripPoints: FC = () => {
 
 
     const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
-        setButtonAdd(false)
-        let formData = new FormData();
 
+        if (accessToken) {
 
-        if (fileSelected) {
-            fileSelected.forEach((file) => {
-                formData.append('file', file);
-            }
-            )
-        }
-        const imagesNames = await API_POINT.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[];
-            return imageName.map((x) => {
-                return x.destination;
-            })
-        }).catch((err) => {
-            console.log(err);
-            setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
-            setLoading(false);
-            setButtonAdd(true);
-        });
+            setButtonAdd(false)
+            let formData = new FormData();
 
-        if (imagesNames) {
-            data.imageFile = imagesNames;
-        }
+            let imagesNames;
 
-
-        data.pointNumber = points.length + 1;
-
-
-        if (clickedPos?.lat !== undefined) {
-            data.lat = clickedPos.lat + '';
-            data.lng = clickedPos.lng + '';
-        }
-
-        if (!data.lat) {
-            setErrorMessageSearch('Plece enter exact name location or click in map');
-            setErrorApi('Plece enter exact name location or click in map');
-            setLoading(false);
-            setButtonAdd(true);
-            return;
-        } else {
-            setErrorMessageSearch('');
-        }
-
-        if (idTrip) {
-            data._ownerTripId = idTrip;
-        }
-
-        data.name = data.name.trim();
-        data.description = data.description.trim();
-        if (userId !== null) {
-            data._ownerId = userId + ''
-        }
-
-
-        const newPoint = { ...data } as PointCreate;
-
-
-        if (newPoint.name.split(',').length > 1) {
-            newPoint.name = newPoint.name.split(',')[0];
-        } else if (newPoint.name.split('-').length > 1) {
-            newPoint.name = newPoint.name.split('-')[0];
-        }
-
-        API_POINT.create(newPoint).then((point) => {
-            setClickedPos(undefined);
-            setButtonAdd(true)
-            reset({ name: '', imageFile: [] });
-            center = {
-                lat: Number(point.lat),
-                lng: Number(point.lng)
+            if (fileSelected && fileSelected.length > 0) {
+               
+                fileSelected.forEach((file) => {
+                    formData.append('file', file);
+                })
+                imagesNames = await API_POINT.sendFile(formData, accessToken).then((data) => {
+                    let imageName = data as unknown as any as any[];
+                    return imageName.map((x) => {
+                        return x.destination;
+                    })
+                }).catch((err) => {
+                    console.log(err);
+                    setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
+                    setLoading(false);
+                    setButtonAdd(true);
+                });
             }
 
-            zoom = 8;
+            if (imagesNames) {
+                data.imageFile = imagesNames;
+            }
 
-            setFileSelected([])
-            navigate(`/trip/points/${idTrip}`);
-        }).catch((err) => {
-            console.log(err.message);
-            setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
 
-            setLoading(false);
-            setButtonAdd(true);
-        });
+            data.pointNumber = points.length + 1;
+
+
+            if (clickedPos?.lat !== undefined) {
+                data.lat = clickedPos.lat + '';
+                data.lng = clickedPos.lng + '';
+            }
+
+            if (!data.lat) {
+                setErrorMessageSearch('Plece enter exact name location or click in map');
+                setErrorApi('Plece enter exact name location or click in map');
+                setLoading(false);
+                setButtonAdd(true);
+                return;
+            } else {
+                setErrorMessageSearch('');
+            }
+
+            if (idTrip) {
+                data._ownerTripId = idTrip;
+            }
+
+            data.name = data.name.trim();
+            data.description = data.description.trim();
+            if (userId !== null) {
+                data._ownerId = userId + ''
+            }
+
+
+            const newPoint = { ...data } as PointCreate;
+
+
+            if (newPoint.name.split(',').length > 1) {
+                newPoint.name = newPoint.name.split(',')[0];
+            } else if (newPoint.name.split('-').length > 1) {
+                newPoint.name = newPoint.name.split('-')[0];
+            }
+
+            API_POINT.create(newPoint, accessToken).then((point) => {
+                setClickedPos(undefined);
+                setButtonAdd(true)
+                reset({ name: '', imageFile: [] });
+                center = {
+                    lat: Number(point.lat),
+                    lng: Number(point.lng)
+                }
+
+                zoom = 8;
+
+                setFileSelected([])
+                navigate(`/trip/points/${idTrip}`);
+            }).catch((err) => {
+                console.log(err.message);
+                setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
+
+                setLoading(false);
+                setButtonAdd(true);
+            });
+        }
     }
 
 

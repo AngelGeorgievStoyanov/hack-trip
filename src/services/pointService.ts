@@ -7,16 +7,16 @@ const baseUrl = CONNECTIONURL;
 
 
 export interface ApiPoint<K, V extends Identifiable<K>> {
-    findAll(): Promise<V[]>;
-    findByTripId(id: K): Promise<V>;
-    create(entityWithoutId: PointCreate): Promise<any>;
-    update(id: K, entity: Point): Promise<V>;
-    deleteById(id: K, idTrip: K, userId: K): Promise<void>;
-    findByPointId(id: K): Promise<V>;
-    deleteByTripId(id: K, userId: K): Promise<void>;
-    editPointPosition(id: K, entity: points): Promise<V>;
-    sendFile(entityWithoutId: FormData): Promise<string[]>;
-    editImages(id: K, oneImage: string[]): Promise<V>;
+    // findAll(token: string): Promise<V[]>;
+    findByTripId(id: K, token: string): Promise<V>;
+    create(entityWithoutId: PointCreate, token: string): Promise<any>;
+    update(id: K, entity: Point, token: string): Promise<V>;
+    deleteById(id: K, idTrip: K, userId: K, token: string): Promise<void>;
+    findByPointId(id: K, token: string): Promise<V>;
+    deleteByTripId(id: K, userId: K, token: string): Promise<void>;
+    editPointPosition(id: K, entity: points, token: string): Promise<V>;
+    sendFile(entityWithoutId: FormData, token: string): Promise<string[]>;
+    editImages(id: K, oneImage: string[], token: string): Promise<V>;
 
 }
 
@@ -26,28 +26,48 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
     constructor(public apiCollectionSuffix: string) { }
 
 
-    async findAll(): Promise<V[]> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`);
+    // async findAll(token: string): Promise<V[]> {
+    //     const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`, {
+    //         method: 'GET',
+    //         headers: {
+    //             "content-type": "application/json",
+    //             "Authorization": `Bearer ${token}`,
+    //         }
+    //     });
+    //     if (response.status >= 400) {
+    //         const result = await response.json();
+    //         throw new Error(result);
+    //     }
+    //     return response.json();
+    // }
+
+
+    async findByTripId(id: K, token: string): Promise<V> {
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
+            method: 'GET',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
         return response.json();
     }
 
 
-    async findByTripId(id: K): Promise<V> {
-
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`);
-
-        const res = await response.json();
-        return res;
-    }
 
 
-
-
-    async create(entityWithoutId: PointCreate): Promise<any> {
+    async create(entityWithoutId: PointCreate, token: string): Promise<any> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`, {
             method: 'POST',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(entityWithoutId)
         });
@@ -61,11 +81,12 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
         return response.json();
     }
 
-    async update(id: K, entity: Point): Promise<V> {
+    async update(id: K, entity: Point, token: string): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'PUT',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(entity)
         });
@@ -78,11 +99,12 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
         return await response.json();
     }
 
-    async editPointPosition(id: K, entity: points): Promise<V> {
+    async editPointPosition(id: K, entity: points, token: string): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/edit-position/${id}`, {
             method: 'PUT',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(entity)
         });
@@ -99,12 +121,13 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
 
 
 
-    async deleteById(id: K, idTrip: K, userId: K): Promise<void> {
+    async deleteById(id: K, idTrip: K, userId: K, token: string): Promise<void> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'DELETE',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ idTrip, userId })
 
@@ -118,10 +141,13 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
         return await response.json();
     }
 
-    async deleteByTripId(id: K, userId: K): Promise<void> {
-
+    async deleteByTripId(id: K, userId: K, token: string): Promise<void> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trip/${id}/${userId}`, {
             method: 'DELETE',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
 
         });
 
@@ -135,18 +161,28 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
     }
 
 
-    async findByPointId(id: K): Promise<V> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/edit/${id}`);
+    async findByPointId(id: K, token: string): Promise<V> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/edit/${id}`, {
+            method: 'GET',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        if (response.status >= 400) {
+            const result = await response.json();
 
-        return response.json();
+            throw new Error(result.message);
+        }
+        return await response.json();
     }
 
-    async sendFile(formdata: FormData): Promise<string[]> {
+    async sendFile(formdata: FormData, token: string): Promise<string[]> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/upload`, {
 
             method: 'POST',
             body: formdata,
-            headers: {}
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         const result = await response.json();
@@ -155,13 +191,14 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
     }
 
 
-    async editImages(id: K, oneImage: string[]) {
+    async editImages(id: K, oneImage: string[], token: string) {
 
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/edit-images/${id}`, {
             method: 'PUT',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(oneImage)
         });

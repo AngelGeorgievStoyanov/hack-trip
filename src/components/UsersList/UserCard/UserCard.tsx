@@ -2,7 +2,7 @@ import { Button, Card, CardMedia, Typography } from "@mui/material";
 import { User } from "../../../model/users";
 import { Link } from 'react-router-dom';
 import { FC, ReactElement, useContext } from "react";
-import { LoginContext } from "../../../App";
+import { LoginContext } from "../../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
 
 

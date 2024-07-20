@@ -10,7 +10,7 @@ import { IdType, getRandomTripAndImage } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
 import SearchIcon from '@mui/icons-material/Search';
 import InputBase from '@mui/material/InputBase';
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import HelmetWrapper from "../Helmet/HelmetWrapper";

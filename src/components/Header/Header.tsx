@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import { FC, useContext, useState } from 'react';
 import { User } from "../../model/users";
 import { IdType } from "../../shared/common-types";
@@ -56,8 +56,8 @@ const Header: FC = () => {
 
 
 
-    if (userId !== undefined && userId !== null) {
-        API_CLIENT.findUserId(userId).then((data) => {
+    if (userId !== undefined && userId !== null && accessToken) {
+        API_CLIENT.findUserId(userId, accessToken).then((data) => {
             setUserVerId(data)
         }).catch((err) => {
             console.log(err)

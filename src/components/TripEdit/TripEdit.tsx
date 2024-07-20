@@ -14,7 +14,7 @@ import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import LoadingButton from "@mui/lab/LoadingButton";
 import imageCompression from "browser-image-compression";
 import jwt_decode from "jwt-decode";
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -128,9 +128,9 @@ const TripEdit: FC = () => {
 
 
     useEffect(() => {
-        if (userId) {
+        if (userId && accessToken) {
 
-            API_TRIP.findById(trip._id, userId).then((data) => {
+            API_TRIP.findById(trip._id, userId, accessToken).then((data) => {
                 setImages(data.imageFile);
 
             }).catch((err) => {
@@ -365,67 +365,72 @@ const TripEdit: FC = () => {
 
 
     const editTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
-        setButtonAdd(false)
-        let formData = new FormData();
+
+        if (accessToken) {
+
+            setButtonAdd(false)
+            let formData = new FormData();
 
 
-        if (fileSelected) {
-            fileSelected.forEach((file) => {
-                formData.append('file', file);
-            });
-        }
+            let imagesNames;
+            if (fileSelected && fileSelected.length > 0) {
+                fileSelected.forEach((file) => {
+                    formData.append('file', file);
+                });
 
 
-        let imagesNames = await API_TRIP.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[] | [];
-            return imageName.map((x) => {
-                return x.destination;
-            })
-        }).catch((err) => {
-            console.log(err);
-        });
-
-
-        let imagesNew = imagesNames as unknown as any as string[];
-
-        if (imagesNew !== undefined && imagesNew.length > 0) {
-            data.imageFile = images?.concat(imagesNew);
-        } else {
-            data.imageFile = images;
-        }
-
-
-
-        if (clickedPos?.lat) {
-            data.lat = clickedPos.lat;
-            data.lng = clickedPos.lng;
-        } else {
-            if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) {
-                data.lat = Number(trip.lat);
-                data.lng = Number(trip.lng);
+                imagesNames = await API_TRIP.sendFile(formData, accessToken).then((data) => {
+                    let imageName = data as unknown as any as any[] | [];
+                    return imageName.map((x) => {
+                        return x.destination;
+                    })
+                }).catch((err) => {
+                    console.log(err);
+                });
             }
-        }
 
 
-        data.title = data.title.trim();
-        data.destination = data.destination.trim();
-        data.description = data.description.trim();
-        data.timeEdited = toIsoDate(new Date());
-        data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)];
-        data.transport = TripTransport[parseInt(data.transport)];
-        const editTrip = { ...data } as any;
+            let imagesNew = imagesNames as unknown as any as string[];
 
-        editTrip.id = trip._id as any as Trip;
-        if (userId) {
-            API_TRIP.update(trip._id, editTrip, userId).then((data) => {
-                setButtonAdd(true)
-                navigate(`/trip/details/${trip._id}`);
-            }).catch((err) => {
-                console.log(err.message);
-                setErrorApi(err.message ? err.message : typeof err === 'string' ? err : 'Something went wrong!');
-                setLoading(false);
-                setButtonAdd(true);
-            });
+            if (imagesNew !== undefined && imagesNew.length > 0) {
+                data.imageFile = images?.concat(imagesNew);
+            } else {
+                data.imageFile = images;
+            }
+
+
+
+            if (clickedPos?.lat) {
+                data.lat = clickedPos.lat;
+                data.lng = clickedPos.lng;
+            } else {
+                if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) {
+                    data.lat = Number(trip.lat);
+                    data.lng = Number(trip.lng);
+                }
+            }
+
+
+            data.title = data.title.trim();
+            data.destination = data.destination.trim();
+            data.description = data.description.trim();
+            data.timeEdited = toIsoDate(new Date());
+            data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)];
+            data.transport = TripTransport[parseInt(data.transport)];
+            const editTrip = { ...data } as any;
+
+            editTrip.id = trip._id as any as Trip;
+            if (userId && accessToken) {
+                API_TRIP.update(trip._id, editTrip, userId, accessToken).then((data) => {
+                    setButtonAdd(true)
+                    navigate(`/trip/details/${trip._id}`);
+                }).catch((err) => {
+                    console.log(err.message);
+                    setErrorApi(err.message ? err.message : typeof err === 'string' ? err : 'Something went wrong!');
+                    setLoading(false);
+                    setButtonAdd(true);
+                });
+            }
         }
     }
 
@@ -439,16 +444,19 @@ const TripEdit: FC = () => {
 
     const deleteImage = (e: React.MouseEvent) => {
 
-        const index = images?.indexOf(e.currentTarget.id);
-        if (index !== undefined) {
-            const deletedImage = images?.slice(index, index + 1);
-            if (deletedImage) {
-                API_TRIP.editImages(trip._id, deletedImage).then((data) => {
-                    setImages(data.imageFile);
+        if (accessToken) {
 
-                }).catch((err) => {
-                    console.log(err);
-                });
+            const index = images?.indexOf(e.currentTarget.id);
+            if (index !== undefined) {
+                const deletedImage = images?.slice(index, index + 1);
+                if (deletedImage) {
+                    API_TRIP.editImages(trip._id, deletedImage, accessToken).then((data) => {
+                        setImages(data.imageFile);
+
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+                }
             }
         }
     }
@@ -535,7 +543,7 @@ const TripEdit: FC = () => {
             } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding: '0px' }}>
-                 
+
                     <GoogleMapWrapper
                         center={center}
                         zoom={zoom}
@@ -548,7 +556,7 @@ const TripEdit: FC = () => {
                         visible={visible}
                         initialPoint={initialPoint}
                     />
-                   
+
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 600px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
                         <Autocomplete>

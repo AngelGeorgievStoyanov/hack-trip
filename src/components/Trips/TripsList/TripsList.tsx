@@ -15,7 +15,7 @@ const TripList: FC<TripsListProps> = ({ trips }): ReactElement => {
 
     return (
         <>
-            {trips.length > 0 ?
+            {Array.isArray(trips) && trips.length > 0 ?
                 trips.map(x => <TripCard key={x._id} trip={x} />)
                 :
                 <>

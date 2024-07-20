@@ -1,6 +1,6 @@
 import { FC, useContext } from 'react';
 import { Outlet, useLoaderData } from 'react-router-dom';
-import { LoginContext } from '../../App';
+import { LoginContext } from "../../hooks/LoginContext";
 import { Comment } from '../../model/comment';
 import NotFound from '../NotFound/NotFound';
 

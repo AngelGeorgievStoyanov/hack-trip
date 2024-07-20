@@ -6,7 +6,7 @@ import * as tripService from '../../services/tripService';
 import { IdType } from "../../shared/common-types";
 import { ApiTrip } from "../../services/tripService";
 import { FC, useEffect, useState } from "react";
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import { useContext } from 'react';
 import jwt_decode from "jwt-decode";
 
@@ -46,9 +46,9 @@ const MyTrips: FC = () => {
 
     useEffect(() => {
 
-        if (userId !== undefined) {
+        if (userId !== undefined && token) {
 
-            API_TRIP.findAllMyTrips(userId).then((data) => {
+            API_TRIP.findAllMyTrips(userId, token).then((data) => {
 
                 setTrips(data);
 
@@ -88,7 +88,7 @@ const MyTrips: FC = () => {
                     bgcolor: '#cfe8fc', height: '100vh', overflow: 'scroll', width: '100vw'
                 }
             } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                {trips.length === 0 ?
+                {!trips || trips.length === 0 ?
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }}>
                         <Typography gutterBottom sx={{ margin: '50px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant="h4" align="center">
                             You dont't have a published trip yet.

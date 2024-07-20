@@ -12,11 +12,11 @@ import * as commentService from '../../services/commentService'
 import { CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { LoginContext } from "../../App";
 import jwt_decode from "jwt-decode";
 import * as userService from '../../services/userService';
 import { ApiClient } from "../../services/userService";
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import { LoginContext } from "../../hooks/LoginContext";
 
 
 
@@ -83,81 +83,84 @@ const Admin: FC = () => {
 
     useEffect(() => {
 
-        API_CLIENT.findAll(userId).then((data) => {
-            setUsers(data);
-        }).catch(err => {
-            console.log(err);
-        });
+        if (accessToken) {
 
-        API_CLIENT.getFailedLogs(userId).then((data) => {
-            setFailedLogs(data);
-        }).catch(err => {
-            console.log(err);
-        });
+            API_CLIENT.findAll(userId, accessToken).then((data) => {
+                setUsers(data);
+            }).catch(err => {
+                console.log(err);
+            });
 
-        API_TRIP.getAllReportTrips(userId).then((data) => {
-            setTrips(data);
-        }).catch(err => {
-            console.log(err);
-        });
+            API_CLIENT.getFailedLogs(userId, accessToken).then((data) => {
+                setFailedLogs(data);
+            }).catch(err => {
+                console.log(err);
+            });
 
-        API_COMMENT.getAllReportComments(userId).then((data) => {
-            setComments(data);
-        }).catch(err => {
-            console.log(err);
-        });
+            API_TRIP.getAllReportTrips(userId, accessToken).then((data) => {
+                setTrips(data);
+            }).catch(err => {
+                console.log(err);
+            });
 
-        API_TRIP.getDBImages(userId).then((data) => {
-            setDbImages(data)
-        }).catch(err => {
-            console.log(err.message)
-        })
+            API_COMMENT.getAllReportComments(userId, accessToken).then((data) => {
+                setComments(data);
+            }).catch(err => {
+                console.log(err);
+            });
 
-        API_TRIP.getGCImages(userId).then((data) => {
-            setGcloudImages(data)
-        }).catch(err => {
-            console.log(err.message)
-        })
+            API_TRIP.getDBImages(userId, accessToken).then((data) => {
+                setDbImages(data)
+            }).catch(err => {
+                console.log(err.message)
+            })
 
-        API_TRIP.getCommonImages(userId).then((data) => {
-            setCommonImages(data)
-        }).catch(err => {
-            console.log(err.message)
-        })
+            API_TRIP.getGCImages(userId, accessToken).then((data) => {
+                setGcloudImages(data)
+            }).catch(err => {
+                console.log(err.message)
+            })
 
-        API_CLIENT.getRouteNotFoundLogs(userId).then((data) => {
-            setRouteNotFoundLogs(data)
-        }).catch(err => {
-            console.log(err.message)
-        })
+            API_TRIP.getCommonImages(userId, accessToken).then((data) => {
+                setCommonImages(data)
+            }).catch(err => {
+                console.log(err.message)
+            })
 
-        const updateColsDB = () => {
+            API_CLIENT.getRouteNotFoundLogs(userId, accessToken).then((data) => {
+                setRouteNotFoundLogs(data)
+            }).catch(err => {
+                console.log(err.message)
+            })
 
-            const newColsDB = Math.floor(window.innerWidth / 100) || 3;
-            setColsDB(newColsDB);
+            const updateColsDB = () => {
 
-        };
+                const newColsDB = Math.floor(window.innerWidth / 100) || 3;
+                setColsDB(newColsDB);
 
-        const updateColsGC = () => {
+            };
 
-            const newColsGC = Math.floor(window.innerWidth / 100) || 3;
-            setColsGC(newColsGC);
+            const updateColsGC = () => {
 
-        };
+                const newColsGC = Math.floor(window.innerWidth / 100) || 3;
+                setColsGC(newColsGC);
 
-        const handleResize = () => {
-            updateColsDB();
-            updateColsGC();
-        };
+            };
 
-        window.addEventListener('resize', handleResize);
+            const handleResize = () => {
+                updateColsDB();
+                updateColsGC();
+            };
 
-        handleResize();
+            window.addEventListener('resize', handleResize);
 
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
+            handleResize();
 
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+
+        }
     }, []);
 
 
@@ -197,13 +200,16 @@ const Admin: FC = () => {
 
     const reportClickHandlerComment = (comment: CommentCreate) => {
 
-        API_COMMENT.reportComment(comment._id, comment).then((data) => {
-            setReportedComment(true);
-            setComments(data);
+        if (accessToken) {
 
-        }).catch((err) => {
-            console.log(err);
-        });
+            API_COMMENT.reportComment(comment._id, comment, accessToken).then((data) => {
+                setReportedComment(true);
+                setComments(data);
+
+            }).catch((err) => {
+                console.log(err);
+            });
+        }
 
     }
 
@@ -211,13 +217,13 @@ const Admin: FC = () => {
 
     const unReportClickHandlerComment = (comment: CommentCreate) => {
 
-        if (comment.reportComment !== undefined) {
+        if (comment.reportComment !== undefined && accessToken) {
 
             const index = comment.reportComment.indexOf('1');
 
             comment.reportComment.splice(index, 1);
 
-            API_COMMENT.adminUnReportComment(comment._id, comment).then((data) => {
+            API_COMMENT.adminUnReportComment(comment._id, comment, accessToken).then((data) => {
 
                 setReportedComment(false);
                 setComments(data);
@@ -233,23 +239,25 @@ const Admin: FC = () => {
 
     const onDeleteComment = async (comment: CommentCreate) => {
 
+        if (accessToken) {
 
-        if (comments !== undefined) {
-            API_COMMENT.deleteById(comment._id).then((data) => {
-                if (data !== undefined) {
-                    const copyComments = [...comments];
-                    const index = copyComments.findIndex(cmt => {
-                        return cmt._id === comment._id;
-                    });
+            if (comments !== undefined) {
+                API_COMMENT.deleteById(comment._id, accessToken).then((data) => {
+                    if (data !== undefined) {
+                        const copyComments = [...comments];
+                        const index = copyComments.findIndex(cmt => {
+                            return cmt._id === comment._id;
+                        });
 
-                    copyComments.splice(index, 1);
+                        copyComments.splice(index, 1);
 
-                    setComments(copyComments);
-                }
+                        setComments(copyComments);
+                    }
 
-            }).catch((err) => {
-                console.log(err);
-            });
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }
         }
 
     }
@@ -275,12 +283,12 @@ const Admin: FC = () => {
 
     const columnsRnFlogs: GridColDef[] = [
         { field: 'date', headerName: 'Date', width: 230 },
-        { field: 'reqBody', headerName: 'Body', width: 650 },
+        { field: 'reqBody', headerName: 'Body', width: 1850 },
         { field: 'reqHeaders', headerName: 'Headers', width: 2300 },
         { field: 'reqIp', headerName: 'IP', width: 700 },
         { field: 'reqMethod', headerName: 'Method' },
-        { field: 'reqParams', headerName: 'Params' },
-        { field: 'reqQuery', headerName: 'Query' },
+        { field: 'reqParams', headerName: 'Params', width: 250 },
+        { field: 'reqQuery', headerName: 'Query' , width: 250},
         { field: 'reqUrl', headerName: 'Url', width: 230 },
         { field: 'reqUserEmail', headerName: 'Email', width: 430 },
         { field: '_id', headerName: 'User ID', width: 330 }
@@ -293,9 +301,9 @@ const Admin: FC = () => {
 
 
     const handeleDeleteRows = () => {
-        if (selectedRow.length > 0) {
+        if (selectedRow.length > 0 && accessToken) {
 
-            API_CLIENT.deleteFailedLogs(userId, selectedRow).then((data) => {
+            API_CLIENT.deleteFailedLogs(userId, selectedRow, accessToken).then((data) => {
 
                 const updatedFailedLogs = failedLogs ? failedLogs.filter((log: IFailedLogs) => !selectedRow.includes(log._id!)) : [];
 

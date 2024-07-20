@@ -11,7 +11,7 @@ import { User } from "../../model/users";
 import { ApiClient } from "../../services/userService";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import imageCompression from "browser-image-compression";
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -137,8 +137,8 @@ const Profile: FC = () => {
 
         if (data.oldpassword.length > 0 && data.password.length > 0 && data.confirmpass.length > 0) {
 
-            if (userId) {
-                API_CLIENT.changePassword(userId, data.oldpassword).then((data) => {
+            if (userId && accessToken) {
+                API_CLIENT.changePassword(userId, data.oldpassword, accessToken).then((data) => {
 
                 }).catch((err) => {
                     console.log(err.message);
@@ -152,13 +152,14 @@ const Profile: FC = () => {
 
         let formData = new FormData();
 
-        let imagesNames
-        if (fileSelected) {
+        let imagesNames;
+
+        if (fileSelected && accessToken) {
             formData.append('file', fileSelected);
 
 
 
-            imagesNames = await API_CLIENT.sendFile(formData).then((data) => {
+            imagesNames = await API_CLIENT.sendFile(formData, accessToken).then((data) => {
                 let imageName = data as unknown as any as any[];
                 return imageName.map((x) => {
                     return x.destination;
@@ -187,9 +188,9 @@ const Profile: FC = () => {
 
         const editedUser = { ...data } as any;
 
-        if (userId) {
+        if (userId && accessToken) {
 
-            API_CLIENT.updateUser(userId, editedUser).then((data) => {
+            API_CLIENT.updateUser(userId, editedUser, accessToken).then((data) => {
                 setUser(data);
                 setFileSelected(null);
                 reset({ oldpassword: '', password: '', confirmpass: '' });
@@ -287,9 +288,9 @@ const Profile: FC = () => {
     const deleteImage = (e: React.MouseEvent) => {
 
         const img = e.currentTarget.id;
-        if (userId) {
+        if (userId && accessToken) {
 
-            API_CLIENT.deleteProfileImage(userId, img).then((data) => {
+            API_CLIENT.deleteProfileImage(userId, img, accessToken).then((data) => {
                 setUser(data);
             }).catch((err) => {
                 console.log(err)

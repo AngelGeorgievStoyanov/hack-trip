@@ -1,5 +1,5 @@
 import { FC, useContext, useEffect, useState } from 'react';
-import { LoginContext } from '../../App';
+import { LoginContext } from "../../hooks/LoginContext";
 import { Outlet } from 'react-router-dom';
 import jwt_decode from "jwt-decode";
 import NotFound from '../NotFound/NotFound';

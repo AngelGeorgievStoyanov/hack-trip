@@ -8,11 +8,12 @@ import FormTextArea from "../FormFields/FormTextArea";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
-import { BaseSyntheticEvent, FC, useEffect, useState } from "react";
+import { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
 import LoadingButton from "@mui/lab/LoadingButton";
 import * as tripService from '../../services/tripService';
 import { Trip } from '../../model/trip';
 import { ApiTrip } from '../../services/tripService';
+import { LoginContext } from "../../hooks/LoginContext";
 
 const API_COMMENT: ApiComment<IdType, Comment> = new commentService.ApiCommentImpl<IdType, Comment>('data/comments');
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data');
@@ -37,6 +38,8 @@ const schema = yup.object({
 
 const EditComment: FC = () => {
 
+    const { token } = useContext(LoginContext);
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     const comment = useLoaderData() as Comment;
     const navigate = useNavigate();
@@ -64,16 +67,20 @@ const EditComment: FC = () => {
 
 
     const editCommentSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
-        setButtonAdd(false)
-        data.comment = data.comment.trim();
-        const editComment = { ...data } as any as Comment;
 
-        API_COMMENT.update(comment._id, editComment).then((data) => {
-            setButtonAdd(true)
-            navigate(`/trip/details/${comment._tripId}`);
-        }).catch((err) => {
-            console.log(err)
-        });
+        if (accessToken) {
+
+            setButtonAdd(false)
+            data.comment = data.comment.trim();
+            const editComment = { ...data } as any as Comment;
+
+            API_COMMENT.update(comment._id, editComment, accessToken).then((data) => {
+                setButtonAdd(true)
+                navigate(`/trip/details/${comment._tripId}`);
+            }).catch((err) => {
+                console.log(err)
+            });
+        }
 
     }
 
@@ -98,7 +105,7 @@ const EditComment: FC = () => {
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        maxWidth: '600px',
+                        maxWidth: '620px',
                         height: 'fit-content',
                         padding: '30px',
                         marginTop: '50px',
@@ -116,7 +123,8 @@ const EditComment: FC = () => {
                     </Typography>
                     <FormTextArea name="comment" label="Comment" control={control} error={errors.comment?.message} multiline={true} rows={4} />
 
-                    <span>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+
                         {buttonAdd === true ?
                             <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!isDirty || !isValid}>EDIT COMMENT</Button>
                             : <LoadingButton variant="contained" loading={loading}   >
@@ -125,7 +133,7 @@ const EditComment: FC = () => {
                         }
 
                         <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-                    </span>
+                    </Box>
 
                 </Box>
 

@@ -4,7 +4,7 @@ import { IdType, toIsoDate } from "../../shared/common-types";
 import * as tripService from '../../services/tripService';
 import { ApiTrip } from "../../services/tripService";
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
-import React, { BaseSyntheticEvent, FC, useEffect, useState } from "react";
+import React, { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
 import { Box, Button, Container, Grid, IconButton, ImageList, ImageListItem, TextField, Tooltip, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
@@ -18,6 +18,7 @@ import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
+import { LoginContext } from "../../hooks/LoginContext";
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
 const libraries: Array<"drawing" | "places" | "geometry"> = ["places"]
@@ -107,12 +108,17 @@ const AdminTipEdit: FC = () => {
 
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
 
+    const { token } = useContext(LoginContext)
+
+    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+
+
     useEffect(() => {
 
         if ((trip !== undefined) && (userId !== undefined)) {
-            if (userId) {
+            if (userId && accessToken) {
 
-                API_TRIP.findById(trip._id, userId).then((data) => {
+                API_TRIP.findById(trip._id, userId, accessToken).then((data) => {
                     setImages(data.imageFile)
                 }).catch((err) => {
                     console.log(err)
@@ -343,68 +349,72 @@ const AdminTipEdit: FC = () => {
 
     const editTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
 
-        let formData = new FormData();
+        if (accessToken) {
 
 
-        if (fileSelected) {
-            fileSelected.forEach((file) => {
-                formData.append('file', file);
-            })
-        }
+            let formData = new FormData();
+            let imagesNames;
 
 
-        let imagesNames = await API_TRIP.sendFile(formData).then((data) => {
-            let imageName = data as unknown as any as any[] | [];
-            return imageName.map((x) => { return x.destination });
-        }).catch((err) => {
-            console.log(err);
-        })
+            if (fileSelected && fileSelected.length > 0) {
+                fileSelected.forEach((file) => {
+                    formData.append('file', file);
+                })
 
 
-        let imagesNew = imagesNames as unknown as any as string[];
-
-
-        if (imagesNew !== undefined && imagesNew.length > 0) {
-            data.imageFile = images?.concat(imagesNew);
-        } else {
-            data.imageFile = images;
-
-        }
-
-
-
-        if (clickedPos?.lat) {
-
-            data.lat = clickedPos.lat;
-            data.lng = clickedPos.lng;
-
-
-        } else {
-            if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) {
-
-                data.lat = Number(trip.lat);
-                data.lng = Number(trip.lng);
+                imagesNames = await API_TRIP.sendFile(formData, accessToken).then((data) => {
+                    let imageName = data as unknown as any as any[] | [];
+                    return imageName.map((x) => { return x.destination });
+                }).catch((err) => {
+                    console.log(err);
+                })
             }
+
+
+            let imagesNew = imagesNames as unknown as any as string[];
+
+
+            if (imagesNew !== undefined && imagesNew.length > 0) {
+                data.imageFile = images?.concat(imagesNew);
+            } else {
+                data.imageFile = images;
+
+            }
+
+
+
+            if (clickedPos?.lat) {
+
+                data.lat = clickedPos.lat;
+                data.lng = clickedPos.lng;
+
+
+            } else {
+                if ((trip.lat !== undefined && trip.lat !== null) && (trip.lng !== undefined && trip.lng !== null)) {
+
+                    data.lat = Number(trip.lat);
+                    data.lng = Number(trip.lng);
+                }
+            }
+
+
+            data.title = data.title.trim();
+            data.destination = data.destination.trim();
+            data.description = data.description.trim();
+            data.timeEdited = toIsoDate(new Date());
+            data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)];
+            data.transport = TripTransport[parseInt(data.transport)];
+            const editTrip = { ...data } as any;
+
+            editTrip.id = trip._id as any as Trip;
+
+            API_TRIP.update(trip._id, editTrip, userId, accessToken).then((data) => {
+                navigate(-1);
+            }).catch((err) => {
+                console.log(err);
+            })
+
         }
-
-
-        data.title = data.title.trim();
-        data.destination = data.destination.trim();
-        data.description = data.description.trim();
-        data.timeEdited = toIsoDate(new Date());
-        data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)];
-        data.transport = TripTransport[parseInt(data.transport)];
-        const editTrip = { ...data } as any;
-
-        editTrip.id = trip._id as any as Trip;
-
-        API_TRIP.update(trip._id, editTrip, userId).then((data) => {
-            navigate(-1);
-        }).catch((err) => {
-            console.log(err);
-        })
-
-
     }
 
     const goBack = () => {
@@ -417,18 +427,21 @@ const AdminTipEdit: FC = () => {
 
     const deleteImage = (e: React.MouseEvent) => {
 
-        const index = images?.indexOf(e.currentTarget.id)
-        if (index !== undefined) {
-            const deletedImage = images?.slice(index, index + 1);
+        if (accessToken) {
 
-            if (deletedImage) {
+            const index = images?.indexOf(e.currentTarget.id)
+            if (index !== undefined) {
+                const deletedImage = images?.slice(index, index + 1);
+
+                if (deletedImage) {
 
 
-                API_TRIP.editImages(trip._id, deletedImage).then((data) => {
-                    setImages(data.imageFile);
-                }).catch((err) => {
-                    console.log(err);
-                });
+                    API_TRIP.editImages(trip._id, deletedImage, accessToken).then((data) => {
+                        setImages(data.imageFile);
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+                }
             }
         }
     }

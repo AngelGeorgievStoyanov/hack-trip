@@ -8,7 +8,7 @@ import { BaseSyntheticEvent, FC, useContext, useEffect, useRef, useState } from 
 import { ApiClient } from '../../services/userService';
 import { IdType, mouseover, touchStart } from '../../shared/common-types';
 import { User } from '../../model/users';
-import { LoginContext } from '../../App';
+import { LoginContext } from "../../hooks/LoginContext";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as tripService from '../../services/tripService';
 import { Trip } from '../../model/trip';

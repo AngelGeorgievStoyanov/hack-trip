@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { HelmetProvider } from 'react-helmet-async';
+import { LoginProvider } from './hooks/LoginContext';
 
 
 
@@ -15,9 +16,11 @@ const helmetContext = {};
 root.render(
   <HelmetProvider context={helmetContext}>
     <React.StrictMode>
-      <App />
+      <LoginProvider>
+        <App />
+      </LoginProvider>
     </React.StrictMode>
-  </HelmetProvider>
+  </HelmetProvider >
 );
 
 

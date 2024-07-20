@@ -10,7 +10,7 @@ import FormTextArea from "../FormFields/FormTextArea";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import LoadingButton from "@mui/lab/LoadingButton";
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import { useContext } from 'react'
 import jwt_decode from "jwt-decode";
 import { User } from "../../model/users";
@@ -94,23 +94,23 @@ const CreateComment: FC = () => {
 
     const navigate = useNavigate();
     const createCommentSubmitHandler = (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
-        setButtonAdd(false)
-        if (userId !== undefined && nameAuthor !== undefined) {
-            data.nameAuthor = nameAuthor + '';
-            data._ownerId = userId + '';
-            data._tripId = idTrip + '';
+        if (userId && nameAuthor && idTrip && accessToken) {
+            setButtonAdd(false)
+            data.nameAuthor = nameAuthor;
+            data._ownerId = userId;
+            data._tripId = idTrip;
 
+            data.comment = data.comment.trim();
+
+            const newComment = { ...data } as any as CommentCreate;
+
+            API_COMMENT.create(newComment, accessToken).then((data) => {
+                setButtonAdd(true)
+                navigate(`/trip/details/${idTrip}`);
+            }).catch((err) => {
+                console.log(err);
+            });
         }
-        data.comment = data.comment.trim();
-
-        const newComment = { ...data } as any as CommentCreate;
-
-        API_COMMENT.create(newComment).then((data) => {
-            setButtonAdd(true)
-            navigate(`/trip/details/${idTrip}`);
-        }).catch((err) => {
-            console.log(err);
-        });
 
     }
 
@@ -126,7 +126,7 @@ const CreateComment: FC = () => {
                 backgroundImage: imageBackground ? `url(https://storage.googleapis.com/hack-trip-background-images/${imageBackground})` : '',
                 backgroundRepeat: "no-repeat", backgroundPosition: "center center", backgroundSize: "cover", backgroundAttachment: 'fixed',
                 justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh',
-                '@media(max-width: 600px)': { display: 'flex', padding: '50px', margin: '-25px 0px 0px 0px' }
+                '@media(max-width: 600px)': { display: 'flex', padding: '50px' }
             }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 <Box component='form'
                     sx={{
@@ -153,7 +153,7 @@ const CreateComment: FC = () => {
 
                     <FormTextArea name="comment" label="Comment" control={control} error={errors.comment?.message} multiline={true} rows={4} />
 
-                    <span>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
                         {buttonAdd === true ?
                             <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!isDirty || !isValid}>ADD COMMENT</Button>
                             : <LoadingButton variant="contained" loading={loading}   >
@@ -162,7 +162,7 @@ const CreateComment: FC = () => {
                         }
 
                         <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
-                    </span>
+                    </Box>
 
                 </Box>
 

@@ -24,22 +24,22 @@ export interface ApiClient<K, V extends Identifiable<K>> {
     login(email: K, password: K, userGeolocation: UserGeolocation): Promise<V>;
     logout(accessToken: string): Promise<V>;
     findById(id: K): Promise<V>;
-    sendFile(entityWithoutId: FormData): Promise<string[]>;
-    updateUser(id: K, entity: UserRegister): Promise<V>;
-    changePassword(id: K, password: string): Promise<V>;
-    deleteProfileImage(id: K, image: string): Promise<V>;
-    findAll(id: K): Promise<V[]>;
-    updateUserAdmin(id: K, entity: UserEditAdmin): Promise<V>;
-    guardedRoute(id: K, role: string, token:string): Promise<boolean>;
-    findUserId(id: K): Promise<boolean>;
+    sendFile(entityWithoutId: FormData, token: string): Promise<string[]>;
+    updateUser(id: K, entity: UserRegister, token: string): Promise<V>;
+    changePassword(id: K, password: string, token: string): Promise<V>;
+    deleteProfileImage(id: K, image: string, token: string): Promise<V>;
+    findAll(id: K, token: string): Promise<V[]>;
+    updateUserAdmin(id: K, entity: UserEditAdmin, token: string): Promise<V>;
+    guardedRoute(id: K, role: string, token: string): Promise<boolean>;
+    findUserId(id: K, token: string): Promise<boolean>;
     forgotPassword(email: string): Promise<string>;
     newPassword(id: K, token: string, password: string): Promise<V>;
     verifyEmail(id: K, token: string): Promise<boolean>;
     resendVerEmail(email: string): Promise<string>;
-    deleteUserById(adminId: K, editedUserId: K): Promise<void>;
-    getFailedLogs(adminId: K): Promise<any[]>
-    deleteFailedLogs(adminId: K, failedLogsArr:  GridRowId[]): Promise<string[]>;
-    getRouteNotFoundLogs(adminId: K): Promise<IRouteNotFoundLogs[]> ;    
+    deleteUserById(adminId: K, editedUserId: K, token: string): Promise<void>;
+    getFailedLogs(adminId: K, token: string): Promise<any[]>
+    deleteFailedLogs(adminId: K, failedLogsArr: GridRowId[], token: string): Promise<string[]>;
+    getRouteNotFoundLogs(adminId: K, token: string): Promise<IRouteNotFoundLogs[]>;
 }
 
 
@@ -104,7 +104,12 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
 
     async findById(id: K): Promise<V> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/profile/${id}`);
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/profile/${id}`, {
+            method: 'GET',
+            headers: {
+                'content-type': 'application/json',
+            }
+        });
 
         if (response.status >= 400) {
             const result = await response.json();
@@ -113,8 +118,14 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
         return response.json();
     }
 
-    async findUserId(id: K): Promise<boolean> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/userId/${id}`);
+    async findUserId(id: K, token: string): Promise<boolean> {
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/userId/${id}`, {
+            method: 'GET',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
         if (response.status >= 400) {
             const result = await response.json();
             throw new Error(result);
@@ -124,12 +135,14 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     }
 
 
-    async sendFile(formdata: FormData): Promise<string[]> {
+    async sendFile(formdata: FormData, token: string): Promise<string[]> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/upload`, {
 
             method: 'POST',
             body: formdata,
-            headers: {}
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         const result = await response.json();
@@ -138,12 +151,13 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
 
 
-    async updateUserAdmin(id: K, entity: UserEditAdmin): Promise<V> {
+    async updateUserAdmin(id: K, entity: UserEditAdmin, token: string): Promise<V> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/edit/${id}`, {
             method: 'PUT',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(entity)
         });
@@ -157,12 +171,13 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     }
 
 
-    async updateUser(id: K, entity: User): Promise<V> {
+    async updateUser(id: K, entity: User, token: string): Promise<V> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/edit/${id}`, {
             method: 'PUT',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(entity)
         });
@@ -177,11 +192,12 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
 
 
-    async changePassword(id: K, password: string): Promise<V> {
+    async changePassword(id: K, password: string, token: string): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/confirmpassword/${id}`, {
             method: 'POST',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ password })
         });
@@ -196,11 +212,12 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
 
 
-    async deleteProfileImage(id: K, image: string): Promise<V> {
+    async deleteProfileImage(id: K, image: string, token: string): Promise<V> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/delete-image/${id}`, {
             method: 'PUT',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ image })
         })
@@ -216,23 +233,16 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
 
 
 
-    async findAll(id: K): Promise<V[]> {
+    async findAll(id: K, token: string): Promise<V[]> {
 
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/${id}`);
-
-        if (response.status >= 400) {
-            const result = await response.json();
-            throw new Error(result);
-        }
-        return response.json();
-    }
-
-
-    async getFailedLogs(adminId: K): Promise<V[]> {
-
-
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/failedlogs/${adminId}`);
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/${id}`, {
+            method: 'GET',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
         if (response.status >= 400) {
             const result = await response.json();
@@ -242,7 +252,26 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     }
 
 
-    async guardedRoute(id: K, role: string,token:string): Promise<boolean> {
+    async getFailedLogs(adminId: K, token: string): Promise<V[]> {
+
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/failedlogs/${adminId}`, {
+            method: 'GET',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
+        return response.json();
+    }
+
+
+    async guardedRoute(id: K, role: string, token: string): Promise<boolean> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/guard`, {
             method: 'POST',
@@ -339,12 +368,15 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     }
 
 
-    async deleteUserById(adminId: K, editedUserId: K): Promise<void> {
+    async deleteUserById(adminId: K, editedUserId: K, token: string): Promise<void> {
 
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/${adminId}/${editedUserId}`, {
             method: 'DELETE',
-
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
         });
 
         if (response.status >= 400) {
@@ -355,11 +387,12 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     }
 
 
-    async deleteFailedLogs(id: K, failedLogsArr:  GridRowId[]): Promise<string[]> {
+    async deleteFailedLogs(id: K, failedLogsArr: GridRowId[], token: string): Promise<string[]> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/delete/failedlogs/${id}`, {
             method: 'DELETE',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(failedLogsArr)
         });
@@ -373,10 +406,16 @@ export class ApiClientImpl<K, V extends Identifiable<K>> implements ApiClient<K,
     }
 
 
-    async getRouteNotFoundLogs(adminId: K): Promise<IRouteNotFoundLogs[]> {
+    async getRouteNotFoundLogs(adminId: K, token: string): Promise<IRouteNotFoundLogs[]> {
 
 
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/routenotfoundlogs/${adminId}`);
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/admin/routenotfoundlogs/${adminId}`, {
+            method: 'GET',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
         if (response.status >= 400) {
             const result = await response.json();

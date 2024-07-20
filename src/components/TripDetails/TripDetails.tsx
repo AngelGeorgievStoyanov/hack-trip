@@ -25,7 +25,7 @@ import ReportOffIcon from '@mui/icons-material/ReportOff';
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import BookmarkRemoveOutlinedIcon from '@mui/icons-material/BookmarkRemoveOutlined';
 import jwt_decode from "jwt-decode";
-import { LoginContext } from "../../App";
+import { LoginContext } from "../../hooks/LoginContext";
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
@@ -35,6 +35,8 @@ import HelmetWrapper from "../Helmet/HelmetWrapper";
 import { FacebookIcon, FacebookShareButton, ViberIcon, ViberShareButton } from "react-share";
 import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
 import InfoIcon from '@mui/icons-material/Info';
+import { keyframes } from '@emotion/react';
+
 let zoom = 12;
 
 let center = {
@@ -71,6 +73,41 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
     }),
 }));
 
+const growAnimation = keyframes`
+0% {
+    transform: scale(1) translateY(0px) rotate(0deg);
+}
+10% {
+    transform: scale(1) translateY(-1px) rotate(10deg);
+}
+20% {
+    transform: scale(1) translateY(-3px) rotate(-10deg);
+}
+30% {
+    transform: scale(1) translateY(-5px) rotate(10deg);
+}
+40% {
+    transform: scale(1) translateY(-10px) rotate(-10deg);
+}
+50% {
+    transform: scale(1) translateY(-10px) rotate(10deg);
+}
+60% {
+    transform: scale(1) translateY(-10px) rotate(-10deg);
+}
+70% {
+    transform: scale(1) translateY(-5px) rotate(10deg);
+}
+80% {
+    transform: scale(1) translateY(-3px) rotate(-10deg);
+}
+90% {
+    transform: scale(1) translateY(-1px) rotate(10deg);
+}
+100% {
+    transform: scale(1) translateY(0px) rotate(0deg);
+}
+`;
 
 const TripDetails: FC = () => {
 
@@ -99,6 +136,7 @@ const TripDetails: FC = () => {
     const [loadTripFullImage, setLoadTripFullImage] = useState<boolean>(false)
     const [randomImage, setRandomImage] = useState<string>()
     const [openCurrency, setOpenCurrency] = useState(false);
+    const [clicked, setClicked] = useState<boolean>(false);
 
     const minSwipeDistance = 45;
     const { token } = useContext(LoginContext);
@@ -131,14 +169,14 @@ const TripDetails: FC = () => {
     useEffect(() => {
 
 
-        if (idTrip !== undefined) {
+        if (idTrip !== undefined && accessToken) {
 
-            API_TRIP.findById(idTrip, userId).then((data) => {
+            API_TRIP.findById(idTrip, userId, accessToken).then((data) => {
 
                 if (data) {
                     setTrip(data)
                     setRandomImage(getRandomTripAndImage(Array(data)))
-                    API_POINT.findByTripId(data._id).then((data) => {
+                    API_POINT.findByTripId(data._id, accessToken).then((data) => {
 
                         if (data && Array.isArray(data)) {
                             const arrPoints = data as Point[];
@@ -164,7 +202,7 @@ const TripDetails: FC = () => {
                         console.log(err);
                     });
 
-                    API_COMMENT.findByTripId(data._id, userId).then(async (data) => {
+                    API_COMMENT.findByTripId(data._id, userId, accessToken).then(async (data) => {
                         if (data && Array.isArray(data)) {
                             setComments(data);
                         }
@@ -222,11 +260,11 @@ const TripDetails: FC = () => {
 
     const deleteClickHandler = () => {
 
-        if (trip === undefined) return;
+        if (trip === undefined || !accessToken) return;
         const tripId = trip._id
-        API_TRIP.deleteById(tripId, userId).then((data) => {
-            API_POINT.deleteByTripId(tripId, userId).then((data) => {
-                API_COMMENT.deleteByTripId(tripId, userId).then((data) => {
+        API_TRIP.deleteById(tripId, userId, accessToken).then((data) => {
+            API_POINT.deleteByTripId(tripId, userId, accessToken).then((data) => {
+                API_COMMENT.deleteByTripId(tripId, userId, accessToken).then((data) => {
 
                 }).catch((err) => {
                     console.log(err);
@@ -353,25 +391,27 @@ const TripDetails: FC = () => {
 
     const onDeleteComment = async (comment: Comment) => {
 
+        if (accessToken) {
 
-        API_COMMENT.deleteById(comment._id).then((data) => {
-            if (data !== undefined) {
+            API_COMMENT.deleteById(comment._id, accessToken).then((data) => {
+                if (data !== undefined) {
 
 
-                const copyComments = [...comments];
-                const index = copyComments.findIndex(cmt => {
-                    return cmt._id === comment._id;
-                });
+                    const copyComments = [...comments];
+                    const index = copyComments.findIndex(cmt => {
+                        return cmt._id === comment._id;
+                    });
 
-                copyComments.splice(index, 1);
+                    copyComments.splice(index, 1);
 
-                setComments(copyComments);
+                    setComments(copyComments);
 
-            }
-        }).catch((err) => {
-            console.log(err)
-        });
+                }
+            }).catch((err) => {
+                console.log(err)
+            });
 
+        }
 
 
     }
@@ -384,9 +424,10 @@ const TripDetails: FC = () => {
 
     const onLikeTrip = () => {
 
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
+            setClicked(true);
 
-            API_TRIP.updateLikes(trip._id, userId).then((data) => {
+            API_TRIP.updateLikes(trip._id, userId, accessToken).then((data) => {
                 setTrip(data)
 
                 setLiked(prev => true);
@@ -402,12 +443,12 @@ const TripDetails: FC = () => {
 
     const onFavoriteClickHandler = () => {
 
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
 
             trip?.favorites.push(userId);
 
 
-            API_TRIP.updateFavorites(trip._id, trip).then((data) => {
+            API_TRIP.updateFavorites(trip._id, trip, accessToken).then((data) => {
 
                 setFavorite(true);
             }).catch((err) => {
@@ -421,13 +462,13 @@ const TripDetails: FC = () => {
 
     const onRemoveFavoriteClickHandler = () => {
 
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
 
             const index = trip.favorites.indexOf(userId);
 
             trip.favorites.splice(index, 1);
 
-            API_TRIP.updateFavorites(trip._id, trip).then((data) => {
+            API_TRIP.updateFavorites(trip._id, trip, accessToken).then((data) => {
                 setFavorite(false);
             }).catch((err) => {
                 console.log(err);
@@ -439,10 +480,10 @@ const TripDetails: FC = () => {
 
     const onUnLikeTrip = () => {
 
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
+            setClicked(false);
 
-
-            API_TRIP.updateLikes(trip._id, userId).then((data) => {
+            API_TRIP.updateLikes(trip._id, userId, accessToken).then((data) => {
 
                 setTrip(data)
 
@@ -458,11 +499,11 @@ const TripDetails: FC = () => {
     const reportClickHandler = () => {
 
 
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
             trip.reportTrip?.push(userId);
 
 
-            API_TRIP.reportTrip(trip._id, trip).then((data) => {
+            API_TRIP.reportTrip(trip._id, trip, accessToken).then((data) => {
 
 
                 setReported(true);
@@ -477,7 +518,7 @@ const TripDetails: FC = () => {
     const unReportClickHandler = () => {
 
 
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
 
             if (trip.reportTrip !== undefined) {
 
@@ -486,7 +527,7 @@ const TripDetails: FC = () => {
                 trip.reportTrip.splice(index, 1);
 
 
-                API_TRIP.reportTrip(trip._id, trip).then((data) => {
+                API_TRIP.reportTrip(trip._id, trip, accessToken).then((data) => {
 
 
                     setReported(false);
@@ -527,7 +568,10 @@ const TripDetails: FC = () => {
         return (
             <Tooltip title='UN LIKE' arrow>
 
-                <ThumbUpIcon color="primary" onClick={onUnLikeTrip} fontSize="large" sx={{ ':hover': { cursor: 'pointer' }, margin: '5px' }} />
+                <ThumbUpIcon color="primary" onClick={onUnLikeTrip} fontSize="large" sx={{
+                    ':hover': { cursor: 'pointer' }, margin: '5px', animation: `${growAnimation} 0.5s ease`,
+                    animationPlayState: clicked ? 'running' : 'paused',
+                }} />
             </Tooltip>
         )
     }
@@ -583,7 +627,7 @@ const TripDetails: FC = () => {
             setOpenCurrency((prev) => !prev);
         }
     };
-   
+
     const handleTooltipClose = () => {
         setOpenCurrency(false);
     };
@@ -602,10 +646,10 @@ const TripDetails: FC = () => {
 
     const reportClickHandlerComment = (comment: Comment) => {
 
-        if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (comment !== undefined) && (userId !== null) && accessToken) {
             comment.reportComment?.push(userId);
 
-            API_COMMENT.reportComment(comment._id, comment).then((data) => {
+            API_COMMENT.reportComment(comment._id, comment, accessToken).then((data) => {
 
                 setReportedComment(true);
 
@@ -621,7 +665,7 @@ const TripDetails: FC = () => {
 
     const unReportClickHandlerComment = (comment: Comment) => {
 
-        if ((userId !== undefined) && (comment !== undefined) && (userId !== null)) {
+        if ((userId !== undefined) && (comment !== undefined) && (userId !== null) && accessToken) {
 
             if (comment.reportComment !== undefined) {
 
@@ -629,7 +673,7 @@ const TripDetails: FC = () => {
 
                 comment.reportComment.splice(index, 1);
 
-                API_COMMENT.reportComment(comment._id, comment).then((data) => {
+                API_COMMENT.reportComment(comment._id, comment, accessToken).then((data) => {
 
                     setReportedComment(false);
                     setComments(data)
