@@ -73,7 +73,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
     }),
 }));
 
-const growAnimation = keyframes`
+const shakeAnimation = keyframes`
 0% {
     transform: scale(1) translateY(0px) rotate(0deg);
 }
@@ -109,6 +109,26 @@ const growAnimation = keyframes`
 }
 `;
 
+
+const growShrinkAnimation = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(2) translateY(-10px); }
+  100% { transform: scale(1); }
+`;
+
+
+const rotateAnimation = keyframes`
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+  100% { transform: rotate(0deg); }
+`;
+
+const rotateXAnimation = keyframes`
+  0% { transform: rotateX(0deg); }
+  50% { transform: rotateX(180deg); }
+  100% { transform: rotateX(0deg); }
+`;
+
 const TripDetails: FC = () => {
 
 
@@ -136,7 +156,8 @@ const TripDetails: FC = () => {
     const [loadTripFullImage, setLoadTripFullImage] = useState<boolean>(false)
     const [randomImage, setRandomImage] = useState<string>()
     const [openCurrency, setOpenCurrency] = useState(false);
-    const [clicked, setClicked] = useState<boolean>(false);
+    const [clickedLike, setClickedLike] = useState<boolean>(false);
+    const [clickedUnLike, setClickedUnLike] = useState<boolean>(false);
 
     const minSwipeDistance = 45;
     const { token } = useContext(LoginContext);
@@ -148,6 +169,9 @@ const TripDetails: FC = () => {
         userId = decode._id;
     }
 
+    const randomAnimationLike = Math.random() > 0.5 ? shakeAnimation : growShrinkAnimation;
+    
+    const randomAnimationUnLike = Math.random() > 0.5 ? rotateAnimation : rotateXAnimation;
 
     const theme = useTheme();
 
@@ -232,7 +256,7 @@ const TripDetails: FC = () => {
 
 
 
-    }, [favorite]);
+    }, []);
 
     useEffect(() => {
         setTimeout(() => {
@@ -425,8 +449,11 @@ const TripDetails: FC = () => {
     const onLikeTrip = () => {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
-            setClicked(true);
-
+            setClickedLike(true);
+            setTimeout(() => setClickedLike(false), 500);
+            if (clickedUnLike) {
+                setClickedUnLike(false);
+            }
             API_TRIP.updateLikes(trip._id, userId, accessToken).then((data) => {
                 setTrip(data)
 
@@ -481,7 +508,11 @@ const TripDetails: FC = () => {
     const onUnLikeTrip = () => {
 
         if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
-            setClicked(false);
+            setClickedUnLike(true);
+            setTimeout(() => setClickedUnLike(false), 1000);
+            if (clickedLike) {
+                setClickedLike(false);
+            }
 
             API_TRIP.updateLikes(trip._id, userId, accessToken).then((data) => {
 
@@ -569,8 +600,8 @@ const TripDetails: FC = () => {
             <Tooltip title='UN LIKE' arrow>
 
                 <ThumbUpIcon color="primary" onClick={onUnLikeTrip} fontSize="large" sx={{
-                    ':hover': { cursor: 'pointer' }, margin: '5px', animation: `${growAnimation} 0.5s ease`,
-                    animationPlayState: clicked ? 'running' : 'paused',
+                    ':hover': { cursor: 'pointer' }, margin: '5px', animation: `${randomAnimationLike} 0.5s ease`,
+                    animationPlayState: clickedLike ? 'running' : 'paused',
                 }} />
             </Tooltip>
         )
@@ -581,7 +612,10 @@ const TripDetails: FC = () => {
     const MuiTooltipLike = () => {
         return (
             <Tooltip title='LIKE' arrow>
-                < ThumbUpOffAltIcon color="primary" onClick={onLikeTrip} fontSize="large" sx={{ ':hover': { cursor: 'pointer' }, margin: '5px' }} />
+                < ThumbUpOffAltIcon color="primary" onClick={onLikeTrip} fontSize="large" sx={{
+                    ':hover': { cursor: 'pointer' }, margin: '5px', animation: `${randomAnimationUnLike} 1s ease`,
+                    animationPlayState: clickedUnLike ? 'running' : 'paused',
+                }} />
 
             </Tooltip>
         )
