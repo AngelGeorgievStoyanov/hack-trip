@@ -37,6 +37,17 @@ interface IUserGeolocation {
     state: string
 }
 
+const defaultUserGeolocation = {
+    IPv4: '185.228.26.44',
+    city: 'Sofia',
+    country_code: '1000',
+    country_name: 'Sofia',
+    latitude: 42.6833,
+    longitude: 23.3167,
+    postal: '1000',
+    state: 'BG'
+}
+
 const schema = yup.object({
     email: yup.string().required().email(),
     password: yup.string().required().matches(/^(?!\s+$).*/, 'Password cannot be empty string.'),
@@ -52,7 +63,7 @@ const Login: FC = () => {
     const [errorApi, setErrorApi] = useState<string>();
     const [imageBackground, setImageBackground] = useState<string>()
     const h1HackRef = useRef<HTMLHeadingElement | null>(null)
-    const [userGeolocation, setUserGeolocation] = useState<IUserGeolocation>()
+    const [userGeolocation, setUserGeolocation] = useState<IUserGeolocation>(defaultUserGeolocation)
 
     const madiaQuery = useMediaQuery('(min-width:480px)');
 
@@ -93,32 +104,30 @@ const Login: FC = () => {
 
         const pathname = sessionStorage.getItem('pathname');
 
-        if (userGeolocation) {
-            API_CLIENT.login(data.email, data.password, userGeolocation)
-                .then((user) => {
-                    if (user !== undefined && user.accessToken) {
-                        loginContext?.loginUser(user.accessToken);
-                        setErrorApi(undefined);
-                        if (pathname && pathname !== '/login' && pathname !== '/registration') {
-                            sessionStorage.removeItem('pathname')
-                            navigate(pathname);
-                        } else {
-                            navigate('/');
-                        }
+        API_CLIENT.login(data.email, data.password, userGeolocation || defaultUserGeolocation)
+            .then((user) => {
+                if (user !== undefined && user.accessToken) {
+                    loginContext?.loginUser(user.accessToken);
+                    setErrorApi(undefined);
+                    if (pathname && pathname !== '/login' && pathname !== '/registration') {
+                        sessionStorage.removeItem('pathname')
+                        navigate(pathname);
                     } else {
-                        setErrorApi('Login failed. Invalid user or access token.');
+                        navigate('/');
                     }
+                } else {
+                    setErrorApi('Login failed. Invalid user or access token.');
+                }
 
-                }).catch((err) => {
-                    if (err.message === 'Failed to fetch') {
-                        err.message = 'No internet connection with server.Please try again later.'
-                    }
-                    setErrorApi(err.message);
-                    console.log(err.message);
+            }).catch((err) => {
+                if (err.message === 'Failed to fetch') {
+                    err.message = 'No internet connection with server.Please try again later.'
+                }
+                setErrorApi(err.message);
+                console.log(err.message);
 
-                });
+            });
 
-        }
 
     }
 

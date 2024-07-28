@@ -25,7 +25,7 @@ function FormTextArea<TFieldValues extends FieldValues>(
             control={control}
             render={({ field }) =>
                 <TextField label={label} disabled={disabled} size={size} error={!!error} multiline={multiline} rows={rows}
-                    helperText={error || ''} type={type} {...field} />
+                    helperText={error || ''} InputLabelProps={{ shrink: true }} type={type} {...field} />
             }
             rules={rules}
         />

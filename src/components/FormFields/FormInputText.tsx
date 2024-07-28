@@ -25,7 +25,7 @@ function FormInputText<TFieldValues extends FieldValues>(
             control={control}
             render={({ field }) =>
                 <TextField label={label} disabled={disabled} size={size} error={!!error} id={id}
-                    helperText={error || ''} type={type} color={color} autoFocus={autoFocus} {...field} />
+                    helperText={error || ''} type={type} color={color} autoFocus={autoFocus} InputLabelProps={{ shrink: true }} {...field} />
             }
             rules={rules}
         />

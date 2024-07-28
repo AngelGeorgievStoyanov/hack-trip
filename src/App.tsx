@@ -1,4 +1,4 @@
-import { createBrowserRouter,  Outlet, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import Home from './components/Home/Home';
 import Trips from './components/Trips/Trips';
 import Header from './components/Header/Header';
@@ -127,7 +127,6 @@ const App: FC = () => {
           children: [
             {
               path: '',
-              loader: tripLoader,
               element: <TripDetails />,
               errorElement: <NotFound />
             }
@@ -135,12 +134,10 @@ const App: FC = () => {
         },
         {
           path: '/trip/edit/:tripId',
-          loader: tripLoader,
           element: <GuardedRouteTrip />,
           children: [
             {
               path: '',
-              loader: tripLoader,
               element: <TripEdit />,
               errorElement: <NotFound />
             }

@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { CurrencyCode, Trip, TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
 import { IdType, toIsoDate } from "../../shared/common-types";
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
@@ -92,12 +92,12 @@ let userId: string | undefined;
 
 const TripEdit: FC = () => {
 
+    const idTrip = useParams().tripId;
 
-    const trip = useLoaderData() as Trip;
-
+    const [trip, setTrip] = useState<Trip>();
     const [images, setImages] = useState<string[]>();
     const [clickedPos, setClickedPos] = React.useState<google.maps.LatLngLiteral | undefined>({} as google.maps.LatLngLiteral);
-    const [initialPoint, setInitialPoint] = React.useState<google.maps.LatLngLiteral>({ lat: Number(trip.lat), lng: Number(trip.lng) } as google.maps.LatLngLiteral);
+    const [initialPoint, setInitialPoint] = React.useState<google.maps.LatLngLiteral>({ lat: Number(trip?.lat), lng: Number(trip?.lng) } as google.maps.LatLngLiteral);
     const [fileSelected, setFileSelected] = React.useState<File[]>([]);
     const [errorMessageSearch, setErrorMessageSearch] = useState('');
     const [visible, setVisible] = React.useState(true);
@@ -128,10 +128,28 @@ const TripEdit: FC = () => {
 
 
     useEffect(() => {
-        if (userId && accessToken) {
 
-            API_TRIP.findById(trip._id, userId, accessToken).then((data) => {
+        if (idTrip && userId && accessToken) {
+
+            API_TRIP.findById(idTrip, userId, accessToken).then((data) => {
+                setTrip(data)
                 setImages(data.imageFile);
+                reset({
+                    title: data.title,
+                    _ownerId: data._ownerId,
+                    countPeoples: Number(data.countPeoples) || 0,
+                    timeCreated: data.timeCreated,
+                    lat: (data.lat !== undefined && data.lat !== null) ? Number(data.lat) : undefined,
+                    lng: (data.lng !== undefined && data.lng !== null) ? Number(data.lng) : undefined,
+                    timeEdited: data.timeEdited,
+                    typeOfPeople: TripTipeOfGroup[data.typeOfPeople || 0],
+                    description: data.description,
+                    destination: data.destination,
+                    price: Number(data.price) || 0,
+                    transport: TripTransport[data.transport || 0],
+                    imageFile: data.imageFile,
+                    currency: data.currency,
+                });
 
             }).catch((err) => {
                 console.log(err)
@@ -150,19 +168,8 @@ const TripEdit: FC = () => {
 
 
 
-    const { control, handleSubmit, formState: { errors, isDirty, isValid } } = useForm<FormData>({
+    const { control, handleSubmit, reset, formState: { errors, isDirty, isValid } } = useForm<FormData>({
 
-
-        defaultValues: {
-            title: trip.title, _ownerId: trip._ownerId, countPeoples: +trip.countPeoples,
-            timeCreated: trip.timeCreated,
-            lat: (trip.lat !== undefined && trip.lat !== null) ? Number(trip.lat) : undefined,
-            lng: (trip.lng !== undefined && trip.lng !== null) ? Number(trip.lng) : undefined,
-            timeEdited: trip.timeEdited, typeOfPeople: TripTipeOfGroup[trip.typeOfPeople],
-            description: trip.description, destination: trip.destination,
-            price: +trip.price, transport: TripTransport[trip.transport],
-            imageFile: trip.imageFile, currency: trip.currency
-        },
         mode: 'onChange',
         resolver: yupResolver(schema),
     });
@@ -170,7 +177,7 @@ const TripEdit: FC = () => {
 
 
 
-    if ((trip.lng !== undefined && trip.lng !== null) && (trip.lat !== undefined && trip.lat !== null) && (clickedPos?.lat === undefined)) {
+    if (trip && (trip.lng !== undefined && trip.lng !== null) && (trip.lat !== undefined && trip.lat !== null) && (clickedPos?.lat === undefined)) {
 
         positionPoint = { lat: Number(trip.lat), lng: Number(trip.lng) }
         center = { lat: Number(trip.lat), lng: Number(trip.lng) }
@@ -366,7 +373,7 @@ const TripEdit: FC = () => {
 
     const editTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
 
-        if (accessToken) {
+        if (accessToken && trip) {
 
             setButtonAdd(false)
             let formData = new FormData();
@@ -444,7 +451,7 @@ const TripEdit: FC = () => {
 
     const deleteImage = (e: React.MouseEvent) => {
 
-        if (accessToken) {
+        if (accessToken && trip) {
 
             const index = images?.indexOf(e.currentTarget.id);
             if (index !== undefined) {
@@ -674,7 +681,7 @@ const TripEdit: FC = () => {
                             </Box>
                         </Box>
 
-                        {(trip.imageFile?.length && trip.imageFile?.length > 0) ?
+                        {trip && (trip.imageFile?.length && trip.imageFile?.length > 0) ?
 
                             <ImageList sx={{ width: 520, height: 'auto', margin: '30px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={trip.imageFile.length > 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : trip.imageFile.length > 5 ? 300 : trip.imageFile.length > 2 ? 350 : 450}>
                                 {images ? images.map((item, i) => (
