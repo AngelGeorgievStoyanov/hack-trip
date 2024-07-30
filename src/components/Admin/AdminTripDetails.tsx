@@ -741,18 +741,20 @@ const AdminTripDetails: FC = () => {
                                 }
 
                             </Card>
-                            {(trip !== undefined) && (trip.imageFile?.length && trip.imageFile?.length > 0) ?
+                            {(trip && trip.imageFile?.length && trip.imageFile?.length > 0) ?
                                 <>
-                                    <ImageList sx={{ width: 520, height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={3} rowHeight={164}>
+                                    <ImageList sx={{ maxWidth: 520, height: 'auto', '@media(max-width: 600px)': { width: 'auto', height: 'auto' } }} cols={trip.imageFile.length >= 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : 'auto'}>
                                         {trip.imageFile ? trip.imageFile.map((item, i) => (
                                             <ImageListItem key={i}>
                                                 <img
                                                     src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
                                                     srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-
                                                     alt={item}
                                                     loading="lazy"
                                                     onClick={onClickImage}
+                                                    style={{ cursor: 'pointer' }}
+                                                    height={'auto'}
+                                                    width={'auto'}
                                                 />
                                             </ImageListItem>
                                         )) : ''}

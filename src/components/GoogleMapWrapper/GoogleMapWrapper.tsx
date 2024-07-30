@@ -28,7 +28,7 @@ const GoogleMapWrapper: FC<GoogleMapWrapperProps> = ({ center, zoom, onLoad, onU
 
     return (
         <>
-            <Box sx={{ display: 'flex', maxWidth: '600px' }} >
+            <Box sx={{ display: 'flex', maxWidth: '600px', width: '100%' }} >
                 <GoogleMap
                     mapContainerStyle={containerStyle}
                     options={options as google.maps.MapOptions}
