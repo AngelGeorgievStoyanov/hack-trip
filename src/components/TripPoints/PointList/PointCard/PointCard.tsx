@@ -168,7 +168,7 @@ const PointCard: FC<PointCardProps> = ({ point, length }): ReactElement => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    maxWidth: '300px', margin: '20px',
+                    maxWidth: '300px', margin: '20px', minWidth: '290px',
                     padding: '15px 0px', backgroundColor: '#e5e3e3d9',
                     boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
                 }}>

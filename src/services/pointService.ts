@@ -7,7 +7,6 @@ const baseUrl = CONNECTIONURL;
 
 
 export interface ApiPoint<K, V extends Identifiable<K>> {
-    // findAll(token: string): Promise<V[]>;
     findByTripId(id: K, token: string): Promise<V>;
     create(entityWithoutId: PointCreate, token: string): Promise<any>;
     update(id: K, entity: Point, token: string): Promise<V>;
@@ -24,22 +23,6 @@ export interface ApiPoint<K, V extends Identifiable<K>> {
 
 export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V> {
     constructor(public apiCollectionSuffix: string) { }
-
-
-    // async findAll(token: string): Promise<V[]> {
-    //     const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}`, {
-    //         method: 'GET',
-    //         headers: {
-    //             "content-type": "application/json",
-    //             "Authorization": `Bearer ${token}`,
-    //         }
-    //     });
-    //     if (response.status >= 400) {
-    //         const result = await response.json();
-    //         throw new Error(result);
-    //     }
-    //     return response.json();
-    // }
 
 
     async findByTripId(id: K, token: string): Promise<V> {

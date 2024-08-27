@@ -107,18 +107,22 @@ export function touchStart(element: React.MutableRefObject<HTMLHeadingElement | 
     }, 30);
 }
 
+
 export function getRandomTripAndImage(trips: Trip[] | []) {
-  if (!trips || trips.length === 0) return  
-  
+    if (!trips || trips.length === 0) return
 
-  const randomTripIndex = Math.floor(Math.random() * trips.length);
-  const randomTrip = trips[randomTripIndex];
-  const randomImage =
-    randomTrip.imageFile && randomTrip.imageFile.length > 0
-      ? randomTrip.imageFile[
-          Math.floor(Math.random() * randomTrip.imageFile.length)
-        ]
-      : "";
 
-  return randomImage;
+    const randomTripIndex = Math.floor(Math.random() * trips.length);
+    const randomTrip = trips[randomTripIndex];
+    const randomImage =
+        randomTrip.imageFile && randomTrip.imageFile.length > 0
+            ? randomTrip.imageFile[
+            Math.floor(Math.random() * randomTrip.imageFile.length)
+            ]
+            : "";
+
+    return randomImage;
 }
+
+
+export type TripGroupId = { _id: string, tripGroupId: string, dayNumber: number, _ownerId: string }

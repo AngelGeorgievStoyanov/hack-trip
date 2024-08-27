@@ -1,6 +1,6 @@
 import { CommonImagesData, GcloudImage } from "../components/Admin/Admin";
 import { Trip, TripCreate } from "../model/trip";
-import { Identifiable } from "../shared/common-types";
+import { Identifiable, TripGroupId } from "../shared/common-types";
 import { CONNECTIONURL } from "../utils/baseUrl";
 
 const baseUrl = CONNECTIONURL;
@@ -26,7 +26,8 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
     backgroundImages(): Promise<string[]>;
     getDBImages(id: K, token: string): Promise<string[]>;
     getGCImages(id: K, token: string): Promise<GcloudImage[]>;
-    getCommonImages(id: K, token: string): Promise<CommonImagesData>
+    getCommonImages(id: K, token: string): Promise<CommonImagesData>;
+    findByTripGroupId(tripGroupId: string, token: string): Promise<TripGroupId[]>
 }
 
 
@@ -37,6 +38,11 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
 
     async findAll(search: string, typeOfGroup: string, typeOfTransportSelect: string): Promise<K> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trips/?search=${search}&typegroup=${typeOfGroup}&typetransport=${typeOfTransportSelect}`);
+      
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
         return response.json();
     }
 
@@ -46,7 +52,11 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trips/paginate/?page=${page}&search=${search}&typegroup=${typeOfGroup}&typetransport=${typeOfTransportSelect}&userId=${userId}`);
 
 
-        return await response.json();
+        if (response.status >= 400) {
+            const result = await response.json();
+            throw new Error(result);
+        }
+        return response.json();
     }
 
 
@@ -367,5 +377,23 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         return await response.json();
     }
 
+
+    async findByTripGroupId(tripGroupId: string, token: string): Promise<TripGroupId[]> {
+
+        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trips/trip-group/${tripGroupId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'content-type': 'application/json'
+            }
+        });
+        if (response.status >= 400) {
+            const result = await response.json();
+
+            throw new Error(result.message ? result.message : result);
+        }
+
+        return await response.json();
+    }
 }
 

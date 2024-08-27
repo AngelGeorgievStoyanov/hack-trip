@@ -84,6 +84,12 @@ const TripPoints: FC = () => {
     const [imageBackground, setImageBackground] = useState<string>()
     const [errorMessageGPS, setErrorMessageGPS] = useState<string | undefined>();
     const [errorApi, setErrorApi] = useState<string>();
+    const [trip, setTrip] = useState<Trip>()
+
+    const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+
+
+
 
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
@@ -98,7 +104,7 @@ const TripPoints: FC = () => {
 
 
 
-    const iconFotoCamera = useMediaQuery('(max-width:600px)');
+    const iconFotoCamera = useMediaQuery('(max-width:610px)');
 
 
     useEffect(() => {
@@ -108,6 +114,14 @@ const TripPoints: FC = () => {
         }).catch((err) => {
             console.log(err)
         });
+        if (idTrip && accessToken && userId) {
+
+            API_TRIP.findById(idTrip, userId, accessToken).then((data) => {
+                setTrip(data)
+            }).catch((err) => {
+                console.log(err)
+            });
+        }
     }, [])
 
     const { control, handleSubmit, reset, setValue, formState: { errors, isDirty, isValid } } = useForm<FormData>({
@@ -275,7 +289,6 @@ const TripPoints: FC = () => {
                 inpName.value = searchRef.current!.value;
             }
 
-            setValue('name', searchRef.current!.value, { shouldValidate: true });
 
             setErrorMessageSearch('');
         }
@@ -293,12 +306,14 @@ const TripPoints: FC = () => {
                 zoom = 16
                 center = { lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() }
                 setClickedPos({ lat: result.results[0].geometry.location.lat(), lng: result.results[0].geometry.location.lng() })
+                setValue('name', searchRef.current!.value || inpName.value, { shouldValidate: true, shouldDirty: true });
 
             }
 
         } catch (err: any) {
 
             setErrorMessageSearch('Plece enter exact name location or choose from suggestions');
+            setClickedPos(undefined)
 
             console.log(err.message);
         }
@@ -317,7 +332,7 @@ const TripPoints: FC = () => {
 
     const removeMarker = () => {
         setClickedPos(undefined);
-        let inpName = document.getElementById('inputAddPointName') as HTMLInputElement;
+        const inpName = document.getElementById('inputAddPointName') as HTMLInputElement;
         inpName.value = '';
         center = {
             lat: 42.697866831005435,
@@ -343,7 +358,7 @@ const TripPoints: FC = () => {
             let imagesNames;
 
             if (fileSelected && fileSelected.length > 0) {
-               
+
                 fileSelected.forEach((file) => {
                     formData.append('file', file);
                 })
@@ -518,6 +533,21 @@ const TripPoints: FC = () => {
             return;
         }
         setErrorApi(undefined);
+        setErrorMessageSearch('');
+    };
+   
+    const handleAutocompleteLoad = (autocompleteInstance: google.maps.places.Autocomplete) => {
+        setAutocomplete(autocompleteInstance);
+    };
+
+    const onPlaceChanged = () => {
+        if (autocomplete !== null) {
+            const place = autocomplete.getPlace();
+            if (place && place.name) {
+                const inpName = document.getElementById('inputAddPointName') as HTMLInputElement;
+                inpName.value = place.name;
+            }
+        }
     };
 
     return (
@@ -541,7 +571,7 @@ const TripPoints: FC = () => {
 
             } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
-                <Container maxWidth={false} sx={{
+                <Container sx={{
                     display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', '@media(max-width: 1020px)': {
                         display: 'flex', flexDirection: 'column', maxWidth: '100%'
                     }
@@ -550,7 +580,7 @@ const TripPoints: FC = () => {
                         <PointList points={points} />
 
                     </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '100%' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
 
                         <GoogleMapWrapper
                             center={center}
@@ -562,11 +592,11 @@ const TripPoints: FC = () => {
                             clickedPos={clickedPos}
                         />
 
-                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', margin: '10px', alignItems: errorMessageSearch ? 'center' : '', '@media(max-width: 900px)': { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
 
 
                             <Autocomplete>
-                                <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px', margin: '2px' }} label="Search field" type="search" inputRef={searchRef} helperText={errorMessageSearch} />
+                                <TextField id="outlined-search" sx={{ backgroundColor: '#f2f1e58f', borderRadius: '5px', margin: '2px', maxWidth: '190px' }} label="Search field" type="search" inputRef={searchRef} />
                             </Autocomplete>
                             <Button variant="contained" onClick={searchInp} sx={{ ':hover': { background: '#4daf30' }, margin: '2px' }}>Search</Button>
                             <Button variant="contained" onClick={removeMarker} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black', margin: '2px' }}  >Remove Marker</Button>
@@ -575,8 +605,8 @@ const TripPoints: FC = () => {
 
                         </Box>
                         <Box sx={{ position: 'relative', marginTop: '20px', display: 'flex', flexDirection: 'column', alignContent: 'center', alignItems: 'center', boxSizing: 'border-box' }}>
-                            <Snackbar sx={{ position: 'relative', left: '0px', right: '0px' }} open={errorApi ? true : false} autoHideDuration={5000} onClose={handleClose} >
-                                <Alert onClose={handleClose} severity="error">{errorApi}</Alert>
+                            <Snackbar sx={{ position: 'relative', left: '0px', right: '0px' }} open={errorApi ? true : errorMessageSearch ? true : false} autoHideDuration={10000} onClose={handleClose} >
+                                <Alert onClose={handleClose} severity="error">{errorApi || errorMessageSearch}</Alert>
                             </Snackbar>
                         </Box>
                         <Box component='form'
@@ -602,8 +632,11 @@ const TripPoints: FC = () => {
                                 ADD POINT
                             </Typography>
                             <span >
-                                <FormInputText name='name' type="search" label='NAME OF CITY, PLACE, LANDMARK OR ANOTHER' control={control} error={errors.name?.message} id='inputAddPointName'
-                                />
+                                <Autocomplete onLoad={handleAutocompleteLoad} onPlaceChanged={onPlaceChanged}>
+
+                                    <FormInputText name='name' type="search" label='NAME OF CITY, PLACE, LANDMARK OR ANOTHER'
+                                        control={control} error={errors.name?.message} id='inputAddPointName' />
+                                </Autocomplete>
                             </span>
                             <Button variant="contained" onClick={findInMap} sx={{ ':hover': { background: '#4daf30' } }}>FIND IN MAP</Button>
                             <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
@@ -654,20 +687,27 @@ const TripPoints: FC = () => {
                             </> : ''}
 
 
-                            <Box component='div' sx={{ display: 'flex', '@media(max-width: 600px)': { flexDirection: 'column', alignItems: 'center' } }}>
+                            <Box component='div' sx={{ display: 'flex', '@media(max-width: 610px)': { flexDirection: 'column', alignItems: 'center' } }}>
 
                                 {buttonAdd === true ?
-                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!isDirty || !isValid}>ADD POINT</Button>
+                                    <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!clickedPos?.lat || !isDirty || !isValid}>ADD POINT</Button>
                                     : <LoadingButton variant="contained" loading={loading}   >
                                         <span>disabled</span>
                                     </LoadingButton>}
 
-                                <Button component={Link} to={`/trip/details/${idTrip}`} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
+                                {buttonAdd === true ?
+                                    <Button component={Link} to={`/create-trip/${trip?.tripGroupId}`} variant="contained" sx={{ ':hover': { background: '#4daf30' } }} >ADD NEXT DAY TRIP</Button>
+                                    : <LoadingButton variant="contained" loading={loading}   >
+                                        <span>disabled</span>
+                                    </LoadingButton>
+                                }
+
                             </Box>
+                            <Button component={Link} to={`/trip/details/${idTrip}`} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                         </Box>
                     </Box>
                 </Container>
-            </Grid>
+            </Grid >
         </>
     )
 };

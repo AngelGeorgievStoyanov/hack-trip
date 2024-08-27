@@ -122,6 +122,13 @@ const App: FC = () => {
           ]
         },
         {
+          path: "/create-trip/:tripGroupId",
+          element: <CreateTrip />,
+          children: [
+            { path: '', element: <CreateTrip /> }
+          ]
+        },
+        {
           path: '/trip/details/:tripId',
           element: <GuardedRoute />,
           children: [

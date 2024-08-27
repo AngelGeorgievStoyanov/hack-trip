@@ -1,9 +1,9 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { CurrencyCode, Trip, TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
-import { IdType, toIsoDate } from "../../shared/common-types";
+import { IdType, toIsoDate, TripGroupId } from "../../shared/common-types";
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
-import { Alert, Box, Button, Container, Grid, IconButton, ImageList, ImageListItem, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, ButtonGroup, Container, Grid, IconButton, ImageList, ImageListItem, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import FormTextArea from "../FormFields/FormTextArea";
@@ -21,7 +21,8 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { ApiTrip } from "../../services/tripService";
 import * as tripService from "../../services/tripService";
 import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
-
+import RemoveIcon from '@mui/icons-material/Remove';
+import AddIcon from '@mui/icons-material/Add';
 
 
 type decode = {
@@ -59,7 +60,11 @@ type FormData = {
     lng: number | undefined;
     imageFile: string[] | undefined;
     currency: string;
+    dayNumber: number;
+    tripGroupId?: string;
 };
+
+
 const TRIP_SELECT_OPTIONS_TRANSPORT: SelectOption[] = Object.keys(TripTransport)
     .filter((item) => !isNaN(Number(item)))
     .map((ordinal: string) => parseInt(ordinal))
@@ -106,6 +111,10 @@ const TripEdit: FC = () => {
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const [imageBackground, setImageBackground] = useState<string>()
     const [errorApi, setErrorApi] = useState<string>();
+    const [dayNumber, setDayNumber] = useState(1);
+    const [checkDay, setCheckDay] = useState<boolean>(false);
+    const [tripGroup, setTripGroup] = useState<TripGroupId[]>([]);
+    const [confirmedChangeDayNumber, setConfirmedChangeDayNumber] = useState<boolean>(false)
 
     const { token } = useContext(LoginContext);
 
@@ -132,8 +141,9 @@ const TripEdit: FC = () => {
         if (idTrip && userId && accessToken) {
 
             API_TRIP.findById(idTrip, userId, accessToken).then((data) => {
-                setTrip(data)
+                setTrip(prev => data)
                 setImages(data.imageFile);
+                setDayNumber(data.dayNumber)
                 reset({
                     title: data.title,
                     _ownerId: data._ownerId,
@@ -149,6 +159,7 @@ const TripEdit: FC = () => {
                     transport: TripTransport[data.transport || 0],
                     imageFile: data.imageFile,
                     currency: data.currency,
+                    dayNumber: data.dayNumber
                 });
 
             }).catch((err) => {
@@ -162,13 +173,25 @@ const TripEdit: FC = () => {
                 console.log(err)
             });
 
-
         }
     }, []);
 
+    useEffect(() => {
+        if (trip && trip.tripGroupId && accessToken) {
 
 
-    const { control, handleSubmit, reset, formState: { errors, isDirty, isValid } } = useForm<FormData>({
+            API_TRIP.findByTripGroupId(trip.tripGroupId, accessToken).then((data) => {
+                setTripGroup(data)
+
+            }).catch((err) => {
+                console.log(err)
+            });
+
+        }
+    }, [trip])
+
+
+    const { control, handleSubmit, reset, setValue, formState: { errors, isDirty, isValid } } = useForm<FormData>({
 
         mode: 'onChange',
         resolver: yupResolver(schema),
@@ -373,12 +396,38 @@ const TripEdit: FC = () => {
 
     const editTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
 
-        if (accessToken && trip) {
+        if (accessToken && trip && userId && trip?.tripGroupId) {
+            if (trip.dayNumber !== dayNumber) {
+                let flag = false
+                if (!confirmedChangeDayNumber && tripGroup.some((x) => x.dayNumber === dayNumber)) {
+                    if (window.confirm(`Day ${dayNumber} already exists!  Do you want to change it with day ${trip.dayNumber} `)) {
+                        setConfirmedChangeDayNumber(prev => true)
+                        setCheckDay(true)
+                        flag = true;
+                    }
 
-            setButtonAdd(false)
+
+                }
+
+                if (confirmedChangeDayNumber || flag) {
+                    const findTrip = tripGroup.find(x => x.dayNumber === dayNumber)
+
+                    if (findTrip) {
+                        const tripId = findTrip._id;
+                        try {
+                            const prevTrip = await API_TRIP.findById(tripId, userId, accessToken)
+                            prevTrip.dayNumber = trip.dayNumber
+                            await API_TRIP.update(prevTrip._id, prevTrip, userId, accessToken);
+                            setButtonAdd(false)
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    }
+                }
+
+
+            }
             let formData = new FormData();
-
-
             let imagesNames;
             if (fileSelected && fileSelected.length > 0) {
                 fileSelected.forEach((file) => {
@@ -424,20 +473,21 @@ const TripEdit: FC = () => {
             data.timeEdited = toIsoDate(new Date());
             data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)];
             data.transport = TripTransport[parseInt(data.transport)];
-            const editTrip = { ...data } as any;
+            data.dayNumber = dayNumber;
+            const editTrip = { ...data } as unknown as Trip;
 
-            editTrip.id = trip._id as any as Trip;
-            if (userId && accessToken) {
-                API_TRIP.update(trip._id, editTrip, userId, accessToken).then((data) => {
-                    setButtonAdd(true)
-                    navigate(`/trip/details/${trip._id}`);
-                }).catch((err) => {
-                    console.log(err.message);
-                    setErrorApi(err.message ? err.message : typeof err === 'string' ? err : 'Something went wrong!');
-                    setLoading(false);
-                    setButtonAdd(true);
-                });
-            }
+            editTrip._id = trip._id;
+
+
+            API_TRIP.update(trip._id, editTrip, userId, accessToken).then((data) => {
+                setButtonAdd(true)
+                navigate(`/trip/details/${trip._id}`);
+            }).catch((err) => {
+                console.log(err.message);
+                setErrorApi(err.message ? err.message : typeof err === 'string' ? err : 'Something went wrong!');
+                setLoading(false);
+                setButtonAdd(true);
+            });
         }
     }
 
@@ -525,6 +575,57 @@ const TripEdit: FC = () => {
         }
         setErrorApi(undefined);
     };
+    const increaseDayNumber = () => {
+        const newDayNumber = dayNumber + 1;
+        setDayNumber(newDayNumber);
+        setValue("dayNumber", newDayNumber, { shouldDirty: true });
+
+    };
+
+    const decreaseDayNumber = () => {
+
+        const newDayNumber = Math.max(dayNumber - 1, 1);
+        setDayNumber(newDayNumber);
+        setValue("dayNumber", newDayNumber, { shouldDirty: true });
+
+    };
+
+    const onSetDay = async () => {
+        if (dayNumber !== trip?.dayNumber) {
+            if (checkDay && trip) {
+                setCheckDay(false)
+
+                if (confirmedChangeDayNumber) {
+                    setConfirmedChangeDayNumber(false);
+                }
+
+            } else {
+                if (trip?.tripGroupId && accessToken) {
+
+                    try {
+
+                        const enableChangeDayNumber = tripGroup.some((x) => x.dayNumber === dayNumber)
+                        if (enableChangeDayNumber) {
+
+                            if (window.confirm(`Day ${dayNumber} already exists!  Do you want to change it with day ${trip.dayNumber} `)) {
+                                setConfirmedChangeDayNumber(true)
+                                setCheckDay(true)
+                            }
+
+                        } else {
+                            setCheckDay(true)
+
+                        }
+                    } catch (err) {
+                        console.log(err)
+                    }
+
+                }
+
+            }
+        }
+    };
+
 
     return (
         <>
@@ -549,7 +650,7 @@ const TripEdit: FC = () => {
                 }
             } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
-                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding: '0px', width:'95%' }}>
+                <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding: '0px', width: '95%' }}>
 
                     <GoogleMapWrapper
                         center={center}
@@ -601,6 +702,48 @@ const TripEdit: FC = () => {
                             <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
                                 EDIT TRIP
                             </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
+
+                                <TextField
+                                    name="dayNumber"
+                                    label="DAY"
+                                    value={dayNumber}
+                                    size="small"
+                                    disabled={checkDay}
+                                    sx={{ maxWidth: '60px', marginRight: '8px', pointerEvents: 'none' }}
+                                    inputProps={{ style: { textAlign: 'center' } }}
+                                />
+                                <ButtonGroup
+                                    disabled={checkDay}
+                                    sx={{
+
+                                        margin: '10px',
+                                        '& .MuiButton-root': {
+                                            margin: '0px',
+                                            padding: '0px',
+                                            maxWidth: '100px',
+                                            height: '30px',
+                                            width: '50px'
+                                        }
+                                    }}>
+                                    <Button variant="contained"
+                                        aria-label="reduce"
+
+                                        onClick={decreaseDayNumber}
+                                    >
+                                        <RemoveIcon fontSize="small" />
+                                    </Button>
+                                    <Button
+                                        aria-label="increase"
+                                        variant="contained"
+                                        onClick={increaseDayNumber}
+                                    >
+                                        <AddIcon fontSize="small" />
+                                    </Button>
+                                </ButtonGroup>
+                                <Button variant="contained" onClick={onSetDay}
+                                >  {checkDay ? 'change day' : 'Set day'}</Button>
+                            </Box>
 
                             <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
                             />

@@ -26,7 +26,7 @@ const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType
 const MyTrips: FC = () => {
 
 
-    const [trips, setTrips] = useState<Trip[]>([]);
+    const [trips, setTrips] = useState<Trip[]>();
     const [imageBackground, setImageBackground] = useState<string>()
 
     const { token } = useContext(LoginContext);
@@ -100,7 +100,7 @@ const MyTrips: FC = () => {
                         <Typography gutterBottom sx={{ margin: '50px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }} variant="h5" component="div">
                             These are your trips
                         </Typography>
-                        <Grid container sx={{ justifyContent: 'center', padding: '30px', minHeight: '100vh', alignItems: 'center', '@media(max-width: 900px)': { display: 'flex', alignItems: 'center', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                        <Grid container sx={{ justifyContent: 'center', padding: '30px', minHeight: '100vh' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
                             <TripList trips={trips} />
 

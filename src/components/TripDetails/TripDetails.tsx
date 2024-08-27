@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CurrencyCodeName, Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
-import { IdType, getRandomTripAndImage, sliceDescription } from "../../shared/common-types";
+import { IdType, TripGroupId, getRandomTripAndImage, sliceDescription } from "../../shared/common-types";
 import * as tripService from '../../services/tripService';
 import * as pointService from '../../services/pointService';
 import { Point } from "../../model/point";
@@ -13,7 +13,7 @@ import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { Backdrop, Box, Button, CardActions, CardContent, CircularProgress, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Typography, useMediaQuery } from "@mui/material";
+import { AppBar, Backdrop, Box, Button, CardActions, CardContent, CircularProgress, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Pagination, PaginationItem, PaginationRenderItemParams, Typography, useMediaQuery } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { styled, useTheme } from '@mui/material/styles';
@@ -158,6 +158,8 @@ const TripDetails: FC = () => {
     const [openCurrency, setOpenCurrency] = useState(false);
     const [clickedLike, setClickedLike] = useState<boolean>(false);
     const [clickedUnLike, setClickedUnLike] = useState<boolean>(false);
+    const [tripGroupTrips, setTripGroupTrips] = useState<TripGroupId[]>([]);
+    const [pageValue, setPageValue] = useState<number>(trip?.dayNumber || 1)
 
     const minSwipeDistance = 45;
     const { token } = useContext(LoginContext);
@@ -168,9 +170,8 @@ const TripDetails: FC = () => {
         const decode: decode = jwt_decode(accessToken);
         userId = decode._id;
     }
-
     const randomAnimationLike = Math.random() > 0.5 ? shakeAnimation : growShrinkAnimation;
-    
+
     const randomAnimationUnLike = Math.random() > 0.5 ? rotateAnimation : rotateXAnimation;
 
     const theme = useTheme();
@@ -199,12 +200,12 @@ const TripDetails: FC = () => {
 
                 if (data) {
                     setTrip(data)
+                    setPageValue(data.dayNumber)
                     setRandomImage(getRandomTripAndImage(Array(data)))
                     API_POINT.findByTripId(data._id, accessToken).then((data) => {
 
                         if (data && Array.isArray(data)) {
                             const arrPoints = data as Point[];
-
                             if (arrPoints !== undefined && arrPoints.length > 0) {
 
                                 arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
@@ -266,6 +267,91 @@ const TripDetails: FC = () => {
         }, 500)
     }, [pointCard, fullPointImage])
 
+
+    useEffect(() => {
+        if (trip) {
+            fetchTripsByGroupId(trip.tripGroupId);
+        }
+    }, [trip]);
+
+    const fetchTripsByGroupId = async (tripGroupId: string) => {
+        if (accessToken) {
+
+            API_TRIP.findByTripGroupId(tripGroupId, accessToken).then((data) => {
+
+                setTripGroupTrips(data);
+            }).catch((err) => {
+                console.log(err)
+            })
+        }
+
+    };
+
+    const days = tripGroupTrips.map(trip => trip.dayNumber);
+    const maxDay = Math.max(...days);
+    const paginationItems = Array.from({ length: maxDay }, (_, i) => i + 1).map(day => ({
+        day,
+        available: days.includes(day)
+    }));
+
+
+    const handlePageChange = async (event: React.ChangeEvent<unknown>, value: number) => {
+        const tripIndex = tripGroupTrips.findIndex(trip => trip.dayNumber === value);
+        if (tripIndex !== -1) {
+            setPageValue(value);
+
+            if (userId && accessToken) {
+
+                API_TRIP.findById(tripGroupTrips[tripIndex]._id, userId, accessToken).then((data) => {
+                    setTrip(data);
+                    setActiveStep(0);
+                    API_POINT.findByTripId(data._id, accessToken).then((data) => {
+                        if (data && Array.isArray(data)) {
+                            const arrPoints = data as Point[];
+                            if (arrPoints !== undefined && arrPoints.length > 0) {
+
+                                arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
+
+
+                                center = {
+                                    lat: Number(arrPoints[0].lat),
+                                    lng: Number(arrPoints[0].lng)
+                                }
+
+
+                                setPoints(arrPoints);
+                                setMapCenter(center);
+                            } else {
+                                setPoints([]);
+                                setPointCard(null)
+                                setMapCenter({
+                                    lat: 42.697866831005435,
+                                    lng: 23.321590139866355
+                                });
+                            }
+
+                        }
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+
+                    API_COMMENT.findByTripId(data._id, userId, accessToken).then(async (data) => {
+                        if (data && Array.isArray(data)) {
+                            setComments(data);
+                        }
+
+
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+
+                })
+            }
+        } else {
+            setPageValue(value);
+            setTrip(undefined);
+        }
+    };
 
     if (trip !== undefined) {
 
@@ -832,6 +918,40 @@ const TripDetails: FC = () => {
                 keywords={'Hack Trip, Travel, Adventure'}
                 canonical={trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : `https://www.hack-trip.com`}
             />
+            {tripGroupTrips.length > 1 && (
+                <AppBar position="sticky"
+                    sx={{ marginTop: '-20px', paddingBottom: '10px', marginBottom: '20px' }}
+                >
+                    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                        <Pagination
+                            count={paginationItems.length}
+                            variant="outlined"
+                            shape="rounded"
+                            page={pageValue}
+                            boundaryCount={paginationItems.length}
+                            siblingCount={paginationItems.length}
+                            onChange={handlePageChange}
+                            renderItem={(item: PaginationRenderItemParams) => (
+                                <PaginationItem
+                                    {...item}
+                                    sx={{
+                                        margin: '3px',
+                                        color: 'white',
+                                        '&.Mui-selected': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                            color: 'white',
+                                        },
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                        }
+                                    }}
+                                />
+                            )}
+                            sx={{ marginTop: '10px' }}
+                        />
+                    </Box>
+                </AppBar>
+            )}
             <Grid container sx={!isIphone ?
                 {
                     boxSizing: 'border-box',
@@ -851,7 +971,7 @@ const TripDetails: FC = () => {
                 }
             } spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 
-                {!fullImage && !fullPointImage ?
+                {!fullImage && !fullPointImage && trip ?
                     <>
                         <Container maxWidth={false} sx={{
                             boxSizing: 'border-box',
@@ -863,7 +983,7 @@ const TripDetails: FC = () => {
                             <Box sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
-                                minWidth: '200px',
+                                minWidth: '320px',
                                 maxWidth: '450px', margin: '20px',
                                 padding: '25px', backgroundColor: '#eee7e79e',
                                 boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
@@ -935,7 +1055,10 @@ const TripDetails: FC = () => {
 
                                 }
                                 {(trip && trip._ownerId === userId) ?
-                                    <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
+                                    <>
+                                        <Button component={Link} to={`/create-trip/${trip?.tripGroupId}`} variant="contained" sx={{ ':hover': { background: '#4daf30' } }} >ADD NEXT DAY TRIP</Button>
+                                        <Button component={Link} to={`/trip/points/${trip?._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD OR EDIT POINTS FOR YOUR TRIP</Button>
+                                    </>
 
                                     :
                                     (points !== undefined && points.length > 0) ?
@@ -1148,10 +1271,33 @@ const TripDetails: FC = () => {
 
                             </>
 
-                            : ''
+                            : !trip ?
+                                <>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        minWidth: '340px',
+                                        maxWidth: '450px', margin: '20px',
+                                        padding: '25px', backgroundColor: '#eee7e79e',
+                                        boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
+                                        minHeight: '440px', justifyContent: 'center'
+                                    }}>
+
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: 'auto', justifyContent: 'space-evenly' }}>
+
+                                            <Typography gutterBottom variant="h5" sx={{ padding: '0px 15px' }}>
+                                                No trip on {pageValue} day
+                                            </Typography>
+                                        </Box>
+                                        <CardContent>
+
+                                        </CardContent>
+                                    </Box>
+                                </>
+                                : ''
 
                 }
-                {!fullImage && !fullPointImage ?
+                {!fullImage && !fullPointImage && trip ?
                     <>
                         <Box sx={{ display: 'flex', margin: '10px' }}>
                             <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Facebook</h3>

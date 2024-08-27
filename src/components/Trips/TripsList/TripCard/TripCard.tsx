@@ -1,19 +1,21 @@
 
-import { Box, Button, Card, CardContent, MobileStepper, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, Card, CardContent, MobileStepper, Pagination, PaginationItem, PaginationRenderItemParams, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Trip } from '../../../../model/trip';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from '../../../../hooks/LoginContext';
-import { FC, ReactElement, useContext, useState, TouchEvent } from 'react';
-import { IdType } from '../../../../shared/common-types';
+import { FC, ReactElement, useContext, useState, TouchEvent, useEffect } from 'react';
+import { IdType, TripGroupId } from '../../../../shared/common-types';
 import { User } from '../../../../model/users';
 import * as userService from '../../../../services/userService';
 import { ApiClient } from '../../../../services/userService';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import * as tripService from '../../../../services/tripService';
+import { ApiTrip } from '../../../../services/tripService';
 
-type decode = {
-    _id: string,
-    role: string
+type Decode = {
+    _id: string;
+    role: string;
 }
 
 interface TripCardProps {
@@ -24,59 +26,73 @@ interface TripCardProps {
 
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
-
-let userId: string | undefined;
-
-// const slideInEllipticBottom = keyframes` 
-// 0% {
-//     -webkit-transform: translateY(600px) rotateX(-30deg) scale(6.5);
-//             transform: translateY(600px) rotateX(-30deg) scale(6.5);
-//     -webkit-transform-origin: 50% -100%;
-//             transform-origin: 50% -100%;
-//     opacity: 0;
-//   }
-//   100% {
-//     -webkit-transform: translateY(0) rotateX(0) scale(1);
-//             transform: translateY(0) rotateX(0) scale(1);
-//     -webkit-transform-origin: 50% 500px;
-//             transform-origin: 50% 500px;
-//     opacity: 1;
-//   }
-// `;
+const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data');
 
 const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
 
-    const [userVerId, setUserVerId] = useState<boolean>(false)
+    const [userVerId, setUserVerId] = useState<boolean>(false);
     const [activeStep, setActiveStep] = useState(0);
-    const [touchStart, setTouchStart] = useState<number>(0)
-    const [touchEnd, setTouchEnd] = useState<number>(0)
+    const [touchStart, setTouchStart] = useState<number>(0);
+    const [touchEnd, setTouchEnd] = useState<number>(0);
+    const [noTripOnThisDay, setNoTripOnThisDay] = useState<boolean>(false)
+    const [pageValue, setPageValue] = useState<number>(1)
+    const [currentTrip, setCurrentTrip] = useState<Trip | undefined>(trip)
+    const [tripGroupTrips, setTripGroupTrips] = useState<TripGroupId[]>([]);
 
     const minSwipeDistance = 45;
     const theme = useTheme();
     const { token } = useContext(LoginContext);
-    const isMobile = useMediaQuery('(max-width:750px)');
+    const isMobile = useMediaQuery('(max-width:700px)');
 
     const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     let role = 'user';
+    let userId: string | undefined;
+
     if (accessToken) {
-        const decode: decode = jwt_decode(accessToken);
+        const decode: Decode = jwt_decode(accessToken);
         role = decode.role;
-        userId = decode._id
+        userId = decode._id;
     }
+    useEffect(() => {
+        if (userId !== undefined && userId !== null && accessToken) {
+            API_CLIENT.findUserId(userId, accessToken).then((data) => {
+
+                setUserVerId(data)
+            }).catch((err) => {
+                console.log(err)
+            })
+        }
+    }, [accessToken, userId]);
+
+    useEffect(() => {
+        if (trip) {
+            fetchTripsByGroupId(trip.tripGroupId);
+        }
+    }, [trip]);
+
+    const fetchTripsByGroupId = async (tripGroupId: string) => {
+        if (accessToken) {
+
+            API_TRIP.findByTripGroupId(tripGroupId, accessToken).then((data) => {
+
+                setTripGroupTrips(data);
+            }).catch((err) => {
+                console.log(err)
+            })
+        }
+
+    };
 
 
-    if (userId !== undefined && userId !== null && accessToken) {
-        API_CLIENT.findUserId(userId, accessToken).then((data) => {
+    const maxSteps = currentTrip?.imageFile ? currentTrip.imageFile.length : 0;
+    const days = tripGroupTrips.map(trip => trip.dayNumber);
+    const maxDay = Math.max(...days);
+    const paginationItems = Array.from({ length: maxDay }, (_, i) => i + 1).map(day => ({
+        day,
+        available: days.includes(day)
+    }));
 
-            setUserVerId(data)
-        }).catch((err) => {
-            console.log(err)
-        })
-    }
-
-
-    const maxSteps = trip.imageFile ? trip.imageFile.length : 0;
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -121,36 +137,54 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
     }
 
 
+    const handlePageChange = async (event: React.ChangeEvent<unknown>, value: number) => {
+        const tripIndex = tripGroupTrips.findIndex(trip => trip.dayNumber === value);
+        if (tripIndex !== -1) {
+            setNoTripOnThisDay(false);
+            setPageValue(value);
+
+            if (userId && accessToken) {
+
+                API_TRIP.findById(tripGroupTrips[tripIndex]._id, userId, accessToken).then((data) => {
+                    setCurrentTrip(data);
+                    setActiveStep(0);
+                })
+            }
+        } else {
+            setNoTripOnThisDay(true);
+            setPageValue(value);
+            setCurrentTrip(undefined);
+        }
+    };
 
 
     return (
         <>
-            {(((trip.reportTrip !== undefined) && (trip.reportTrip !== null) && (Number(trip.reportTrip)) >= 5) && (role === 'user')) ? '' :
-                <Card sx={{
+            {currentTrip && (((currentTrip.reportTrip !== undefined) && (currentTrip.reportTrip !== null) && (Number(currentTrip.reportTrip)) >= 5) && (role === 'user')) ? '' :
+                currentTrip ? (<Card sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'flex-end',
                     alignItems: 'center',
                     maxWidth: '300px', margin: '20px',
                     height: isMobile ? 'fit-content' : 'auto',
-                    maxHeight: '500px',
+                    maxHeight: '540px',
                     width: '-webkit-fill-available',
                     padding: '25px 0px 0px 0px', backgroundColor: '#eee7e79e',
                     boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
-                    // animation: `${slideInEllipticBottom} 1.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s both`
                 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: isMobile ? 'auto' : '-webkit-fill-available', justifyContent: 'space-evenly' }}>
 
                         <Typography gutterBottom variant="h5" sx={{ padding: '0px 15px' }}>
-                            Title: {trip.title}
+                            Title: {currentTrip.title}
                         </Typography>
                         <Typography gutterBottom variant="h6" sx={{ padding: '0px 15px' }}>
-                            Destination: {trip.destination}
+                            Destination: {currentTrip.destination}
                         </Typography>
                     </Box>
-                    {trip.imageFile?.length && trip.imageFile.length > 0 ?
+                    {currentTrip.imageFile?.length && currentTrip.imageFile.length > 0 ?
                         <>
-                            <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${trip.imageFile[activeStep]}`} alt='hack trip' title='hack trip' loading="lazy" width='300px' height='200px' style={{ aspectRatio: '1/1' }} />
+                            <img onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} src={`https://storage.googleapis.com/hack-trip/${currentTrip.imageFile[activeStep]}`} alt='hack trip' title='hack trip' loading="lazy" width='300px' height='200px' style={{ aspectRatio: '1/1' }} />
 
                             <MobileStepper
                                 variant="dots"
@@ -188,17 +222,17 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                     }
                     <CardContent sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center' }}>
                         {
-                            (((role === 'admin') || (role === 'manager')) && ((Number(trip.reportTrip) > 0) || (trip.reportTrip?.toString().length === 36)) && (userVerId === true)) ?
-                                <Button href={`/admin/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
+                            (((role === 'admin') || (role === 'manager')) && ((Number(currentTrip.reportTrip) > 0) || (currentTrip.reportTrip?.toString().length === 36)) && (userVerId === true)) ?
+                                <Button href={`/admin/trip/details/${currentTrip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
                                 :
                                 (userVerId === true && accessToken !== undefined) ?
-                                    <Button href={`/trip/details/${trip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
+                                    <Button href={`/trip/details/${currentTrip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
                                     :
                                     ''}
 
-                        {Number(trip.likes) > 0 ?
+                        {Number(currentTrip.likes) > 0 ?
                             < Typography sx={{ margin: '10px' }} gutterBottom variant="h6" component="div">
-                                LIKES: {Number(trip.likes[0])}
+                                LIKES: {Number(currentTrip.likes)}
                             </Typography>
                             :
                             < Typography sx={{ margin: '10px', display: 'flex', alignItems: 'center' }} gutterBottom variant="h6" component="div">
@@ -206,12 +240,71 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                             </Typography>
                         }
 
+                        {tripGroupTrips.length > 1 && (
+                            <Box>
+                                <Pagination
+                                    count={paginationItems.length}
+                                    variant="outlined"
+                                    shape="rounded"
+                                    page={noTripOnThisDay ? pageValue : currentTrip?.dayNumber}
+                                    onChange={handlePageChange}
+                                    renderItem={(item: PaginationRenderItemParams) => (
+                                        <PaginationItem
+                                            {...item}
+                                        />
+                                    )}
+                                    sx={{ marginTop: 2 }}
+                                />
+                            </Box>
+                        )}
                     </CardContent>
-                </Card>
+                </Card>) :
+                    <>
+                        <Card sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'flex-end',
+                            alignItems: 'center',
+                            maxWidth: '300px', margin: '20px',
+                            height: isMobile ? 'fit-content' : 'auto',
+                            maxHeight: '500px',
+                            width: '-webkit-fill-available',
+                            padding: '25px 0px 0px 0px', backgroundColor: '#eee7e79e',
+                            boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
+                        }}>
+
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: isMobile ? 'auto' : '-webkit-fill-available', justifyContent: 'space-evenly' }}>
+
+                                <Typography gutterBottom variant="h5" sx={{ padding: '0px 15px' }}>
+                                    No trip on {pageValue} day
+                                </Typography>
+                            </Box>
+                            <CardContent>
+                                {tripGroupTrips.length > 1 && (
+                                    <Box>
+                                        <Pagination
+                                            count={paginationItems.length}
+                                            variant="outlined"
+                                            shape="rounded"
+                                            page={pageValue}
+                                            onChange={handlePageChange}
+                                            renderItem={(item: PaginationRenderItemParams) => (
+                                                <PaginationItem
+                                                    {...item}
+                                                />
+                                            )}
+                                            sx={{ marginTop: 2 }}
+                                        />
+                                    </Box>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </>
             }
         </>
 
-    )
-}
+
+    );
+};
 
 export default TripCard;

@@ -1,11 +1,11 @@
 import { useJsApiLoader, Autocomplete, } from "@react-google-maps/api";
 import React, { BaseSyntheticEvent, FC, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ApiTrip } from "../../services/tripService";
 import * as tripService from '../../services/tripService'
 import { CurrencyCode, TripCreate, TripTipeOfGroup, TripTransport } from "../../model/trip";
-import { IdType, toIsoDate } from "../../shared/common-types";
-import { Alert, Box, Button, Container, Grid, IconButton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
+import { IdType, toIsoDate, TripGroupId } from "../../shared/common-types";
+import { Alert, Box, Button, ButtonGroup, Container, Grid, IconButton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import FormInputText from "../FormFields/FormInputText";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
@@ -22,6 +22,8 @@ import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
+import RemoveIcon from '@mui/icons-material/Remove';
+import AddIcon from '@mui/icons-material/Add';
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data');
 
@@ -47,7 +49,8 @@ type FormData = {
     lng: number | string | undefined;
     imageFile: string[] | undefined;
     currency: string;
-
+    dayNumber: number;
+    tripGroupId?: string;
 };
 
 const TRIP_SELECT_OPTIONS_CURRENCY: SelectOption[] = Object.keys(CurrencyCode)
@@ -103,7 +106,12 @@ const CreateTrip: FC = () => {
     const { token } = useContext(LoginContext);
     const [imageBackground, setImageBackground] = useState<string>()
     const [errorApi, setErrorApi] = useState<string>();
+    const [dayNumber, setDayNumber] = useState(1);
+    const [missingDays, setMissingDays] = useState<number[]>([]);
+    const [tripGroup, setTripGroup] = useState<TripGroupId[]>([]);
 
+
+    const { tripGroupId } = useParams();
     const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
     if (accessToken) {
@@ -123,10 +131,38 @@ const CreateTrip: FC = () => {
         }).catch((err) => {
             console.log(err)
         });
+
+
+        if (tripGroupId && accessToken) {
+
+            API_TRIP.findByTripGroupId(tripGroupId, accessToken).then((data) => {
+                setDayNumber(data[0].dayNumber + 1)
+                const sortedTripGroup = [...data].sort((a, b) => a.dayNumber - b.dayNumber);
+
+                setMissingDays(findMissingDays(sortedTripGroup));
+                setTripGroup(sortedTripGroup)
+            }).catch((err) => {
+                console.log(err)
+            });
+
+        }
     }, [])
 
 
-    const { control, handleSubmit, formState: { errors, isValid, isDirty } } = useForm<FormData>({
+    const findMissingDays = (sortedTripGroup: TripGroupId[]) => {
+        const missingDays = [];
+        for (let i = 1; i < sortedTripGroup.length; i++) {
+            const currentDay = sortedTripGroup[i - 1].dayNumber;
+            const nextDay = sortedTripGroup[i].dayNumber;
+            for (let j = currentDay + 1; j < nextDay; j++) {
+                missingDays.push(j);
+            }
+        }
+        return missingDays;
+    }
+
+
+    const { control, handleSubmit, formState: { errors, isValid, isDirty }, reset } = useForm<FormData>({
 
 
         defaultValues: {
@@ -316,7 +352,7 @@ const CreateTrip: FC = () => {
 
 
 
-    const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined, addPoints?: boolean) => {
+    const createTripSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined, addPoints?: boolean, nextDayTrip?: boolean) => {
         if (accessToken) {
             setButtonAdd(false)
             event?.preventDefault();
@@ -364,13 +400,34 @@ const CreateTrip: FC = () => {
             data.timeCreated = toIsoDate(new Date());
             data.typeOfPeople = TripTipeOfGroup[parseInt(data.typeOfPeople)];
             data.transport = TripTransport[parseInt(data.transport)];
+            if (dayNumber) {
+                data.dayNumber = dayNumber
+            }
+            if (tripGroupId) {
+                data.tripGroupId = tripGroupId
+            }
             const newTrip = { ...data } as any as TripCreate;
+
 
             API_TRIP.create(newTrip, accessToken).then((trip) => {
                 setButtonAdd(true)
                 if (addPoints === true) {
                     navigate(`/trip/points/${trip._id}`);
 
+                } else if (nextDayTrip) {
+
+                    reset();
+                    API_TRIP.findByTripGroupId(trip.tripGroupId, accessToken).then((data) => {
+
+                        setDayNumber(data[0].dayNumber + 1)
+                        const sortedTripGroup = [...data].sort((a, b) => a.dayNumber - b.dayNumber);
+                        setMissingDays(findMissingDays(sortedTripGroup));
+                        setFileSelected([]);
+                        setTripGroup(sortedTripGroup);
+
+                    }).catch((err) => {
+                        console.log(err.message)
+                    })
                 } else {
 
                     navigate(`/trip/details/${trip._id}`);
@@ -399,6 +456,19 @@ const CreateTrip: FC = () => {
         e as any as BaseSyntheticEvent<HTMLFormElement>
 
         createTripSubmitHandler(data, e, true);
+
+    }
+
+    const addNextDay = (e: React.MouseEvent) => {
+        e.preventDefault();
+
+
+        const target = e.currentTarget.parentElement?.parentElement as HTMLFormElement;
+        const data = Object.fromEntries(new FormData(target)) as any as FormData;
+
+        e as any as BaseSyntheticEvent<HTMLFormElement>
+
+        createTripSubmitHandler(data, e, false, true);
 
     }
 
@@ -469,6 +539,36 @@ const CreateTrip: FC = () => {
     };
 
 
+    const increaseDayNumber = () => {
+        const day = dayNumber + 1;
+        setDayNumber(day);
+        checkDay(day);
+        if (errorApi) {
+            setErrorApi(undefined);
+        }
+    };
+
+    const decreaseDayNumber = () => {
+        const day = Math.max(dayNumber - 1, 1);
+        setDayNumber(day);
+        checkDay(day);
+        if (errorApi) {
+            setErrorApi(undefined);
+        }
+    };
+
+
+    const handleCloseMissingDays = () => {
+        setMissingDays([]);
+    }
+
+    const checkDay = (dayNumberNow: number) => {
+
+        if (tripGroup.some((x) => x.dayNumber === dayNumberNow)) {
+            setErrorApi(`Day ${dayNumberNow} alredi exists`);
+        }
+    }
+
 
     return (
         <>
@@ -479,6 +579,15 @@ const CreateTrip: FC = () => {
                 backgroundAttachment: 'fixed', justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh',
                 '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '-25px 0px 0px 0px' }
             }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                <div>
+                    {missingDays.length > 0 && (
+                        <Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'left' }} open={missingDays.length > 0 ? true : false} autoHideDuration={10000} onClose={handleCloseMissingDays} >
+                            <Alert severity="info" onClose={handleCloseMissingDays}>
+                                Missing day(s): {missingDays.join(', ')}
+                            </Alert>
+                        </Snackbar>
+                    )}
+                </div>
                 <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
 
                     <GoogleMapWrapper
@@ -517,7 +626,7 @@ const CreateTrip: FC = () => {
                             backgroundColor: '#eee7e79e',
                             boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px',
                             '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
-                            '& .MuiButton-root': { m: 1, width: '32ch' },
+                            '& .MuiButton-root': { m: 1 },
                             marginBottom: '5px'
                         }}
                         encType="multipart/form-data"
@@ -531,7 +640,47 @@ const CreateTrip: FC = () => {
                             CREATE TRIP
                         </Typography>
 
+                        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
 
+                            <TextField
+                                name="dayNumber"
+                                label="DAY"
+                                value={dayNumber}
+                                size="small"
+                                sx={{ maxWidth: '60px', marginRight: '8px', pointerEvents: 'none' }}
+                                inputProps={{ style: { textAlign: 'center' } }}
+                            />
+                            <ButtonGroup
+                                sx={{
+
+                                    margin: '10px',
+                                    '& .MuiButton-root': {
+                                        margin: '0px',
+                                        padding: '0px',
+                                        maxWidth: '100px',
+                                        height: '30px',
+                                        width: '50px'
+                                    }
+                                }}>
+                                <Button variant="contained"
+                                    aria-label="reduce"
+
+                                    onClick={decreaseDayNumber}
+                                >
+                                    <RemoveIcon fontSize="small" />
+                                </Button>
+                                <Button
+                                    aria-label="increase"
+                                    variant="contained"
+                                    onClick={increaseDayNumber}
+                                >
+                                    <AddIcon fontSize="small" />
+                                </Button>
+                            </ButtonGroup>
+                            {/* <Button variant="contained" onClick={onSetDay}                        >
+                                {checkDay ? 'change day' : 'Set day'}
+                            </Button> */}
+                        </Box>
                         <FormInputText name='title' label='TITLE' control={control} error={errors.title?.message}
                         />
                         <Box sx={{ display: 'flex', flexDirection: 'row' }}>
@@ -603,16 +752,27 @@ const CreateTrip: FC = () => {
                         <FormTextArea name="description" label="DESCRIPTION" control={control} error={errors.description?.message} multiline={true} rows={4} />
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
                             {buttonAdd === true ?
-                                <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!isDirty || !isValid}>ADD TRIP</Button>
+                                <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={(tripGroup.some((x) => x.dayNumber === dayNumber)) || (!isDirty || !isValid)}>ADD TRIP</Button>
                                 : <LoadingButton variant="contained" loading={loading}   >
                                     <span>disabled</span>
                                 </LoadingButton>
                             }
-                            <Button variant="contained" disabled={!isValid} onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}>ADD POINT`S FOR THE TRIP</Button>
+                            {buttonAdd === true ?
+                                <Button variant="contained" onClick={addNextDay} sx={{ ':hover': { background: '#4daf30' } }} disabled={(tripGroup.some((x) => x.dayNumber === dayNumber)) || (!isDirty || !isValid)}>ADD NEXT DAY TRIP</Button>
+                                : <LoadingButton variant="contained" loading={loading}   >
+                                    <span>disabled</span>
+                                </LoadingButton>
+                            }
+                            {buttonAdd === true ?
 
+                                <Button variant="contained" disabled={!isValid} onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}>ADD POINT`S FOR THE TRIP</Button>
+                                : <LoadingButton variant="contained" loading={loading}   >
+                                    <span>disabled</span>
+                                </LoadingButton>
+                            }
                         </Box>
                         <Box sx={{ position: 'relative', marginTop: '20px', display: 'flex', flexDirection: 'column', alignContent: 'center', alignItems: 'center', boxSizing: 'border-box' }}>
-                            <Snackbar sx={{ position: 'relative', left: '0px', right: '0px' }} open={errorApi ? true : false} autoHideDuration={5000} onClose={handleClose} >
+                            <Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'left' }} open={errorApi ? true : false} autoHideDuration={5000} onClose={handleClose} >
                                 <Alert onClose={handleClose} severity="error">{errorApi}</Alert>
                             </Snackbar>
                         </Box>

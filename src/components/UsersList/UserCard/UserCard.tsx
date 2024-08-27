@@ -18,19 +18,26 @@ interface UserCardProps {
 
 
 const UserCard: FC<UserCardProps> = ({ user }): ReactElement => {
-
+   
     const dateFormat = (date: string) => {
         const isoDate = new Date(date);
         let timePart = '';
+        
         if (!isNaN(isoDate.getTime())) {
             const hours = isoDate.getHours().toString().padStart(2, '0');
             const minutes = isoDate.getMinutes().toString().padStart(2, '0');
             const seconds = isoDate.getSeconds().toString().padStart(2, '0');
             timePart = `${hours}:${minutes}:${seconds} `;
         }
-        const formattedDate = `${timePart}${isoDate.getDate()}-${isoDate.getMonth() + 1}-${isoDate.getFullYear()}`;
+        
+        const day = isoDate.getDate().toString().padStart(2, '0');
+        const month = (isoDate.getMonth() + 1).toString().padStart(2, '0');
+        const year = isoDate.getFullYear();
+    
+        const formattedDate = `${timePart}${day}-${month}-${year}`;
         return formattedDate;
     }
+    
 
     let oneDay = 60 * 60 * 24 * 1000
     let timeCreatedPlusOneDay = Date.parse(user.timeCreated ? user.timeCreated : new Date().toISOString()) + oneDay
@@ -55,7 +62,7 @@ const UserCard: FC<UserCardProps> = ({ user }): ReactElement => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    maxWidth: '300px', margin: '20px',
+                    maxWidth: '350px', margin: '20px',
                     height: 'fit-content',
                     padding: '25px', backgroundColor: '#8d868670',
                     boxShadow: '3px 2px 5px black', border: 'solid 1px', borderRadius: '0px'
