@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Box, Button, CardMedia, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Button, CardMedia, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -10,14 +10,14 @@ import { IdType, toIsoDate } from "../../shared/common-types";
 import { User } from "../../model/users";
 import { ApiClient } from "../../services/userService";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
-import imageCompression from "browser-image-compression";
 import { LoginContext } from "../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { TripCreate } from "../../model/trip";
 import * as tripService from "../../services/tripService";
 import { ApiTrip } from "../../services/tripService";
+import { handleFilesChange } from "../../shared/handleFilesChange";
+import CustomFileUploadButton from "../CustomFileUploadButton/CustomFileUploadButton ";
 
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
@@ -72,7 +72,7 @@ const Profile: FC = () => {
 
     const [user, setUser] = useState<User>();
     const [hide, setHide] = useState<boolean>(false);
-    const [fileSelected, setFileSelected] = useState<File | null>(null);
+    const [fileSelected, setFileSelected] = useState<File[]>([]);
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const [imageBackground, setImageBackground] = useState<string>()
 
@@ -154,9 +154,8 @@ const Profile: FC = () => {
 
         let imagesNames;
 
-        if (fileSelected && accessToken) {
-            formData.append('file', fileSelected);
-
+        if (fileSelected && fileSelected.length > 0 && accessToken) {
+            formData.append('file', fileSelected[fileSelected.length - 1]);
 
 
             imagesNames = await API_CLIENT.sendFile(formData, accessToken).then((data) => {
@@ -192,7 +191,7 @@ const Profile: FC = () => {
 
             API_CLIENT.updateUser(userId, editedUser, accessToken).then((data) => {
                 setUser(data);
-                setFileSelected(null);
+                setFileSelected([]);
                 reset({ oldpassword: '', password: '', confirmpass: '' });
                 setHide(false);
             }).catch((err) => {
@@ -219,68 +218,11 @@ const Profile: FC = () => {
         }
     }
 
-    const handleFileChange = async (event: BaseSyntheticEvent) => {
+    let images;
 
-        let file = Array.from(event.target.files)[0] as File;
+    const handleProfileFileChange = (event: BaseSyntheticEvent) => {
 
-        if (!file) return;
-
-
-        if (file !== null) {
-
-
-
-            if (!file.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
-                setErrorMessageImage('Please select valid file image');
-
-                return;
-            }
-            if (file.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
-                setErrorMessageImage(undefined);
-            }
-
-
-
-
-            if (file.size > 1000000) {
-                const options = {
-                    maxSizeMB: 1,
-                    maxWidthOrHeight: 1920,
-                    useWebWorker: true,
-                    fileType: file.type,
-                    name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
-                        file.name.split(/[,\s]+/).length > 1 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
-
-                }
-
-
-
-                try {
-                    const compressedFile = await imageCompression(file, options);
-
-                    if (compressedFile !== undefined) {
-                        let compFile = new File([compressedFile], options.name, { type: file.type })
-                        setFileSelected(prev => compFile);
-                    }
-
-                } catch (err) {
-                    console.log(err);
-                }
-            } else {
-
-                const options = {
-                    name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
-                        file.name.split(/[,\s]+/).length > 1 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
-                }
-                let newFile = new File([file], options.name, { type: file.type })
-
-                setFileSelected(prev => newFile);
-            }
-
-
-        }
-
-
+        handleFilesChange(event, fileSelected, setFileSelected, setErrorMessageImage, images?.length || 0);
     };
 
 
@@ -301,7 +243,7 @@ const Profile: FC = () => {
 
     const onDeleteImage = (event: BaseSyntheticEvent) => {
 
-        setFileSelected(null)
+        setFileSelected([])
     }
 
 
@@ -315,17 +257,8 @@ const Profile: FC = () => {
     }
 
 
-
-    const MuiTooltipIconFotoCamera = () => {
-        return (
-            <Tooltip title='UPLOAD' arrow>
-                <IconButton color="primary" aria-label="upload picture" component="label">
-                    <input hidden accept="image/*" type="file" onChange={handleFileChange} />
-
-                    <PhotoCamera fontSize="large" />
-                </IconButton>
-            </Tooltip>
-        )
+    if (fileSelected.length > 1) {
+        setFileSelected(Array(fileSelected[fileSelected.length - 1]))
     }
 
 
@@ -396,17 +329,11 @@ const Profile: FC = () => {
 
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
 
-                        {iconFotoCamera ?
-                            <MuiTooltipIconFotoCamera />
-                            :
-                            <Button variant="contained" component="label" sx={{ margin: '2px' }} >
-                                Upload
-                                <input hidden accept="image/*" multiple type="file" onChange={handleFileChange} />
-                            </Button>
-                        }
+                        <CustomFileUploadButton handleFilesChange={handleProfileFileChange} images={images || []} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} />
+
                     </Box >
                     {errorMessageImage ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageImage}</Typography> : ''}
-                    {(fileSelected !== null) && (fileSelected !== undefined) ? <>
+                    {fileSelected.length > 0 ? <>
 
                         <Box component='div' id='box-images' sx={{
                             display: "flex",
@@ -420,14 +347,14 @@ const Profile: FC = () => {
                             borderRadius: '5px',
 
                         }}>
-                            {Array(fileSelected).map((x, i) => { return <li style={{ 'listStyle': 'none', display: 'flex', justifyContent: 'space-between', margin: '5px 0px', alignItems: 'center' }} key={i}><img src={URL.createObjectURL(x)} style={{ borderRadius: '5px' }} alt={x.name} height='45px' width='55px' /> {x.name.length > 60 ? '...' + x.name.slice(-60) : x.name} <HighlightOffSharpIcon sx={{ cursor: 'pointer', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={onDeleteImage} key={x.name} id={x.name} /></li> }
+                            {Array(fileSelected.slice(-1)[0]).map((x, i) => { return <li style={{ 'listStyle': 'none', display: 'flex', justifyContent: 'space-between', margin: '5px 0px', alignItems: 'center' }} key={i}><img src={URL.createObjectURL(x)} style={{ borderRadius: '5px' }} alt={x.name} height='45px' width='55px' /> {x.name.length > 60 ? '...' + x.name.slice(-60) : x.name} <HighlightOffSharpIcon sx={{ cursor: 'pointer', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={onDeleteImage} key={x.name} id={x.name} /></li> }
                             )}
                         </Box >
 
 
                     </> : ''}
                     <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Button variant="contained" type='submit' disabled={(!isDirty || !isValid) && !fileSelected} sx={{ margin: '2px', ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
+                        <Button variant="contained" type='submit' disabled={(!isDirty || !isValid) && fileSelected.length === 0} sx={{ margin: '2px', ':hover': { background: '#4daf30' } }}>EDIT PROFILE</Button>
                         <Button variant="contained" onClick={goBack} sx={{ margin: '2px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                         <Button variant="contained" onClick={changePass} disabled={user?.email === 'test@abv.bg' ? true : false} sx={{ margin: '2px', ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >{hide ? 'HIDE CHANGE PASSWORD' : 'CHANGE PASSWORD'}</Button>
                     </Box >

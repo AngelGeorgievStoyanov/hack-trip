@@ -39,10 +39,7 @@ import { keyframes } from '@emotion/react';
 
 let zoom = 12;
 
-let center = {
-    lat: 42.697866831005435,
-    lng: 23.321590139866355
-}
+
 
 
 const googleKey = process.env.REACT_APP_GOOGLE_KEY;
@@ -131,6 +128,10 @@ const rotateXAnimation = keyframes`
 
 const TripDetails: FC = () => {
 
+    let center = {
+        lat: 42.697866831005435,
+        lng: 23.321590139866355
+    }
 
     const [activeStep, setActiveStep] = React.useState(0);
     const [points, setPoints] = useState<Point[]>([]);
@@ -210,16 +211,12 @@ const TripDetails: FC = () => {
 
                                 arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
 
-
-                                center = {
-                                    lat: Number(arrPoints[0].lat),
-                                    lng: Number(arrPoints[0].lng)
-                                }
+                                center.lat = Number(arrPoints[0].lat);
+                                center.lng = Number(arrPoints[0].lng);
 
 
                                 setPoints(arrPoints);
                             }
-
 
                             setMapCenter(center);
                         }
@@ -313,11 +310,8 @@ const TripDetails: FC = () => {
                                 arrPoints.sort((a, b) => Number(a.pointNumber) - Number(b.pointNumber))
 
 
-                                center = {
-                                    lat: Number(arrPoints[0].lat),
-                                    lng: Number(arrPoints[0].lng)
-                                }
-
+                                center.lat = Number(arrPoints[0].lat);
+                                center.lng = Number(arrPoints[0].lng);
 
                                 setPoints(arrPoints);
                                 setMapCenter(center);
@@ -407,8 +401,7 @@ const TripDetails: FC = () => {
 
     const onLoad = (map: google.maps.Map): void => {
         mapRef.current = map;
-
-        if (points.length === 0 && trip) {
+        if (points.length === 0 && trip && trip.lat !== undefined && trip.lng !== undefined && trip.lat !== null && trip.lng !== null) {
             mapRef.current.setCenter({ lat: Number(trip.lat), lng: Number(trip.lng) });
         } else if (points.length > 0 && activeStep === 0) {
             const bounds = new google.maps.LatLngBounds();
@@ -417,6 +410,8 @@ const TripDetails: FC = () => {
         } else if (activeStep > 0) {
             mapRef.current.setCenter(center);
             mapRef.current?.set('zoom', 14);
+        } else if (trip && (trip.lat === undefined || trip.lng === undefined || trip.lat === null || trip.lng === null)) {
+            mapRef.current.setCenter({ lat: Number(center.lat), lng: Number(center.lng) });
         }
     }
 
@@ -1181,7 +1176,7 @@ const TripDetails: FC = () => {
                                     : ''}
 
                                 <GoogleMapWrapper
-                                    center={mapCenter !== undefined ? mapCenter : center}
+                                    center={mapCenter.lat !== undefined && mapCenter.lng !== undefined ? mapCenter : center}
                                     zoom={zoom}
                                     onLoad={onLoad}
                                     onUnmount={onUnmount}

@@ -1,4 +1,4 @@
-import { Box, Button, CardMedia, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Button, CardMedia, Typography } from "@mui/material";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import FormInputText from "../FormFields/FormInputText";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
@@ -13,9 +13,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginContext } from "../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
 import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
-import imageCompression from "browser-image-compression";
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import CustomFileUploadButton from "../CustomFileUploadButton/CustomFileUploadButton ";
+import { handleFilesChange } from "../../shared/handleFilesChange";
 
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
@@ -75,7 +75,7 @@ const AdminEdit: FC = () => {
 
 
 
-    const [fileSelected, setFileSelected] = useState<File | null>(null);
+    const [fileSelected, setFileSelected] = useState<File[]>([]);
     const [user, setUser] = useState<User>();
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
 
@@ -102,7 +102,7 @@ const AdminEdit: FC = () => {
     let timeCreatedPlusOneDay = Date.parse(userEdit.timeCreated ? userEdit.timeCreated : new Date().toISOString()) + oneDay
     let now = Date.parse(new Date().toISOString())
 
-    const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit, formState: { errors, isDirty } } = useForm<FormData>({
 
         defaultValues: {
             _id: userEdit._id + '', email: userEdit.email,
@@ -125,6 +125,9 @@ const AdminEdit: FC = () => {
     });
 
 
+    if (fileSelected.length > 1) {
+        setFileSelected(Array(fileSelected[fileSelected.length - 1]))
+    }
 
     const editProfileSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
         if (accessToken) {
@@ -132,9 +135,9 @@ const AdminEdit: FC = () => {
 
             let formData = new FormData();
             let imagesNames
-            if (fileSelected) {
+            if (fileSelected && fileSelected.length > 0) {
+                formData.append('file', fileSelected[fileSelected.length - 1]);
 
-                formData.append('file', fileSelected);
 
                 imagesNames = await API_CLIENT.sendFile(formData, accessToken).then((data) => {
                     let imageName = data as unknown as any as any[];
@@ -194,7 +197,7 @@ const AdminEdit: FC = () => {
                 API_CLIENT.updateUserAdmin(userEdit._id, editedUser, accessToken).then((data) => {
 
                     setUser(prev => data);
-                    setFileSelected(null);
+                    setFileSelected([]);
 
                 }).catch((err) => {
                     console.log(err)
@@ -212,65 +215,14 @@ const AdminEdit: FC = () => {
 
     }
 
+    let images;
 
-    const handleFileChange = async (event: BaseSyntheticEvent) => {
-
+    const handleAdminEditTripFilesChange = (event: BaseSyntheticEvent) => {
         let file = Array.from(event.target.files)[0] as File;
-
         if (!file) return;
-
-        if (file !== null) {
-
-            if (!file.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
-                setErrorMessageImage('Please select valid file image');
-
-
-                return;
-            }
-            if (file.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
-                setErrorMessageImage(undefined)
-            }
-
-
-
-            if (file.size > 1000000) {
-
-                const options = {
-                    maxSizeMB: 1,
-                    maxWidthOrHeight: 1920,
-                    useWebWorker: true,
-                    fileType: file.type,
-                    name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
-                        file.name.split(/[,\s]+/).length > 1 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
-
-                }
-
-                try {
-                    const compressedFile = await imageCompression(file, options);
-
-                    if (compressedFile !== undefined) {
-                        let compFile = new File([compressedFile], options.name, { type: file.type })
-                        setFileSelected(prev => compFile);
-                    }
-
-                } catch (err) {
-                    console.log(err);
-                }
-            } else {
-
-                const options = {
-                    name: !file.name ? 'IMG' + (Math.random() * 3).toString() :
-                        file.name.split(/[,\s]+/).length > 1 ? file.name.split(/[,\s]+/)[0] + '.jpg' : file.name
-                }
-                let newFile = new File([file], options.name, { type: file.type })
-
-                setFileSelected(prev => newFile);
-            }
-
-        }
-
-
+        handleFilesChange(event, fileSelected, setFileSelected, setErrorMessageImage, images?.length || 0);
     };
+
 
 
 
@@ -291,8 +243,7 @@ const AdminEdit: FC = () => {
 
 
     const onDeleteImage = (event: BaseSyntheticEvent) => {
-
-        setFileSelected(null)
+        setFileSelected([])
     }
 
 
@@ -307,17 +258,7 @@ const AdminEdit: FC = () => {
 
 
 
-    const MuiTooltipIconFotoCamera = () => {
-        return (
-            <Tooltip title='UPLOAD' arrow>
-                <IconButton color="primary" aria-label="upload picture" component="label">
-                    <input hidden accept="image/*" type="file" onChange={handleFileChange} />
 
-                    <PhotoCamera fontSize="large" />
-                </IconButton>
-            </Tooltip>
-        )
-    }
 
 
     const deleteClickHandler = () => {
@@ -404,17 +345,11 @@ const AdminEdit: FC = () => {
                         : ''}
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
 
-                        {iconFotoCamera ?
-                            <MuiTooltipIconFotoCamera />
-                            :
-                            <Button variant="contained" component="label" sx={{ margin: '2px' }} >
-                                Upload
-                                <input hidden accept="image/*" multiple type="file" onChange={handleFileChange} />
-                            </Button>
-                        }
+                        <CustomFileUploadButton handleFilesChange={handleAdminEditTripFilesChange} images={images || []} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} />
+
                     </Box >
                     {errorMessageImage ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageImage}</Typography> : ''}
-                    {(fileSelected !== null) && (fileSelected !== undefined) ? <>
+                    {fileSelected.length > 0 ? <>
 
                         <Box component='div' id='box-images' sx={{
                             display: "flex",
@@ -428,7 +363,7 @@ const AdminEdit: FC = () => {
                             borderRadius: '5px',
 
                         }}>
-                            {Array(fileSelected).map((x, i) => { return <li style={{ 'listStyle': 'none', display: 'flex', justifyContent: 'space-between', margin: '5px 0px', alignItems: 'center' }} key={i}><img src={URL.createObjectURL(x)} style={{ borderRadius: '5px' }} alt={x.name} height='45px' width='55px' /> {x.name.length > 60 ? '...' + x.name.slice(-60) : x.name} <HighlightOffSharpIcon sx={{ cursor: 'pointer', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={onDeleteImage} key={x.name} id={x.name} /></li> }
+                            {Array(fileSelected.slice(-1))[0].map((x, i) => { return <li style={{ 'listStyle': 'none', display: 'flex', justifyContent: 'space-between', margin: '5px 0px', alignItems: 'center' }} key={i}><img src={URL.createObjectURL(x)} style={{ borderRadius: '5px' }} alt={x.name} height='45px' width='55px' /> {x.name.length > 60 ? '...' + x.name.slice(-60) : x.name} <HighlightOffSharpIcon sx={{ cursor: 'pointer', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={onDeleteImage} key={x.name} id={x.name} /></li> }
                             )}
                         </Box >
 
@@ -437,7 +372,7 @@ const AdminEdit: FC = () => {
 
 
                     <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30', margin: '2px' } }}>EDIT PROFILE</Button>
+                        <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30', margin: '2px' } }} disabled={!isDirty && fileSelected.length === 0}>EDIT PROFILE</Button>
                         <Button variant="contained" onClick={deleteClickHandler} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE USER</Button>
 
                         <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>

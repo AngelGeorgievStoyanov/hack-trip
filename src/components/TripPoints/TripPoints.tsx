@@ -6,7 +6,7 @@ import { Point, PointCreate } from "../../model/point";
 import * as pointService from '../../services/pointService';
 import { ApiPoint } from "../../services/pointService";
 import PointList from "./PointList/PointList";
-import { Alert, Box, Button, Container, Grid, IconButton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, Container, Grid, Snackbar, TextField, Typography } from "@mui/material";
 import FormInputText from "../FormFields/FormInputText";
 import FormTextArea from "../FormFields/FormTextArea";
 import { useForm } from "react-hook-form";
@@ -14,16 +14,16 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginContext } from "../../hooks/LoginContext";
 import LoadingButton from "@mui/lab/LoadingButton";
-import imageCompression from "browser-image-compression";
 import jwt_decode from "jwt-decode";
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import * as tripService from '../../services/tripService';
 import { Trip } from '../../model/trip';
 import { ApiTrip } from '../../services/tripService';
 import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
+import CustomFileUploadButton from "../CustomFileUploadButton/CustomFileUploadButton ";
+import { handleFilesChange } from "../../shared/handleFilesChange";
+import RemoveAllImagesButton from "../RemoveAllImagesButton/RemoveAllImagesButton";
 
 
 
@@ -93,7 +93,6 @@ const TripPoints: FC = () => {
 
     const isIphone = /\b(iPhone)\b/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
 
-    const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
 
     const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
 
@@ -167,96 +166,9 @@ const TripPoints: FC = () => {
     }
 
 
-
-    const handleFilesChange = async (event: BaseSyntheticEvent) => {
-
-        let files: File[] = Array.from(event.target.files);
-
-        if (!files) return;
-        if (files.length === 0) return
-
-        while (files.some((x) => !x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/))) {
-            setErrorMessageImage('Please select valid file image');
-
-            let index = files.findIndex((x: any) => {
-                return !x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)
-            })
-
-            files.splice(index, 1)
-        }
-
-        if (files.length > 9) {
-            files = files.slice(0, 9)
-        }
-
-        if (fileSelected.length > 0) {
-            files = files.slice(0, 9 - fileSelected.length)
-        }
-
-        let indexSize: number = 0;
-        let totalSize: number = 0;
-
-        if (mobile) {
-            files.map((x, i) => {
-                totalSize += x.size;
-
-                if (totalSize > 40000000 && indexSize === 0) {
-                    indexSize = i - 1;
-                }
-            });
-
-        }
-
-
-        if (indexSize > 0) {
-            files = files.slice(0, indexSize)
-
-        }
-
-
-        files.map(async (x: File) => {
-
-
-
-            if (x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
-
-                if (x.size > 1000000) {
-
-                    const options = {
-                        maxSizeMB: 1,
-                        maxWidthOrHeight: 1920,
-                        useWebWorker: true,
-                        fileType: x.type,
-                        name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
-                            x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
-                    }
-                    try {
-                        const compressedFile = await imageCompression(x, options)
-
-                        let compressFile = new File([compressedFile], options.name, { type: x.type })
-
-                        return setFileSelected(prev => [...prev, compressFile]);
-
-                    } catch (err) {
-                        console.log(err);
-                    }
-                } else {
-                    const options = {
-                        name: !x.name ? 'IMG' + (Math.random() * 3).toString() :
-                            x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
-                    }
-                    let file = new File([x], options.name, { type: x.type });
-
-                    return setFileSelected(prev => [...prev, file]);
-                }
-            } else if (!x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/)) {
-                setErrorMessageImage('Please select valid file image');
-                return
-            }
-        })
-
-
-    }
+    const handleCreatePointsFilesChange = (event: BaseSyntheticEvent) => {
+        handleFilesChange(event, fileSelected, setFileSelected, setErrorMessageImage);
+    };
 
 
     const searchInp = async (e: React.MouseEvent) => {
@@ -489,27 +401,6 @@ const TripPoints: FC = () => {
 
 
 
-    const MuiTooltipIconFotoCamera = () => {
-        return (
-            <Tooltip title='UPLOAD' arrow>
-                <IconButton disabled={fileSelected.length >= 9 ? true : false} color="primary" aria-label="upload picture" component="label">
-                    <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
-
-                    <PhotoCamera fontSize="large" />
-                </IconButton>
-            </Tooltip>
-        )
-    }
-
-
-    const MuiTooltipIconRemoveAll = () => {
-        return (
-            <Tooltip title='REMOVE ALL IMAGES' arrow>
-                <DeleteForeverIcon color="primary" fontSize="large" onClick={onDeleteAllImage} />
-            </Tooltip>
-        )
-    }
-
     const getPosition = () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showGPS, gpsError)
@@ -535,7 +426,7 @@ const TripPoints: FC = () => {
         setErrorApi(undefined);
         setErrorMessageSearch('');
     };
-   
+
     const handleAutocompleteLoad = (autocompleteInstance: google.maps.places.Autocomplete) => {
         setAutocomplete(autocompleteInstance);
     };
@@ -643,17 +534,9 @@ const TripPoints: FC = () => {
 
 
                             <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                {iconFotoCamera ?
-                                    <MuiTooltipIconFotoCamera />
-                                    :
-                                    <Box sx={{ width: '30ch' }}>
-                                        <Button variant="contained" component="label" disabled={fileSelected.length >= 9 ? true : false} >
-                                            Upload
-                                            <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
 
-                                        </Button>
-                                    </Box>
-                                }
+                                <CustomFileUploadButton handleFilesChange={handleCreatePointsFilesChange} images={[]} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} />
+
                                 <Typography variant="overline" display="block" gutterBottom style={{ marginRight: '15px' }}>     {fileSelected.length}/9 uploaded images</Typography>
                             </Box >
                             {fileSelected.length === 9 ? <Typography style={{ color: 'red', marginLeft: '12px' }}>9 images are the maximum number to upload.</Typography> : ''}
@@ -675,13 +558,8 @@ const TripPoints: FC = () => {
                                     {fileSelected.map((x, i) => { return <li style={{ 'listStyle': 'none', display: 'flex', justifyContent: 'space-between', margin: '5px 0px', alignItems: 'center' }} key={i}><img src={URL.createObjectURL(x)} style={{ borderRadius: '5px' }} alt={x.name} height='45px' width='55px' /> {x.name.length > 60 ? '...' + x.name.slice(-60) : x.name} <HighlightOffSharpIcon sx={{ cursor: 'pointer', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={onDeleteImage} key={x.name} id={x.name} /></li> }
                                     )}
                                 </Box >
-                                {iconFotoCamera ?
-                                    <MuiTooltipIconRemoveAll />
-                                    :
-                                    <Box component='div' sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                        <Button variant="contained" onClick={onDeleteAllImage}>Remove all images</Button>
-                                    </Box>
-                                }
+
+                                <RemoveAllImagesButton onDeleteAllImages={onDeleteAllImage} iconFotoCamera={iconFotoCamera} />
 
 
                             </> : ''}

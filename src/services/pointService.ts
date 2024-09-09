@@ -7,7 +7,7 @@ const baseUrl = CONNECTIONURL;
 
 
 export interface ApiPoint<K, V extends Identifiable<K>> {
-    findByTripId(id: K, token: string): Promise<V>;
+    findByTripId(id: K, token: string): Promise<V[]>;
     create(entityWithoutId: PointCreate, token: string): Promise<any>;
     update(id: K, entity: Point, token: string): Promise<V>;
     deleteById(id: K, idTrip: K, userId: K, token: string): Promise<void>;
@@ -25,7 +25,7 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
     constructor(public apiCollectionSuffix: string) { }
 
 
-    async findByTripId(id: K, token: string): Promise<V> {
+    async findByTripId(id: K, token: string): Promise<V[]> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/${id}`, {
             method: 'GET',
