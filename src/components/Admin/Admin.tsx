@@ -28,6 +28,7 @@ type decode = {
     _id: string;
 }
 
+const PAGESIZE = [5, 10, 20, 50]
 
 
 let userId: string;
@@ -68,8 +69,11 @@ const Admin: FC = () => {
     const [failedLogs, setFailedLogs] = useState<IFailedLogs[]>();
     const [hideFailedLogsList, setHideFailedLogsList] = useState<boolean>(true);
     const [selectedRow, setSelectedRow] = useState<GridRowSelectionModel>([]);
+    const [selectedRowNotFound, setSelectedRowNotFound] = useState<GridRowSelectionModel>([]);
     const [currentPage, setCurrentPage] = useState<number>(0);
+    const [currentPageNotFound, setCurrentPageNotFound] = useState<number>(0);
     const [pageSize, setPageSize] = useState<number>(5);
+    const [pageSizeNotFound, setPageSizeNotFound] = useState<number>(5);
     const [dbImages, setDbImages] = useState<string[]>();
     const [gcloudImages, setGcloudImages] = useState<GcloudImage[]>();
     const [commonImages, setCommonImages] = useState<CommonImagesData>();
@@ -288,7 +292,7 @@ const Admin: FC = () => {
         { field: 'reqIp', headerName: 'IP', width: 700 },
         { field: 'reqMethod', headerName: 'Method' },
         { field: 'reqParams', headerName: 'Params', width: 250 },
-        { field: 'reqQuery', headerName: 'Query' , width: 250},
+        { field: 'reqQuery', headerName: 'Query', width: 250 },
         { field: 'reqUrl', headerName: 'Url', width: 230 },
         { field: 'reqUserEmail', headerName: 'Email', width: 430 },
         { field: '_id', headerName: 'User ID', width: 330 }
@@ -299,11 +303,17 @@ const Admin: FC = () => {
         setSelectedRow(selectionModel);
     };
 
+    const handleSelectionModelChangeNotFound = (selectionModel: GridRowSelectionModel) => {
+
+        setSelectedRowNotFound(selectionModel);
+    };
 
     const handeleDeleteRows = () => {
         if (selectedRow.length > 0 && accessToken) {
 
-            API_CLIENT.deleteFailedLogs(userId, selectedRow, accessToken).then((data) => {
+            const mutableSelectedRow = [...selectedRow];
+
+            API_CLIENT.deleteFailedLogs(userId, mutableSelectedRow, accessToken).then((data) => {
 
                 const updatedFailedLogs = failedLogs ? failedLogs.filter((log: IFailedLogs) => !selectedRow.includes(log._id!)) : [];
 
@@ -323,6 +333,11 @@ const Admin: FC = () => {
         setCurrentPage(newPage.page);
         setPageSize(newPage.pageSize);
     }
+
+    const changePageNotFound = (newPage: any) => {
+        setCurrentPageNotFound(newPage.page);
+        setPageSizeNotFound(newPage.pageSize);
+    };
 
     return (
         <>
@@ -410,11 +425,11 @@ const Admin: FC = () => {
                                             },
                                         }}
 
-                                        pageSizeOptions={[5, 10]}
+                                        pageSizeOptions={PAGESIZE}
                                         checkboxSelection
                                         onRowSelectionModelChange={handleSelectionModelChange}
 
-                                        onPaginationModelChange={(newPage: any) => changePage(newPage)}
+                                        onPaginationModelChange={changePage}
 
 
                                     />
@@ -429,21 +444,21 @@ const Admin: FC = () => {
                             {(routeNotFoundLogs !== undefined && routeNotFoundLogs.length > 0) ?
                                 <>
                                     <DataGrid
-                                        key={currentPage}
+                                        key={currentPageNotFound}
                                         sx={{ maxWidth: '100%', bgcolor: 'white' }}
                                         rows={routeNotFoundLogs.map((log, index) => ({ id: log._id || index, ...log }))}
                                         columns={columnsRnFlogs}
                                         initialState={{
                                             pagination: {
-                                                paginationModel: { page: currentPage !== undefined ? currentPage : 0, pageSize: pageSize !== undefined ? pageSize : 5 }
+                                                paginationModel: { page: currentPageNotFound !== undefined ? currentPageNotFound : 0, pageSize: pageSizeNotFound !== undefined ? pageSizeNotFound : 5 }
                                             },
                                         }}
 
-                                        pageSizeOptions={[5, 10]}
+                                        pageSizeOptions={PAGESIZE}
                                         checkboxSelection
-                                        onRowSelectionModelChange={handleSelectionModelChange}
+                                        onRowSelectionModelChange={handleSelectionModelChangeNotFound}
 
-                                        onPaginationModelChange={(newPage: any) => changePage(newPage)}
+                                        onPaginationModelChange={changePageNotFound}
 
 
                                     />
