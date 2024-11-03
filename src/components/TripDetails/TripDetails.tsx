@@ -408,7 +408,6 @@ const TripDetails: FC = () => {
             points?.forEach(({ lat, lng }) => bounds.extend({ lat: Number(lat), lng: Number(lng) }));
             map.fitBounds(bounds);
         } else if (activeStep > 0) {
-            mapRef.current.setCenter(center);
             mapRef.current?.set('zoom', 14);
         } else if (trip && (trip.lat === undefined || trip.lng === undefined || trip.lat === null || trip.lng === null)) {
             mapRef.current.setCenter({ lat: Number(center.lat), lng: Number(center.lng) });
@@ -448,6 +447,7 @@ const TripDetails: FC = () => {
 
                 mapRef.current?.set('zoom', 14);
 
+                setMapCenter(center);
             }
 
         } else if (positionNumber) {
@@ -465,6 +465,8 @@ const TripDetails: FC = () => {
                 mapRef.current?.panTo(center);
 
                 mapRef.current?.set('zoom', 14);
+
+                setMapCenter(center);
             }
 
         } else if (positionNumber === 0) {
