@@ -23,6 +23,7 @@ import GoogleMapWrapper from "../../GoogleMapWrapper/GoogleMapWrapper";
 import CustomFileUploadButton from "../../CustomFileUploadButton/CustomFileUploadButton ";
 import { handleFilesChange } from "../../../shared/handleFilesChange";
 import RemoveAllImagesButton from "../../RemoveAllImagesButton/RemoveAllImagesButton";
+import { useConfirm } from "../../ConfirmDialog/ConfirmDialog";
 
 
 let zoom = 8;
@@ -82,6 +83,7 @@ const PointEdit: FC = () => {
     const [imageBackground, setImageBackground] = useState<string>()
     const [errorApi, setErrorApi] = useState<string>();
 
+    const { confirm } = useConfirm();
 
     const { token } = useContext(LoginContext);
 
@@ -337,20 +339,22 @@ const PointEdit: FC = () => {
     }
 
 
-    const deleteImage = (e: React.MouseEvent) => {
+    const deleteImage = async (item: string) => {
         if (accessToken) {
+            const result = await confirm('Are you sure you want to delete this image?', 'Delete Confirmation');
+            if (result) {
+                const index = images?.indexOf(item);
+                if (index !== undefined) {
+                    const deletedImage = images?.slice(index, index + 1);
 
-            const index = images?.indexOf(e.currentTarget.id);
-            if (index !== undefined) {
-                const deletedImage = images?.slice(index, index + 1);
+                    if (deletedImage) {
 
-                if (deletedImage) {
-
-                    API_POINT.editImages(point._id, deletedImage, accessToken).then((data) => {
-                        setImages(data.imageFile);
-                    }).catch((err) => {
-                        console.log(err);
-                    });
+                        API_POINT.editImages(point._id, deletedImage, accessToken).then((data) => {
+                            setImages(data.imageFile);
+                        }).catch((err) => {
+                            console.log(err);
+                        });
+                    }
                 }
             }
         }
@@ -525,7 +529,7 @@ const PointEdit: FC = () => {
                             <ImageList sx={{ width: 520, height: 'auto', margin: '20px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={point.imageFile.length > 3 ? 3 : point.imageFile.length} rowHeight={point.imageFile.length > 9 ? 164 : point.imageFile.length > 5 ? 300 : point.imageFile.length > 2 ? 350 : 450}>
                                 {images ? images.map((item, i) => (
                                     <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
-                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', position: 'absolute', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={deleteImage} id={item} />
+                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', position: 'absolute', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={() => deleteImage(item)} id={item} />
                                         <img
                                             src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
                                             srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}

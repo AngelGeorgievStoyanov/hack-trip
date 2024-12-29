@@ -18,6 +18,7 @@ import * as tripService from "../../services/tripService";
 import { ApiTrip } from "../../services/tripService";
 import { handleFilesChange } from "../../shared/handleFilesChange";
 import CustomFileUploadButton from "../CustomFileUploadButton/CustomFileUploadButton ";
+import { useConfirm } from "../ConfirmDialog/ConfirmDialog";
 
 
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
@@ -74,7 +75,10 @@ const Profile: FC = () => {
     const [hide, setHide] = useState<boolean>(false);
     const [fileSelected, setFileSelected] = useState<File[]>([]);
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
-    const [imageBackground, setImageBackground] = useState<string>()
+    const [imageBackground, setImageBackground] = useState<string>();
+    const [images, setImages] = useState([]);
+
+    const { confirm } = useConfirm();
 
     const navigate = useNavigate();
 
@@ -218,7 +222,7 @@ const Profile: FC = () => {
         }
     }
 
-    let images;
+
 
     const handleProfileFileChange = (event: BaseSyntheticEvent) => {
 
@@ -227,16 +231,18 @@ const Profile: FC = () => {
 
 
 
-    const deleteImage = (e: React.MouseEvent) => {
+    const deleteImage = async (e: React.MouseEvent) => {
 
         const img = e.currentTarget.id;
         if (userId && accessToken) {
-
-            API_CLIENT.deleteProfileImage(userId, img, accessToken).then((data) => {
-                setUser(data);
-            }).catch((err) => {
-                console.log(err)
-            });
+            const result = await confirm('Are you sure you want to delete this image?', 'Delete Confirmation');
+            if (result) {
+                API_CLIENT.deleteProfileImage(userId, img, accessToken).then((data) => {
+                    setUser(data);
+                }).catch((err) => {
+                    console.log(err)
+                });
+            }
         }
     }
 

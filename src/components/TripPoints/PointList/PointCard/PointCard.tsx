@@ -11,6 +11,7 @@ import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import { LoginContext } from "../../../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
+import { useConfirm } from "../../../ConfirmDialog/ConfirmDialog";
 
 
 interface PointCardProps {
@@ -45,6 +46,8 @@ const PointCard: FC<PointCardProps> = ({ point, length }): ReactElement => {
     const idTrip = useParams().tripId;
 
     const { token } = useContext(LoginContext);
+
+    const { confirm } = useConfirm();
 
     const navigate = useNavigate();
     let center = {
@@ -82,13 +85,16 @@ const PointCard: FC<PointCardProps> = ({ point, length }): ReactElement => {
     if (!isLoaded) return <Grid container sx={{ justifyContent: 'center', bgcolor: '#cfe8fc', padding: '30px', minHeight: '100vh', '@media(max-width: 900px)': { display: 'flex', width: '100vw', padding: '0', margin: '0' } }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}><Typography sx={{ fontFamily: 'Space Mono, monospace' }} variant='h4'>MAP LOADING ...</Typography></Grid>
 
 
-    const deleteClickHandler = () => {
+    const deleteClickHandler = async() => {
         if (idTrip && userId && accessToken) {
-            API_POINT.deleteById(point._id, idTrip, userId, accessToken).then((data) => {
-                navigate(`/trip/points/${idTrip}`);
-            }).catch((err) => {
-                console.log(err);
-            });
+            const result = await confirm('Are you sure you want to delete this point?', 'Delete Confirmation');
+            if (result) {
+                API_POINT.deleteById(point._id, idTrip, userId, accessToken).then((data) => {
+                    navigate(`/trip/points/${idTrip}`);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }
         }
 
     }

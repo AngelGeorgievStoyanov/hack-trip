@@ -36,6 +36,8 @@ import { FacebookIcon, FacebookShareButton, ViberIcon, ViberShareButton } from "
 import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
 import InfoIcon from '@mui/icons-material/Info';
 import { keyframes } from '@emotion/react';
+import { useConfirm } from "../ConfirmDialog/ConfirmDialog";
+
 
 let zoom = 12;
 
@@ -161,6 +163,8 @@ const TripDetails: FC = () => {
     const [clickedUnLike, setClickedUnLike] = useState<boolean>(false);
     const [tripGroupTrips, setTripGroupTrips] = useState<TripGroupId[]>([]);
     const [pageValue, setPageValue] = useState<number>(trip?.dayNumber || 1)
+
+    const { confirm } = useConfirm();
 
     const minSwipeDistance = 45;
     const { token } = useContext(LoginContext);
@@ -362,24 +366,27 @@ const TripDetails: FC = () => {
     }
 
 
-    const deleteClickHandler = () => {
+    const deleteClickHandler = async () => {
 
         if (trip === undefined || !accessToken) return;
-        const tripId = trip._id
-        API_TRIP.deleteById(tripId, userId, accessToken).then((data) => {
-            API_POINT.deleteByTripId(tripId, userId, accessToken).then((data) => {
-                API_COMMENT.deleteByTripId(tripId, userId, accessToken).then((data) => {
+        const result = await confirm('Are you sure you want to delete this trip?', 'Delete Confirmation');
+        if (result) {
+            const tripId = trip._id
+            API_TRIP.deleteById(tripId, userId, accessToken).then((data) => {
+                API_POINT.deleteByTripId(tripId, userId, accessToken).then((data) => {
+                    API_COMMENT.deleteByTripId(tripId, userId, accessToken).then((data) => {
 
+                    }).catch((err) => {
+                        console.log(err);
+                    });
                 }).catch((err) => {
                     console.log(err);
                 });
+                navigate('/trips')
             }).catch((err) => {
                 console.log(err);
             });
-            navigate('/trips')
-        }).catch((err) => {
-            console.log(err);
-        });
+        }
     }
 
 
@@ -499,24 +506,26 @@ const TripDetails: FC = () => {
     const onDeleteComment = async (comment: Comment) => {
 
         if (accessToken) {
+            const result = await confirm('Are you sure you want to delete this comment?', 'Delete Confirmation');
+            if (result) {
+                API_COMMENT.deleteById(comment._id, accessToken).then((data) => {
+                    if (data !== undefined) {
 
-            API_COMMENT.deleteById(comment._id, accessToken).then((data) => {
-                if (data !== undefined) {
 
+                        const copyComments = [...comments];
+                        const index = copyComments.findIndex(cmt => {
+                            return cmt._id === comment._id;
+                        });
 
-                    const copyComments = [...comments];
-                    const index = copyComments.findIndex(cmt => {
-                        return cmt._id === comment._id;
-                    });
+                        copyComments.splice(index, 1);
 
-                    copyComments.splice(index, 1);
+                        setComments(copyComments);
 
-                    setComments(copyComments);
-
-                }
-            }).catch((err) => {
-                console.log(err)
-            });
+                    }
+                }).catch((err) => {
+                    console.log(err)
+                });
+            }
 
         }
 

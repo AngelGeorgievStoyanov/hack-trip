@@ -26,6 +26,7 @@ import { handleFilesChange } from "../../shared/handleFilesChange";
 import { Point } from "../../model/point";
 import { ApiPoint } from "../../services/pointService";
 import RemoveAllImagesButton from "../RemoveAllImagesButton/RemoveAllImagesButton";
+import { useConfirm } from "../ConfirmDialog/ConfirmDialog";
 
 
 type decode = {
@@ -121,6 +122,8 @@ const TripEdit: FC = () => {
     const [confirmedChangeDayNumber, setConfirmedChangeDayNumber] = useState<boolean>(false);
     const [isImagesChanged, setIsImagesChanged] = useState(false);
     const [points, setPoints] = useState<Point[]>([]);
+
+    const { confirm } = useConfirm();
 
     const { token } = useContext(LoginContext);
 
@@ -342,12 +345,15 @@ const TripEdit: FC = () => {
             if (trip.dayNumber !== dayNumber) {
                 let flag = false
                 if (!confirmedChangeDayNumber && tripGroup.some((x) => x.dayNumber === dayNumber)) {
-                    if (window.confirm(`Day ${dayNumber} already exists!  Do you want to change it with day ${trip.dayNumber} `)) {
+
+                    const result = await confirm(`Day ${dayNumber} already exists!  Do you want to change it with day ${trip.dayNumber} `, 'Change Day Confirmation');
+                    if (result) {
                         setConfirmedChangeDayNumber(prev => true)
                         setCheckDay(true)
                         flag = true;
+                    } else {
+                        return;
                     }
-
 
                 }
 
@@ -441,20 +447,22 @@ const TripEdit: FC = () => {
 
 
 
-    const deleteImage = (e: React.MouseEvent) => {
+    const deleteImage = async (item: string) => {
 
         if (accessToken && trip) {
-
-            const index = images?.indexOf(e.currentTarget.id);
-            if (index !== undefined) {
-                const deletedImage = images?.slice(index, index + 1);
-                if (deletedImage) {
-                    API_TRIP.editImages(trip._id, deletedImage, accessToken).then((data) => {
-                        setImages(data.imageFile);
-                        setIsImagesChanged(true);
-                    }).catch((err) => {
-                        console.log(err);
-                    });
+            const result = await confirm('Are you sure you want to delete this image?', 'Delete Confirmation');
+            if (result) {
+                const index = images?.indexOf(item);
+                if (index !== undefined) {
+                    const deletedImage = images?.slice(index, index + 1);
+                    if (deletedImage) {
+                        API_TRIP.editImages(trip._id, deletedImage, accessToken).then((data) => {
+                            setImages(data.imageFile);
+                            setIsImagesChanged(true);
+                        }).catch((err) => {
+                            console.log(err);
+                        });
+                    }
                 }
             }
         }
@@ -528,7 +536,8 @@ const TripEdit: FC = () => {
                         const enableChangeDayNumber = tripGroup.some((x) => x.dayNumber === dayNumber)
                         if (enableChangeDayNumber) {
 
-                            if (window.confirm(`Day ${dayNumber} already exists!  Do you want to change it with day ${trip.dayNumber} `)) {
+                            const result = await confirm(`Day ${dayNumber} already exists!  Do you want to change it with day ${trip.dayNumber} `, 'Change Day Confirmation');
+                            if (result) {
                                 setConfirmedChangeDayNumber(true)
                                 setCheckDay(true)
                             }
@@ -624,7 +633,7 @@ const TripEdit: FC = () => {
                             <Typography gutterBottom sx={{ margin: '10px auto' }} variant="h5">
                                 EDIT TRIP
                             </Typography>
-                            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', '@media(max-width: 600px)': { flexDirection: 'column' } }}>
 
                                 <TextField
                                     name="dayNumber"
@@ -663,7 +672,7 @@ const TripEdit: FC = () => {
                                         <AddIcon fontSize="small" />
                                     </Button>
                                 </ButtonGroup>
-                                <Button variant="contained" onClick={onSetDay}
+                                <Button variant="contained" onClick={onSetDay} disabled={trip?.dayNumber === dayNumber}
                                 >  {checkDay ? 'change day' : 'Set day'}</Button>
                             </Box>
 
@@ -740,7 +749,7 @@ const TripEdit: FC = () => {
                             <ImageList sx={{ width: 520, height: 'auto', margin: '30px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '5px' } }} cols={trip.imageFile.length > 3 ? 3 : trip.imageFile.length} rowHeight={trip.imageFile.length > 9 ? 164 : trip.imageFile.length > 5 ? 300 : trip.imageFile.length > 2 ? 350 : 450}>
                                 {images ? images.map((item, i) => (
                                     <ImageListItem key={item} sx={{ margin: '10px', padding: '10px', '@media(max-width: 600px)': { width: 'auto', height: 'auto', margin: '1px', padding: '0 8px' } }}>
-                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', position: 'absolute', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={deleteImage} id={item} />
+                                        <HighlightOffSharpIcon sx={{ cursor: 'pointer', position: 'absolute', backgroundColor: '#ffffff54', borderRadius: '50%' }} onClick={() => deleteImage(item)} id={item} />
                                         <img
                                             src={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format`}
                                             srcSet={`https://storage.googleapis.com/hack-trip/${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}

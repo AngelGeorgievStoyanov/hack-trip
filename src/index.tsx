@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { HelmetProvider } from 'react-helmet-async';
 import { LoginProvider } from './hooks/LoginContext';
+import { ConfirmDialogProvider } from './components/ConfirmDialog/ConfirmDialog';
 
 
 
@@ -16,9 +17,11 @@ const helmetContext = {};
 root.render(
   <HelmetProvider context={helmetContext}>
     <React.StrictMode>
-      <LoginProvider>
-        <App />
-      </LoginProvider>
+      <ConfirmDialogProvider>
+        <LoginProvider>
+          <App />
+        </LoginProvider>
+      </ConfirmDialogProvider>
     </React.StrictMode>
   </HelmetProvider >
 );

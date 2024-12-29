@@ -97,7 +97,7 @@ const AboutUs: FC = () => {
 
                     <h2 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>Hack Trip is an app where you can share your trips or get valuable tips for your future trips.</h2>
                     <h3 style={{ margin: '2px', fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)' }}>
-                        The idea of ​​Hack Trip is to help all travelers, if you want to visit a certain destination, city or area, enter to search for information and see other travelers if they have been there and if they have described
+                        The idea of Hack Trip is to help all travelers, if you want to visit a certain destination, city or area, enter to search for information and see other travelers if they have been there and if they have described
                         what they recommend and then if wish you could add your journey and be of help.</h3>
                     <CardMedia
                         component="img"
