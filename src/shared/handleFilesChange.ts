@@ -3,10 +3,10 @@ import { BaseSyntheticEvent } from "react";
 
 export const handleFilesChange = async (
     event: BaseSyntheticEvent,
-    existingFiles: File[], 
+    existingFiles: File[],
     setFileSelected: React.Dispatch<React.SetStateAction<File[]>>,
-    setErrorMessageImage: React.Dispatch<React.SetStateAction<string | undefined>>, 
-    existingImagesLength: number = 0 
+    setErrorMessageImage: React.Dispatch<React.SetStateAction<string | undefined>>,
+    existingImagesLength: number = 0
 ) => {
     let files: File[] = Array.from(event.target.files);
 
@@ -42,8 +42,8 @@ export const handleFilesChange = async (
 
     const compressFiles = files.map(async (x: File) => {
         const options = {
-            maxSizeMB: 1,
-            maxWidthOrHeight: 1920,
+            maxSizeMB: isMobile ? 0.8 : 1,
+            maxWidthOrHeight: isMobile ? 1280 : 1920,
             useWebWorker: true,
             fileType: x.type,
             name: x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
@@ -58,5 +58,5 @@ export const handleFilesChange = async (
         }
     });
 
-    await Promise.all(compressFiles); 
+    await Promise.all(compressFiles);
 };
