@@ -686,13 +686,13 @@ const TripEdit: FC = () => {
                                     options={TRIP_SELECT_OPTIONS_CURRENCY} />
                             </Box>
                             <FormInputSelect name='transport' label='TRANSPORT' control={control} error={errors.transport?.message}
-                                options={TRIP_SELECT_OPTIONS_TRANSPORT} defaultOptionIndex={1} />
+                                options={TRIP_SELECT_OPTIONS_TRANSPORT} />
 
                             <FormInputText name='countPeoples' type="number" label='COUNT OF PEOPLE' control={control} error={errors.countPeoples?.message}
                             />
 
                             <FormInputSelect name='typeOfPeople' label='TYPE OF THE GROUP' control={control} error={errors.typeOfPeople?.message}
-                                options={TRIP_SELECT_OPTIONS_TYPE_GROUPE} defaultOptionIndex={1} />
+                                options={TRIP_SELECT_OPTIONS_TYPE_GROUPE} />
 
                             <FormInputText name='destination' label='DESTINATION' control={control} error={errors.destination?.message}
                             />

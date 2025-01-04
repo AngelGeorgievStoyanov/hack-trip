@@ -40,28 +40,23 @@ export const handleFilesChange = async (
         }
     }
 
-    await Promise.all(files.map(async (x: File) => {
-        if (x.size > 1000000) {
-            const options = {
-                maxSizeMB: 1,
-                maxWidthOrHeight: 1920,
-                useWebWorker: true,
-                fileType: x.type,
-                name: x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
-            };
-            try {
-                const compressedFile = await imageCompression(x, options);
-                const compressFile = new File([compressedFile], options.name, { type: x.type });
-                setFileSelected(prev => [...prev, compressFile]);
-            } catch (err) {
-                console.log(err);
-            }
-        } else {
-            const options = {
-                name: x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
-            };
-            const file = new File([x], options.name, { type: x.type });
-            setFileSelected(prev => [...prev, file]);
+    const compressFiles = files.map(async (x: File) => {
+        const options = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+            fileType: x.type,
+            name: x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
+        };
+
+        try {
+            const compressedFile = await imageCompression(x, options);
+            const compressFile = new File([compressedFile], options.name, { type: x.type });
+            setFileSelected(prev => [...prev, compressFile]);
+        } catch (err) {
+            console.log(err);
         }
-    }));
+    });
+
+    await Promise.all(compressFiles); 
 };

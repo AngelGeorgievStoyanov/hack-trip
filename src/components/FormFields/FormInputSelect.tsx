@@ -1,5 +1,5 @@
 import React from 'react';
-import { Control, Controller, FieldPath, FieldValues, Path, RegisterOptions } from 'react-hook-form';
+import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 
 export interface SelectOption {
@@ -13,37 +13,46 @@ interface FormInputSelectProps<TFieldValues extends FieldValues> {
     label: string;
     options: SelectOption[];
     defaultOptionIndex?: number;
-    rules?: Omit<RegisterOptions<TFieldValues, FieldPath<TFieldValues>>, 'valueAsNumber' | 'valueAsDate' | 'setValueAs' | 'disabled'>;
+    rules?: any;
     disabled?: boolean;
     size?: 'small' | 'medium';
-    error?: string | undefined;
+    error?: string;
 }
 
-function FormInputSelect<TFieldValues extends FieldValues>(
-    { name, control, label, options = [], defaultOptionIndex = 1, rules = {}, disabled = false, size = 'medium', error = undefined }
-        : FormInputSelectProps<TFieldValues>) {
+function FormInputSelect<TFieldValues extends FieldValues>({
+    name,
+    control,
+    label,
+    options = [],
+    defaultOptionIndex = 0,
+    rules = {},
+    disabled = false,
+    size = 'medium',
+    error = undefined
+}: FormInputSelectProps<TFieldValues>) {
     return (
         <Controller
             name={name}
             control={control}
-            render={({ field }) =>
-            (<FormControl>
-                <InputLabel id={name + '-label'}>{label}</InputLabel>
-                <Select
-                    labelId={name + '-label'}
-                    id={name}
-                    label={label}
-                    defaultValue={options[defaultOptionIndex].key}
-                    {...field}
-                >
-                    {options.map((option, index) =>
-                    (<MenuItem key={option.key} value={option.key} selected={index === defaultOptionIndex}>
-                        {option.value}
-                    </MenuItem>))
-                    }
-                </Select>
-            </FormControl>)
-            }
+            render={({ field }) => (
+                <FormControl fullWidth size={size} disabled={disabled} error={!!error}>
+                    <InputLabel id={`${name}-label`}>{label}</InputLabel>
+                    <Select
+                        labelId={`${name}-label`}
+                        id={name}
+                        label={label}
+                        value={field.value || options[defaultOptionIndex]?.key}
+                        onChange={field.onChange}
+                    >
+                        {options.map((option) => (
+                            <MenuItem key={option.key} value={option.key}>
+                                {option.value}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                    {error && <span style={{ color: 'red' }}>{error}</span>}
+                </FormControl>
+            )}
             rules={rules}
         />
     );
