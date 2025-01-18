@@ -11,7 +11,6 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from "react-hook-form";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
-import LoadingButton from "@mui/lab/LoadingButton";
 import jwt_decode from "jwt-decode";
 import { LoginContext } from "../../hooks/LoginContext";
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -27,6 +26,7 @@ import { Point } from "../../model/point";
 import { ApiPoint } from "../../services/pointService";
 import RemoveAllImagesButton from "../RemoveAllImagesButton/RemoveAllImagesButton";
 import { useConfirm } from "../ConfirmDialog/ConfirmDialog";
+import LoadingButtonWrapper from "../LoadingButtonWrapper/LoadingButtonWrapper";
 
 
 type decode = {
@@ -375,6 +375,7 @@ const TripEdit: FC = () => {
 
 
             }
+            setButtonAdd(false)
             let formData = new FormData();
             let imagesNames;
             if (fileSelected && fileSelected.length > 0) {
@@ -384,24 +385,19 @@ const TripEdit: FC = () => {
 
 
                 imagesNames = await API_TRIP.sendFile(formData, accessToken).then((data) => {
-                    let imageName = data as unknown as any as any[] | [];
-                    return imageName.map((x) => {
-                        return x.destination;
-                    })
+
+                    return data
                 }).catch((err) => {
                     console.log(err);
                 });
             }
 
-
             let imagesNew = imagesNames as unknown as any as string[];
-
             if (imagesNew !== undefined && imagesNew.length > 0) {
                 data.imageFile = images?.concat(imagesNew);
             } else {
                 data.imageFile = images;
             }
-
 
 
             if (clickedPos?.lat) {
@@ -428,7 +424,6 @@ const TripEdit: FC = () => {
 
 
             API_TRIP.update(trip._id, editTrip, userId, accessToken).then((data) => {
-                setButtonAdd(true)
                 navigate(`/trip/details/${trip._id}`);
             }).catch((err) => {
                 console.log(err.message);
@@ -699,7 +694,7 @@ const TripEdit: FC = () => {
 
                             <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
 
-                                <CustomFileUploadButton handleFilesChange={handleEditTripFilesChange} images={images || []} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} />
+                                <CustomFileUploadButton handleFilesChange={handleEditTripFilesChange} images={images || []} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} disabled={!buttonAdd} />
 
                                 <Typography variant="overline" display="block" gutterBottom style={{ marginRight: '15px' }}>     {((images ? images.length : 0) + fileSelected.length)}/9 uploaded images</Typography>
                             </Box >
@@ -730,9 +725,9 @@ const TripEdit: FC = () => {
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
                                 {buttonAdd === true ?
                                     <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={(fileSelected.length > 0 || (clickedPos?.lat && clickedPos.lng) ? false : (!isDirty || !isValid) && !isImagesChanged)} >EDIT YOUR TRIP</Button>
-                                    : <LoadingButton variant="contained" loading={loading}   >
+                                    : <LoadingButtonWrapper loading={loading}>
                                         <span>disabled</span>
-                                    </LoadingButton>
+                                    </LoadingButtonWrapper>
                                 }
 
                                 <Button variant="contained" onClick={goBack} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>

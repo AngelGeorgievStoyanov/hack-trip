@@ -38,7 +38,7 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
 
     async findAll(search: string, typeOfGroup: string, typeOfTransportSelect: string): Promise<K> {
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trips/?search=${search}&typegroup=${typeOfGroup}&typetransport=${typeOfTransportSelect}`);
-      
+
         if (response.status >= 400) {
             const result = await response.json();
             throw new Error(result);
@@ -242,19 +242,34 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
     }
 
     async sendFile(formdata: FormData, token: string): Promise<string[]> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trips/upload`, {
+        const fileFields = formdata.getAll('file');
 
-            method: 'POST',
-            body: formdata,
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.status >= 400) {
+        const uploadPromises = fileFields.map(async (file) => {
+            const singleFileFormData = new FormData();
+            singleFileFormData.append('file', file as Blob);
+
+            const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trips/upload`, {
+                method: 'POST',
+                body: singleFileFormData,
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            if (response.status >= 400) {
+                const result = await response.json();
+                throw new Error(result.message ? result.message : result);
+            }
+
             const result = await response.json();
+            return result[0].destination;
+        });
 
-            throw new Error(result.message ? result.message : result);
+        try {
+            const uploadedFileNames:string[] = await Promise.all(uploadPromises);
+            return uploadedFileNames;
+        } catch (err) {
+            console.error('Error uploading files:', err);
+            throw err;
         }
-        const result = await response.json();
-        return result;
     }
 
 

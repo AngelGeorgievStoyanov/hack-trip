@@ -12,24 +12,25 @@ interface CustomFileUploadButtonProps {
     images: string[];
     fileSelected: File[];
     iconFotoCamera: boolean;
+    disabled?: boolean;
 }
 
 
-const CustomFileUploadButton: FC<CustomFileUploadButtonProps> = ({ handleFilesChange, images, fileSelected, iconFotoCamera }) => {
+const CustomFileUploadButton: FC<CustomFileUploadButtonProps> = ({ handleFilesChange, images, fileSelected, iconFotoCamera, disabled = false }) => {
     const isDisabled = ((images ? images.length : 0) + fileSelected.length) >= 9;
 
     return (
         <>
             {iconFotoCamera ? (
                 <Tooltip title="UPLOAD" arrow>
-                    <IconButton color="primary" disabled={isDisabled} aria-label="upload picture" component="label">
+                    <IconButton color="primary" disabled={isDisabled || disabled} aria-label="upload picture" component="label">
                         <input hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
                         <PhotoCamera fontSize="large" />
                     </IconButton>
                 </Tooltip>
             ) : (
                 <Box sx={{ width: '30ch' }}>
-                    <Button variant="contained" component="label" disabled={isDisabled}>
+                    <Button variant="contained" component="label" disabled={isDisabled || disabled}>
                         Upload
                         <input name="files" hidden accept="image/*" multiple type="file" onChange={handleFilesChange} />
                     </Button>

@@ -335,7 +335,7 @@ const Profile: FC = () => {
 
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
 
-                        <CustomFileUploadButton handleFilesChange={handleProfileFileChange} images={images || []} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} />
+                        <CustomFileUploadButton handleFilesChange={handleProfileFileChange} images={images || []} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} disabled={false} />
 
                     </Box >
                     {errorMessageImage ? <Typography style={{ color: 'red', marginLeft: '12px' }}>{errorMessageImage}</Typography> : ''}

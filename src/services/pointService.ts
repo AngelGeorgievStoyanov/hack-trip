@@ -161,16 +161,34 @@ export class ApiPointImpl<K, V extends Identifiable<K>> implements ApiPoint<K, V
     }
 
     async sendFile(formdata: FormData, token: string): Promise<string[]> {
-        const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/upload`, {
+        const fileFields = formdata.getAll('file');
 
-            method: 'POST',
-            body: formdata,
-            headers: { 'Authorization': `Bearer ${token}` }
+        const uploadPromises = fileFields.map(async (file) => {
+            const singleFileFormData = new FormData();
+            singleFileFormData.append('file', file as Blob);
+
+            const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/upload`, {
+                method: 'POST',
+                body: singleFileFormData,
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            if (response.status >= 400) {
+                const result = await response.json();
+                throw new Error(result.message ? result.message : result);
+            }
+
+            const result = await response.json();
+            return result[0].destination;
         });
 
-        const result = await response.json();
-
-        return result;
+        try {
+            const uploadedFileNames: string[] = await Promise.all(uploadPromises);
+            return uploadedFileNames;
+        } catch (err) {
+            console.error('Error uploading files:', err);
+            throw err;
+        }
     }
 
 

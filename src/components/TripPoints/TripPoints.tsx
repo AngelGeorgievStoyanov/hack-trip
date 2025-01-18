@@ -13,7 +13,6 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginContext } from "../../hooks/LoginContext";
-import LoadingButton from "@mui/lab/LoadingButton";
 import jwt_decode from "jwt-decode";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
@@ -24,6 +23,7 @@ import GoogleMapWrapper from "../GoogleMapWrapper/GoogleMapWrapper";
 import CustomFileUploadButton from "../CustomFileUploadButton/CustomFileUploadButton ";
 import { handleFilesChange } from "../../shared/handleFilesChange";
 import RemoveAllImagesButton from "../RemoveAllImagesButton/RemoveAllImagesButton";
+import LoadingButtonWrapper from "../LoadingButtonWrapper/LoadingButtonWrapper";
 
 
 
@@ -275,10 +275,8 @@ const TripPoints: FC = () => {
                     formData.append('file', file);
                 })
                 imagesNames = await API_POINT.sendFile(formData, accessToken).then((data) => {
-                    let imageName = data as unknown as any as any[];
-                    return imageName.map((x) => {
-                        return x.destination;
-                    })
+
+                    return data
                 }).catch((err) => {
                     console.log(err);
                     setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
@@ -535,7 +533,7 @@ const TripPoints: FC = () => {
 
                             <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
 
-                                <CustomFileUploadButton handleFilesChange={handleCreatePointsFilesChange} images={[]} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} />
+                                <CustomFileUploadButton handleFilesChange={handleCreatePointsFilesChange} images={[]} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} disabled={!buttonAdd} />
 
                                 <Typography variant="overline" display="block" gutterBottom style={{ marginRight: '15px' }}>     {fileSelected.length}/9 uploaded images</Typography>
                             </Box >
@@ -569,15 +567,16 @@ const TripPoints: FC = () => {
 
                                 {buttonAdd === true ?
                                     <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!clickedPos?.lat || !isDirty || !isValid}>ADD POINT</Button>
-                                    : <LoadingButton variant="contained" loading={loading}   >
+                                    : <LoadingButtonWrapper loading={loading}>
                                         <span>disabled</span>
-                                    </LoadingButton>}
+                                    </LoadingButtonWrapper>
+                                }
 
                                 {buttonAdd === true ?
                                     <Button component={Link} to={`/create-trip/${trip?.tripGroupId}`} variant="contained" sx={{ ':hover': { background: '#4daf30' } }} >ADD NEXT DAY TRIP</Button>
-                                    : <LoadingButton variant="contained" loading={loading}   >
+                                    : <LoadingButtonWrapper loading={loading}>
                                         <span>disabled</span>
-                                    </LoadingButton>
+                                    </LoadingButtonWrapper>
                                 }
 
                             </Box>

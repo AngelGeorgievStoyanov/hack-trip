@@ -12,7 +12,6 @@ import FormInputSelect, { SelectOption } from "../FormFields/FormInputSelect";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormTextArea from "../FormFields/FormTextArea";
-import LoadingButton from '@mui/lab/LoadingButton';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from "../../hooks/LoginContext";
 import { useContext } from 'react';
@@ -24,6 +23,7 @@ import AddIcon from '@mui/icons-material/Add';
 import CustomFileUploadButton from "../CustomFileUploadButton/CustomFileUploadButton ";
 import { handleFilesChange } from "../../shared/handleFilesChange";
 import RemoveAllImagesButton from "../RemoveAllImagesButton/RemoveAllImagesButton";
+import LoadingButtonWrapper from "../LoadingButtonWrapper/LoadingButtonWrapper";
 
 const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType, TripCreate>('data');
 
@@ -282,14 +282,10 @@ const CreateTrip: FC = () => {
 
 
                 imagesNames = await API_TRIP.sendFile(formData, accessToken).then((data) => {
-                    let imageName = data as unknown as any as any[];
-                    return imageName.map((x) => {
-                        return x.destination;
-                    })
+                    return data
                 }).catch((err) => {
                     console.log(err);
                 });
-
                 if (imagesNames) {
                     data.imageFile = imagesNames;
                 }
@@ -319,7 +315,6 @@ const CreateTrip: FC = () => {
                 data.tripGroupId = tripGroupId
             }
             const newTrip = { ...data } as any as TripCreate;
-
 
             API_TRIP.create(newTrip, accessToken).then((trip) => {
                 setButtonAdd(true)
@@ -588,7 +583,7 @@ const CreateTrip: FC = () => {
 
                         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
 
-                            <CustomFileUploadButton handleFilesChange={handleCreateTripFilesChange} images={[]} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} />
+                            <CustomFileUploadButton handleFilesChange={handleCreateTripFilesChange} images={[]} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} disabled={!buttonAdd} />
 
                             <Typography variant="overline" display="block" gutterBottom style={{ marginRight: '15px' }}>     {fileSelected.length}/9 uploaded images</Typography>
                         </Box >
@@ -620,22 +615,22 @@ const CreateTrip: FC = () => {
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
                             {buttonAdd === true ?
                                 <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={(tripGroup.some((x) => x.dayNumber === dayNumber)) || (!isDirty || !isValid)}>ADD TRIP</Button>
-                                : <LoadingButton variant="contained" loading={loading}   >
+                                : <LoadingButtonWrapper loading={loading}>
                                     <span>disabled</span>
-                                </LoadingButton>
+                                </LoadingButtonWrapper>
                             }
                             {buttonAdd === true ?
                                 <Button variant="contained" onClick={addNextDay} sx={{ ':hover': { background: '#4daf30' } }} disabled={(tripGroup.some((x) => x.dayNumber === dayNumber)) || (!isDirty || !isValid)}>ADD NEXT DAY TRIP</Button>
-                                : <LoadingButton variant="contained" loading={loading}   >
+                                : <LoadingButtonWrapper loading={loading}>
                                     <span>disabled</span>
-                                </LoadingButton>
+                                </LoadingButtonWrapper>
                             }
                             {buttonAdd === true ?
 
                                 <Button variant="contained" disabled={!isValid} onClick={addPoints} sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}>ADD POINT`S FOR THE TRIP</Button>
-                                : <LoadingButton variant="contained" loading={loading}   >
+                                : <LoadingButtonWrapper loading={loading}>
                                     <span>disabled</span>
-                                </LoadingButton>
+                                </LoadingButtonWrapper>
                             }
                         </Box>
                         <Box sx={{ position: 'relative', marginTop: '20px', display: 'flex', flexDirection: 'column', alignContent: 'center', alignItems: 'center', boxSizing: 'border-box' }}>

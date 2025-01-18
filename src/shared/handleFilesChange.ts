@@ -43,7 +43,7 @@ export const handleFilesChange = async (
     const compressFiles = files.map(async (x: File) => {
         const options = {
             maxSizeMB: isMobile ? 0.8 : 1,
-            maxWidthOrHeight: isMobile ? 1280 : 1920,
+            maxWidthOrHeight: isMobile ? 1480 : 1920,
             useWebWorker: true,
             fileType: x.type,
             name: x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name

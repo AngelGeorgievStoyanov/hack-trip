@@ -9,7 +9,6 @@ import { BaseSyntheticEvent, FC, useEffect, useState } from "react";
 import FormTextArea from "../FormFields/FormTextArea";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
-import LoadingButton from "@mui/lab/LoadingButton";
 import { LoginContext } from "../../hooks/LoginContext";
 import { useContext } from 'react'
 import jwt_decode from "jwt-decode";
@@ -19,6 +18,7 @@ import { ApiClient } from "../../services/userService";
 import * as tripService from '../../services/tripService';
 import { Trip } from '../../model/trip';
 import { ApiTrip } from '../../services/tripService';
+import LoadingButtonWrapper from "../LoadingButtonWrapper/LoadingButtonWrapper";
 
 const API_COMMENT: ApiComment<IdType, CommentCreate> = new commentService.ApiCommentImpl<IdType, CommentCreate>('data/comments');
 const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType, User>('users');
@@ -156,9 +156,9 @@ const CreateComment: FC = () => {
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
                         {buttonAdd === true ?
                             <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={!isDirty || !isValid}>ADD COMMENT</Button>
-                            : <LoadingButton variant="contained" loading={loading}   >
+                            : <LoadingButtonWrapper loading={loading}>
                                 <span>disabled</span>
-                            </LoadingButton>
+                            </LoadingButtonWrapper>
                         }
 
                         <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>

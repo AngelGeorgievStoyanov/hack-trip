@@ -12,7 +12,6 @@ import FormTextArea from "../../FormFields/FormTextArea";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
-import LoadingButton from "@mui/lab/LoadingButton";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { LoginContext } from "../../../hooks/LoginContext";
 import jwt_decode from "jwt-decode";
@@ -24,6 +23,7 @@ import CustomFileUploadButton from "../../CustomFileUploadButton/CustomFileUploa
 import { handleFilesChange } from "../../../shared/handleFilesChange";
 import RemoveAllImagesButton from "../../RemoveAllImagesButton/RemoveAllImagesButton";
 import { useConfirm } from "../../ConfirmDialog/ConfirmDialog";
+import LoadingButtonWrapper from "../../LoadingButtonWrapper/LoadingButtonWrapper";
 
 
 let zoom = 8;
@@ -267,10 +267,8 @@ const PointEdit: FC = () => {
 
 
                 imagesNames = await API_POINT.sendFile(formData, accessToken).then((data) => {
-                    let imageName = data as unknown as any as any[] | [];
-                    return imageName.map((x) => {
-                        return x.destination;
-                    })
+
+                    return data
                 }).catch((err) => {
                     console.log(err);
                     setErrorApi(err.message && typeof err.message === 'string' ? err.message : 'Something went wrong!');
@@ -279,10 +277,9 @@ const PointEdit: FC = () => {
                 });
             }
 
-            let imagesNew = imagesNames as unknown as any as string[];
 
-            if (imagesNew !== undefined && imagesNew.length > 0) {
-                data.imageFile = images?.concat(imagesNew);
+            if (imagesNames !== undefined && imagesNames.length > 0) {
+                data.imageFile = images?.concat(imagesNames);
             } else {
                 data.imageFile = images;
             }
@@ -487,7 +484,7 @@ const PointEdit: FC = () => {
 
                                 <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
 
-                                    <CustomFileUploadButton handleFilesChange={handleEditTripFilesChange} images={images || []} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} />
+                                    <CustomFileUploadButton handleFilesChange={handleEditTripFilesChange} images={images || []} fileSelected={fileSelected} iconFotoCamera={iconFotoCamera} disabled={!buttonAdd} />
 
                                     <Typography variant="overline" display="block" gutterBottom style={{ marginRight: '15px' }}>     {((images ? images.length : 0) + fileSelected.length)}/9 uploaded images</Typography>
                                 </Box >
@@ -516,9 +513,9 @@ const PointEdit: FC = () => {
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
                                     {buttonAdd === true ?
                                         <Button variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' } }} disabled={(fileSelected.length > 0 ? false : (!isDirty || !isValid))}>EDIT POINT</Button>
-                                        : <LoadingButton variant="contained" loading={loading}   >
+                                        : <LoadingButtonWrapper loading={loading}>
                                             <span>disabled</span>
-                                        </LoadingButton>}
+                                        </LoadingButtonWrapper>}
                                     <Button onClick={goBack} variant="contained" sx={{ ':hover': { color: 'rgb(248 245 245)' }, background: 'rgb(194 194 224)', color: 'black' }}  >BACK</Button>
                                 </Box>
                             </Box>
