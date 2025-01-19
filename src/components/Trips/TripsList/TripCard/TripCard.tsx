@@ -225,10 +225,10 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                             (((role === 'admin') || (role === 'manager')) && ((Number(currentTrip.reportTrip) > 0) || (currentTrip.reportTrip?.toString().length === 36)) && (userVerId === true)) ?
                                 <Button href={`/admin/trip/details/${currentTrip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
                                 :
-                                (userVerId === true && accessToken !== undefined) ?
+                                // TODO  (userVerId === true && accessToken !== undefined) ?
                                     <Button href={`/trip/details/${currentTrip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
-                                    :
-                                    ''}
+                                    // : ''
+                        }
 
                         {Number(currentTrip.likes) > 0 ?
                             < Typography sx={{ margin: '10px' }} gutterBottom variant="h6" component="div">

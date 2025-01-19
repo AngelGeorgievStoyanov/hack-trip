@@ -53,6 +53,9 @@ export function stringAvatar(name: string) {
 
 
 export function sliceDescription(description: string, maxLength: number) {
+    if (!description) {
+        return '';
+    }
     if (description.length > maxLength) {
 
         let slicedDescription = description.slice(0, maxLength - 3);
@@ -119,10 +122,15 @@ export function getRandomTripAndImage(trips: Trip[] | []) {
             ? randomTrip.imageFile[
             Math.floor(Math.random() * randomTrip.imageFile.length)
             ]
-            : "";
+            : "hack-trip-home-page.png";
 
     return randomImage;
 }
 
 
 export type TripGroupId = { _id: string, tripGroupId: string, dayNumber: number, _ownerId: string }
+
+
+export const testUserDetails = '191ff979-5438-4ea8-865e-5724257a8fd6';
+
+export const accessTokenTestUserDetails = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiIxOTFmZjk3OS01NDM4LTRlYTgtODY1ZS01NzI0MjU3YThmZDYiLCJlbWFpbCI6InRlc3RAYWJ2LmJnIiwiZmlyc3ROYW1lIjoiVGVzdCIsImxhc3ROYW1lIjoiVGVzdCIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzM3MjA1NTAzfQ.JVrj6BU_pcVug-wCJeqV3oe1qL5WiR4QTy0jIMKWa3M';

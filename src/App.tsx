@@ -130,15 +130,21 @@ const App: FC = () => {
         },
         {
           path: '/trip/details/:tripId',
-          element: <GuardedRoute />,
-          children: [
-            {
-              path: '',
-              element: <TripDetails />,
-              errorElement: <NotFound />
-            }
-          ]
+          element: <TripDetails />,
+          errorElement: <NotFound />
         },
+        // TODO
+        // {
+        //   path: '/trip/details/:tripId',
+        //   element: <GuardedRoute />,
+        //   children: [
+        //     {
+        //       path: '',
+        //       element: <TripDetails />,
+        //       errorElement: <NotFound />
+        //     }
+        //   ]
+        // },
         {
           path: '/trip/edit/:tripId',
           element: <GuardedRouteTrip />,

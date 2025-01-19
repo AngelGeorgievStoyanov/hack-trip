@@ -126,7 +126,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, onDeleteCom, onEditCom, on
             </Tooltip>
         )
     }
-
+    // TODO user?._id !== userId ?
     return (
         <>
             <Card sx={{
@@ -155,11 +155,13 @@ const CommentCard: FC<CommentCardProps> = ({ comment, onDeleteCom, onEditCom, on
                             <Button variant="contained" onClick={handeleDelete} sx={{ ':hover': { background: '#ef0a0a' }, margin: '5px' }}>DELETE COMMENT</Button>
                         </>
                         : ''}
-                    {((comment.reportComment?.some((x) => x === userId))) ?
+                    {user?._id !== userId ?
+                        ((comment.reportComment?.some((x) => x === userId))) ?
 
-                        <MuiTooltiUnReport />
-                        :
-                        <MuiTooltiReport />
+                            <MuiTooltiUnReport />
+                            :
+                            <MuiTooltiReport />
+                        : ''
                     }
 
                 </span>

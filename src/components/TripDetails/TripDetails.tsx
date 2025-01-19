@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CurrencyCodeName, Trip, TripCreate } from "../../model/trip";
 import { ApiTrip } from "../../services/tripService";
-import { IdType, TripGroupId, getRandomTripAndImage, sliceDescription } from "../../shared/common-types";
+import { IdType, TripGroupId, accessTokenTestUserDetails, getRandomTripAndImage, sliceDescription, testUserDetails } from "../../shared/common-types";
 import * as tripService from '../../services/tripService';
 import * as pointService from '../../services/pointService';
 import { Point } from "../../model/point";
@@ -13,7 +13,7 @@ import * as commentService from '../../services/commentService';
 import { Comment, CommentCreate } from "../../model/comment";
 import { ApiComment } from "../../services/commentService";
 import CommentCard from "../CommentCard/CommentCard";
-import { AppBar, Backdrop, Box, Button, CardActions, CardContent, CircularProgress, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Pagination, PaginationItem, PaginationRenderItemParams, Typography, useMediaQuery } from "@mui/material";
+import { Alert, AppBar, Backdrop, Box, Button, CardActions, CardContent, CircularProgress, Collapse, Container, Grid, ImageList, ImageListItem, MobileStepper, Pagination, PaginationItem, PaginationRenderItemParams, Snackbar, Typography, useMediaQuery } from "@mui/material";
 import TripDetailsPointCard from "./TripDetailsPoint";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import { styled, useTheme } from '@mui/material/styles';
@@ -163,18 +163,26 @@ const TripDetails: FC = () => {
     const [clickedUnLike, setClickedUnLike] = useState<boolean>(false);
     const [tripGroupTrips, setTripGroupTrips] = useState<TripGroupId[]>([]);
     const [pageValue, setPageValue] = useState<number>(trip?.dayNumber || 1)
+    const [messageLogin, setMessageLogin] = useState('');
 
     const { confirm } = useConfirm();
 
     const minSwipeDistance = 45;
     const { token } = useContext(LoginContext);
 
-    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    // const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    let accessToken = token || localStorage.getItem('accessToken') || accessTokenTestUserDetails;
+
 
     if (accessToken) {
         const decode: decode = jwt_decode(accessToken);
         userId = decode._id;
     }
+
+    //TODO
+    userId = userId || testUserDetails;
+    accessToken = accessToken || accessTokenTestUserDetails;
+
     const randomAnimationLike = Math.random() > 0.5 ? shakeAnimation : growShrinkAnimation;
 
     const randomAnimationUnLike = Math.random() > 0.5 ? rotateAnimation : rotateXAnimation;
@@ -272,6 +280,7 @@ const TripDetails: FC = () => {
     useEffect(() => {
         if (trip) {
             fetchTripsByGroupId(trip.tripGroupId);
+            setRandomImage(getRandomTripAndImage(Array(trip)))
         }
     }, [trip]);
 
@@ -539,8 +548,8 @@ const TripDetails: FC = () => {
     }
 
     const onLikeTrip = () => {
-
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
+        // TODO
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken && (accessToken !== accessTokenTestUserDetails)) {
             setClickedLike(true);
             setTimeout(() => setClickedLike(false), 500);
             if (clickedUnLike) {
@@ -555,14 +564,17 @@ const TripDetails: FC = () => {
                 console.log(err);
             });
 
+        } else {
+            // TODO
+            loginOrRegisterMessage('like this');
         }
 
     }
 
 
     const onFavoriteClickHandler = () => {
-
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
+        // TODO
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken && (accessToken !== accessTokenTestUserDetails)) {
 
             trip?.favorites.push(userId);
 
@@ -573,6 +585,10 @@ const TripDetails: FC = () => {
             }).catch((err) => {
                 console.log(err);
             });
+
+        } else {
+            // TODO
+            loginOrRegisterMessage('add this in favorites');
 
         }
 
@@ -621,8 +637,8 @@ const TripDetails: FC = () => {
 
     const reportClickHandler = () => {
 
-
-        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken) {
+        // TODO
+        if ((userId !== undefined) && (trip !== undefined) && (userId !== null) && accessToken && (accessToken !== accessTokenTestUserDetails)) {
             trip.reportTrip?.push(userId);
 
 
@@ -634,6 +650,10 @@ const TripDetails: FC = () => {
             }).catch((err) => {
                 console.log(err);
             });
+
+        } else {
+            // TODO
+            loginOrRegisterMessage('report this');
 
         }
     }
@@ -912,12 +932,25 @@ const TripDetails: FC = () => {
 
     const currencyName = CurrencyCodeName[trip?.currency as keyof typeof CurrencyCodeName];
 
+    // TODO
+    const loginOrRegisterMessage = (action: string) => {
+        setMessageLogin(`To ${action}, please register or log in to your account.`)
+    }
+    // TODO
+    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setMessageLogin('');
+    };
+
     return (
         <>
 
             <HelmetWrapper
-                title={trip ? trip.title : 'Hack Trip'}
-                description={trip ? trip.description : 'Hack Trip'}
+                title={trip && trip.title ? trip.title : ''}
+                description={trip && trip.description ? trip.description : ''}
                 url={trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : `https://www.hack-trip.com`}
                 image={randomImage ? randomImage : ''}
                 hashtag={'#HackTrip'}
@@ -985,6 +1018,9 @@ const TripDetails: FC = () => {
                                 display: 'flex', flexDirection: 'column-reverse'
                             }
                         }}>
+                            <Snackbar anchorOrigin={{ vertical: "top", horizontal: "left" }} open={messageLogin ? true : false} autoHideDuration={5000} onClose={handleClose} >
+                                <Alert onClose={handleClose} severity="info">{messageLogin}</Alert>
+                            </Snackbar>
 
                             <Box sx={{
                                 display: 'flex',
@@ -1077,7 +1113,16 @@ const TripDetails: FC = () => {
                                         </Typography>
                                 }
 
-                                <Button component={Link} to={`/comments/add-comment/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD COMMENT</Button>
+                                {/* <Button component={Link} to={`/comments/add-comment/${trip?._id}`} variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}>ADD COMMENT</Button> */}
+                                <Button
+                                    component={accessToken === accessTokenTestUserDetails ? 'button' : Link}
+                                    to={accessToken === accessTokenTestUserDetails ? undefined : `/comments/add-comment/${trip?._id}`}
+                                    onClick={accessToken === accessTokenTestUserDetails ? () => loginOrRegisterMessage('post a comment') : undefined}
+                                    variant="contained"
+                                    sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}
+                                >
+                                    ADD COMMENT
+                                </Button>
 
                                 {(trip && trip._ownerId === userId) ?
                                     <>
