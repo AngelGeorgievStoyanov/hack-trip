@@ -315,6 +315,7 @@ const TripDetails: FC = () => {
                 API_TRIP.findById(tripGroupTrips[tripIndex]._id, userId, accessToken).then((data) => {
                     setTrip(data);
                     setActiveStep(0);
+                    navigate(`/trip/details/${data._id}`)
                     API_POINT.findByTripId(data._id, accessToken).then((data) => {
                         if (data && Array.isArray(data)) {
                             const arrPoints = data as Point[];
@@ -391,7 +392,7 @@ const TripDetails: FC = () => {
                 }).catch((err) => {
                     console.log(err);
                 });
-                navigate('/trips')
+                navigate(-1)
             }).catch((err) => {
                 console.log(err);
             });

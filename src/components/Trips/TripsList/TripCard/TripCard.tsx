@@ -4,7 +4,7 @@ import { Trip } from '../../../../model/trip';
 import jwt_decode from "jwt-decode";
 import { LoginContext } from '../../../../hooks/LoginContext';
 import { FC, ReactElement, useContext, useState, TouchEvent, useEffect } from 'react';
-import { IdType, TripGroupId } from '../../../../shared/common-types';
+import { accessTokenTestUserDetails, IdType, TripGroupId } from '../../../../shared/common-types';
 import { User } from '../../../../model/users';
 import * as userService from '../../../../services/userService';
 import { ApiClient } from '../../../../services/userService';
@@ -44,7 +44,8 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
     const { token } = useContext(LoginContext);
     const isMobile = useMediaQuery('(max-width:700px)');
 
-    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    // const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
+    let accessToken = token || localStorage.getItem('accessToken') || accessTokenTestUserDetails;
 
     let role = 'user';
     let userId: string | undefined;
@@ -157,6 +158,8 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
         }
     };
 
+    const likeValue = Number(currentTrip?.likes[0]);
+    const isNumber = !Number.isNaN(likeValue);
 
     return (
         <>
@@ -226,19 +229,19 @@ const TripCard: FC<TripCardProps> = ({ trip }): ReactElement => {
                                 <Button href={`/admin/trip/details/${currentTrip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
                                 :
                                 // TODO  (userVerId === true && accessToken !== undefined) ?
-                                    <Button href={`/trip/details/${currentTrip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
-                                    // : ''
+                                <Button href={`/trip/details/${currentTrip._id}`} variant="contained" type='submit' sx={{ ':hover': { background: '#4daf30' }, padding: '10px 50px' }}>DETAILS</Button>
+                            // : ''
                         }
 
-                        {Number(currentTrip.likes) > 0 ?
-                            < Typography sx={{ margin: '10px' }} gutterBottom variant="h6" component="div">
-                                LIKES: {Number(currentTrip.likes)}
-                            </Typography>
-                            :
-                            < Typography sx={{ margin: '10px', display: 'flex', alignItems: 'center' }} gutterBottom variant="h6" component="div">
+                        {(isNumber && likeValue === 0) || currentTrip.likes.length === 0 ? (
+                            <Typography sx={{ margin: '10px', display: 'flex', alignItems: 'center' }} gutterBottom variant="h6" component="div">
                                 LIKES: <FavoriteIcon color="primary" />
                             </Typography>
-                        }
+                        ) : (
+                            <Typography sx={{ margin: '10px' }} gutterBottom variant="h6" component="div">
+                                LIKES: {isNumber ? likeValue : currentTrip.likes.length}
+                            </Typography>
+                        )}
 
                         {tripGroupTrips.length > 1 && (
                             <Box>
