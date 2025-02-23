@@ -454,6 +454,10 @@ const CreateTrip: FC = () => {
         }
     }
 
+    const goBack = () => {
+        navigate(-1)
+    }
+
 
     return (
         <>
@@ -632,6 +636,7 @@ const CreateTrip: FC = () => {
                                     <span>disabled</span>
                                 </LoadingButtonWrapper>
                             }
+                            <Button onClick={goBack} variant="contained" sx={{ ':hover': { background: '#4daf30' } }}  >BACK</Button>
                         </Box>
                         <Box sx={{ position: 'relative', marginTop: '20px', display: 'flex', flexDirection: 'column', alignContent: 'center', alignItems: 'center', boxSizing: 'border-box' }}>
                             <Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'left' }} open={errorApi ? true : false} autoHideDuration={5000} onClose={handleClose} >

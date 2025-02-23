@@ -12,7 +12,7 @@ export interface ApiTrip<K, V extends Identifiable<K>> {
     create(entityWithoutId: TripCreate, token: string): Promise<any>;
     update(id: K, entity: Trip, userId: K, token: string): Promise<V>;
     updateLikes(id: K, userId: K, token: string): Promise<V>;
-    deleteById(id: K, userId: K, token: string): Promise<void>;
+    deleteById(id: K, userId: K, token: string): Promise<V>;
     reportTrip(id: K, entity: Trip, token: string): Promise<V>;
     findTopTrips(userId: K | undefined): Promise<V[]>;
     findAllMyTrips(id: K, token: string): Promise<V[]>;
@@ -138,7 +138,7 @@ export class ApiTripImpl<K, V extends Identifiable<K>> implements ApiTrip<K, V> 
         return result
     }
 
-    async deleteById(id: K, userId: K, token: string): Promise<void> {
+    async deleteById(id: K, userId: K, token: string): Promise<V> {
 
         const response = await fetch(`${baseUrl}/${this.apiCollectionSuffix}/trips/${id}/${userId}`, {
             method: 'DELETE',

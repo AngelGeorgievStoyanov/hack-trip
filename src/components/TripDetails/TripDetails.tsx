@@ -203,6 +203,7 @@ const TripDetails: FC = () => {
 
     const mobileStepperRef = useRef<HTMLDivElement | null>(null)
     const refPoint = useRef<HTMLDivElement | null>(null)
+    const appBarRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
 
@@ -270,11 +271,16 @@ const TripDetails: FC = () => {
 
     useEffect(() => {
         setTimeout(() => {
-            if ((refPoint && refPoint.current !== null) && scrollMedia && (mobileStepperRef && mobileStepperRef.current !== null)) {
-                mobileStepperRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            if (refPoint?.current !== null && scrollMedia && mobileStepperRef?.current !== null) {
+
+                mobileStepperRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+
+                const appBarHeight = appBarRef?.current?.getBoundingClientRect().height || 0;
+                window.scrollBy({ top: -appBarHeight - 10, left: 0, behavior: "smooth" });
             }
-        }, 500)
-    }, [pointCard, fullPointImage])
+        }, 500);
+    }, [pointCard, fullPointImage]);
+
 
 
     useEffect(() => {
@@ -392,10 +398,24 @@ const TripDetails: FC = () => {
                 }).catch((err) => {
                     console.log(err);
                 });
-                navigate(-1)
             }).catch((err) => {
                 console.log(err);
             });
+
+            const tripsGroupsId = tripGroupTrips.filter((x) => x._id !== tripId).sort((a, b) => a.dayNumber - b.dayNumber)
+
+            if (tripsGroupsId.length > 0) {
+                setTripGroupTrips(tripsGroupsId)
+                setPageValue(tripsGroupsId[0].dayNumber)
+                API_TRIP.findById(tripsGroupsId[0]._id, userId, accessToken).then((data) => {
+                    setTrip(data)
+                }).catch((err) => {
+                    console.log(err);
+                });
+                navigate(`/trip/details/${tripsGroupsId[0]._id}`)
+            } else {
+                navigate('/')
+            }
         }
     }
 
@@ -959,7 +979,7 @@ const TripDetails: FC = () => {
                 canonical={trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : `https://www.hack-trip.com`}
             />
             {tripGroupTrips.length > 1 && (
-                <AppBar position="sticky"
+                <AppBar position="sticky" ref={appBarRef}
                     sx={{ marginTop: '-20px', paddingBottom: '10px', marginBottom: '20px' }}
                 >
                     <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>

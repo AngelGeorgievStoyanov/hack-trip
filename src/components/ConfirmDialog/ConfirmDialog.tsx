@@ -53,7 +53,7 @@ export const ConfirmDialogProvider: React.FC<{ children: React.ReactNode }> = ({
           <Button onClick={() => handleClose(false)} color="primary" variant="contained">
             No
           </Button>
-          <Button onClick={() => handleClose(true)} color="primary" variant="contained" >
+          <Button onClick={() => handleClose(true)} color="primary" variant="contained" autoFocus>
             Yes
           </Button>
         </DialogActions>
