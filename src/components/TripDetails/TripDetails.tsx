@@ -315,7 +315,7 @@ const TripDetails: FC = () => {
         const tripIndex = tripGroupTrips.findIndex(trip => trip.dayNumber === value);
         if (tripIndex !== -1) {
             setPageValue(value);
-
+            setPointCard(null);
             if (userId && accessToken) {
 
                 API_TRIP.findById(tripGroupTrips[tripIndex]._id, userId, accessToken).then((data) => {
