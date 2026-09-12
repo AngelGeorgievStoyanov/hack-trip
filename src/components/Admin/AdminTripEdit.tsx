@@ -24,7 +24,7 @@ import AddIcon from '@mui/icons-material/Add';
 import jwt_decode from "jwt-decode";
 import { useConfirm } from "../ConfirmDialog/ConfirmDialog";
 
-const googleKey = process.env.REACT_APP_GOOGLE_KEY;
+const googleKey = import.meta.env.VITE_GOOGLE_KEY;
 const libraries: Array<"drawing" | "places" | "geometry"> = ["places"]
 
 let zoom = 8;

@@ -29,7 +29,7 @@ type decode = {
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data');
 
-const googleKey = process.env.REACT_APP_GOOGLE_KEY;
+const googleKey = import.meta.env.VITE_GOOGLE_KEY;
 let zoom = 8;
 
 let center = {
