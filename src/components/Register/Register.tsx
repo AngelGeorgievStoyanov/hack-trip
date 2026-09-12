@@ -58,7 +58,7 @@ const schema2 = yup.object({
 
 }).required();
 
-const reCaptchaV2 = process.env.REACT_APP_SITE_KEY2;
+const reCaptchaV2 = import.meta.env.VITE_SITE_KEY2;
 
 const Register: FC = () => {
 

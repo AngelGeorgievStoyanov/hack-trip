@@ -39,7 +39,7 @@ const API_TRIP: ApiTrip<IdType, TripCreate> = new tripService.ApiTripImpl<IdType
 const API_POINT: ApiPoint<IdType, Point> = new pointService.ApiPointImpl<IdType, Point>('data/points');
 
 
-const googleKey = process.env.REACT_APP_GOOGLE_KEY;
+const googleKey = import.meta.env.VITE_GOOGLE_KEY;
 const libraries: Array<"drawing" | "places" | "geometry"> = ["places"]
 
 let zoom = 8;

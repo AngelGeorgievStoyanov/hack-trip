@@ -19,7 +19,7 @@ const API_CLIENT: ApiClient<IdType, User> = new userService.ApiClientImpl<IdType
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data');
 
 
-const reCaptchaV2 = process.env.REACT_APP_SITE_KEY2;
+const reCaptchaV2 = import.meta.env.VITE_SITE_KEY2;
 
 
 type FormData = {
