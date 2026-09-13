@@ -1,4 +1,4 @@
-import { GridRowId } from "@mui/x-data-grid/models/gridRows";
+import { GridRowId } from "@mui/x-data-grid";
 import { IRouteNotFoundLogs, User, UserEditAdmin, UserRegister } from "../model/users";
 import { Identifiable } from "../shared/common-types";
 import { CONNECTIONURL } from "../utils/baseUrl";

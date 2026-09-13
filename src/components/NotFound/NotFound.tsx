@@ -6,8 +6,8 @@ import './NotFound.css';
 
 const NotFound: FC = () => {
 
-    const internalSec = useRef<NodeJS.Timeout>();
-    const internal = useRef<NodeJS.Timeout>();
+    const internalSec = useRef<ReturnType<typeof setInterval> | null>(null);
+    const internal = useRef<ReturnType<typeof setTimeout> | null>(null);
     const initialState = 10;
     const [count, setCount] = useState(initialState);
     const counterRef = useRef(initialState);
