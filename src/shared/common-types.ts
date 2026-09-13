@@ -25,7 +25,6 @@ export function stringToColor(string: string) {
     let hash = 0;
     let i;
 
-    /* eslint-disable no-bitwise */
     for (i = 0; i < string.length; i += 1) {
         hash = string.charCodeAt(i) + ((hash << 5) - hash);
     }
@@ -36,8 +35,6 @@ export function stringToColor(string: string) {
         const value = (hash >> (i * 8)) & 0xff;
         color += `00${value.toString(16)}`.slice(-2);
     }
-    /* eslint-enable no-bitwise */
-
     return color;
 }
 
@@ -100,11 +97,11 @@ export function touchStart(element: React.MutableRefObject<HTMLHeadingElement | 
         if ((element !== null) && (element.current !== null)) {
             element.current.innerText = element.current?.innerText.split('').map((letter: string, index: number) => {
                 if (index < iterations) {
-                    return element.current?.dataset.value![index];
+                    return element.current?.dataset.value?.[index];
                 }
                 return letters[Math.floor(Math.random() * 26)];
             }).join('');
-            if (iterations >= element.current?.dataset.value!.length!) clearInterval(interval);
+            if (element.current?.dataset.value && iterations >= element.current.dataset.value.length) clearInterval(interval);
             iterations += 1 / 3;
         }
     }, 30);
