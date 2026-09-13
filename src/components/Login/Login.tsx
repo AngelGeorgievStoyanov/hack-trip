@@ -103,15 +103,18 @@ const Login: FC = () => {
         data.password = data.password.trim();
 
         const pathname = sessionStorage.getItem('pathname');
+        const returnPath = pathname && pathname.startsWith('/') && !pathname.startsWith('//') && !pathname.includes('\\')
+            ? pathname
+            : undefined;
 
         API_CLIENT.login(data.email, data.password, userGeolocation || defaultUserGeolocation)
             .then((user) => {
                 if (user !== undefined && user.accessToken) {
                     loginContext?.loginUser(user.accessToken);
                     setErrorApi(undefined);
-                    if (pathname && pathname !== '/login' && pathname !== '/registration') {
+                    if (returnPath && returnPath !== '/login' && returnPath !== '/registration') {
                         sessionStorage.removeItem('pathname')
-                        navigate(pathname);
+                        navigate(returnPath);
                     } else {
                         navigate('/');
                     }

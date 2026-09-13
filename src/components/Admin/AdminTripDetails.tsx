@@ -116,7 +116,7 @@ const AdminTripDetails: FC = () => {
 
     const scrollMedia = useMediaQuery('(max-width:900px)');
 
-    const refPoint = React.useRef<HTMLDivElement | null>()
+    const refPoint = React.useRef<HTMLDivElement | null>(null)
 
 
     useEffect(() => {

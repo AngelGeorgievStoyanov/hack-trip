@@ -1,5 +1,4 @@
-import Typography from '@mui/material/Typography';
-import { Box } from '@mui/system';
+import { Box, Typography } from '@mui/material';
 import { FC, ReactElement } from 'react';
 import { Trip } from '../../../model/trip';
 import TripCard from './TripCard/TripCard';

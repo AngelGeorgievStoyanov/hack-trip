@@ -1,5 +1,5 @@
 import React from 'react';
-import LoadingButton from '@mui/lab/LoadingButton';
+import { Button } from '@mui/material';
 
 
 interface LoadingButtonWrapperProps {
@@ -9,9 +9,9 @@ interface LoadingButtonWrapperProps {
 
 const LoadingButtonWrapper: React.FC<LoadingButtonWrapperProps> = ({ loading, children }) => {
     return (
-        <LoadingButton variant="contained" loading={loading}>
+        <Button variant="contained" loading={loading}>
             {children}
-        </LoadingButton>
+        </Button>
     );
 };
 
