@@ -53,7 +53,6 @@ const CreateComment: FC = () => {
 
     const { token } = useContext(LoginContext);
 
-    const [loading, setLoading] = useState<boolean>(true);
     const [nameAuthor, setNameAuthor] = useState<string>()
     const [buttonAdd, setButtonAdd] = useState<boolean>(true)
     const [imageBackground, setImageBackground] = useState<string>()

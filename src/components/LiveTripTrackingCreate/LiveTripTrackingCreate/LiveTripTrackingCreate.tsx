@@ -11,7 +11,6 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginContext } from "../../../hooks/LoginContext";
-import jwt_decode from "jwt-decode";
 import * as tripService from '../../../services/tripService';
 import { Trip } from '../../../model/trip';
 import { ApiTrip } from '../../../services/tripService';
@@ -21,11 +20,6 @@ import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
 import DeleteForeverTwoToneIcon from '@mui/icons-material/DeleteForeverTwoTone';
 import UTurnLeftTwoToneIcon from '@mui/icons-material/UTurnLeftTwoTone';
-
-type decode = {
-    _id: string,
-}
-
 
 const API_TRIP: ApiTrip<IdType, Trip> = new tripService.ApiTripImpl<IdType, Trip>('data');
 
@@ -55,9 +49,6 @@ const schema = yup.object({
     description: yup.string().matches(/^(?!\s+$).*/, 'Description cannot be empty string.').max(1050, 'Description max length is 1050 chars'),
 
 }).required();
-
-let userId: string | undefined;
-
 
 type positionsPoints = {
     lng: number,
@@ -114,7 +105,7 @@ const LiveTripTrackingCreate: FC = () => {
     const [activeStep, setActiveStep] = useState(0);
     const [touchStart, setTouchStart] = useState<number>(0);
     const [touchEnd, setTouchEnd] = useState<number>(0);
-    const [screenHeigth, setScreenHeigth] = useState(window.screen.height)
+    const [, setScreenHeigth] = useState(window.screen.height)
     const minSwipeDistance = 45;
 
     const theme = useTheme();
@@ -123,18 +114,9 @@ const LiveTripTrackingCreate: FC = () => {
 
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
 
-    const accessToken = token ? token : localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : undefined
-
     const header = document.getElementsByTagName('header')[0];
 
     const footer = document.getElementsByTagName('footer')[0];
-
-
-
-    if (accessToken) {
-        const decode: decode = jwt_decode(accessToken);
-        userId = decode._id;
-    }
 
 
 

@@ -43,7 +43,6 @@ const EditComment: FC = () => {
 
     const comment = useLoaderData() as Comment;
     const navigate = useNavigate();
-    const [loading, setLoading] = useState<boolean>(true);
     const [buttonAdd, setButtonAdd] = useState<boolean>(true);
     const [imageBackground, setImageBackground] = useState<string>();
 
