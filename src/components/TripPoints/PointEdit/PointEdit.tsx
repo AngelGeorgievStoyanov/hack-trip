@@ -175,7 +175,7 @@ const PointEdit: FC = () => {
 
     const searchInp = async (e: React.MouseEvent) => {
 
-        let findAddress = '';
+        let findAddress: string;
         const inpName = document.getElementById('inputAddPointName') as HTMLInputElement;
         const btnFind = e.target as HTMLElement;
         if (btnFind.textContent === 'FIND IN MAP') {

@@ -360,8 +360,6 @@ const CreateTrip: FC = () => {
         const target = e.currentTarget.parentElement?.parentElement as HTMLFormElement;
         const data = Object.fromEntries(new FormData(target)) as any as FormData;
 
-        e as any as BaseSyntheticEvent<HTMLFormElement>
-
         createTripSubmitHandler(data, e, true);
 
     }
@@ -372,8 +370,6 @@ const CreateTrip: FC = () => {
 
         const target = e.currentTarget.parentElement?.parentElement as HTMLFormElement;
         const data = Object.fromEntries(new FormData(target)) as any as FormData;
-
-        e as any as BaseSyntheticEvent<HTMLFormElement>
 
         createTripSubmitHandler(data, e, false, true);
 

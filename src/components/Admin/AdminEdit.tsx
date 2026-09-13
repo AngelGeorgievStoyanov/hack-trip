@@ -215,7 +215,7 @@ const AdminEdit: FC = () => {
 
     }
 
-    let images;
+    const images: string[] = [];
 
     const handleAdminEditTripFilesChange = (event: BaseSyntheticEvent) => {
         let file = Array.from(event.target.files)[0] as File;

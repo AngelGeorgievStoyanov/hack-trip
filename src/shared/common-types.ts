@@ -100,11 +100,11 @@ export function touchStart(element: React.MutableRefObject<HTMLHeadingElement | 
         if ((element !== null) && (element.current !== null)) {
             element.current.innerText = element.current?.innerText.split('').map((letter: string, index: number) => {
                 if (index < iterations) {
-                    return element.current?.dataset.value![index];
+                    return element.current?.dataset.value?.[index];
                 }
                 return letters[Math.floor(Math.random() * 26)];
             }).join('');
-            if (iterations >= element.current?.dataset.value!.length!) clearInterval(interval);
+            if (element.current?.dataset.value && iterations >= element.current.dataset.value.length) clearInterval(interval);
             iterations += 1 / 3;
         }
     }, 30);

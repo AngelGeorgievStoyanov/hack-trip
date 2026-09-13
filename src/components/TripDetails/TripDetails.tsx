@@ -1375,7 +1375,6 @@ const TripDetails: FC = () => {
                             <h3 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: '1', textShadow: '3px 3px 3px rgb(10,10,10)', marginRight: '10px' }}>Share to Facebook</h3>
                             <FacebookShareButton
                                 url={randomImage ? `https://storage.googleapis.com/hack-trip/${randomImage}` : 'https://storage.googleapis.com/hack-trip/hack-trip-home-page.png'}
-                                quote={`Hack Trip - ${trip?.title} - ${trip ? `https://www.hack-trip.com/trip/details/${trip._id}` : 'https://www.hack-trip.com'}`}
                                 hashtag='#HackTrip'
                             >
                                 <FacebookIcon size={38} round />
