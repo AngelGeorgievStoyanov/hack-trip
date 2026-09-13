@@ -1,41 +1,42 @@
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
-import Home from './components/Home/Home';
-import Trips from './components/Trips/Trips';
+import { FC, lazy, Suspense } from 'react';
 import Header from './components/Header/Header';
 import ErrorBoundary from './utils/ErrorBoundary';
 import Footer from './components/Footer/Footer';
-import CreateTrip from './components/TripCreate/TripCreate';
-import TripDetails from './components/TripDetails/TripDetails';
-import TripEdit from './components/TripEdit/TripEdit';
-import TripPoints from './components/TripPoints/TripPoints';
-import PointEdit from './components/TripPoints/PointEdit/PointEdit';
-import CreateComment from './components/CommentCreate/CommentCreate';
-import EditComment from './components/CommentEdit/CommentEdit';
-import MyTrips from './components/MyTrips/MyTrips';
 import GuardedRoute from './components/GuardedRoute/GuardedRoute';
 import NotFound from './components/NotFound/NotFound';
 import './App.css';
-import Profile from './components/Profile/Profile';
-import Admin from './components/Admin/Admin';
-import AdminEdit from './components/Admin/AdminEdit';
 import GuardedRouteAdmin from './components/GuardedRouteAdmin/GuardedRouteAdmin';
-import AdminTripDetails from './components/Admin/AdminTripDetails';
-import AdminTripEdit from './components/Admin/AdminTripEdit';
-import MyFavorites from './components/MyFavorites/MyFavorites';
-import AdminCommentEdit from './components/Admin/AdminCommentEdit';
 import GuardedRouteTrip from './components/GuardedRouteTrip/GuardedRouteTrip';
 import GuardedRoutePoint from './components/GuardedRoutePoints/GuardedRoutePoints';
 import GuardedRouteComment from './components/GuardedRouteComment/GuardedRouteComment';
-import TermPrivacy from './components/TermPrivacy/TermPrivacy';
-import AboutUs from './components/About/About';
-import Users from './components/Users/Users';
-import ForgotPassword from './components/ForgotPassword/ForgotPassword';
-import ReSendVerifyEmail from './components/ReSendVerifyEmail/ReSendVerifyEmail';
-import Login from './components/Login/Login';
-import Register from './components/Register/Register';
-import LiveTripTrackingCreate from './components/LiveTripTrackingCreate/LiveTripTrackingCreate/LiveTripTrackingCreate';
 import useLoaders from './hooks/UseLoaders';
-import { FC } from 'react';
+
+const Home = lazy(() => import('./components/Home/Home'));
+const Trips = lazy(() => import('./components/Trips/Trips'));
+const CreateTrip = lazy(() => import('./components/TripCreate/TripCreate'));
+const TripDetails = lazy(() => import('./components/TripDetails/TripDetails'));
+const TripEdit = lazy(() => import('./components/TripEdit/TripEdit'));
+const TripPoints = lazy(() => import('./components/TripPoints/TripPoints'));
+const PointEdit = lazy(() => import('./components/TripPoints/PointEdit/PointEdit'));
+const CreateComment = lazy(() => import('./components/CommentCreate/CommentCreate'));
+const EditComment = lazy(() => import('./components/CommentEdit/CommentEdit'));
+const MyTrips = lazy(() => import('./components/MyTrips/MyTrips'));
+const Profile = lazy(() => import('./components/Profile/Profile'));
+const Admin = lazy(() => import('./components/Admin/Admin'));
+const AdminEdit = lazy(() => import('./components/Admin/AdminEdit'));
+const AdminTripDetails = lazy(() => import('./components/Admin/AdminTripDetails'));
+const AdminTripEdit = lazy(() => import('./components/Admin/AdminTripEdit'));
+const MyFavorites = lazy(() => import('./components/MyFavorites/MyFavorites'));
+const AdminCommentEdit = lazy(() => import('./components/Admin/AdminCommentEdit'));
+const TermPrivacy = lazy(() => import('./components/TermPrivacy/TermPrivacy'));
+const AboutUs = lazy(() => import('./components/About/About'));
+const Users = lazy(() => import('./components/Users/Users'));
+const ForgotPassword = lazy(() => import('./components/ForgotPassword/ForgotPassword'));
+const ReSendVerifyEmail = lazy(() => import('./components/ReSendVerifyEmail/ReSendVerifyEmail'));
+const Login = lazy(() => import('./components/Login/Login'));
+const Register = lazy(() => import('./components/Register/Register'));
+const LiveTripTrackingCreate = lazy(() => import('./components/LiveTripTrackingCreate/LiveTripTrackingCreate/LiveTripTrackingCreate'));
 
 
 
@@ -48,7 +49,9 @@ const App: FC = () => {
     <>
       <Header />
 
-      <Outlet />
+      <Suspense fallback={null}>
+        <Outlet />
+      </Suspense>
 
       <Footer />
 

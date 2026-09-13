@@ -3,7 +3,7 @@ import { useLoaderData, useNavigate } from "react-router-dom";
 import FormInputText from "../FormFields/FormInputText";
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import { User, UserRole, UserStatus } from "../../model/users";
-import { BaseSyntheticEvent, FC, useContext, useState } from "react";
+import { BaseSyntheticEvent, FC, useContext, useEffect, useState } from "react";
 import { IdType, toIsoDate } from "../../shared/common-types";
 import { ApiClient } from "../../services/userService";
 import * as userService from '../../services/userService'
@@ -125,9 +125,11 @@ const AdminEdit: FC = () => {
     });
 
 
-    if (fileSelected.length > 1) {
-        setFileSelected(Array(fileSelected[fileSelected.length - 1]))
-    }
+    useEffect(() => {
+        if (fileSelected.length > 1) {
+            setFileSelected([fileSelected[fileSelected.length - 1]]);
+        }
+    }, [fileSelected]);
 
     const editProfileSubmitHandler = async (data: FormData, event: BaseSyntheticEvent<object, any, any> | undefined) => {
         if (accessToken) {
@@ -215,7 +217,7 @@ const AdminEdit: FC = () => {
 
     }
 
-    let images;
+    const images: string[] = [];
 
     const handleAdminEditTripFilesChange = (event: BaseSyntheticEvent) => {
         let file = Array.from(event.target.files)[0] as File;

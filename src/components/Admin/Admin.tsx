@@ -69,7 +69,7 @@ const Admin: FC = () => {
     const [failedLogs, setFailedLogs] = useState<IFailedLogs[]>();
     const [hideFailedLogsList, setHideFailedLogsList] = useState<boolean>(true);
     const [selectedRow, setSelectedRow] = useState<GridRowSelectionModel>([]);
-    const [selectedRowNotFound, setSelectedRowNotFound] = useState<GridRowSelectionModel>([]);
+    const [, setSelectedRowNotFound] = useState<GridRowSelectionModel>([]);
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [currentPageNotFound, setCurrentPageNotFound] = useState<number>(0);
     const [pageSize, setPageSize] = useState<number>(5);

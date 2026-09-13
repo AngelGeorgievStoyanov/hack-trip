@@ -76,7 +76,7 @@ const Profile: FC = () => {
     const [fileSelected, setFileSelected] = useState<File[]>([]);
     const [errorMessageImage, setErrorMessageImage] = useState<string | undefined>();
     const [imageBackground, setImageBackground] = useState<string>();
-    const [images, setImages] = useState([]);
+    const [images] = useState<string[]>([]);
 
     const { confirm } = useConfirm();
 

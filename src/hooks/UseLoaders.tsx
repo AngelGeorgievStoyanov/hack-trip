@@ -47,7 +47,7 @@ const useLoaders = () => {
             } catch (error) {
                 const err = error as Error;
                 console.log(err.message);
-                throw new Error(`${err.message}`);
+                throw new Error(err.message, { cause: error });
             }
         } else {
             throw new Error(`Invalid or missing trip ID`);
