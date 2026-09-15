@@ -383,41 +383,44 @@ const TripDetails: FC = () => {
 
 
     const deleteClickHandler = async () => {
-
         if (trip === undefined || !accessToken) return;
-        const result = await confirm('Are you sure you want to delete this trip?', 'Delete Confirmation');
-        if (result) {
-            const tripId = trip._id
-            API_TRIP.deleteById(tripId, userId, accessToken).then((data) => {
-                API_POINT.deleteByTripId(tripId, userId, accessToken).then((data) => {
-                    API_COMMENT.deleteByTripId(tripId, userId, accessToken).then((data) => {
 
-                    }).catch((err) => {
-                        console.log(err);
-                    });
-                }).catch((err) => {
-                    console.log(err);
-                });
-            }).catch((err) => {
-                console.log(err);
-            });
+        const result = await confirm(
+            'Are you sure you want to delete this trip?',
+            'Delete Confirmation'
+        );
 
-            const tripsGroupsId = tripGroupTrips.filter((x) => x._id !== tripId).sort((a, b) => a.dayNumber - b.dayNumber)
+        if (!result) return;
+
+        try {
+            const tripId = trip._id;
+            await API_COMMENT.deleteByTripId(tripId, userId, accessToken);
+            await API_POINT.deleteByTripId(tripId, userId, accessToken);
+            await API_TRIP.deleteById(tripId, userId, accessToken);
+
+            const tripsGroupsId = tripGroupTrips
+                .filter((x) => x._id !== tripId)
+                .sort((a, b) => a.dayNumber - b.dayNumber);
 
             if (tripsGroupsId.length > 0) {
-                setTripGroupTrips(tripsGroupsId)
-                setPageValue(tripsGroupsId[0].dayNumber)
-                API_TRIP.findById(tripsGroupsId[0]._id, userId, accessToken).then((data) => {
-                    setTrip(data)
-                }).catch((err) => {
-                    console.log(err);
-                });
-                navigate(`/trip/details/${tripsGroupsId[0]._id}`)
+                setTripGroupTrips(tripsGroupsId);
+                setPageValue(tripsGroupsId[0].dayNumber);
+
+                const data = await API_TRIP.findById(
+                    tripsGroupsId[0]._id,
+                    userId,
+                    accessToken
+                );
+
+                setTrip(data);
+                navigate(`/trip/details/${tripsGroupsId[0]._id}`);
             } else {
-                navigate('/')
+                navigate('/');
             }
+        } catch (err) {
+            console.log(err);
         }
-    }
+    };
 
 
     const { isLoaded } = useJsApiLoader({
