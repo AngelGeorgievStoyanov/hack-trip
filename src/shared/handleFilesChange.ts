@@ -1,6 +1,12 @@
 import imageCompression from "browser-image-compression";
 import { BaseSyntheticEvent } from "react";
 
+const MAX_IMAGES = 9;
+const MAX_SINGLE_FILE_SIZE_MB = 25;
+const MAX_SIZE_MB = 2;
+const MAX_DIMENSION = 2048;
+const QUALITY = 0.88;
+
 export const handleFilesChange = async (
     event: BaseSyntheticEvent,
     existingFiles: File[],
@@ -8,55 +14,82 @@ export const handleFilesChange = async (
     setErrorMessageImage: React.Dispatch<React.SetStateAction<string | undefined>>,
     existingImagesLength: number = 0
 ) => {
-    let files: File[] = Array.from(event.target.files);
+    const selectedFiles: File[] = Array.from(event.target.files || []);
 
-    if (!files || files.length === 0) return;
+    if (!selectedFiles.length) return;
 
+    const remainingSlots =
+        MAX_IMAGES - existingFiles.length - existingImagesLength;
 
-    while (files.some((x) => !x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/))) {
-        setErrorMessageImage('Please select valid file image');
-
-        let index = files.findIndex((x: any) => !x.name.match(/\.(jpg|jpeg|PNG|gif|JPEG|png|JPG|gif)$/));
-        files.splice(index, 1);
+    if (remainingSlots <= 0) {
+        setErrorMessageImage(`Maximum ${MAX_IMAGES} images allowed`);
+        return;
     }
 
-    files = files.slice(0, 9 - existingFiles.length - existingImagesLength);
 
-    let indexSize: number = 0;
-    let totalSize: number = 0;
+    const files = selectedFiles.slice(0, remainingSlots);
 
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(window.navigator.userAgent);
+    const validFiles = files.filter(
+        (file) =>
+            file.size <= MAX_SINGLE_FILE_SIZE_MB * 1024 * 1024
+    );
 
-    if (isMobile) {
-        files.forEach((x, i) => {
-            totalSize += x.size;
-            if (totalSize > 40000000 && indexSize === 0) {
-                indexSize = i - 1;
-            }
-        });
+    const skippedFilesCount = files.length - validFiles.length;
 
-        if (indexSize > 0) {
-            files = files.slice(0, indexSize);
+    if (skippedFilesCount > 0) {
+        setErrorMessageImage(
+            `${skippedFilesCount} image${skippedFilesCount > 1 ? "s" : ""
+            } skipped because ${skippedFilesCount > 1 ? "they exceed" : "it exceeds"
+            } the ${MAX_SINGLE_FILE_SIZE_MB} MB limit.`
+        );
+    } else {
+        setErrorMessageImage(undefined);
+    }
+
+    if (!validFiles.length) {
+        if (event.target instanceof HTMLInputElement) {
+            event.target.value = "";
         }
+        return;
     }
 
-    const compressFiles = files.map(async (x: File) => {
-        const options = {
-            maxSizeMB: isMobile ? 0.8 : 1,
-            maxWidthOrHeight: isMobile ? 1480 : 1920,
-            useWebWorker: true,
-            fileType: x.type,
-            name: x.name.split(/[,\s]+/).length > 1 ? x.name.split(/[,\s]+/)[0] + '.jpg' : x.name
-        };
+    const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(
+            window.navigator.userAgent
+        );
 
+    const options = {
+        maxSizeMB: MAX_SIZE_MB,
+        maxWidthOrHeight: isMobile ? MAX_DIMENSION : 2560,
+        useWebWorker: true,
+        initialQuality: QUALITY,
+        fileType: "image/jpeg",
+    };
+
+    for (const file of validFiles) {
         try {
-            const compressedFile = await imageCompression(x, options);
-            const compressFile = new File([compressedFile], options.name, { type: x.type });
-            setFileSelected(prev => [...prev, compressFile]);
-        } catch (err) {
-            console.log(err);
-        }
-    });
+            const compressedFile = await imageCompression(file, options);
 
-    await Promise.all(compressFiles);
+            const originalNameWithoutExtension = file.name.replace(
+                /\.[^/.]+$/,
+                ""
+            );
+
+            const fileName = `${originalNameWithoutExtension}.jpg`;
+
+            const finalFile = new File([compressedFile], fileName, {
+                type: "image/jpeg",
+            });
+
+            setFileSelected((prev) => [...prev, finalFile]);
+        } catch {
+            setErrorMessageImage(
+                `Could not process image "${file.name}".`
+            );
+        }
+    }
+
+    if (event.target instanceof HTMLInputElement) {
+        event.target.value = "";
+    }
 };
