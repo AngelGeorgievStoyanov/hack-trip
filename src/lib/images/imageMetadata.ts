@@ -13,4 +13,5 @@ export const IMAGE_SIZES = {
   twoColumn: '50vw',
   threeColumn: '33vw',
   card: '(max-width: 600px) 100vw, 33vw',
+  gallery: '(max-width: 600px) 50vw, 33vw',
 } as const;

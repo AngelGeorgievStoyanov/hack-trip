@@ -19,14 +19,7 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
       </header>
 
       {trip.coverImage ? (
-        <AppImage
-          src={trip.coverImage}
-          alt={trip.title}
-          width={1200}
-          height={630}
-          sizes="100vw"
-          priority
-        />
+        <AppImage src={trip.coverImage} alt={trip.title} preset="hero" />
       ) : null}
 
       {trip.days.map((day) => (
@@ -36,14 +29,7 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
               {day.images.map((img) => (
                 <div key={img.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <AppImage
-                    image={img}
-                    alt={day.title ?? `Day ${day.day}`}
-                    useThumbnail
-                    width={240}
-                    height={180}
-                    sizes="(max-width: 600px) 50vw, 33vw"
-                  />
+                  <AppImage image={img} alt={day.title ?? `Day ${day.day}`} preset="gallery" />
                   <EngagementBar
                     targetType="image"
                     targetId={img.id}
@@ -71,13 +57,7 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                       {point.images.map((img) => (
                         <div key={img.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                          <AppImage
-                            image={img}
-                            alt={point.title}
-                            useThumbnail
-                            width={200}
-                            height={150}
-                          />
+                          <AppImage image={img} alt={point.title} preset="tripPointThumb" />
                           <EngagementBar
                             targetType="image"
                             targetId={img.id}

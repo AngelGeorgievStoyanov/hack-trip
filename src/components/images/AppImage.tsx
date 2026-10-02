@@ -3,14 +3,14 @@
 import { useState, type CSSProperties } from 'react';
 import Image from 'next/image';
 import { pickImageUrl } from '@/lib/images/thumbnail';
+import { IMAGE_PRESETS, type ImagePreset, type ImagePresetName } from '@/lib/images/imagePresets';
 import type { ImageDto } from '@/types';
 
 interface AppImageProps {
   image?: ImageDto | null;
-  /** Bare URL (e.g. `TripListItem.coverImage`), used when no thumbnail is available. */
   src?: string | null;
   alt: string;
-  /** Lists/cards pass `true` to use `thumbnailUrl`; detail/gallery use the full image. */
+  preset?: ImagePresetName;
   useThumbnail?: boolean;
   fill?: boolean;
   width?: number;
@@ -22,24 +22,32 @@ interface AppImageProps {
 }
 
 /**
- * Canonical image component. Centralizes URL selection (thumbnail vs. full), `next/image`
- * optimization, responsive sizing, priority loading and fallback behavior.
+ * Canonical image component — the only place `next/image` is used. Presentation defaults
+ * come from `preset` in `src/lib/images/imagePresets.ts`.
  */
 export function AppImage({
   image,
   src,
   alt,
-  useThumbnail = false,
-  fill = false,
+  preset,
+  useThumbnail,
+  fill,
   width,
   height,
   sizes,
-  priority = false,
+  priority,
   className,
   style,
 }: AppImageProps) {
   const [errored, setErrored] = useState(false);
-  const resolved = src ?? pickImageUrl(image, useThumbnail);
+  const presetProps: ImagePreset | undefined = preset ? IMAGE_PRESETS[preset] : undefined;
+  const resolvedFill = fill ?? presetProps?.fill ?? false;
+  const resolvedUseThumbnail = useThumbnail ?? presetProps?.useThumbnail ?? false;
+  const resolvedPriority = priority ?? presetProps?.priority ?? false;
+  const resolvedWidth = width ?? presetProps?.width;
+  const resolvedHeight = height ?? presetProps?.height;
+  const resolvedSizes = sizes ?? presetProps?.sizes;
+  const resolved = src ?? pickImageUrl(image, resolvedUseThumbnail);
 
   if (errored || !resolved) {
     return <div className={className} style={style} role="img" aria-label={alt} />;
@@ -49,11 +57,11 @@ export function AppImage({
     <Image
       src={resolved}
       alt={alt}
-      fill={fill}
-      width={fill ? undefined : width}
-      height={fill ? undefined : height}
-      sizes={sizes}
-      priority={priority}
+      fill={resolvedFill}
+      width={resolvedFill ? undefined : resolvedWidth}
+      height={resolvedFill ? undefined : resolvedHeight}
+      sizes={resolvedSizes}
+      priority={resolvedPriority}
       className={className}
       style={style}
       onError={() => setErrored(true)}

@@ -20,7 +20,7 @@ export function PointDetails({ point }: { point: TripPoint }) {
 
       {hero ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          <AppImage image={hero} alt={point.title} width={1200} height={630} sizes="100vw" priority />
+          <AppImage image={hero} alt={point.title} preset="hero" />
           <EngagementBar
             targetType="image"
             targetId={hero.id}
@@ -31,14 +31,7 @@ export function PointDetails({ point }: { point: TripPoint }) {
       ) : null}
       {point.images.slice(1).map((img) => (
         <div key={img.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          <AppImage
-            image={img}
-            alt={point.title}
-            useThumbnail
-            width={240}
-            height={180}
-            sizes="(max-width: 600px) 50vw, 33vw"
-          />
+          <AppImage image={img} alt={point.title} preset="gallery" />
           <EngagementBar
             targetType="image"
             targetId={img.id}

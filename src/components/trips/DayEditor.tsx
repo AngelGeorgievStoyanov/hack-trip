@@ -100,7 +100,7 @@ export function DayEditor({ tripId, day, onMove }: DayEditorProps) {
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 1, alignItems: 'flex-start' }}>
         {day.images.map((img) => (
           <Box key={img.id} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-            <AppImage image={img} alt={day.title ?? `Day ${day.day}`} useThumbnail width={120} height={90} />
+            <AppImage image={img} alt={day.title ?? `Day ${day.day}`} preset="editorDayThumb" />
             <Button size="small" color="error" onClick={() => deleteImageMutation.mutate(img.id)}>Remove</Button>
           </Box>
         ))}
@@ -132,7 +132,7 @@ export function DayEditor({ tripId, day, onMove }: DayEditorProps) {
                   <Button size="small" color="error" onClick={() => { if (window.confirm('Delete this point?')) deletePointMutation.mutate(point.id); }}>Delete</Button>
                   {point.images.map((img) => (
                     <Box key={img.id} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                      <AppImage image={img} alt={point.title} useThumbnail width={80} height={60} />
+                      <AppImage image={img} alt={point.title} preset="editorPointThumb" />
                       <Button size="small" color="error" onClick={() => deletePointImageMutation.mutate({ pointId: point.id, imageId: img.id })}>Remove</Button>
                     </Box>
                   ))}

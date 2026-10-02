@@ -74,7 +74,7 @@ export function ProfileImage() {
       {loading ? (
         <CircularProgress size={24} />
       ) : image ? (
-        <AppImage image={image} alt="Profile image" width={160} height={160} />
+        <AppImage image={image} alt="Profile image" preset="profile" />
       ) : (
         <Typography variant="body2">No profile image.</Typography>
       )}
