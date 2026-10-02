@@ -1,15 +1,17 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
+import { AdminUsers } from '@/components/admin';
 
 export const metadata: Metadata = {
   title: 'Users',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 export default function AdminUsersPage() {
   return (
     <section>
-      <h1>Users</h1>
-      <p>User administration will be implemented in the admin step.</p>
+      <AdminUsers />
     </section>
   );
 }
+

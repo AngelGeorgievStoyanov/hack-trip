@@ -6,3 +6,5 @@ export * from './trips';
 export * from './points';
 export * from './images';
 export * from './ui';
+export * from './seo';
+

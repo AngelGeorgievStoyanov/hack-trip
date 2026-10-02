@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
 import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm';
 
 export const metadata: Metadata = {
   title: 'Reset password',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 interface ResetPasswordPageProps {

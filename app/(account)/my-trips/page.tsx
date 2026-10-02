@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
 
 export const metadata: Metadata = {
   title: 'My trips',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 export default function MyTripsPage() {

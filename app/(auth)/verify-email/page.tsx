@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
 import { VerifyEmailForm } from '@/components/auth/VerifyEmailForm';
 
 export const metadata: Metadata = {
   title: 'Verify email',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 interface VerifyEmailPageProps {

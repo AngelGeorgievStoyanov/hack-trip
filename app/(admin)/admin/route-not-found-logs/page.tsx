@@ -1,15 +1,17 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
+import { AdminRouteNotFoundLogs } from '@/components/admin';
 
 export const metadata: Metadata = {
   title: 'Route not found logs',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 export default function RouteNotFoundLogsPage() {
   return (
     <section>
-      <h1>Route not found logs</h1>
-      <p>Route-not-found logs will be implemented in the admin step.</p>
+      <AdminRouteNotFoundLogs />
     </section>
   );
 }
+

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
 import { notFound } from 'next/navigation';
 import { TripForm } from '@/components/trips/TripForm';
 import { TripDaysManager } from '@/components/trips/TripDaysManager';
@@ -7,7 +8,7 @@ import { positiveIdParam } from '@/validations';
 
 export const metadata: Metadata = {
   title: 'Edit trip',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 interface EditTripPageProps {

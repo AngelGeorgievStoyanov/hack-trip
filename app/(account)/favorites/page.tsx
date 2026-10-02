@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
 
 export const metadata: Metadata = {
   title: 'Favorites',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 export default function FavoritesPage() {

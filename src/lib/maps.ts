@@ -23,3 +23,25 @@ export const googleMapsInitConfig: GoogleMapsInitConfig = {
   googleMapsApiKey: config.googleMapsApiKey,
   libraries: GOOGLE_MAPS_LIBRARIES,
 };
+
+export interface MapPosition {
+  lat: number;
+  lng: number;
+}
+
+export function toMapPosition(point: {
+  latitude: number | null;
+  longitude: number | null;
+}): MapPosition | null {
+  if (point.latitude == null || point.longitude == null) {
+    return null;
+  }
+  return { lat: point.latitude, lng: point.longitude };
+}
+
+export function hasCoordinates(point: {
+  latitude: number | null;
+  longitude: number | null;
+}): boolean {
+  return point.latitude != null && point.longitude != null;
+}

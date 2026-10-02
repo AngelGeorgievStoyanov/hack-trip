@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
 import { ProfileForm } from '@/components/auth/ProfileForm';
 import { ProfileImage } from '@/components/auth/ProfileImage';
 import { ChangePasswordForm } from '@/components/auth/ChangePasswordForm';
@@ -6,7 +7,7 @@ import { ConfirmPasswordForm } from '@/components/auth/ConfirmPasswordForm';
 
 export const metadata: Metadata = {
   title: 'Profile',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 export default function ProfilePage() {

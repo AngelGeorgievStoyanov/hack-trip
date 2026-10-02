@@ -1,15 +1,17 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
+import { AdminImages } from '@/components/admin';
 
 export const metadata: Metadata = {
   title: 'Image inventory',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 export default function AdminImagesPage() {
   return (
     <section>
-      <h1>Image inventory</h1>
-      <p>Image inventory (cloud/database/orphans) will be implemented in the admin step.</p>
+      <AdminImages />
     </section>
   );
 }
+

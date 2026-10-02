@@ -1,15 +1,18 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
+import { AdminDashboard } from '@/components/admin';
 
 export const metadata: Metadata = {
   title: 'Admin',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 export default function AdminPage() {
   return (
     <section>
       <h1>Admin</h1>
-      <p>Admin dashboard will be implemented in the admin step.</p>
+      <AdminDashboard />
     </section>
   );
 }
+

@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
+import { AdminUserForm } from '@/components/admin';
 
 interface AdminUserEditPageProps {
   params: Promise<{ userId: string }>;
@@ -6,15 +8,15 @@ interface AdminUserEditPageProps {
 
 export const metadata: Metadata = {
   title: 'Edit user',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 export default async function AdminUserEditPage({ params }: AdminUserEditPageProps) {
   const { userId } = await params;
   return (
     <section>
-      <h1>Edit user {userId}</h1>
-      <p>User editing will be implemented in the admin step.</p>
+      <AdminUserForm userId={userId} />
     </section>
   );
 }
+

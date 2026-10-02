@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/common/JsonLd';
+import { PointMap } from '@/components/maps/PointMap';
 import { PointDetails } from '@/components/points/PointDetails';
 import { absoluteUrl } from '@/config';
 import { pointRepresentativeImage } from '@/lib/images/representative';
+import { hasCoordinates } from '@/lib/maps';
 import { getPoint, isNotFoundError } from '@/lib/serverApi';
 import { positiveIdParam } from '@/validations';
 import type { TripPoint } from '@/types';
@@ -79,6 +81,7 @@ export default async function PointPage({ params }: PointPageProps) {
   return (
     <main style={{ padding: '2rem' }}>
       <PointDetails point={point} />
+      {hasCoordinates(point) ? <PointMap point={point} /> : null}
       <JsonLd
         data={{
           '@context': 'https://schema.org',

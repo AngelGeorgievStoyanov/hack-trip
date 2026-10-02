@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/constants/seo';
 import { RegisterForm } from '@/components/auth/RegisterForm';
 
 export const metadata: Metadata = {
   title: 'Register',
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 export default function RegisterPage() {
