@@ -10,6 +10,18 @@ export const metadata: Metadata = {
   title: 'Trips',
   description: 'Browse and discover trips on HackTrip.',
   alternates: { canonical: absoluteUrl('/trips') },
+  openGraph: {
+    title: 'Trips',
+    description: 'Browse and discover trips on HackTrip.',
+    url: absoluteUrl('/trips'),
+    siteName: 'HackTrip',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Trips',
+    description: 'Browse and discover trips on HackTrip.',
+  },
 };
 
 interface TripsPageProps {

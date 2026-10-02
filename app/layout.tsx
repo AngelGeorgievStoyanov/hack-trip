@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { config } from '@/config';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.hack-trip.com'),
+  metadataBase: new URL(config.siteUrl),
   title: {
     default: 'HackTrip',
     template: '%s | HackTrip',

@@ -3,6 +3,7 @@ import { config } from '../config';
 import { ACCESS_TOKEN_STORAGE_KEY } from '../constants/auth';
 import {
   AUTH,
+  AUTHORIZATION_HEADER,
   CLIENT_MARKER_HEADER,
   CLIENT_MARKER_VALUE,
   PUBLIC_FRONTEND_TOKEN,
@@ -57,7 +58,7 @@ apiClient.interceptors.request.use((requestConfig: InternalAxiosRequestConfig) =
 
   if (!requestConfig.skipAuthHeader) {
     const token = accessToken ?? PUBLIC_FRONTEND_TOKEN;
-    requestConfig.headers.set('Authorization', `Bearer ${token}`);
+    requestConfig.headers.set(AUTHORIZATION_HEADER, `Bearer ${token}`);
   }
 
   return requestConfig;
@@ -100,7 +101,7 @@ apiClient.interceptors.response.use(
         })));
 
       if (token) {
-        original.headers.set('Authorization', `Bearer ${token}`);
+        original.headers.set(AUTHORIZATION_HEADER, `Bearer ${token}`);
         return apiClient(original);
       }
     }
