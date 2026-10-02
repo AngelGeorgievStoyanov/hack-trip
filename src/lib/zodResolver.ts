@@ -17,9 +17,8 @@ type ZodLikeSchema = {
 /**
  * Minimal Zod v4 → react-hook-form resolver adapter.
  *
- * The installed `@hookform/resolvers@2.9.11` targets Zod v3 and reads `error.errors`, which
- * no longer exists in Zod v4 (renamed to `error.issues`). This adapter keeps the existing
- * Zod schemas working with React Hook Form without adding a new dependency.
+ * Zod v4 renamed `error.errors` to `error.issues`, so a Zod-v3-era resolver would read the
+ * wrong property. This adapter keeps the existing Zod schemas working with React Hook Form.
  */
 export function zodResolver(schema: ZodLikeSchema): Resolver<any> {
   return async (values) => {

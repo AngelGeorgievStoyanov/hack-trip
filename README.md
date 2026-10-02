@@ -1,68 +1,51 @@
 # HACK-TRIP - https://github.com/AngelGeorgievStoyanov/hack-trip
 # https://www.hack-trip.com
 ## Author: Angel Stoyanov
-### Technologies used:
-* React-TypeScript
-* MySQL 
-* Express.js
-* Node.js
+
+### Technologies used
+* Next.js (App Router)
+* React + TypeScript
 * MUI
-* YUP
+* Zod + React Hook Form
+* React Query
+* Axios
+* MySQL (via the HackTrip REST API)
+* Express.js / Node.js (backend)
 * Google Maps
 * Google Cloud
-* HTML & CSS
-
 
 ### Functionality
-* Guest users can see Home page with TOP 5 TRIPS (HOME PAGE) most liked trips and page with ALL TRIPS, they wont't be able to see the details page of the TRIPS and comments or points.  
-* Logged users have extended functionality with option to create trips and comments, add/edit/delete trips and comments, they will only be able to like trips if they are not the owner,on MY-TRIPS page they will be able to see all their own trips, on MY-FAVORITES page they will be able to see if they added favourite trips.
-* Trips owners can edit and delete their trips and add points(Markers) on Google Maps.
-* Comments' owners can edit and delete their comments.
+* Guests can browse public trips, trip details and points (server-rendered, SEO-friendly).
+* Logged-in users can create/edit/delete trips, like/favorite/report content, and comment.
+* Trips owners (and moderators) can edit and delete their trips.
+* Comments' authors can edit and delete their own comments.
 
-# Connection with REST API MySQL
-* Default HACK-TRIP is the connection with REST API MySQL.   
+### Connection with REST API MySQL
+* The frontend consumes the HackTrip REST API through the centralized `src/api/*` layer (Axios).
+* Canonical API contract: `docs/API_CONTRACT.md`
 
-# REST API MySQL - https://github.com/AngelGeorgievStoyanov/REST-API-MYSQL
-* To run server npm start
-* To run client app cd client and npm start
+### REST API MySQL - https://github.com/AngelGeorgievStoyanov/REST-API-MYSQL
 
+### Getting Started with Next.js
 
-# Getting Started with Vite
+This project uses **Next.js** (App Router) as the frontend framework and routing layer.
 
-This project uses Vite for development and production builds.
+Environment variables use the `NEXT_PUBLIC_*` prefix:
 
-## Available Scripts
+* `NEXT_PUBLIC_API_BASE_URL`
+* `NEXT_PUBLIC_SITE_URL`
+* `NEXT_PUBLIC_GOOGLE_KEY`
+* `NEXT_PUBLIC_SITE_KEY2`
+* `NEXT_PUBLIC_SITE_KEY3`
 
-In the project directory, you can run:
+### Available Scripts
 
-### `npm run dev`
-
-Starts the Vite development server.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.
+* `npm run dev` — starts the Next.js development server (http://localhost:3000)
+* `npm run build` — production build
+* `npm run start` — serves the production build
+* `npm run lint` — ESLint over `src` and `app`
 
 ### Tests
 
 No test script is currently configured.
 
-### `npm run build`
-
-Builds the app for production in the `dist` folder with Vite.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-Use `npm run preview` to inspect the production build locally.
-
-### Production preview
-
-The project uses Vite configuration directly.
-
-Vite configuration is maintained in `vite.config.ts`.
-
-The production output is generated in `dist`.
-
-### `npm run preview`
-
-Serves the production build locally for preview.
