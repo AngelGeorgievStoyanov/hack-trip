@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { TripForm } from '@/components/trips/TripForm';
+import { TripDaysManager } from '@/components/trips/TripDaysManager';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
 import { positiveIdParam } from '@/validations';
 
@@ -32,15 +33,18 @@ export default async function EditTripPage({ params }: EditTripPageProps) {
   }
 
   return (
-    <TripForm
-      tripId={trip.id}
-      initial={{
-        title: trip.title,
-        description: trip.description,
-        group: trip.group.key,
-        transport: trip.transport.key,
-      }}
-    />
+    <div style={{ maxWidth: 720, display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+      <TripForm
+        tripId={trip.id}
+        initial={{
+          title: trip.title,
+          description: trip.description,
+          group: trip.group.key,
+          transport: trip.transport.key,
+        }}
+      />
+      <TripDaysManager tripId={trip.id} initialTrip={trip} />
+    </div>
   );
 }
 

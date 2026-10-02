@@ -5,7 +5,8 @@ import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material'
 import { authApi } from '@/api/auth';
 import { AppImage } from '@/components/images/AppImage';
 import { getGenericErrorMessage } from '@/lib/errors';
-import { ACCEPTED_IMAGE_MIME_TYPES, MAX_UPLOAD_BYTES } from '@/constants/images';
+import { validateImageFile } from '@/lib/images/validate';
+import { ACCEPTED_IMAGE_MIME_TYPES } from '@/constants/images';
 import type { ImageDto } from '@/types';
 
 const ACCEPT_TYPES = (ACCEPTED_IMAGE_MIME_TYPES as readonly string[]).join(',');
@@ -36,12 +37,9 @@ export function ProfileImage() {
     if (!file) {
       return;
     }
-    if (file.size > MAX_UPLOAD_BYTES) {
-      setError('The file is too large (max 25 MB).');
-      return;
-    }
-    if (!(ACCEPTED_IMAGE_MIME_TYPES as readonly string[]).includes(file.type)) {
-      setError('Unsupported image format.');
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
