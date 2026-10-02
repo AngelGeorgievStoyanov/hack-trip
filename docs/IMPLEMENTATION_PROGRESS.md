@@ -78,7 +78,7 @@ Stage 5 — Next.js migration (in progress). Order per the task brief:
 
 1. **Next.js application structure** — ✅ DONE
 2. routing + structural alignment — ✅ DONE
-3. public pages
+3. public pages + API integration + SEO — ✅ DONE
 4. API integration
 5. React Query hooks
 6. authentication pages
@@ -217,13 +217,43 @@ Routing (App Router):
 No `react-router`, `react-helmet`, `jwt-decode`, `yup`, or inline `fetch` remain in
 `src/` + `app/`. The only Axios usage is the single `src/api/client.ts`.
 
+### Stage 5 — Step 3: Public pages + API integration + SEO (done)
+
+Server data flow: `Server Component → src/api/* → src/api/client.ts (axios) → backend`.
+
+- `src/lib/serverApi.ts` — `React.cache()`-deduped `getTrip`/`getPoint` + `isNotFoundError`.
+- `src/lib/images/representative.ts` — trip/point representative-image helpers (cover/OG).
+- `src/components/common/JsonLd.tsx` — safe JSON-LD script (`<` escaped to `\u003c`).
+- `src/components/social/ShareButton.tsx` — Web Share API + clipboard fallback (no react-share).
+- `src/components/trips/{TripCard,TripList,TripFilters,TripDetails}.tsx` — presentational
+  (Server Components); `TripFilters` is a native GET form (no client JS).
+- `src/components/points/PointDetails.tsx`.
+- `AppImage` gained a `src` prop for bare URLs (e.g. `coverImage`); all public images go
+  through `next/image` (no raw `<img>`).
+
+Public pages (all Server Components unless interactive):
+
+- `/` — hero + recent trips (`GET /trips` limit 6).
+- `/trips` — `GET /trips` with search/sort filters (GET form) + server pagination.
+- `/trips/[id]` — `GET /trips/:id` (TripDetails) + `generateMetadata` (title/description/
+  canonical/OG/Twitter) + JSON-LD `Trip` + `notFound()` on 404/invalid id.
+- `/points/[pointId]` — `GET /points/:pointId` + `generateMetadata` + JSON-LD `Place` +
+  `notFound()`.
+
+SEO:
+
+- `app/robots.ts` — allows public, disallows auth/account/admin/edit/create.
+- `app/sitemap.ts` — `/`, `/trips` + all `/trips/[id]` from real `GET /trips` (points
+  omitted: no public point-list endpoint).
+- Canonical URLs use `config.siteUrl` via `absoluteUrl()` (no relative canonical).
+
 ## 5. Checks
 
 | Check | Result |
 | --- | --- |
 | `npx tsc --noEmit` | 0 errors (legacy excluded; the 2 old `loading` errors went away with the quarantined code). |
 | `npm run lint` | 0 errors, 0 warnings across `src` and `app`. |
-| `npm run build` (`next build`) | Success — compiled, TypeScript passed; 19 routes (`/`, auth, account, admin, dynamic `/trips/[id]`, `/points/[pointId]`, `/admin/users/[userId]`, `/trips/[id]/edit`). |
+| `npm run build` (`next build`) | Success (EXIT 0) — 21 static pages + dynamic `/trips` (search), `/trips/[id]`, `/points/[pointId]`, `/trips/[id]/edit`, `/admin/users/[userId]`; plus `/robots.txt`, `/sitemap.xml`. |
 | `npm audit` | 1 high (`brace-expansion` via `eslint -> minimatch`), dev-toolchain only. Fix pending (no `--force`). |
 
 ## 7. Environment note
@@ -236,9 +266,9 @@ local development.
 
 ## 8. Remaining
 
-Stage 5 (continue in the documented order): public pages (data), API integration,
-React Query hooks, auth pages, trip pages, point/day pages, comments/social, images,
-SEO/metadata, sharing/Open Graph, account pages, admin.
+Stage 5 remaining: React Query hooks for client interactive state, authentication pages,
+account pages (profile/my-trips/favorites/trip create+edit), admin pages, comments/social
+UI, maps/tracking, image upload. (Public pages + public SEO are now done.)
 
 Structural alignment done in Step 2: HTTP client → `src/api/client.ts`, `src/services/`
 scaffold, `src/components/{common,layout,navigation,forms,images,maps,trips,points,comments,social,admin,auth}/`,

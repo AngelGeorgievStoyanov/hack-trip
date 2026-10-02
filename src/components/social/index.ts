@@ -1,2 +1,2 @@
-// Social interaction components (LikeButton, FavoriteButton, ReportButton, ...).
-export {};
+export * from './ShareButton';
+

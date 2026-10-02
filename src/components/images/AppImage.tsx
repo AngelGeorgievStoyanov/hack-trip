@@ -7,6 +7,8 @@ import type { ImageDto } from '@/types';
 
 interface AppImageProps {
   image?: ImageDto | null;
+  /** Bare URL (e.g. `TripListItem.coverImage`), used when no thumbnail is available. */
+  src?: string | null;
   alt: string;
   /** Lists/cards pass `true` to use `thumbnailUrl`; detail/gallery use the full image. */
   useThumbnail?: boolean;
@@ -25,6 +27,7 @@ interface AppImageProps {
  */
 export function AppImage({
   image,
+  src,
   alt,
   useThumbnail = false,
   fill = false,
@@ -36,15 +39,15 @@ export function AppImage({
   style,
 }: AppImageProps) {
   const [errored, setErrored] = useState(false);
-  const src = pickImageUrl(image, useThumbnail);
+  const resolved = src ?? pickImageUrl(image, useThumbnail);
 
-  if (errored || !src) {
+  if (errored || !resolved) {
     return <div className={className} style={style} role="img" aria-label={alt} />;
   }
 
   return (
     <Image
-      src={src}
+      src={resolved}
       alt={alt}
       fill={fill}
       width={fill ? undefined : width}
