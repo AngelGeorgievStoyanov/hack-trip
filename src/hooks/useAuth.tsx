@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { authToken, normalizeApiError } from '../clients/axios';
+import { authToken, normalizeApiError } from '../api/client';
 import { API_ERROR_CODES } from '../constants/api';
 import { authApi, type LoginInput } from '../api/auth';
 import type { AuthUserDto } from '../types';
@@ -40,11 +40,14 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(() => authToken.get());
+  const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUserDto | null>(null);
-  const [status, setStatus] = useState<AuthStatus>(() =>
-    authToken.get() ? 'loading' : 'anonymous',
-  );
+  const [status, setStatus] = useState<AuthStatus>('loading');
+
+  // Resolve the persisted access token on the client only, so SSR and hydration agree.
+  useEffect(() => {
+    setToken(authToken.get());
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

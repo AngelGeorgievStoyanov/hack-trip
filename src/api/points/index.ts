@@ -1,4 +1,4 @@
-import { apiClient } from '../../clients/axios';
+import { apiClient } from '../client';
 import { DAYS, POINTS } from '../../constants/api';
 import type { ImageDto, TripPoint } from '../../types';
 import { pointCreateSchema, pointReorderSchema, pointUpdateSchema } from '../../validations';

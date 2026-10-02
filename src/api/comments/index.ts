@@ -1,4 +1,4 @@
-import { apiClient } from '../../clients/axios';
+import { apiClient } from '../client';
 import { COMMENTS, IMAGES, POINTS, TRIPS, TRIP_GROUPS } from '../../constants/api';
 import type { CommentDto, CommentListResponse } from '../../types';
 import { commentBodySchema, commentPageQuerySchema } from '../../validations';

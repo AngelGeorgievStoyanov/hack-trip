@@ -1,4 +1,4 @@
-import { apiClient } from '../../clients/axios';
+import { apiClient } from '../client';
 import { FAVORITES, LIKES, REPORTS } from '../../constants/api';
 import type { ReportDto, SocialState, SocialTargetTypeInput } from '../../types';
 import {

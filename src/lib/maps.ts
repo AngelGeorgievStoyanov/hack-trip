@@ -1,9 +1,9 @@
-import { config } from '../../config';
+import { config } from '../config';
 
 /**
- * Google integration boundary.
+ * Google Maps integration boundary.
  *
- * Centralizes Google Maps configuration and any Google-specific SDK details. UI components
+ * Centralizes Google Maps configuration and any Google-specific SDK details. Map components
  * consume this boundary rather than reading environment variables or initializing the SDK
  * independently.
  */

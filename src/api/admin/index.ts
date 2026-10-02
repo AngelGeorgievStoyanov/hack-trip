@@ -1,4 +1,4 @@
-import { apiClient } from '../../clients/axios';
+import { apiClient } from '../client';
 import { ADMIN } from '../../constants/api';
 import type { Role, UserStatus } from '../../types';
 import type {

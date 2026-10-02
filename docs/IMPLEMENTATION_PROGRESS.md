@@ -77,7 +77,7 @@ Layer foundation (done):
 Stage 5 — Next.js migration (in progress). Order per the task brief:
 
 1. **Next.js application structure** — ✅ DONE
-2. routing
+2. routing + structural alignment — ✅ DONE
 3. public pages
 4. API integration
 5. React Query hooks
@@ -186,13 +186,44 @@ Removed / quarantined:
   were `src/App.tsx` / `src/index.tsx`, now replaced by the App Router. It stays on disk for
   reference and remains recoverable from commit `80cefbf`.
 
+### Stage 5 — Step 2: Routing + structural alignment (done)
+
+Structural alignment:
+
+- Moved the canonical HTTP client to `src/api/client.ts` (was `src/clients/axios/`); all
+  `src/api/*` modules and `useAuth` now import from `../client`. Removed `src/clients/`.
+- Moved Google Maps init config to `src/lib/maps.ts` (key + libraries).
+- `src/hooks/useAuth.tsx` now hydrates the token in a `useEffect` (SSR-safe hydration).
+- `src/lib/images/` — `imageUrl.ts`, `thumbnail.ts`, `imageMetadata.ts`, barrel.
+- `src/components/layout/` — `Header` (client, auth-aware), `Footer`.
+- `src/components/images/` — `AppImage` (next/image, thumbnail vs full, fallback, responsive).
+- `src/components/auth/` — `RequireAuth`, `RequireRole` (replace legacy guarded routes).
+- `src/components/{common,navigation,forms,maps,trips,points,comments,social,admin}/` and
+  `src/services/{auth,trips,points,comments,social,admin}/` scaffolds (empty barrels).
+
+Routing (App Router):
+
+- `app/(public)/layout.tsx` — Header + Footer shell (Server Component).
+- Public: `/` (home), `/trips`, `/trips/[id]` (dynamic + `generateMetadata`), `/points/[pointId]`,
+  `/not-found` (global 404).
+- `app/(auth)/` — `/login`, `/register`, `/verify-email`, `/resend-verification`,
+  `/forgot-password`, `/reset-password` (all `robots: noindex`).
+- `app/(account)/` — `/profile`, `/my-trips`, `/favorites`, `/trips/create`,
+  `/trips/[id]/edit` (guarded by `RequireAuth`).
+- `app/(admin)/` — `/admin`, `/admin/users`, `/admin/users/[userId]`,
+  `/admin/failed-login-logs`, `/admin/route-not-found-logs`, `/admin/images`
+  (guarded by `RequireRole` moderator roles).
+
+No `react-router`, `react-helmet`, `jwt-decode`, `yup`, or inline `fetch` remain in
+`src/` + `app/`. The only Axios usage is the single `src/api/client.ts`.
+
 ## 5. Checks
 
 | Check | Result |
 | --- | --- |
 | `npx tsc --noEmit` | 0 errors (legacy excluded; the 2 old `loading` errors went away with the quarantined code). |
 | `npm run lint` | 0 errors, 0 warnings across `src` and `app`. |
-| `npm run build` (`next build`) | Success — compiled, TypeScript passed, static routes `/` and `/_not-found`. |
+| `npm run build` (`next build`) | Success — compiled, TypeScript passed; 19 routes (`/`, auth, account, admin, dynamic `/trips/[id]`, `/points/[pointId]`, `/admin/users/[userId]`, `/trips/[id]/edit`). |
 | `npm audit` | 1 high (`brace-expansion` via `eslint -> minimatch`), dev-toolchain only. Fix pending (no `--force`). |
 
 ## 7. Environment note
@@ -205,18 +236,16 @@ local development.
 
 ## 8. Remaining
 
-Stage 5 (continue in the documented order): routing, public pages, API integration,
+Stage 5 (continue in the documented order): public pages (data), API integration,
 React Query hooks, auth pages, trip pages, point/day pages, comments/social, images,
 SEO/metadata, sharing/Open Graph, account pages, admin.
 
-Structural alignment still pending against the new docs (§21–23 of `ARCHITECTURE.md`):
+Structural alignment done in Step 2: HTTP client → `src/api/client.ts`, `src/services/`
+scaffold, `src/components/{common,layout,navigation,forms,images,maps,trips,points,comments,social,admin,auth}/`,
+`src/lib/images/` + `src/lib/maps.ts`.
 
-- move the HTTP client to `src/api/client.ts` (currently `src/clients/axios/`);
-- add the `src/services/` orchestration layer;
-- build `src/components/{common,layout,navigation,forms,images,maps,trips,points,comments,social,admin}/`;
-- add `src/lib/images/` (`imageUrl.ts`, `thumbnail.ts`, `imageMetadata.ts`);
-- optionally flatten `src/constants/*` to the documented file-per-domain layout and split
-  `src/validations/*` into per-schema files.
+Still optional (non-blocking cosmetic conformance): flatten `src/constants/*` to the
+documented file-per-domain layout and split `src/validations/*` into per-schema files.
 
 Stage 6: remove `yup`, `jwt-decode`, `react-router-dom`, `react-helmet-async`, `react-share`
 once no consumers remain; resolve the `brace-expansion` advisory without `--force`; final

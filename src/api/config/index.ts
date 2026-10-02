@@ -1,4 +1,4 @@
-import { apiClient } from '../../clients/axios';
+import { apiClient } from '../client';
 import { CONFIG } from '../../constants/api';
 import type { PublicServiceConfigDto, SelectConfigDto } from '../../types';
 

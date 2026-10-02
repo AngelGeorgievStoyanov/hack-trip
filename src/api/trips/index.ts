@@ -1,4 +1,4 @@
-import { apiClient } from '../../clients/axios';
+import { apiClient } from '../client';
 import { IMAGES, TRIPS } from '../../constants/api';
 import type { TripSort } from '../../constants/trips';
 import type { ImageDto, TripDay, TripDetails, TripListResponse } from '../../types';

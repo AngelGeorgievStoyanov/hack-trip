@@ -1,13 +1,13 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import { config } from '../../config';
-import { ACCESS_TOKEN_STORAGE_KEY } from '../../constants/auth';
+import { config } from '../config';
+import { ACCESS_TOKEN_STORAGE_KEY } from '../constants/auth';
 import {
   AUTH,
   CLIENT_MARKER_HEADER,
   CLIENT_MARKER_VALUE,
   PUBLIC_FRONTEND_TOKEN,
-} from '../../constants/api';
-import type { AuthSessionDto } from '../../types';
+} from '../constants/api';
+import type { AuthSessionDto } from '../types';
 
 declare module 'axios' {
   export interface AxiosRequestConfig {

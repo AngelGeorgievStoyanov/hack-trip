@@ -1,4 +1,4 @@
-import { apiClient } from '../../clients/axios';
+import { apiClient } from '../client';
 import { AUTH } from '../../constants/api';
 import type {
   AuthSessionDto,
