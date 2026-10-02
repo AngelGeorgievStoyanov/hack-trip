@@ -70,9 +70,10 @@ export function LoginForm() {
       >
         Login
       </Button>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <Link href="/register">Register</Link>
         <Link href="/forgot-password">Forgot password?</Link>
+        <Link href="/resend-verification">Resend verification email</Link>
       </Box>
     </Box>
   );

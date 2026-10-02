@@ -22,6 +22,7 @@ export function Header() {
         <Link href="/trips">Trips</Link>
         {isAuthenticated ? (
           <>
+            <Link href="/trips/create">Create trip</Link>
             <Link href="/profile">{user?.firstName ?? 'Account'}</Link>
             <Link href="/my-trips">My trips</Link>
             <Link href="/favorites">Favorites</Link>

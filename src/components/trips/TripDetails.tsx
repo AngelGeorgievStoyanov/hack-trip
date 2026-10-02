@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { AppImage } from '@/components/images/AppImage';
 import { TripActions } from './TripActions';
 import { CommentsSection } from '@/components/comments/CommentsSection';
@@ -53,7 +54,9 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
             <ol>
               {day.points.map((point) => (
                 <li key={point.id}>
-                  <h3>{point.title}</h3>
+                  <h3>
+                    <Link href={`/points/${point.id}`}>{point.title}</Link>
+                  </h3>
                   {point.description ? <p>{point.description}</p> : null}
                   {point.latitude != null && point.longitude != null ? (
                     <p>
