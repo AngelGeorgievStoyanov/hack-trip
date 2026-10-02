@@ -1,2 +1,2 @@
-// Comment components (CommentCard, CommentList, CommentCreate, ...).
-export {};
+export * from './CommentsSection';
+

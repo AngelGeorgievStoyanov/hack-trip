@@ -1,11 +1,10 @@
 import { AppImage } from '@/components/images/AppImage';
-import { ShareButton } from '@/components/social/ShareButton';
-import { absoluteUrl } from '@/config';
+import { PointActions } from './PointActions';
+import { CommentsSection } from '@/components/comments/CommentsSection';
 import type { TripPoint } from '@/types';
 
 /** Server-rendered point detail: title, description, coordinates and images. */
 export function PointDetails({ point }: { point: TripPoint }) {
-  const url = absoluteUrl(`/points/${point.id}`);
   const hero = point.images[0];
 
   return (
@@ -17,7 +16,7 @@ export function PointDetails({ point }: { point: TripPoint }) {
           Coordinates: {point.latitude.toFixed(6)}, {point.longitude.toFixed(6)}
         </p>
       ) : null}
-      <ShareButton url={url} title={point.title} text={point.description ?? undefined} />
+      <PointActions point={point} />
 
       {hero ? (
         <AppImage image={hero} alt={point.title} width={1200} height={630} sizes="100vw" priority />
@@ -33,6 +32,8 @@ export function PointDetails({ point }: { point: TripPoint }) {
           sizes="(max-width: 600px) 50vw, 33vw"
         />
       ))}
+
+      <CommentsSection target={{ type: 'point', pointId: point.id }} />
     </article>
   );
 }

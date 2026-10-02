@@ -9,7 +9,10 @@ export default function FavoritesPage() {
   return (
     <section>
       <h1>Favorites</h1>
-      <p>Favorites will be implemented in a later step.</p>
+      <p>
+        A &quot;favorites&quot; list is not available in the current backend API contract:
+        favorites can only be added/removed (POST/DELETE); there is no endpoint to list them.
+      </p>
     </section>
   );
 }

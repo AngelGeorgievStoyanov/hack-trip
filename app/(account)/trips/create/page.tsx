@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { TripForm } from '@/components/trips/TripForm';
 
 export const metadata: Metadata = {
   title: 'Create trip',
@@ -6,10 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function CreateTripPage() {
-  return (
-    <section>
-      <h1>Create trip</h1>
-      <p>Trip creation will be implemented in a later step.</p>
-    </section>
-  );
+  return <TripForm />;
 }

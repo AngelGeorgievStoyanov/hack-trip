@@ -9,7 +9,10 @@ export default function MyTripsPage() {
   return (
     <section>
       <h1>My trips</h1>
-      <p>My trips will be implemented in a later step.</p>
+      <p>
+        A dedicated &quot;my trips&quot; list is not available in the current backend API
+        contract: there is no endpoint to list trips by owner.
+      </p>
     </section>
   );
 }

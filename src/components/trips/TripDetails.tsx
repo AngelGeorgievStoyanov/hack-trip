@@ -1,6 +1,6 @@
 import { AppImage } from '@/components/images/AppImage';
-import { ShareButton } from '@/components/social/ShareButton';
-import { absoluteUrl } from '@/config';
+import { TripActions } from './TripActions';
+import { CommentsSection } from '@/components/comments/CommentsSection';
 import type { TripDetails as TripDetailsDto } from '@/types';
 
 /**
@@ -8,8 +8,6 @@ import type { TripDetails as TripDetailsDto } from '@/types';
  * and images. Interactive pieces (Share, like/favorite later, map later) stay client-side.
  */
 export function TripDetails({ trip }: { trip: TripDetailsDto }) {
-  const url = absoluteUrl(`/trips/${trip.id}`);
-
   return (
     <article>
       <header>
@@ -19,7 +17,7 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
           By {trip.author.firstName} {trip.author.lastName} · {trip.group.name} ·{' '}
           {trip.transport.name}
         </p>
-        <ShareButton url={url} title={trip.title} text={trip.description ?? undefined} />
+        <TripActions trip={trip} />
       </header>
 
       {trip.coverImage ? (
@@ -82,6 +80,8 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
           ) : null}
         </section>
       ))}
+
+      <CommentsSection target={{ type: 'tripGroup', tripGroupId: trip.id }} />
     </article>
   );
 }

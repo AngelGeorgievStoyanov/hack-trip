@@ -278,6 +278,28 @@ Auth behavior:
 - Profile image uses `GET/POST/DELETE /auth/me/image` via `AppImage` + client validation.
 - Account routes guarded by `RequireAuth`/`RequireRole` (no legacy `GuardedRoute`).
 
+### Stage 5 — Step 5: Trips, Points, Social + remaining user UI (done, see limitations)
+
+- `src/components/social/{LikeButton,FavoriteButton,ReportButton}.tsx` — like/favorite/report
+  (React Query `useMutation`, correct `targetType` per contract).
+- `src/components/comments/CommentsSection.tsx` — list/create/edit/delete comments
+  (React Query `useQuery`/`useMutation`, author-only edit/delete UI, newest-first).
+- `src/components/trips/TripActions.tsx` — share/like/favorite/report + edit/delete
+  (owner/moderator UI) on the trip detail page.
+- `src/components/points/PointActions.tsx` — share/like/report on the point detail page.
+- `src/components/trips/TripForm.tsx` — create/edit trip (React Hook Form + Zod).
+- `/trips/create` and `/trips/[id]/edit` wired to `TripForm` (POST/PUT `/trips`).
+- `TripDetails` / `PointDetails` render interactive client islands (actions + comments)
+  while staying Server Components (SEO preserved).
+
+Limitations (no backend support — NOT fabricated):
+
+- `/my-trips`: no endpoint to list trips by owner.
+- `/favorites`: no endpoint to list favorites (only POST/DELETE exists).
+- Point create/edit/delete/reorder UI, day create/reorder/update/delete UI, and trip/point
+  image upload/delete UI are deferred — `src/api/*` already exposes every such endpoint
+  (`pointApi`, `tripApi.createDay/reorderDays/updateDay/deleteDay/uploadDayImage/deleteImage`).
+
 ## 5. Checks
 
 | Check | Result |
@@ -297,9 +319,17 @@ local development.
 
 ## 8. Remaining
 
-Stage 5 remaining: React Query hooks for client interactive state, account pages
-(my-trips/favorites/trip create+edit), admin pages, comments/social UI, maps/tracking,
-image upload (trip/point images). (Public pages + public SEO + auth/account profile done.)
+Stage 6 (next): dependency + legacy cleanup — remove `yup`, `jwt-decode`, `react-router-dom`,
+`react-helmet-async`, `react-share` once no consumers remain; delete `legacy/`; resolve the
+`brace-expansion` advisory without `--force`.
+
+Deferred (no backend support, or remaining work):
+
+- `/my-trips`, `/favorites` — no backend endpoints (documented limitation).
+- Point create/edit/delete/reorder UI; day create/reorder/update/delete UI; trip/point
+  image upload/delete UI — API layer ready, UI deferred.
+- Admin pages (users, moderation, logs, image inventory).
+- Maps/tracking (client-side Google Maps).
 
 Structural alignment done in Step 2: HTTP client → `src/api/client.ts`, `src/services/`
 scaffold, `src/components/{common,layout,navigation,forms,images,maps,trips,points,comments,social,admin,auth}/`,
