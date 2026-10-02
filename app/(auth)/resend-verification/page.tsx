@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ResendVerificationForm } from '@/components/auth/ResendVerificationForm';
 
 export const metadata: Metadata = {
   title: 'Resend verification',
@@ -6,10 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function ResendVerificationPage() {
-  return (
-    <section>
-      <h1>Resend verification</h1>
-      <p>Resend verification will be implemented in the authentication step.</p>
-    </section>
-  );
+  return <ResendVerificationForm />;
 }

@@ -81,7 +81,7 @@ Stage 5 — Next.js migration (in progress). Order per the task brief:
 3. public pages + API integration + SEO — ✅ DONE
 4. API integration
 5. React Query hooks
-6. authentication pages
+6. authentication pages — ✅ DONE (login/register/verify/resend/forgot/reset + `/profile`)
 7. trip pages
 8. point/day pages
 9. comments/social
@@ -247,6 +247,37 @@ SEO:
   omitted: no public point-list endpoint).
 - Canonical URLs use `config.siteUrl` via `absoluteUrl()` (no relative canonical).
 
+### Stage 5 — Step 4: Authentication + Account (done)
+
+- `src/lib/zodResolver.ts` — minimal Zod v4 → react-hook-form adapter. The installed
+  `@hookform/resolvers@2.9.11` reads `error.errors` (Zod v3); Zod v4 renamed it to
+  `error.issues`, so this adapter avoids a dependency change and keeps the existing schemas.
+- `src/lib/errors.ts` — centralized `ApiError` code → user message mapping
+  (`getAuthErrorMessage`, `getGenericErrorMessage`, `getTokenErrorMessage`).
+- `useAuth` gained `updateUser()` (updates in-memory user after profile updates).
+- `Header` now shows Login/Register (anonymous) vs Profile/My trips/Favorites/Admin/Logout.
+
+Forms (React Hook Form + Zod, no Yup), all Client Components under `src/components/auth/`:
+
+- `LoginForm`, `RegisterForm`, `VerifyEmailForm`, `ResendVerificationForm`,
+  `ForgotPasswordForm`, `ResetPasswordForm`, `ProfileForm`, `ChangePasswordForm`,
+  `ConfirmPasswordForm`, `ProfileImage`.
+
+Pages (Server Components with `robots: noindex`, render the client forms):
+
+- `/login`, `/register`, `/verify-email?token=…`, `/resend-verification`,
+  `/forgot-password`, `/reset-password?token=…`, `/profile` (profile update + image +
+  change/confirm password). Tokens are read from the URL query only — never persisted.
+
+Auth behavior:
+
+- Login/register/verify/resend/forgot/reset use the centralized `authApi` + Axios client.
+- Anti-enumeration preserved (register/resend/forgot show the backend neutral message).
+- Refresh/logout remain in `src/api/client.ts` (single-flight, HttpOnly cookie, retry once).
+- Profile uses `GET/PUT /auth/me`; role/status come from `/auth/me` (no JWT decoding).
+- Profile image uses `GET/POST/DELETE /auth/me/image` via `AppImage` + client validation.
+- Account routes guarded by `RequireAuth`/`RequireRole` (no legacy `GuardedRoute`).
+
 ## 5. Checks
 
 | Check | Result |
@@ -266,9 +297,9 @@ local development.
 
 ## 8. Remaining
 
-Stage 5 remaining: React Query hooks for client interactive state, authentication pages,
-account pages (profile/my-trips/favorites/trip create+edit), admin pages, comments/social
-UI, maps/tracking, image upload. (Public pages + public SEO are now done.)
+Stage 5 remaining: React Query hooks for client interactive state, account pages
+(my-trips/favorites/trip create+edit), admin pages, comments/social UI, maps/tracking,
+image upload (trip/point images). (Public pages + public SEO + auth/account profile done.)
 
 Structural alignment done in Step 2: HTTP client → `src/api/client.ts`, `src/services/`
 scaffold, `src/components/{common,layout,navigation,forms,images,maps,trips,points,comments,social,admin,auth}/`,

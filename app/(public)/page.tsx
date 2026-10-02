@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { tripApi } from '@/api/trips';
 import { TripList } from '@/components/trips/TripList';
 import { absoluteUrl } from '@/config';
-import type { TripListItem } from '@/types';
 
 export const metadata: Metadata = {
   title: 'HackTrip — plan and share your trips',
@@ -23,13 +22,8 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  let trips: TripListItem[] = [];
-  try {
-    const response = await tripApi.listTrips({ limit: 6, sort: 'newest' });
-    trips = response.items;
-  } catch {
-    trips = [];
-  }
+  const response = await tripApi.listTrips({ limit: 6, sort: 'newest' }).catch(() => null);
+  const trips = response?.items ?? [];
 
   return (
     <main style={{ padding: '2rem' }}>

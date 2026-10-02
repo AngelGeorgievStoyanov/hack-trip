@@ -1,15 +1,17 @@
 import type { Metadata } from 'next';
+import { VerifyEmailForm } from '@/components/auth/VerifyEmailForm';
 
 export const metadata: Metadata = {
   title: 'Verify email',
   robots: { index: false, follow: false },
 };
 
-export default function VerifyEmailPage() {
-  return (
-    <section>
-      <h1>Verify email</h1>
-      <p>Email verification will be implemented in the authentication step.</p>
-    </section>
-  );
+interface VerifyEmailPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
+  const sp = await searchParams;
+  const token = typeof sp.token === 'string' ? sp.token : undefined;
+  return <VerifyEmailForm token={token} />;
 }

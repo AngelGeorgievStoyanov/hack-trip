@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { LoginForm } from '@/components/auth/LoginForm';
 
 export const metadata: Metadata = {
   title: 'Login',
@@ -6,10 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
-  return (
-    <section>
-      <h1>Login</h1>
-      <p>The login form will be implemented in the authentication step.</p>
-    </section>
-  );
+  return <LoginForm />;
 }

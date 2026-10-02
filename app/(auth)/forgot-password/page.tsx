@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm';
 
 export const metadata: Metadata = {
   title: 'Forgot password',
@@ -6,10 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function ForgotPasswordPage() {
-  return (
-    <section>
-      <h1>Forgot password</h1>
-      <p>Password recovery will be implemented in the authentication step.</p>
-    </section>
-  );
+  return <ForgotPasswordForm />;
 }
