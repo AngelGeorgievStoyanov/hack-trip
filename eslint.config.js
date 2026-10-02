@@ -4,12 +4,12 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
     {
-        ignores: ['build/**', 'dist/**', 'node_modules/**'],
+        ignores: ['build/**', 'dist/**', 'node_modules/**', '.next/**', 'legacy/**'],
     },
     eslint.configs.recommended,
     ...tseslint.configs.recommended,
     {
-        files: ['src/**/*.{ts,tsx}'],
+        files: ['src/**/*.{ts,tsx}', 'app/**/*.{ts,tsx}'],
         languageOptions: {
             parserOptions: {
                 ecmaFeatures: {
