@@ -1,13 +1,10 @@
 import Link from 'next/link';
 import { AppImage } from '@/components/images/AppImage';
+import { EngagementBar } from '@/components/social/EngagementBar';
 import { TripActions } from './TripActions';
 import { CommentsSection } from '@/components/comments/CommentsSection';
 import type { TripDetails as TripDetailsDto } from '@/types';
 
-/**
- * Server-rendered trip detail: title, description, author, group/transport, days, points
- * and images. Interactive pieces (Share, like/favorite later, map later) stay client-side.
- */
 export function TripDetails({ trip }: { trip: TripDetailsDto }) {
   return (
     <article>
@@ -38,15 +35,22 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
           {day.images.length > 0 ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
               {day.images.map((img) => (
-                <AppImage
-                  key={img.id}
-                  image={img}
-                  alt={day.title ?? `Day ${day.day}`}
-                  useThumbnail
-                  width={240}
-                  height={180}
-                  sizes="(max-width: 600px) 50vw, 33vw"
-                />
+                <div key={img.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <AppImage
+                    image={img}
+                    alt={day.title ?? `Day ${day.day}`}
+                    useThumbnail
+                    width={240}
+                    height={180}
+                    sizes="(max-width: 600px) 50vw, 33vw"
+                  />
+                  <EngagementBar
+                    targetType="image"
+                    targetId={img.id}
+                    social={img.social}
+                    commentTarget={{ type: 'image', imageId: img.id }}
+                  />
+                </div>
               ))}
             </div>
           ) : null}
@@ -66,14 +70,21 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
                   {point.images.length > 0 ? (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                       {point.images.map((img) => (
-                        <AppImage
-                          key={img.id}
-                          image={img}
-                          alt={point.title}
-                          useThumbnail
-                          width={200}
-                          height={150}
-                        />
+                        <div key={img.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <AppImage
+                            image={img}
+                            alt={point.title}
+                            useThumbnail
+                            width={200}
+                            height={150}
+                          />
+                          <EngagementBar
+                            targetType="image"
+                            targetId={img.id}
+                            social={img.social}
+                            commentTarget={{ type: 'image', imageId: img.id }}
+                          />
+                        </div>
                       ))}
                     </div>
                   ) : null}
@@ -81,6 +92,12 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
               ))}
             </ol>
           ) : null}
+          <EngagementBar
+            targetType="day"
+            targetId={day.id}
+            social={day.social}
+            commentTarget={{ type: 'day', tripId: trip.id, dayId: day.id }}
+          />
         </section>
       ))}
 
