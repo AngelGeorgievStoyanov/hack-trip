@@ -7,8 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { authToken, normalizeApiError } from '../api/client';
-import { API_ERROR_CODES } from '../constants/api';
+import { authToken, isAccountStatusError, normalizeApiError, restoreSession } from '../api/client';
 import { authApi, type LoginInput } from '../api/auth';
 import type { AuthUserDto } from '../types';
 
@@ -18,16 +17,6 @@ import type { AuthUserDto } from '../types';
  * failures are surfaced distinctly.
  */
 export type AuthStatus = 'loading' | 'anonymous' | 'authenticated' | 'accountError';
-
-const ACCOUNT_STATUS_CODES = [
-  API_ERROR_CODES.EMAIL_NOT_VERIFIED,
-  API_ERROR_CODES.ACCOUNT_SUSPENDED,
-  API_ERROR_CODES.ACCOUNT_DEACTIVATED,
-] as const;
-
-function isAccountStatusError(code?: string): boolean {
-  return code !== undefined && (ACCOUNT_STATUS_CODES as readonly string[]).includes(code);
-}
 
 interface AuthContextValue {
   status: AuthStatus;
@@ -45,22 +34,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUserDto | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
 
-  // Resolve the persisted access token on the client only, so SSR and hydration agree.
   useEffect(() => {
-    setToken(authToken.get());
+    let cancelled = false;
+    restoreSession().then((result) => {
+      if (cancelled) {
+        return;
+      }
+      if (result.status === 'ok') {
+        setToken(result.token);
+      } else if (result.status === 'accountError') {
+        setUser(null);
+        setStatus('accountError');
+      } else {
+        setUser(null);
+        setStatus('anonymous');
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
     if (!token) {
-      setUser(null);
-      setStatus('anonymous');
-      return () => {
-        cancelled = true;
-      };
+      return;
     }
 
+    let cancelled = false;
     setStatus('loading');
     authApi
       .me()

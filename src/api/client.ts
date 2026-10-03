@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { config } from '../config';
-import { ACCESS_TOKEN_STORAGE_KEY } from '../constants/auth';
 import {
+  API_ERROR_CODES,
   AUTH,
   AUTHORIZATION_HEADER,
   CLIENT_MARKER_HEADER,
@@ -20,28 +20,13 @@ declare module 'axios' {
   }
 }
 
-/**
- * Holder for the short-lived access token.
- *
- * The refresh token is an HttpOnly cookie managed exclusively by the browser and is never
- * stored here or in browser-accessible storage. The access token is persisted to
- * `localStorage` so a session survives reloads; it is never treated as the refresh token.
- */
-let accessToken: string | null =
-  typeof window !== 'undefined' ? window.localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY) : null;
+// Memory-only access token; the refresh token lives in an HttpOnly cookie owned by the browser.
+let accessToken: string | null = null;
 
 export const authToken = {
   get: (): string | null => accessToken,
   set: (token: string | null): void => {
     accessToken = token;
-    if (typeof window === 'undefined') {
-      return;
-    }
-    if (token) {
-      window.localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
-    } else {
-      window.localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
-    }
   },
 };
 
@@ -64,9 +49,24 @@ apiClient.interceptors.request.use((requestConfig: InternalAxiosRequestConfig) =
   return requestConfig;
 });
 
-let refreshPromise: Promise<string | null> | null = null;
+export type RefreshResult =
+  | { status: 'ok'; token: string }
+  | { status: 'accountError' }
+  | { status: 'failed' };
 
-function refreshAccessToken(): Promise<string | null> {
+const ACCOUNT_STATUS_CODES = [
+  API_ERROR_CODES.EMAIL_NOT_VERIFIED,
+  API_ERROR_CODES.ACCOUNT_SUSPENDED,
+  API_ERROR_CODES.ACCOUNT_DEACTIVATED,
+] as const;
+
+export function isAccountStatusError(code?: string): boolean {
+  return code !== undefined && (ACCOUNT_STATUS_CODES as readonly string[]).includes(code);
+}
+
+let refreshPromise: Promise<RefreshResult> | null = null;
+
+function refreshSession(): Promise<RefreshResult> {
   return axios
     .post<AuthSessionDto>(`${config.apiBaseUrl}${AUTH}/refresh`, undefined, {
       withCredentials: true,
@@ -75,12 +75,25 @@ function refreshAccessToken(): Promise<string | null> {
     .then((response) => {
       const token = response.data.accessToken;
       authToken.set(token);
-      return token;
+      return { status: 'ok' as const, token };
     })
-    .catch(() => {
+    .catch((error) => {
       authToken.set(null);
-      return null;
+      const code = normalizeApiError(error).code;
+      if (isAccountStatusError(code)) {
+        return { status: 'accountError' as const };
+      }
+      return { status: 'failed' as const };
     });
+}
+
+export function restoreSession(): Promise<RefreshResult> {
+  return (
+    refreshPromise ??
+    (refreshPromise = refreshSession().finally(() => {
+      refreshPromise = null;
+    }))
+  );
 }
 
 apiClient.interceptors.response.use(
@@ -95,13 +108,10 @@ apiClient.interceptors.response.use(
       error.response?.status === 401
     ) {
       original._retry = true;
-      const token = await (refreshPromise ??
-        (refreshPromise = refreshAccessToken().finally(() => {
-          refreshPromise = null;
-        })));
+      const result = await restoreSession();
 
-      if (token) {
-        original.headers.set(AUTHORIZATION_HEADER, `Bearer ${token}`);
+      if (result.status === 'ok') {
+        original.headers.set(AUTHORIZATION_HEADER, `Bearer ${result.token}`);
         return apiClient(original);
       }
     }

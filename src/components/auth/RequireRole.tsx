@@ -1,32 +1,26 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { type ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { NotFound } from '@/components/common/NotFound';
 import type { Role } from '@/types';
 
 /**
- * Client-side role guard. Backend authorization remains authoritative; this only controls
- * UI visibility. Replaces the legacy `GuardedRouteAdmin`.
+ * Client-side role guard for sensitive routes. Unauthorized visitors receive the normal
+ * not-found page so the existence of the route and its role requirement are not revealed.
+ * Backend authorization remains authoritative.
  */
 export function RequireRole({ roles, children }: { roles: Role[]; children: ReactNode }) {
   const { status, user } = useAuth();
-  const router = useRouter();
 
   const allowed = status === 'authenticated' && user !== null && roles.includes(user.role);
 
-  useEffect(() => {
-    if (status === 'anonymous' || status === 'accountError') {
-      const path = window.location.pathname + window.location.search;
-      const returnTo = path && path !== '/login' ? `?returnTo=${encodeURIComponent(path)}` : '';
-      router.replace(`/login${returnTo}`);
-    } else if (status === 'authenticated' && !allowed) {
-      router.replace('/');
-    }
-  }, [status, allowed, router]);
+  if (status === 'loading') {
+    return null;
+  }
 
   if (!allowed) {
-    return null;
+    return <NotFound />;
   }
 
   return <>{children}</>;
