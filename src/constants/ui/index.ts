@@ -1,8 +1,3 @@
-/**
- * Shared UI constants and pagination defaults.
- */
-
-/** Maximum allowed `page` value across list endpoints. */
 export const PAGE_MAX = 10000;
 
 export const TRIP_PAGE_DEFAULT = 1;

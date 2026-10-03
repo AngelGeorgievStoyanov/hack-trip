@@ -1,5 +1,3 @@
-import { IMAGE_SIZES } from './imageMetadata';
-
 export interface ImagePreset {
   width?: number;
   height?: number;
@@ -9,7 +7,12 @@ export interface ImagePreset {
   useThumbnail?: boolean;
 }
 
-/** Single source of image presentation defaults; call sites pass `preset` to `AppImage`. */
+export const IMAGE_SIZES = {
+  hero: '100vw',
+  card: '(max-width: 600px) 100vw, 33vw',
+  gallery: '(max-width: 600px) 50vw, 33vw',
+} as const;
+
 export const IMAGE_PRESETS = {
   hero: { width: 1200, height: 630, sizes: IMAGE_SIZES.hero, priority: true },
   tripCard: { width: 400, height: 240, sizes: IMAGE_SIZES.card },

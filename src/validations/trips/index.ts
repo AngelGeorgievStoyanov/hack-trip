@@ -1,42 +1,48 @@
 import { z } from 'zod';
+import {
+  DAY_NUMBER_MAX,
+  DAY_TITLE_MAX_LENGTH,
+  TRIP_DESCRIPTION_MAX_LENGTH,
+  TRIP_GROUP_MAX_LENGTH,
+  TRIP_SEARCH_MAX_LENGTH,
+  TRIP_TITLE_MAX_LENGTH,
+  TRIP_TRANSPORT_MAX_LENGTH,
+} from '@/constants/trips';
+import { PAGE_MAX, TRIP_LIMIT_MAX } from '@/constants/ui';
 import { idList, optionalInt, optionalText, patchText, trimmedString } from '../shared';
-
-/**
- * Trip request schemas (API_CONTRACT.md §18.3). All `.strict()`.
- */
 
 export const tripWriteSchema = z
   .object({
-    title: trimmedString({ min: 1, max: 60 }),
-    description: optionalText({ max: 2000 }),
-    group: trimmedString({ min: 1, max: 45 }),
-    transport: trimmedString({ min: 1, max: 45 }),
+    title: trimmedString({ min: 1, max: TRIP_TITLE_MAX_LENGTH }),
+    description: optionalText({ max: TRIP_DESCRIPTION_MAX_LENGTH }),
+    group: trimmedString({ min: 1, max: TRIP_GROUP_MAX_LENGTH }),
+    transport: trimmedString({ min: 1, max: TRIP_TRANSPORT_MAX_LENGTH }),
   })
   .strict();
 
 export const tripListQuerySchema = z
   .object({
-    page: optionalInt({ min: 1, max: 10000 }),
-    limit: optionalInt({ min: 1, max: 100 }),
-    search: trimmedString({ min: 1, max: 200 }).optional(),
-    group: trimmedString({ min: 1, max: 45 }).optional(),
-    transport: trimmedString({ min: 1, max: 45 }).optional(),
+    page: optionalInt({ min: 1, max: PAGE_MAX }),
+    limit: optionalInt({ min: 1, max: TRIP_LIMIT_MAX }),
+    search: trimmedString({ min: 1, max: TRIP_SEARCH_MAX_LENGTH }).optional(),
+    group: trimmedString({ min: 1, max: TRIP_GROUP_MAX_LENGTH }).optional(),
+    transport: trimmedString({ min: 1, max: TRIP_TRANSPORT_MAX_LENGTH }).optional(),
     sort: z.enum(['newest', 'oldest']).optional(),
   })
   .strict();
 
 export const dayCreateSchema = z
   .object({
-    dayNumber: optionalInt({ min: 1, max: 500 }),
-    title: optionalText({ min: 1, max: 60 }),
-    description: optionalText({ max: 2000 }),
+    dayNumber: optionalInt({ min: 1, max: DAY_NUMBER_MAX }),
+    title: optionalText({ min: 1, max: DAY_TITLE_MAX_LENGTH }),
+    description: optionalText({ max: TRIP_DESCRIPTION_MAX_LENGTH }),
   })
   .strict();
 
 export const dayUpdateSchema = z
   .object({
-    title: patchText({ min: 1, max: 60 }),
-    description: patchText({ max: 2000 }),
+    title: patchText({ min: 1, max: DAY_TITLE_MAX_LENGTH }),
+    description: patchText({ max: TRIP_DESCRIPTION_MAX_LENGTH }),
   })
   .strict()
   .refine(

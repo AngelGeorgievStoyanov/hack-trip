@@ -1,9 +1,6 @@
 import { z } from 'zod';
+import { COMMENT_LIMIT_MAX, PAGE_MAX } from '@/constants/ui';
 import { optionalInt, trimmedString } from '../shared';
-
-/**
- * Comment request schemas (API_CONTRACT.md §18.5). All `.strict()`.
- */
 
 export const commentBodySchema = z
   .object({
@@ -13,7 +10,7 @@ export const commentBodySchema = z
 
 export const commentPageQuerySchema = z
   .object({
-    page: optionalInt({ min: 1, max: 10000 }),
-    limit: optionalInt({ min: 1, max: 100 }),
+    page: optionalInt({ min: 1, max: PAGE_MAX }),
+    limit: optionalInt({ min: 1, max: COMMENT_LIMIT_MAX }),
   })
   .strict();

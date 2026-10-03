@@ -4,7 +4,13 @@ import { tripApi, type TripListQuery } from '@/api/trips';
 import { TripFilters } from '@/components/trips/TripFilters';
 import { TripList } from '@/components/trips/TripList';
 import { absoluteUrl } from '@/config';
-import type { TripSort } from '@/constants/trips';
+import {
+  TRIP_GROUP_MAX_LENGTH,
+  TRIP_SEARCH_MAX_LENGTH,
+  TRIP_TRANSPORT_MAX_LENGTH,
+  type TripSort,
+} from '@/constants/trips';
+import { PAGE_MAX, TRIP_LIMIT_MAX } from '@/constants/ui';
 
 export const metadata: Metadata = {
   title: 'Trips',
@@ -54,11 +60,11 @@ function parseQuery(sp: Record<string, string | string[] | undefined>): TripList
     sortRaw === 'newest' || sortRaw === 'oldest' ? sortRaw : undefined;
 
   return {
-    page: parseOptionalInt(first(sp.page), 10000),
-    limit: parseOptionalInt(first(sp.limit), 100),
-    search: cleanString(first(sp.search), 200),
-    group: cleanString(first(sp.group), 45),
-    transport: cleanString(first(sp.transport), 45),
+    page: parseOptionalInt(first(sp.page), PAGE_MAX),
+    limit: parseOptionalInt(first(sp.limit), TRIP_LIMIT_MAX),
+    search: cleanString(first(sp.search), TRIP_SEARCH_MAX_LENGTH),
+    group: cleanString(first(sp.group), TRIP_GROUP_MAX_LENGTH),
+    transport: cleanString(first(sp.transport), TRIP_TRANSPORT_MAX_LENGTH),
     sort,
   };
 }

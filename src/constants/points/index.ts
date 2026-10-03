@@ -1,7 +1,3 @@
-/**
- * Point-related fixed values.
- */
-
 export const POINT_TITLE_MAX_LENGTH = 100;
 export const POINT_DESCRIPTION_MAX_LENGTH = 1050;
 

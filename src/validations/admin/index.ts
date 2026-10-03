@@ -1,9 +1,11 @@
 import { z } from 'zod';
+import {
+  ADMIN_PAGE_DEFAULT,
+  ADMIN_PAGE_SIZE_DEFAULT,
+  ADMIN_PAGE_SIZE_MAX,
+  PAGE_MAX,
+} from '@/constants/ui';
 import { idList, optionalInt, trimmedString } from '../shared';
-
-/**
- * Admin request schemas (API_CONTRACT.md §18.6). All `.strict()`.
- */
 
 export const adminUserUpdateSchema = z
   .object({
@@ -30,7 +32,9 @@ export const failedLogDeleteSchema = z
 
 export const adminPaginationQuerySchema = z
   .object({
-    page: optionalInt({ min: 1, max: 10000 }).transform((value) => value ?? 1),
-    pageSize: optionalInt({ min: 1, max: 100 }).transform((value) => value ?? 50),
+    page: optionalInt({ min: 1, max: PAGE_MAX }).transform((value) => value ?? ADMIN_PAGE_DEFAULT),
+    pageSize: optionalInt({ min: 1, max: ADMIN_PAGE_SIZE_MAX }).transform(
+      (value) => value ?? ADMIN_PAGE_SIZE_DEFAULT,
+    ),
   })
   .strict();

@@ -3,7 +3,7 @@
 import { useState, type CSSProperties } from 'react';
 import Image from 'next/image';
 import { pickImageUrl } from '@/lib/images/thumbnail';
-import { IMAGE_PRESETS, type ImagePreset, type ImagePresetName } from '@/lib/images/imagePresets';
+import { IMAGE_PRESETS, type ImagePreset, type ImagePresetName } from '@/constants/images/presets';
 import type { ImageDto } from '@/types';
 
 interface AppImageProps {
@@ -22,8 +22,7 @@ interface AppImageProps {
 }
 
 /**
- * Canonical image component — the only place `next/image` is used. Presentation defaults
- * come from `preset` in `src/lib/images/imagePresets.ts`.
+ * Canonical image component — the only place `next/image` is used.
  */
 export function AppImage({
   image,

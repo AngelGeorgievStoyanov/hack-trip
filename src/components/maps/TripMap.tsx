@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { GoogleMap, InfoWindowF, MarkerF, useJsApiLoader } from '@react-google-maps/api';
 import { Box } from '@mui/material';
 import { googleMapsInitConfig, toMapPosition, type MapPosition } from '@/lib/maps';
+import { MAP_CONTAINER_HEIGHT, MAP_DEFAULT_ZOOM } from '@/constants/maps';
 import type { TripPoint } from '@/types';
 
 interface MarkerItem {
@@ -31,13 +32,13 @@ export function TripMap({ points }: { points: TripPoint[] }) {
   }
 
   return (
-    <Box sx={{ width: '100%', height: 400, mt: 2 }}>
+    <Box sx={{ width: '100%', height: MAP_CONTAINER_HEIGHT, mt: 2 }}>
       <GoogleMap
         mapContainerStyle={{ width: '100%', height: '100%' }}
         onLoad={(map) => {
           if (markers.length === 1) {
             map.setCenter(markers[0].position);
-            map.setZoom(14);
+            map.setZoom(MAP_DEFAULT_ZOOM);
             return;
           }
           const bounds = new google.maps.LatLngBounds();

@@ -1,11 +1,10 @@
 export * from './api';
 export * from './auth';
-export * from './routes';
 export * from './roles';
 export * from './trips';
 export * from './points';
 export * from './config';
 export * from './images';
+export * from './maps';
 export * from './ui';
 export * from './seo';
-

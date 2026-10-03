@@ -1,7 +1,3 @@
-/**
- * Trip-related fixed values and documented domain enumerations.
- */
-
 export const TRIP_SORT_OPTIONS = {
   newest: 'newest',
   oldest: 'oldest',

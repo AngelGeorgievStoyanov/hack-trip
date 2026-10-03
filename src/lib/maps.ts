@@ -1,16 +1,8 @@
 import { config } from '../config';
+import { GOOGLE_MAPS_LIBRARIES } from '@/constants/maps';
+import type { GoogleMapsLibrary } from '@/constants/maps';
 
-/**
- * Google Maps integration boundary.
- *
- * Centralizes Google Maps configuration and any Google-specific SDK details. Map components
- * consume this boundary rather than reading environment variables or initializing the SDK
- * independently.
- */
-
-export type GoogleMapsLibrary = 'drawing' | 'places' | 'geometry';
-
-export const GOOGLE_MAPS_LIBRARIES: GoogleMapsLibrary[] = ['places', 'drawing', 'geometry'];
+export type { GoogleMapsLibrary };
 
 export const googleMapsApiKey: string = config.googleMapsApiKey;
 
