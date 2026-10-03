@@ -92,7 +92,12 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
     return (
       <main style={{ padding: '2rem' }}>
         <h1>Trips</h1>
-        <TripFilters search={query.search} sort={query.sort} />
+        <TripFilters
+          search={query.search}
+          sort={query.sort}
+          group={query.group}
+          transport={query.transport}
+        />
         <p>Trips are temporarily unavailable. Please try again later.</p>
       </main>
     );
@@ -104,7 +109,12 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
   return (
     <main style={{ padding: '2rem' }}>
       <h1>Trips</h1>
-      <TripFilters search={query.search} sort={query.sort} />
+      <TripFilters
+        search={query.search}
+        sort={query.sort}
+        group={query.group}
+        transport={query.transport}
+      />
       <TripList trips={items} />
 
       {totalPages > 1 ? (

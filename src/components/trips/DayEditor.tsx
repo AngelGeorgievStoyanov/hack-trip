@@ -16,12 +16,13 @@ import type { TripDay } from '@/types';
 interface DayEditorProps {
   tripId: number;
   day: TripDay;
+  editing: boolean;
+  onEditingChange: (editing: boolean) => void;
   onMove: (direction: -1 | 1) => void;
 }
 
-export function DayEditor({ tripId, day, onMove }: DayEditorProps) {
+export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: DayEditorProps) {
   const queryClient = useQueryClient();
-  const [editing, setEditing] = useState(false);
   const [addingPoint, setAddingPoint] = useState(false);
   const [editingPointId, setEditingPointId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +84,7 @@ export function DayEditor({ tripId, day, onMove }: DayEditorProps) {
   }
 
   if (editing) {
-    return <DayForm tripId={tripId} day={day} onDone={() => setEditing(false)} />;
+    return <DayForm tripId={tripId} day={day} onDone={() => onEditingChange(false)} />;
   }
 
   return (
@@ -92,7 +93,7 @@ export function DayEditor({ tripId, day, onMove }: DayEditorProps) {
         <Typography variant="h6">{day.title ?? `Day ${day.day}`}</Typography>
         <Button size="small" onClick={() => onMove(-1)}>↑</Button>
         <Button size="small" onClick={() => onMove(1)}>↓</Button>
-        <Button size="small" onClick={() => setEditing(true)}>Edit</Button>
+        <Button size="small" onClick={() => onEditingChange(true)}>Edit</Button>
         <Button size="small" color="error" disabled={deleteDayMutation.isPending} onClick={() => { if (window.confirm('Delete this day?')) deleteDayMutation.mutate(); }}>Delete</Button>
       </Box>
       {error ? <Alert severity="error" onClose={() => setError(null)}>{error}</Alert> : null}

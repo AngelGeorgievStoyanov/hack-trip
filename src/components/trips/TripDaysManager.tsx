@@ -16,7 +16,8 @@ interface TripDaysManagerProps {
 
 export function TripDaysManager({ tripId, initialTrip }: TripDaysManagerProps) {
   const queryClient = useQueryClient();
-  const [addingDay, setAddingDay] = useState(false);
+  const [addingDay, setAddingDay] = useState<{ dayNumber: number } | null>(null);
+  const [editingDayId, setEditingDayId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { data: trip } = useQuery({
@@ -32,6 +33,7 @@ export function TripDaysManager({ tripId, initialTrip }: TripDaysManagerProps) {
   });
 
   const days = trip?.days ?? [];
+  const nextDayNumber = days.reduce((max, day) => Math.max(max, day.day), 0) + 1;
 
   function moveDay(index: number, direction: -1 | 1): void {
     const target = index + direction;
@@ -48,12 +50,30 @@ export function TripDaysManager({ tripId, initialTrip }: TripDaysManagerProps) {
       <Typography variant="h5">Days</Typography>
       {error ? <Alert severity="error" onClose={() => setError(null)}>{error}</Alert> : null}
       {days.map((day, index) => (
-        <DayEditor key={day.id} tripId={tripId} day={day} onMove={(direction) => moveDay(index, direction)} />
+        <DayEditor
+          key={day.id}
+          tripId={tripId}
+          day={day}
+          editing={editingDayId === day.id}
+          onEditingChange={(next) => setEditingDayId(next ? day.id : null)}
+          onMove={(direction) => moveDay(index, direction)}
+        />
       ))}
       {addingDay ? (
-        <DayForm tripId={tripId} onDone={() => setAddingDay(false)} />
+        <DayForm
+          tripId={tripId}
+          existingDays={days}
+          initialDayNumber={addingDay.dayNumber}
+          onOpenExistingDay={(dayId) => {
+            setAddingDay(null);
+            setEditingDayId(dayId);
+          }}
+          onDone={() => setAddingDay(null)}
+        />
       ) : (
-        <Button variant="outlined" onClick={() => setAddingDay(true)}>Add day</Button>
+        <Button variant="outlined" onClick={() => setAddingDay({ dayNumber: nextDayNumber })}>
+          {`Add next day (Day ${nextDayNumber})`}
+        </Button>
       )}
     </Box>
   );

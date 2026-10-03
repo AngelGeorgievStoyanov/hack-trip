@@ -1,9 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import { tripApi } from '@/api/trips';
+import { normalizeApiError } from '@/api/client';
+import { API_ERROR_CODES } from '@/constants/api';
+import { DAY_NUMBER_MAX } from '@/constants/trips';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { dayCreateSchema, dayUpdateSchema } from '@/validations/trips';
@@ -12,6 +16,9 @@ import type { TripDay } from '@/types';
 interface DayFormProps {
   tripId: number;
   day?: TripDay;
+  existingDays?: TripDay[];
+  initialDayNumber?: number;
+  onOpenExistingDay?: (dayId: number) => void;
   onDone: () => void;
 }
 
@@ -21,7 +28,23 @@ interface DayFormValues {
   description: string;
 }
 
-export function DayForm({ tripId, day, onDone }: DayFormProps) {
+/**
+ * Day create/edit form.
+ *
+ * A day's number is fixed once the day exists: the API rejects `dayNumber` on update and only
+ * reorders days through the reorder endpoint, so the number is editable while creating only.
+ * `existingDays` is the trip's in-memory day list, used to keep the create action away from a
+ * number that is already taken.
+ */
+export function DayForm({
+  tripId,
+  day,
+  existingDays = [],
+  initialDayNumber,
+  onOpenExistingDay,
+  onDone,
+}: DayFormProps) {
+  const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const isEdit = day !== undefined;
@@ -29,17 +52,42 @@ export function DayForm({ tripId, day, onDone }: DayFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<DayFormValues>({
     resolver: zodResolver(isEdit ? dayUpdateSchema.pick({ title: true }) : dayCreateSchema),
     defaultValues: {
-      dayNumber: isEdit ? String(day.day) : '',
+      dayNumber: isEdit
+        ? String(day.day)
+        : initialDayNumber !== undefined
+          ? String(initialDayNumber)
+          : '',
       title: day?.title ?? '',
       description: '',
     },
   });
 
+  const dayNumberValue = watch('dayNumber');
+  const parsedDayNumber = Number(dayNumberValue);
+  const hasDayNumber =
+    dayNumberValue.trim() !== '' && Number.isInteger(parsedDayNumber) && parsedDayNumber > 0;
+  const takenDay = hasDayNumber
+    ? existingDays.find((candidate) => candidate.day === parsedDayNumber)
+    : undefined;
+  const takenMessage = hasDayNumber ? `Day ${parsedDayNumber} already exists.` : null;
+
+  function stepDayNumber(delta: number): void {
+    const current = hasDayNumber ? parsedDayNumber : (initialDayNumber ?? 1);
+    const next = Math.min(Math.max(current + delta, 1), DAY_NUMBER_MAX);
+    setValue('dayNumber', String(next), { shouldValidate: true });
+  }
+
   async function onSubmit(values: DayFormValues): Promise<void> {
+    if (!isEdit && takenDay) {
+      return;
+    }
+
     setSubmitting(true);
     setServerError(null);
     try {
@@ -52,28 +100,91 @@ export function DayForm({ tripId, day, onDone }: DayFormProps) {
           description: values.description.trim() || null,
         });
       }
+      await queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
       onDone();
     } catch (error) {
-      setServerError(getGenericErrorMessage(error));
+      const apiError = normalizeApiError(error);
+      if (!isEdit && apiError.code === API_ERROR_CODES.CONFLICT) {
+        setServerError(takenMessage ?? 'This day already exists.');
+      } else {
+        setServerError(getGenericErrorMessage(error));
+      }
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography variant="h6">{isEdit ? `Edit day ${day.day}` : 'Add day'}</Typography>
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
+      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+    >
+      <Typography variant="h6">{isEdit ? `Edit day ${day.day}` : 'Create a day'}</Typography>
       {serverError ? <Alert severity="error">{serverError}</Alert> : null}
-      {!isEdit ? <TextField label="Day number (optional)" {...register('dayNumber')} error={!!errors.dayNumber} helperText={errors.dayNumber?.message} /> : null}
-      <TextField label="Title" {...register('title')} error={!!errors.title} helperText={errors.title?.message} />
-      {!isEdit ? <TextField label="Description" multiline minRows={2} {...register('description')} error={!!errors.description} helperText={errors.description?.message} /> : null}
+      {!isEdit ? (
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={() => stepDayNumber(-1)}
+            aria-label="Previous day number"
+          >
+            -
+          </Button>
+          <TextField
+            label="Day number"
+            type="number"
+            {...register('dayNumber')}
+            error={!!errors.dayNumber || !!takenDay}
+            helperText={errors.dayNumber?.message ?? takenMessage}
+            slotProps={{ htmlInput: { min: 1, max: DAY_NUMBER_MAX } }}
+          />
+          <Button variant="outlined" onClick={() => stepDayNumber(1)} aria-label="Next day number">
+            +
+          </Button>
+        </Box>
+      ) : null}
+      {takenDay && onOpenExistingDay ? (
+        <Alert
+          severity="info"
+          action={
+            <Button color="inherit" size="small" onClick={() => onOpenExistingDay(takenDay.id)}>
+              {`Edit day ${takenDay.day}`}
+            </Button>
+          }
+        >
+          {takenMessage}
+        </Alert>
+      ) : null}
+      <TextField
+        label="Title"
+        {...register('title')}
+        error={!!errors.title}
+        helperText={errors.title?.message}
+      />
+      {!isEdit ? (
+        <TextField
+          label="Description"
+          multiline
+          minRows={2}
+          {...register('description')}
+          error={!!errors.description}
+          helperText={errors.description?.message}
+        />
+      ) : null}
       <Box sx={{ display: 'flex', gap: 1 }}>
-        <Button type="submit" variant="contained" disabled={submitting} startIcon={submitting ? <CircularProgress size={16} /> : undefined}>
-          {isEdit ? 'Save' : 'Add'}
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={submitting || !!takenDay}
+          startIcon={submitting ? <CircularProgress size={16} /> : undefined}
+        >
+          {isEdit ? 'Save' : hasDayNumber ? `Create day ${parsedDayNumber}` : 'Create day'}
         </Button>
-        <Button type="button" onClick={onDone}>Cancel</Button>
+        <Button type="button" onClick={onDone}>
+          Cancel
+        </Button>
       </Box>
     </Box>
   );
 }
-
