@@ -1,5 +1,6 @@
 export * from './RequireAuth';
 export * from './RequireRole';
+export * from './RequireTripOwner';
 export * from './LoginForm';
 export * from './RegisterForm';
 export * from './VerifyEmailForm';

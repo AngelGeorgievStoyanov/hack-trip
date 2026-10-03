@@ -2,18 +2,20 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 import { zodResolver } from '@/lib/zodResolver';
 import { getAuthErrorMessage } from '@/lib/errors';
+import { isSafeInternalPath } from '@/lib/returnPath';
 import { loginSchema } from '@/validations/auth';
 import type { LoginInput } from '@/api/auth';
 
 export function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -28,7 +30,8 @@ export function LoginForm() {
     setServerError(null);
     try {
       await login(values);
-      router.replace('/profile');
+      const returnTo = searchParams.get('returnTo');
+      router.replace(returnTo && isSafeInternalPath(returnTo) ? returnTo : '/profile');
     } catch (error) {
       setServerError(getAuthErrorMessage(error));
     } finally {

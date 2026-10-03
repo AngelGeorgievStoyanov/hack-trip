@@ -17,7 +17,9 @@ export function RequireRole({ roles, children }: { roles: Role[]; children: Reac
 
   useEffect(() => {
     if (status === 'anonymous' || status === 'accountError') {
-      router.replace('/login');
+      const path = window.location.pathname + window.location.search;
+      const returnTo = path && path !== '/login' ? `?returnTo=${encodeURIComponent(path)}` : '';
+      router.replace(`/login${returnTo}`);
     } else if (status === 'authenticated' && !allowed) {
       router.replace('/');
     }
