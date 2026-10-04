@@ -1,13 +1,14 @@
 'use client';
 
-import { GoogleMap, MarkerF, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, MarkerF } from '@react-google-maps/api';
 import { Box } from '@mui/material';
-import { googleMapsInitConfig, toMapPosition } from '@/lib/maps';
+import { useGoogleMapsLoader } from '@/hooks/useGoogleMapsLoader';
+import { toMapPosition } from '@/lib/maps';
 import { MAP_CONTAINER_HEIGHT, MAP_DEFAULT_ZOOM } from '@/constants/maps';
 import type { TripPoint } from '@/types';
 
 export function PointMap({ point }: { point: TripPoint }) {
-  const { isLoaded } = useJsApiLoader({ ...googleMapsInitConfig, id: 'point-map' });
+  const { isLoaded } = useGoogleMapsLoader();
   const position = toMapPosition(point);
 
   if (!isLoaded || !position) {

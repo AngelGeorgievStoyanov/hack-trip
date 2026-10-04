@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { GoogleMap, InfoWindowF, MarkerF, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, InfoWindowF, MarkerF } from '@react-google-maps/api';
 import { Box } from '@mui/material';
-import { googleMapsInitConfig, toMapPosition, type MapPosition } from '@/lib/maps';
+import { useGoogleMapsLoader } from '@/hooks/useGoogleMapsLoader';
+import { toMapPosition, type MapPosition } from '@/lib/maps';
 import { MAP_CONTAINER_HEIGHT, MAP_DEFAULT_ZOOM } from '@/constants/maps';
 import type { TripPoint } from '@/types';
 
@@ -15,7 +16,7 @@ interface MarkerItem {
 }
 
 export function TripMap({ points }: { points: TripPoint[] }) {
-  const { isLoaded } = useJsApiLoader({ ...googleMapsInitConfig, id: 'trip-map' });
+  const { isLoaded } = useGoogleMapsLoader();
   const [selected, setSelected] = useState<MarkerItem | null>(null);
 
   const markers = useMemo<MarkerItem[]>(
