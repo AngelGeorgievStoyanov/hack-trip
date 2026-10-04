@@ -1,372 +1,265 @@
 # HackTrip Frontend Architecture
 
-## 1. Architecture Overview
+## 1. Purpose
 
-HackTrip uses Next.js as the frontend application framework.
+This document describes the architecture of the HackTrip frontend.
 
-The application combines:
+The frontend is a Next.js application that communicates with the HackTrip Backend through the documented API contract and integrates with Google Maps independently as a browser-side service.
 
-* Next.js App Router
-* React Server Components
-* React Client Components
-* TypeScript
-* MUI
-* Axios
-* Zod
-* centralized constants
-* feature-oriented modules
-* Next.js image optimization
-* server-rendered public content
-* client-side interactive application areas
+The current modernization is an incremental migration of an existing application.
 
-The backend remains an independent service.
+The goal is to improve structure, maintainability, security and consistency without silently removing existing functionality.
 
-The frontend has two separate external boundaries:
-
-```text
-                    ┌──────────────────────┐
-                    │      Browser         │
-                    └──────────┬───────────┘
-                               │
-                 ┌─────────────┴─────────────┐
-                 │                           │
-                 ▼                           ▼
-        ┌─────────────────┐        ┌─────────────────┐
-        │   HackTrip API  │        │   Google Maps   │
-        │                 │        │      SDK        │
-        └────────┬────────┘        └────────┬────────┘
-                 │                          │
-              Axios                   browser/map APIs
-                 │
-                 ▼
-        ┌─────────────────┐
-        │ HackTrip Backend│
-        └─────────────────┘
-```
-
-Google Maps is not part of the HackTrip Backend API layer.
-
-The backend API contract is defined by:
+The backend API contract is defined separately in:
 
 `docs/API_CONTRACT.md`
 
+That document is authoritative for backend communication.
+
+This document must not redefine the backend API contract.
+
 ---
 
-## 2. Application Layers
+# 2. Architectural Principles
 
-The frontend is divided into clear responsibilities.
+The frontend follows these principles:
+
+1. Backend contract is authoritative.
+2. Frontend modernization is incremental.
+3. Existing functionality must be preserved during migration.
+4. Backend authorization is authoritative.
+5. Authentication state and authorization UI are separate concerns.
+6. API communication is centralized.
+7. Google Maps is a separate integration boundary.
+8. Server Components are preferred where browser interactivity is not required.
+9. Client Components are isolated to interactive/browser-dependent functionality.
+10. Constants are centralized and organized by responsibility.
+11. Feature code should remain cohesive.
+12. Shared infrastructure should not be duplicated.
+13. API models must remain aligned with backend DTOs.
+14. Public SEO-sensitive content should be server-rendered where practical.
+15. Security-sensitive behavior must not depend on client-side assumptions.
+
+---
+
+# 3. High-Level Architecture
+
+The frontend consists of several major layers:
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│                      Next.js App                         │
+│                                                         │
+│  App Router                                             │
+│  Pages / Layouts / Route Groups                         │
+│                                                         │
+│  ┌───────────────────────┐  ┌────────────────────────┐  │
+│  │ Server Components     │  │ Client Components      │  │
+│  │                       │  │                        │  │
+│  │ Public pages          │  │ Forms                  │  │
+│  │ SEO content           │  │ Maps                   │  │
+│  │ Server composition    │  │ Tracking               │  │
+│  │ Data loading          │  │ Interactive UI         │  │
+│  └───────────┬───────────┘  └────────────┬───────────┘  │
+│              │                           │              │
+│              └──────────────┬────────────┘              │
+│                             ↓                           │
+│                         Services                        │
+│                             ↓                           │
+│                       Feature APIs                      │
+│                             ↓                           │
+│                       api/client.ts                     │
+└─────────────────────────────┬───────────────────────────┘
+                              │
+                              ↓
+                       HackTrip Backend
+```
+
+Google Maps is deliberately outside the backend API flow:
+
+```text
+                         FRONTEND
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+              ↓                           ↓
+       HackTrip Backend             Google Maps
+              │                           │
+       api/client.ts                Google Maps SDK
+              │                           │
+            Axios                   Map components
+              │
+          Express API
+```
+
+Google Maps operations must not be routed through `api/client.ts` unless the backend contract explicitly introduces a corresponding endpoint.
+
+---
+
+# 4. Repository Structure
+
+The primary frontend structure is:
 
 ```text
 app/
-    ↓
 components/
-    ↓
-hooks/
-    ↓
+api/
 services/
-    ↓
-feature API
-    ↓
-api/client.ts
-    ↓
-Axios
-    ↓
-HackTrip Backend
-```
-
-Supporting layers:
-
-```text
+hooks/
 validations/
 types/
 constants/
-config/
 lib/
+config/
+docs/
 ```
 
-The purpose of each layer is explicit.
-
----
-
-## 3. Next.js App Router
-
-Next.js App Router owns application routing.
-
-Routes are organized by user-facing responsibility rather than backend controller names.
-
-Typical application areas include:
+Responsibilities:
 
 ```text
 app/
-├── (public)/
-├── (auth)/
-├── (account)/
-└── (admin)/
+    Next.js App Router
+    pages
+    layouts
+    route groups
+    route-level composition
+
+components/
+    reusable UI components
+    feature UI
+    interactive UI
+
+api/
+    backend API communication
+    feature endpoint modules
+    centralized Axios client
+
+services/
+    application-level orchestration
+    coordination between API operations
+    application-specific transformations
+
+hooks/
+    reusable React hooks
+    browser interactions
+    authentication state
+    tracking and interactive behavior
+
+validations/
+    Zod schemas
+    form validation
+    request/query validation where appropriate
+
+types/
+    TypeScript models
+    API DTO types
+    feature models
+    UI models
+
+constants/
+    reusable application constants
+    organized by responsibility
+
+lib/
+    framework-independent utilities
+    shared low-level helpers
+
+config/
+    application/environment configuration
 ```
 
-Dynamic routes represent public content that can be directly opened and shared.
-
-Route structure must follow the actual application and must not be changed merely to mirror backend endpoint names.
+Do not create additional top-level architectural layers without a clear reason.
 
 ---
 
-## 4. Server Components and Client Components
+# 5. Next.js App Router
+
+The application uses the Next.js App Router.
+
+The `app/` directory owns:
+
+* routing
+* layouts
+* pages
+* route groups
+* metadata
+* route-level composition
+
+Route organization should represent application navigation and page boundaries rather than backend controller structure.
+
+Do not create frontend routes simply because a backend endpoint exists.
+
+---
+
+# 6. Server Components
 
 Server Components are the default.
 
-Use Server Components for:
+Use Server Components when a component does not require:
+
+* browser APIs
+* React client hooks
+* browser event handlers
+* interactive state
+* client-only authentication interaction
+* map SDK access
+* geolocation
+* live tracking
+
+Server Components are preferred for:
 
 * public trip pages
 * public point pages
 * informational pages
-* SEO metadata
-* server-side data retrieval
-* layouts
-* static content
-* ISR content
+* SEO-sensitive content
+* static page composition
+* server-side data loading where appropriate
 
-Use Client Components only for functionality requiring:
+Avoid unnecessary `"use client"` boundaries.
 
-* browser APIs
-* hooks
-* event-driven interaction
-* maps
+---
+
+# 7. Client Components
+
+Client Components are required for browser-side functionality.
+
+Typical examples:
+
+* interactive forms
+* authentication forms
+* interactive navigation
+* dialogs
+* image upload UI
+* drag/drop
+* likes
+* favorites
+* comments interaction
+* Google Maps
 * geolocation
 * live tracking
-* interactive galleries
-* uploads
-* drag/drop
-* dialogs
-* client-side form interaction
-* browser-only libraries
+* touch interactions
+* swipe interactions
+* browser-specific behavior
 
-Example:
+Client Components should remain as small and isolated as practical.
 
-```text
-TripPage (Server)
-├── TripHeader
-├── TripMetadata
-├── TripGallery
-├── TripDescription
-├── TripMap (Client)
-├── TripPoints
-└── TripSocialActions (Client)
-```
+Do not convert an entire page or feature to a Client Component merely because one child component needs browser functionality.
 
-Do not make the complete Trip page a Client Component because one child requires client-side JavaScript.
-
----
-
-## 5. Public Content Architecture
-
-Public HackTrip content is designed to be:
-
-* directly accessible
-* server-rendered
-* indexable where appropriate
-* shareable
-* mobile-friendly
-* optimized for social previews
-
-A user opening a shared public URL directly must receive the public page without depending on previous browser navigation state.
-
----
-
-## 6. SEO Architecture
-
-SEO is implemented through Next.js metadata APIs.
-
-Public content may expose:
+Prefer:
 
 ```text
-title
-description
-canonical
-robots
-openGraph
-twitter
-```
-
-Dynamic content uses metadata derived from the public API response.
-
-Metadata must never expose private user/account information.
-
----
-
-## 7. Search Engine Indexing
-
-The application provides the technical infrastructure required for indexing public content.
-
-Typical infrastructure includes:
-
-```text
-app/
-├── robots.ts
-└── sitemap.ts
-```
-
-Only intentionally public/indexable URLs belong in the sitemap.
-
-Private pages such as authentication, account and admin pages must not be indexed.
-
----
-
-## 8. Social Sharing
-
-Public content has stable canonical URLs.
-
-Sharing is based on public routes rather than client navigation state.
-
-Public metadata should provide:
-
-```text
-og:title
-og:description
-og:url
-og:image
-twitter:title
-twitter:description
-twitter:image
-```
-
-The representative image must use the established public image mechanism.
-
----
-
-## 9. Image Architecture
-
-Images are centralized.
-
-Use the existing shared image components and utilities.
-
-The image architecture must reflect the current project structure.
-
-Image presets are maintained under the existing constants structure, including:
-
-```text
-src/constants/images/presets.ts
-```
-
-Do not reintroduce removed legacy files such as:
-
-```text
-lib/images/imageUrl.ts
-lib/images/imageMetadata.ts
-```
-
-Do not duplicate image URL or thumbnail logic inside individual pages.
-
-The backend API provides image DTOs and the backend contract defines the image behavior.
-
-The frontend consumes the values provided by the API.
-
----
-
-## 10. `next/image`
-
-`next/image` is the default rendering mechanism for application images.
-
-It provides:
-
-* responsive images
-* optimized loading
-* width/height handling
-* lazy loading
-* priority loading
-* appropriate `sizes`
-
-The shared image layer owns common image presentation behavior.
-
-Individual pages should not repeatedly implement image URL construction, thumbnail selection or responsive sizing logic.
-
----
-
-## 11. Thumbnail Strategy
-
-Use thumbnails for:
-
-* trip lists
-* point lists
-* gallery previews
-* cards
-* compact UI
-* secondary content
-
-Use full images when the user explicitly needs larger display quality.
-
-Avoid downloading full-size images unnecessarily in lists.
-
----
-
-## 12. Responsive Image Strategy
-
-Images use responsive sizing appropriate to their actual layout.
-
-The exact `sizes` value belongs to the component/layout that renders the image rather than one universal hard-coded value.
-
----
-
-## 13. Image Accessibility
-
-Meaningful content images require meaningful `alt` text.
-
-Decorative images use appropriate empty alt behavior.
-
-Interactive galleries and previews must provide accessible controls and keyboard support where applicable.
-
----
-
-## 14. Image Upload Architecture
-
-Uploads are interactive Client Components.
-
-```text
-ImageUpload
+Server Page
     ↓
-client validation
+Server composition
     ↓
-Service
-    ↓
-Feature API
-    ↓
-api/client.ts
-    ↓
-Axios
-    ↓
-Backend
+Client interactive island
 ```
-
-Client validation improves UX.
-
-Backend validation remains authoritative.
-
-The frontend respects the backend contract for:
-
-* maximum file size
-* supported file types
-* maximum image count
 
 ---
 
-## 15. API Architecture
+# 8. API Architecture
 
-All HackTrip Backend communication goes through the API layer.
-
-```text
-src/api/
-├── client.ts
-├── auth/
-├── trips/
-├── points/
-├── comments/
-├── social/
-├── admin/
-└── config/
-```
-
-`client.ts` owns shared HTTP behavior.
-
-Feature API modules own endpoint-specific operations.
+All communication with the HackTrip Backend must use the centralized API architecture.
 
 The intended flow is:
 
@@ -384,142 +277,623 @@ Axios
 HackTrip Backend
 ```
 
-Pages and components must not construct arbitrary API URLs.
-
-Pages and components must not make raw Axios calls directly.
+The layers have distinct responsibilities.
 
 ---
 
-## 16. Services Layer
+## 8.1 `api/client.ts`
 
-Services contain application-level orchestration.
+`src/api/client.ts` is the centralized Axios client.
 
-```text
-src/services/
-├── auth/
-├── trips/
-├── points/
-├── comments/
-├── social/
-└── admin/
-```
+It owns common HTTP behavior such as:
 
-A service may coordinate multiple API operations.
+* backend base URL
+* common headers
+* `x-hacktrip-client`
+* authentication header handling
+* credentials
+* refresh behavior
+* common response handling
 
-Example:
+There must not be multiple independent Axios clients implementing competing authentication behavior.
 
-```text
-Trip Service
-    ↓
-Trip API
-    ↓
-Point API
-```
-
-Services prevent UI components from becoming business-logic containers.
-
-Services do not own generic HTTP transport configuration.
+Raw Axios calls must not be scattered across the application.
 
 ---
 
-## 17. Authentication Architecture
+## 8.2 Feature API modules
 
-Authentication follows the backend contract.
+Feature API modules expose endpoint-specific operations.
 
-```text
-login
-  ↓
-access token → memory only
-refresh token → HttpOnly cookie
-```
-
-The refresh token is never readable by JavaScript.
-
-Requests requiring the refresh cookie use:
+Examples include:
 
 ```text
-Axios:
-withCredentials: true
-
-Fetch:
-credentials: 'include'
-```
-
-After a browser reload:
-
-```text
-memory access token gone
-        ↓
-POST /auth/refresh
-        ↓
-browser sends HttpOnly cookie
-        ↓
-backend validates refresh token
-        ↓
-new access token
-        ↓
-memory
-```
-
-The frontend never stores the refresh token itself.
-
----
-
-## 18. Authentication Boundaries
-
-Three different concepts must remain separate:
-
-```text
-x-hacktrip-client: web
-        ↓
-frontend client identification
-
-
-Public bearer token
-        ↓
-public frontend access where required
-
-
-User access JWT
-        ↓
-authenticated user
-
-
-HttpOnly refresh cookie
-        ↓
-session restoration
-```
-
-These concepts are not interchangeable.
-
-The exact behavior is defined by `docs/API_CONTRACT.md`.
-
----
-
-## 19. Zod Architecture
-
-Validation is feature-oriented.
-
-```text
-src/validations/
+src/api/
 ├── auth/
 ├── trips/
 ├── points/
 ├── comments/
 ├── social/
 ├── admin/
-└── shared/
+└── ...
 ```
 
-Frontend schemas reflect the backend contract but do not replace backend validation.
+The exact directory structure follows the actual repository.
+
+Feature APIs should contain HTTP endpoint operations rather than UI logic.
+
+Example responsibility:
+
+```text
+trips API
+    ↓
+GET /trips
+GET /trips/:id
+POST /trips
+PUT /trips/:id
+DELETE /trips/:id
+```
+
+The exact endpoints and payloads are defined by `docs/API_CONTRACT.md`.
 
 ---
 
-## 20. Constants Architecture
+# 9. Services
 
-Constants are organized by responsibility.
+Services provide application-level orchestration.
 
-The current structure uses areas such as:
+A service may:
+
+* coordinate multiple API operations
+* transform API data into application models
+* combine related API operations
+* provide a feature-oriented interface for components
+* encapsulate non-trivial application workflows
+
+Services should not duplicate Axios configuration.
+
+Services should not contain presentation/UI logic.
+
+Example:
+
+```text
+Trip page
+   ↓
+tripService
+   ↓
+tripApi
+   ↓
+apiClient
+   ↓
+Backend
+```
+
+A service should exist when it provides meaningful application-level behavior.
+
+Do not create empty service wrappers simply to add another layer.
+
+---
+
+# 10. API Contract Boundary
+
+`docs/API_CONTRACT.md` defines the backend boundary.
+
+The frontend must follow:
+
+* endpoint paths
+* HTTP methods
+* request DTOs
+* response DTOs
+* authentication requirements
+* authorization requirements
+* error codes
+* pagination
+* ownership rules
+* image rules
+* public access rules
+
+Do not invent frontend assumptions about the backend.
+
+When a frontend requirement conflicts with the API contract, stop and resolve the contract discrepancy instead of silently implementing a different protocol.
+
+---
+
+# 11. Authentication Architecture
+
+Authentication has two separate token mechanisms:
+
+```text
+Access token
+    ↓
+memory only
+
+Refresh token
+    ↓
+HttpOnly cookie
+```
+
+The frontend never reads the refresh token.
+
+---
+
+## 11.1 Login
+
+The login flow is:
+
+```text
+Login form
+    ↓
+auth API
+    ↓
+POST /auth/login
+    ↓
+backend
+    ├── access token
+    └── refresh cookie
+    ↓
+access token stored in memory
+```
+
+The refresh token must never enter React state or JavaScript-accessible storage.
+
+---
+
+## 11.2 Session Restoration
+
+After a browser reload:
+
+```text
+Browser reload
+      ↓
+memory access token lost
+      ↓
+restoreSession()
+      ↓
+POST /auth/refresh
+      ↓
+HttpOnly cookie automatically included
+      ↓
+backend validates refresh token
+      ↓
+new access token
+      ↓
+memory
+      ↓
+GET /auth/me
+      ↓
+authenticated state
+```
+
+If no valid refresh session exists:
+
+```text
+POST /auth/refresh
+      ↓
+401/403
+      ↓
+anonymous/account error
+```
+
+The frontend must not repeatedly refresh indefinitely after a definitive refresh failure.
+
+---
+
+# 12. Access Token Handling
+
+Access tokens are application-memory state.
+
+Do not persist access tokens in:
+
+* localStorage
+* sessionStorage
+* IndexedDB
+
+Do not create alternative token storage mechanisms.
+
+The centralized API client is responsible for attaching the current access token when appropriate.
+
+---
+
+# 13. Refresh Token Handling
+
+Refresh tokens are HttpOnly cookies.
+
+The browser owns the cookie lifecycle.
+
+The frontend JavaScript must not:
+
+* read the refresh token
+* write the refresh token
+* copy the refresh token into state
+* log the refresh token
+* expose the refresh token to components
+
+Axios requests that depend on the refresh cookie use:
+
+```text
+withCredentials: true
+```
+
+Fetch requests that depend on the refresh cookie use:
+
+```text
+credentials: 'include'
+```
+
+---
+
+# 14. Refresh and 401 Handling
+
+Authenticated requests may receive `401`.
+
+The frontend API layer handles access-token restoration.
+
+The expected flow is:
+
+```text
+Authenticated request
+      ↓
+401
+      ↓
+restoreSession()
+      ↓
+refresh access token
+      ↓
+retry original request once
+```
+
+Refresh requests themselves must not recursively enter the same refresh cycle.
+
+Only one refresh operation should be active when multiple requests fail concurrently.
+
+Conceptually:
+
+```text
+Request A ──┐
+Request B ──┼──→ single refresh operation
+Request C ──┘
+                 ↓
+             new token
+                 ↓
+          retry eligible requests
+```
+
+The frontend must prevent refresh storms and infinite retry loops.
+
+---
+
+# 15. Public Access and Client Identification
+
+The following concepts are independent:
+
+```text
+x-hacktrip-client: web
+        ↓
+identifies the frontend client
+
+Public bearer token
+        ↓
+public frontend access
+
+User access JWT
+        ↓
+authenticated identity
+
+Refresh HttpOnly cookie
+        ↓
+session restoration
+```
+
+The frontend must not merge these mechanisms into one generic token concept.
+
+The exact behavior is defined by `docs/API_CONTRACT.md`.
+
+---
+
+# 16. Authorization Architecture
+
+Authorization is ultimately enforced by the backend.
+
+The frontend may provide UX guards.
+
+Examples:
+
+```text
+RequireAuth
+RequireRole
+RequireTripOwner
+```
+
+These guards improve navigation and user experience.
+
+They are not security boundaries.
+
+The backend must independently enforce:
+
+* authentication
+* role permissions
+* ownership
+* account status
+* resource access
+
+Never assume that hiding a button or route is sufficient authorization.
+
+---
+
+# 17. Account State
+
+Authentication state and account state are separate concerns.
+
+Relevant backend states include:
+
+* pending verification
+* active
+* suspended
+* deactivated
+
+Frontend behavior should distinguish meaningful backend authentication/account errors rather than treating every failure as anonymous.
+
+For example:
+
+```text
+EMAIL_NOT_VERIFIED
+ACCOUNT_SUSPENDED
+ACCOUNT_DEACTIVATED
+```
+
+must remain distinguishable where the UI needs to communicate the correct state.
+
+---
+
+# 18. Routing Guards
+
+Frontend guards should preserve navigation context where applicable.
+
+For protected routes:
+
+```text
+unauthenticated
+      ↓
+login
+      ↓
+returnTo
+      ↓
+original destination
+```
+
+For role-protected routes:
+
+```text
+authenticated
+      ↓
+role check
+      ↓
+allowed → render
+not allowed → appropriate fallback
+```
+
+For ownership-protected UI:
+
+```text
+authenticated
+      ↓
+resource owner check
+      ↓
+owner → edit UI
+non-owner → public/read-only UI
+```
+
+Backend ownership remains authoritative.
+
+---
+
+# 19. Data Fetching
+
+Data fetching should happen at the most appropriate layer.
+
+Prefer server-side fetching for public, SEO-sensitive content when possible.
+
+Use client-side fetching when functionality requires:
+
+* browser interaction
+* live updates
+* user-specific state
+* interactive mutations
+* browser-only APIs
+
+Do not automatically introduce a client-side data fetching layer for every request.
+
+Use the dependencies already present in the repository according to the established architecture.
+
+Do not add another data-fetching library without a concrete architectural requirement.
+
+---
+
+# 20. React Query
+
+If React Query is used by the application, it must have a clear responsibility.
+
+React Query is appropriate for client-side server state requiring features such as:
+
+* caching
+* synchronization
+* invalidation
+* background refetching
+* mutation state
+* query lifecycle management
+
+React Query must not replace the API architecture.
+
+The flow remains:
+
+```text
+Component / hook
+      ↓
+React Query
+      ↓
+Service / feature API
+      ↓
+api/client.ts
+      ↓
+Backend
+```
+
+Do not call Axios directly from arbitrary React Query callbacks when an existing API/service layer is responsible for the endpoint.
+
+Do not introduce React Query into server-only page data simply because it is available in `package.json`.
+
+---
+
+# 21. Google Maps Architecture
+
+Google Maps is a separate browser integration.
+
+It does not belong under the HackTrip backend API layer.
+
+The conceptual architecture is:
+
+```text
+Map page/component
+       ↓
+Google Maps integration
+       ↓
+Google Maps JavaScript SDK
+       ↓
+Google Maps
+```
+
+Backend data can be combined with map rendering:
+
+```text
+HackTrip API
+     ↓
+trip/point data
+     ↓
+map component
+     ↓
+Google Maps SDK
+```
+
+But the Google Maps SDK itself is not accessed through Axios.
+
+---
+
+# 22. Google Maps Loading
+
+Google Maps must be loaded through the existing Google Maps integration rather than through the HackTrip API client.
+
+Google Maps functionality should remain within Client Components because the Maps JavaScript SDK requires browser execution.
+
+The integration should centralize:
+
+* API key configuration
+* script loading
+* map availability
+* map-related context/provider behavior
+
+Do not load the Google Maps JavaScript SDK independently in multiple components.
+
+Do not duplicate script loaders.
+
+---
+
+# 23. Google Maps Deprecations
+
+Google Maps APIs evolve independently from the HackTrip backend.
+
+Existing deprecated Google Maps APIs must not be replaced blindly during unrelated migration work.
+
+If the application currently uses deprecated APIs such as:
+
+```text
+google.maps.Marker
+google.maps.places.Autocomplete
+```
+
+the migration must:
+
+1. identify all usages;
+2. determine whether the current Google Maps library supports the recommended replacement;
+3. inspect existing behavior;
+4. verify the replacement's interaction and visual behavior;
+5. migrate deliberately;
+6. verify desktop, mobile and touch behavior.
+
+The current Google Maps deprecation warnings do not justify changing unrelated HackTrip architecture.
+
+Google Maps API migrations are separate compatibility tasks.
+
+---
+
+# 24. Maps and Trip Data
+
+Trip/point data comes from the HackTrip backend.
+
+Map-specific rendering remains a frontend responsibility.
+
+Conceptually:
+
+```text
+Backend trip
+    ↓
+Trip API
+    ↓
+Trip service/model
+    ↓
+Map component
+    ↓
+markers / polylines / routes
+```
+
+Do not put map rendering logic into API modules.
+
+Do not put Axios calls directly inside low-level map primitives.
+
+---
+
+# 25. Live Tracking
+
+Live tracking is browser-side functionality.
+
+The conceptual flow is:
+
+```text
+Browser GPS
+     ↓
+tracking hook
+     ↓
+tracking state
+     ↓
+map component
+```
+
+The tracking system may combine:
+
+* browser geolocation
+* current coordinates
+* trip route data
+* map position
+* polylines
+* markers
+* user interaction
+
+Tracking should not require converting the complete trip page into a Client Component.
+
+Keep browser-dependent logic isolated.
+
+---
+
+# 26. Constants Architecture
+
+Constants live under:
+
+```text
+src/constants/
+```
+
+They are organized by responsibility.
+
+Current architecture includes areas such as:
 
 ```text
 src/constants/
@@ -531,587 +905,717 @@ src/constants/
 └── ...
 ```
 
-Do not document or recreate the old flat structure as the target architecture.
+The purpose of this structure is to prevent unrelated constants from being placed into large generic files.
 
-Constants should remain close to the responsibility they configure.
-
-Examples include:
+Examples:
 
 ```text
 images/
-    image presets and image-related constants
+    image presets
+    image sizes
 
 maps/
-    map-related constants
+    map defaults
+    map configuration
 
 points/
-    point-related constants
+    point-related limits
+    point configuration
 
 trips/
-    trip-related constants
+    trip-related limits
+    trip configuration
 
 ui/
-    shared UI constants
+    UI-specific constants
 ```
 
-Do not introduce a new constants architecture as part of ordinary migration.
+Follow the actual repository structure when adding new constants.
 
-Do not move frontend constants into backend configuration during the current modernization stage.
-
-Backend-driven configuration is a separate future concern.
+Do not recreate removed flat files merely because older documentation referenced them.
 
 ---
 
-## 21. Type Architecture
+# 27. Image Architecture
 
-Types are organized by feature.
+Images are handled through centralized image-related functionality.
 
-```text
-src/types/
-├── auth/
-├── trips/
-├── points/
-├── comments/
-├── social/
-├── admin/
-├── config/
-├── images/
-└── api/
-```
-
-Where useful:
+The current image preset architecture includes:
 
 ```text
-API DTO
-    ↓
-service transformation
-    ↓
-UI model
+src/constants/images/presets.ts
 ```
 
-This prevents backend implementation details from leaking throughout the UI.
+Image constants should remain centralized.
+
+Do not recreate removed legacy files such as:
+
+```text
+src/lib/images/imageUrl.ts
+src/lib/images/imageMetadata.ts
+```
+
+unless a future architectural decision explicitly introduces those responsibilities again.
 
 ---
 
-## 22. Components Architecture
+# 28. Image Components
 
-Components are organized by responsibility.
+Image rendering should use the existing shared image components and utilities.
 
-Typical areas include:
+Use `next/image` where appropriate.
 
-```text
-src/components/
-├── common/
-├── layout/
-├── navigation/
-├── forms/
-├── images/
-├── maps/
-├── trips/
-├── points/
-├── comments/
-├── social/
-└── admin/
-```
+Image URLs should come from the backend contract/data model.
 
-Generic components must not contain feature-specific business logic.
+Do not reconstruct backend storage URLs manually inside components.
 
-Presentational components should not make direct API calls.
+Image presentation may include:
+
+* thumbnails
+* full-size images
+* galleries
+* previews
+* upload previews
+
+Image interaction must preserve existing legacy behavior.
 
 ---
 
-## 23. Hooks
+# 29. Image Upload Architecture
 
-Reusable React behavior belongs in:
+Image upload follows the backend contract.
 
-```text
-src/hooks/
-```
+The frontend must respect backend limits.
 
-Hooks may compose:
+Typical constraints include:
 
-* services
-* local state
-* browser APIs
-* reusable interaction logic
+* one image per request
+* maximum image count per entity
+* maximum file size
+* supported image formats
 
-Hooks must not duplicate API transport configuration.
+Client-side validation is only an early UX check.
 
----
+The backend remains authoritative.
 
-## 24. Maps
-
-Maps are isolated Client Components.
-
-```text
-components/maps/
-├── TripMap.tsx
-├── PointMap.tsx
-├── TrackingMap.tsx
-└── MapMarker.tsx
-```
-
-Map code may use:
-
-* Google Maps SDK
-* browser APIs
-* geolocation
-* interactive state
-* markers
-* polylines
-* live tracking
-
-Maps are a separate frontend integration boundary from the HackTrip Backend API.
-
-```text
-HackTrip Backend
-    ↑
-Axios / API layer
-
-
-Google Maps
-    ↑
-Google Maps SDK
-```
-
-A map does not require the entire surrounding page to become a Client Component.
+The frontend must not assume that client validation makes an upload safe or valid.
 
 ---
 
-## 25. Live Tracking
+# 30. Forms and Validation
 
-Live tracking is client-side.
+Forms use React form patterns and Zod validation.
 
-```text
-GPS / browser
-      ↓
-tracking hook
-      ↓
-tracking state
-      ↓
-map component
-```
-
-Tracking state must remain localized to the interactive portion of the application.
-
----
-
-## 26. Comments and Social Features
-
-Comments, likes, favorites and reports remain feature modules.
-
-Typical separation:
+The conceptual flow is:
 
 ```text
-components/comments/
-components/social/
-
-api/comments/
-api/social/
-
-services/comments/
-services/social/
-
-validations/comments/
-validations/social/
-
-types/comments/
-types/social/
-```
-
-Public reads may be server-rendered where appropriate.
-
-Interactive mutations are Client Components.
-
----
-
-## 27. Admin Architecture
-
-Admin functionality is isolated from public application features.
-
-```text
-app/(admin)/admin/
-components/admin/
-api/admin/
-services/admin/
-validations/admin/
-types/admin/
-```
-
-Frontend role checks are UI guards only.
-
-Backend authorization remains authoritative.
-
----
-
-## 28. Configuration
-
-Frontend configuration is centralized under the existing configuration layer.
-
-Browser-visible configuration is public.
-
-Backend-only environment variables must never be imported into Client Components.
-
-Do not introduce backend-driven configuration migration as part of the current frontend modernization stage.
-
----
-
-## 29. Static Informational Pages
-
-Pages such as:
-
-```text
-/about
-/privacy-policy
-```
-
-are ordinary public Next.js pages.
-
-Static pages do not need backend API requests merely because the rest of the application uses an API.
-
-They still participate in:
-
-* metadata
-* canonical URLs
-* accessibility
-* responsive UI
-* SEO
-
----
-
-## 30. Performance Architecture
-
-Preferred pattern:
-
-```text
-Server-rendered page
-       │
-       ├── static content
-       ├── SEO metadata
-       ├── optimized images
-       │
-       └── Client Components only where interaction exists
-```
-
-Heavy browser-only components such as maps may be dynamically loaded where appropriate.
-
-Images use thumbnails and responsive loading.
-
-Public data uses caching/revalidation where appropriate.
-
-Avoid unnecessary client JavaScript.
-
----
-
-## 31. Error Boundary Architecture
-
-Use Next.js error boundaries where appropriate:
-
-```text
-error.tsx
-not-found.tsx
-loading.tsx
-```
-
-API errors are translated into safe UI messages.
-
-Backend error codes remain available to application logic.
-
-Do not expose backend internals.
-
----
-
-## 32. Security Architecture
-
-The browser is an untrusted environment.
-
-Never trust:
-
-* hidden form fields
-* local role state
-* local ownership state
-* client-generated IDs
-* client-generated point numbers
-* client-generated owner IDs
-
-The backend is authoritative for:
-
-* authentication
-* authorization
-* ownership
-* generated identifiers
-* image validation
-* business rules
-
-The frontend must follow the API contract exactly.
-
----
-
-## 33. Request Data Flow
-
-Typical public Trip page:
-
-```text
-Next.js Server Component
-        ↓
-Trip Service
-        ↓
-Trip API
-        ↓
-api/client.ts
-        ↓
-Axios
-        ↓
-Backend
-        ↓
-Trip DTO
-        ↓
-Server Component
-        ↓
-HTML + metadata
-```
-
-Typical interactive mutation:
-
-```text
-Client Component
-        ↓
+Form
+ ↓
 Zod validation
-        ↓
+ ↓
 Service
-        ↓
+ ↓
 Feature API
-        ↓
-api/client.ts
-        ↓
-Axios
-        ↓
-Backend
-        ↓
-DTO / error
-        ↓
-UI update
+ ↓
+Backend validation
+```
+
+Client validation exists for usability.
+
+Backend validation remains authoritative.
+
+Forms must handle documented backend validation errors.
+
+Do not send fields that are generated or owned by the backend.
+
+---
+
+# 31. API Types
+
+API types should reflect backend DTOs.
+
+Where useful, distinguish:
+
+```text
+Request DTO
+Response DTO
+UI model
+Form model
+```
+
+Do not expose database implementation details to UI code.
+
+Do not assume that a backend database model and API DTO are identical.
+
+---
+
+# 32. Error Handling
+
+Backend errors should retain their meaning.
+
+The frontend should map documented error codes to appropriate UI behavior.
+
+Examples may include:
+
+```text
+401 UNAUTHORIZED
+403 FORBIDDEN
+403 EMAIL_NOT_VERIFIED
+403 ACCOUNT_SUSPENDED
+403 ACCOUNT_DEACTIVATED
+404 NOT_FOUND
+409 CONFLICT
+422 VALIDATION_ERROR
+500 INTERNAL_SERVER_ERROR
+```
+
+The exact contract is defined in `docs/API_CONTRACT.md`.
+
+Do not create frontend-only error codes that pretend to be backend contract values.
+
+Unexpected errors should not expose internal implementation details.
+
+---
+
+# 33. Public Pages and SEO
+
+Public pages should be designed for server rendering and SEO.
+
+Relevant content includes:
+
+* trips
+* points
+* About
+* Privacy Policy
+* other public informational pages
+
+Use Next.js metadata APIs for:
+
+* title
+* description
+* canonical
+* Open Graph
+* Twitter/X metadata
+
+SEO metadata should not expose private user information.
+
+Public pages should not require client-side JavaScript merely to render their primary content unless functionality genuinely requires it.
+
+---
+
+# 34. UI Architecture
+
+MUI is the primary UI component system.
+
+Reusable UI belongs in shared component locations.
+
+Feature-specific UI should remain close to the feature when appropriate.
+
+A generic component should not contain feature-specific backend logic.
+
+Avoid:
+
+```text
+Button
+  ↓
+API call
+  ↓
+backend
+```
+
+Prefer:
+
+```text
+Button
+  ↓
+feature action
+  ↓
+service
+  ↓
+API
 ```
 
 ---
 
-## 34. Data Ownership
+# 35. Responsive Architecture
 
-The frontend owns:
+Responsive behavior is part of the existing application's functionality.
 
-* presentation
-* navigation
-* interaction
-* local UI state
-* form state
-* rendering
-* SEO presentation
+The modernization must support:
 
-The backend owns:
+* desktop
+* tablet
+* mobile
 
-* persistent state
-* authorization
-* ownership
-* generated identifiers
-* numbering
-* validation authority
-* business rules
+Responsive behavior includes more than CSS.
 
-Do not reproduce backend domain truth in frontend state.
+It may include:
+
+* different navigation
+* different controls
+* different interaction patterns
+* different component layouts
+* touch behavior
+* mobile-specific gestures
+* desktop hover behavior
+
+Do not remove behavior simply because a new responsive implementation looks visually equivalent.
 
 ---
 
-## 35. Legacy Migration Architecture
+# 36. Input and Interaction Compatibility
 
-### Modernization is a migration, not a redesign.
+Existing input behavior is considered functionality.
 
-The target architecture must preserve the behavior of the existing HackTrip application.
+Preserve, where applicable:
 
-Before removing or replacing legacy functionality:
+* mouse click
+* mouse hover
+* mouse movement
+* touch
+* swipe
+* drag
+* keyboard
+* pointer events
+* device-specific behavior
+
+When replacing a component:
+
+```text
+old component
+    ↓
+inspect interactions
+    ↓
+list behaviors
+    ↓
+implement equivalent behavior
+    ↓
+verify
+    ↓
+remove old implementation
+```
+
+Visual similarity alone is not sufficient.
+
+---
+
+# 37. Legacy Migration
+
+The current frontend modernization is a migration rather than a redesign.
+
+A replacement implementation must be compared against the legacy implementation before the old implementation is removed.
+
+The migration process is:
 
 ```text
 Legacy implementation
         ↓
-Inspect behavior
+Inventory functionality
         ↓
-Identify functionality
+Target architecture
         ↓
-Implement equivalent behavior in new architecture
+Functional comparison
         ↓
-Compare old vs new
+Migrate missing behavior
         ↓
-Verify
+Verification
         ↓
-Remove obsolete implementation
+Remove obsolete code
 ```
 
-Functional equivalence includes behavior that may not be obvious from the visual UI.
+Legacy behavior includes:
 
-The migration must explicitly account for:
-
-* mouse click behavior
-* mouse hover behavior
-* touch events
-* swipe gestures
-* keyboard interactions
-* mobile behavior
-* tablet behavior
-* desktop behavior
-* responsive breakpoints
-* device/input-specific behavior
-* image interactions
-* map interactions
-* drag/drop
-* navigation behavior
+* UI behavior
+* API calls
+* navigation
+* validation
+* responsive behavior
+* mouse behavior
+* touch behavior
+* swipe behavior
+* map behavior
+* image behavior
+* keyboard behavior
 * loading states
 * error states
-* animations when they affect behavior
+* animations when functionally relevant
 
-A component must not be considered successfully migrated merely because the new UI looks similar.
-
-If the old implementation supported a behavior, inspect and preserve it unless its removal is explicitly required.
+Do not interpret "modernization" as permission to redesign or simplify functionality.
 
 ---
 
-## 36. Documentation and Comments
+# 38. Comments and Code Clarity
 
-Architecture documentation describes stable architectural rules.
+Code should explain itself where possible.
 
-Code comments should not merely repeat the code.
+Avoid comments that merely describe obvious operations.
 
-Prefer comments explaining:
+Bad:
 
-* why a non-obvious architectural decision exists
-* why a backend requirement is necessary
-* why a compatibility workaround exists
-* why browser/device-specific behavior is required
-* why a migration temporarily keeps an unusual implementation
+```ts
+// Get trip
+const trip = await getTrip(id);
+```
 
-Avoid comments that only describe obvious operations.
+Good:
+
+```ts
+// Backend derives the owner from the authenticated user; do not send ownerId.
+```
+
+Comments should explain:
+
+* why
+* architectural constraint
+* security requirement
+* backend contract requirement
+* compatibility requirement
+* workaround
+* non-obvious browser behavior
+
+Do not add comments solely to increase documentation volume.
 
 ---
 
-## 37. Architectural Boundaries
+# 39. Security Boundaries
 
-The following boundaries are intentional:
+The browser is not a trusted security boundary.
+
+Never trust:
+
+* frontend role state
+* frontend ownership state
+* hidden buttons
+* hidden routes
+* client-side validation
+* locally stored permissions
+
+The backend must enforce authorization.
+
+Frontend checks are for:
+
+* navigation
+* UX
+* avoiding unnecessary requests
+* presenting appropriate UI
+
+They are not security controls.
+
+---
+
+# 40. Secrets and Configuration
+
+Secrets must never be included in browser-exposed code.
+
+Anything available through client-side JavaScript must be considered public.
+
+Environment configuration must distinguish between:
 
 ```text
-Next.js
-    owns routing and rendering
+server-only secrets
+```
 
-React
-    owns component interaction
+and:
 
-MUI
-    owns UI primitives
+```text
+browser-exposed configuration
+```
 
-Zod
-    owns frontend validation
+Google Maps browser configuration must follow the Google Maps platform's intended browser key restrictions.
 
-Axios
-    owns HTTP transport
+Backend secrets never belong in frontend code.
 
-API modules
-    own endpoint communication
+---
 
-Services
-    own application orchestration
+# 41. Dependency Boundaries
 
-Components
-    own presentation
+Existing dependencies should be reused where appropriate.
 
-Hooks
-    own reusable client behavior
+Current relevant dependencies include:
 
-Constants
-    own centralized static configuration
+* Next.js
+* React
+* MUI
+* Axios
+* Zod
+* React Hook Form
+* React Query
+* Google Maps integration
 
-Types
-    own TypeScript contracts
+Do not add another library solving an existing problem without an explicit reason.
 
-Image layer
-    owns image presentation and optimization
+In particular, do not introduce:
 
-Google Maps SDK
-    owns map rendering and map interaction
+* another HTTP client
+* another validation library
+* another data-fetching library
+* another Google Maps loader
 
-Backend
-    owns domain truth and authorization
+without a documented architectural need.
+
+---
+
+# 42. React Query Boundary
+
+React Query, where used, is a client-side server-state mechanism.
+
+It does not replace:
+
+* API modules
+* services
+* Axios client
+* backend contract
+
+Its responsibility is state lifecycle:
+
+```text
+query
+cache
+invalidate
+refetch
+mutation state
+```
+
+not HTTP transport configuration.
+
+The HTTP boundary remains:
+
+```text
+React Query
+    ↓
+service/API
+    ↓
+api/client.ts
+    ↓
+backend
 ```
 
 ---
 
-## 38. Canonical Documentation
+# 43. File and Folder Ownership
 
-Frontend engineering rules are defined in:
+Each layer should have a clear responsibility.
 
-`AGENTS.md`
+```text
+app/
+    route/page composition
 
-Frontend architecture is defined in:
+components/
+    UI
 
-`docs/ARCHITECTURE.md`
+api/
+    backend HTTP operations
 
-The backend API contract is defined in:
+services/
+    application orchestration
 
-`docs/API_CONTRACT.md`
+hooks/
+    reusable React/browser behavior
 
-`docs/API_CONTRACT.md` remains the canonical API reference.
+validations/
+    Zod validation
 
-Frontend architecture documentation must not contradict the backend API contract.
+types/
+    TypeScript models
 
-Do not create a second frontend API contract.
+constants/
+    reusable constants
 
-Do not move backend API rules into a new frontend-specific contract.
+lib/
+    low-level shared utilities
+
+config/
+    configuration
+```
+
+Do not place API calls in constants.
+
+Do not place UI components in services.
+
+Do not place backend transport logic in map components.
+
+Do not place map SDK logic in the backend API client.
 
 ---
 
-## 39. Final Architecture Principle
+# 44. Migration Verification
 
-HackTrip is an established production application being modernized incrementally.
+Every migration batch must verify more than compilation.
 
-The target architecture is:
+At minimum:
 
 ```text
-                 HackTrip Frontend
-                        │
-          ┌─────────────┴─────────────┐
-          │                           │
-          ▼                           ▼
-    HackTrip Backend            Google Maps SDK
-          │                           │
-   api/client.ts                Map Components
-          │
-       Axios
-          │
-      Services
-          │
-   Client/Server UI
+TypeScript
+Lint
+Build
+Relevant tests
+API contract
+Legacy functionality
+Responsive behavior
+Authentication behavior
 ```
 
-Public content remains:
+Where a component is replaced, verify its previous functionality.
 
-* server-renderable
-* SEO-friendly
-* directly shareable
+Where an API operation is migrated, verify:
 
-Interactive functionality remains:
+* endpoint
+* method
+* request payload
+* authentication
+* response handling
+* error handling
 
-* client-side where required
-* isolated
-* reusable
-* responsive
+---
 
-API integration remains:
+# 45. Documentation Boundaries
 
-* centralized
-* typed
-* contract-driven
+The project has three distinct documentation responsibilities.
 
-Authentication remains:
+### `AGENTS.md`
 
-* access token in memory
-* refresh token in HttpOnly cookie
+Defines rules for coding agents and contributors.
 
-And most importantly:
+### `docs/ARCHITECTURE.md`
 
-**The modernization must not silently remove existing HackTrip functionality.**
+Defines frontend architecture and boundaries.
+
+### `docs/API_CONTRACT.md`
+
+Defines the backend API contract.
+
+These documents complement one another.
+
+Do not create another frontend API contract.
+
+Do not copy the complete backend contract into architecture documentation.
+
+Do not modify the backend contract merely because the frontend architecture changed.
+
+---
+
+# 46. Modernization Scope
+
+The current modernization should proceed incrementally.
+
+Each batch should:
+
+1. inspect existing implementation;
+2. inspect legacy behavior where applicable;
+3. identify the exact migration scope;
+4. make the smallest coherent change;
+5. preserve functionality;
+6. verify the result;
+7. commit the batch separately.
+
+Do not combine unrelated modernization work into one large rewrite.
+
+---
+
+# 47. Current Architecture Direction
+
+The target frontend architecture is:
+
+```text
+                         Next.js
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+       Server Components           Client Components
+              │                           │
+              │                    hooks / interaction
+              │                           │
+              └─────────────┬─────────────┘
+                            ↓
+                         Services
+                            ↓
+                      Feature APIs
+                            ↓
+                       api/client.ts
+                            ↓
+                           Axios
+                            ↓
+                    HackTrip Backend
+```
+
+Separately:
+
+```text
+Client Components
+       ↓
+Google Maps integration
+       ↓
+Google Maps JavaScript SDK
+```
+
+Authentication:
+
+```text
+Login
+  ↓
+access token → memory
+
+refresh token
+  ↓
+HttpOnly cookie
+```
+
+Session restoration:
+
+```text
+Reload
+  ↓
+/auth/refresh
+  ↓
+HttpOnly cookie
+  ↓
+new access token
+  ↓
+memory
+  ↓
+/auth/me
+```
+
+Authorization:
+
+```text
+Frontend guards → UX
+Backend          → authority
+```
+
+---
+
+# 48. Final Architectural Rule
+
+HackTrip frontend modernization must improve architecture without silently changing application behavior.
+
+The most important rule is:
+
+> **Modernization is a migration, not a redesign. Existing functionality must be preserved unless its removal is explicitly required.**
+
+When architecture and legacy behavior appear to conflict:
+
+1. inspect the legacy implementation;
+2. identify the behavior;
+3. compare it with the target architecture;
+4. migrate the behavior into the target architecture;
+5. verify it;
+6. only then remove obsolete code.
+
+The backend API contract remains the authoritative source for backend communication.
+
+The frontend architecture remains responsible for clean separation between:
+
+* pages
+* UI
+* services
+* API modules
+* HTTP transport
+* authentication
+* browser integrations
+* Google Maps
+* validation
+* configuration
+* constants
+
+No layer should silently absorb another layer's responsibility.

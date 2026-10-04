@@ -23,6 +23,7 @@ The backend API contract is authoritative for:
 * image behavior
 * public versus authenticated access
 * server-generated fields
+* backend-generated ownership
 
 Do not invent API behavior that is not defined by the backend contract.
 
