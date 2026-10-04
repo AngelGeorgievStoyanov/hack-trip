@@ -96,13 +96,6 @@ export const authApi = {
     return data;
   },
 
-  refresh: async (): Promise<AuthSessionDto> => {
-    const { data } = await apiClient.post<AuthSessionDto>(`${AUTH}/refresh`, undefined, {
-      skipAuthHeader: true,
-    });
-    return data;
-  },
-
   logout: async (): Promise<MessageResponse> => {
     const { data } = await apiClient.post<MessageResponse>(`${AUTH}/logout`, undefined, {
       skipAuthHeader: true,

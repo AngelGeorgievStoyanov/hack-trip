@@ -19,49 +19,40 @@ The application combines:
 * server-rendered public content
 * client-side interactive application areas
 
-The architecture separates public SEO-oriented content from authenticated interactive functionality while keeping both inside the same application.
-
 The backend remains an independent service.
+
+The frontend has two separate external boundaries:
 
 ```text
                     ┌──────────────────────┐
                     │      Browser         │
                     └──────────┬───────────┘
                                │
-                               ▼
-                    ┌──────────────────────┐
-                    │      Next.js         │
-                    │   App Router / RSC   │
-                    └──────────┬───────────┘
-                               │
                  ┌─────────────┴─────────────┐
                  │                           │
                  ▼                           ▼
-        Public Server Content       Interactive Client UI
-        SEO / SSR / ISR              Maps / Forms / Social
-                 │                           │
-                 └─────────────┬─────────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │    API Client        │
-                    │       Axios          │
-                    └──────────┬───────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │    HackTrip API      │
-                    │      /api/v1         │
-                    └──────────────────────┘
+        ┌─────────────────┐        ┌─────────────────┐
+        │   HackTrip API  │        │   Google Maps   │
+        │                 │        │      SDK        │
+        └────────┬────────┘        └────────┬────────┘
+                 │                          │
+              Axios                   browser/map APIs
+                 │
+                 ▼
+        ┌─────────────────┐
+        │ HackTrip Backend│
+        └─────────────────┘
 ```
 
-The API contract is defined by:
+Google Maps is not part of the HackTrip Backend API layer.
+
+The backend API contract is defined by:
 
 `docs/API_CONTRACT.md`
 
 ---
 
-# 2. Application Layers
+## 2. Application Layers
 
 The frontend is divided into clear responsibilities.
 
@@ -74,9 +65,13 @@ hooks/
     ↓
 services/
     ↓
-api/
+feature API
     ↓
-backend
+api/client.ts
+    ↓
+Axios
+    ↓
+HackTrip Backend
 ```
 
 Supporting layers:
@@ -89,51 +84,33 @@ config/
 lib/
 ```
 
-Each layer has a defined responsibility.
+The purpose of each layer is explicit.
 
 ---
 
-# 3. Next.js App Router
+## 3. Next.js App Router
 
 Next.js App Router owns application routing.
 
-Routes are organized by user-facing responsibility rather than by backend controller names.
+Routes are organized by user-facing responsibility rather than backend controller names.
 
-Typical structure:
+Typical application areas include:
 
 ```text
 app/
 ├── (public)/
-│   ├── page.tsx
-│   ├── about/
-│   ├── privacy-policy/
-│   ├── trips/
-│   │   └── [tripId]/
-│   └── points/
-│       └── [pointId]/
-│
 ├── (auth)/
-│   ├── login/
-│   ├── register/
-│   ├── verify-email/
-│   ├── forgot-password/
-│   └── reset-password/
-│
 ├── (account)/
-│   ├── profile/
-│   └── ...
-│
 └── (admin)/
-    └── admin/
 ```
-
-Route groups are used to organize application areas without unnecessarily changing public URLs.
 
 Dynamic routes represent public content that can be directly opened and shared.
 
+Route structure must follow the actual application and must not be changed merely to mirror backend endpoint names.
+
 ---
 
-# 4. Server Components and Client Components
+## 4. Server Components and Client Components
 
 Server Components are the default.
 
@@ -148,11 +125,10 @@ Use Server Components for:
 * static content
 * ISR content
 
-Client Components are used for functionality requiring:
+Use Client Components only for functionality requiring:
 
-* `useState`
-* `useEffect`
 * browser APIs
+* hooks
 * event-driven interaction
 * maps
 * geolocation
@@ -168,21 +144,20 @@ Example:
 
 ```text
 TripPage (Server)
-├── TripHeader (Server)
-├── TripMetadata (Server)
-├── TripGallery (Server/Client depending on interaction)
-├── TripDescription (Server)
+├── TripHeader
+├── TripMetadata
+├── TripGallery
+├── TripDescription
 ├── TripMap (Client)
-├── TripPoints (Server)
-│   └── PointCard (Server)
+├── TripPoints
 └── TripSocialActions (Client)
 ```
 
-Do not make the complete Trip page a Client Component because the map or social controls require client-side JavaScript.
+Do not make the complete Trip page a Client Component because one child requires client-side JavaScript.
 
 ---
 
-# 5. Public Content Architecture
+## 5. Public Content Architecture
 
 Public HackTrip content is designed to be:
 
@@ -190,36 +165,18 @@ Public HackTrip content is designed to be:
 * server-rendered
 * indexable where appropriate
 * shareable
-* optimized for mobile
+* mobile-friendly
 * optimized for social previews
 
-Public Trip pages can use:
-
-* Server Components
-* SSR
-* ISR
-* revalidation
-* metadata generation
-* canonical URLs
-* Open Graph metadata
-
-Public content must not depend on browser state to render its primary content.
-
-A user opening:
-
-```text
-/trips/123
-```
-
-must receive a complete public page even when arriving directly from an external website.
+A user opening a shared public URL directly must receive the public page without depending on previous browser navigation state.
 
 ---
 
-# 6. SEO Architecture
+## 6. SEO Architecture
 
 SEO is implemented through Next.js metadata APIs.
 
-Public content exposes appropriate:
+Public content may expose:
 
 ```text
 title
@@ -230,29 +187,17 @@ openGraph
 twitter
 ```
 
-Dynamic content uses dynamic metadata derived from the public API response.
+Dynamic content uses metadata derived from the public API response.
 
-For example:
-
-```text
-Trip
- ├── title
- ├── description
- ├── canonical URL
- └── representative image
-```
-
-The metadata generation must not expose private information.
-
-Authenticated application pages are not SEO content.
+Metadata must never expose private user/account information.
 
 ---
 
-# 7. Search Engine Indexing
+## 7. Search Engine Indexing
 
 The application provides the technical infrastructure required for indexing public content.
 
-The architecture includes:
+Typical infrastructure includes:
 
 ```text
 app/
@@ -260,37 +205,19 @@ app/
 └── sitemap.ts
 ```
 
-The sitemap contains only URLs intended for search engines.
+Only intentionally public/indexable URLs belong in the sitemap.
 
-Public Trip and Point URLs may be included when their content is publicly accessible and indexable.
-
-Private pages are excluded.
-
-The architecture avoids duplicate canonical URLs.
-
-Search engine crawlers must receive valid public HTML rather than a client-only loading shell for indexable content.
+Private pages such as authentication, account and admin pages must not be indexed.
 
 ---
 
-# 8. Social Sharing
+## 8. Social Sharing
 
 Public content has stable canonical URLs.
 
-Sharing is implemented around the public route, not around client navigation state.
+Sharing is based on public routes rather than client navigation state.
 
-For Trips:
-
-```text
-/trips/[tripId]
-```
-
-For Points:
-
-```text
-/points/[pointId]
-```
-
-The page metadata provides:
+Public metadata should provide:
 
 ```text
 og:title
@@ -302,53 +229,40 @@ twitter:description
 twitter:image
 ```
 
-The representative image is selected from the public content.
-
-If a Trip has images, the appropriate public image is used for social previews.
-
-If no content image is available, the application uses the configured HackTrip fallback image.
+The representative image must use the established public image mechanism.
 
 ---
 
-# 9. Image Architecture
+## 9. Image Architecture
 
 Images are centralized.
 
-```text
-components/images/
-├── AppImage.tsx
-├── ImageGallery.tsx
-├── ImageThumbnail.tsx
-├── ImagePreview.tsx
-└── ImageUpload.tsx
-```
+Use the existing shared image components and utilities.
 
-Image utilities:
+The image architecture must reflect the current project structure.
+
+Image presets are maintained under the existing constants structure, including:
 
 ```text
-lib/images/
-├── imageUrl.ts
-├── thumbnail.ts
-└── imageMetadata.ts
+src/constants/images/presets.ts
 ```
 
-The application does not contain ad-hoc image URL concatenation inside pages.
+Do not reintroduce removed legacy files such as:
 
-The backend API provides image DTOs.
+```text
+lib/images/imageUrl.ts
+lib/images/imageMetadata.ts
+```
 
-The backend contract defines:
+Do not duplicate image URL or thumbnail logic inside individual pages.
 
-* image URL
-* thumbnail URL
-* supported upload formats
-* image limits
-* image storage behavior
+The backend API provides image DTOs and the backend contract defines the image behavior.
 
-The frontend consumes those values.
+The frontend consumes the values provided by the API.
 
 ---
 
-# 10. `next/image`
+## 10. `next/image`
 
 `next/image` is the default rendering mechanism for application images.
 
@@ -361,35 +275,15 @@ It provides:
 * priority loading
 * appropriate `sizes`
 
-Example responsibility:
+The shared image layer owns common image presentation behavior.
 
-```text
-AppImage
-    ↓
-next/image
-    ↓
-backend-provided image URL
-```
-
-The shared image component handles common HackTrip behavior.
-
-Individual pages should not repeatedly implement:
-
-```text
-if thumbnail...
-if full...
-build URL...
-choose width...
-choose sizes...
-```
-
-That logic belongs in the image layer.
+Individual pages should not repeatedly implement image URL construction, thumbnail selection or responsive sizing logic.
 
 ---
 
-# 11. Thumbnail Strategy
+## 11. Thumbnail Strategy
 
-Thumbnail images are used for:
+Use thumbnails for:
 
 * trip lists
 * point lists
@@ -398,68 +292,31 @@ Thumbnail images are used for:
 * compact UI
 * secondary content
 
-Full-size images are used when the user explicitly views the image at larger resolution.
+Use full images when the user explicitly needs larger display quality.
 
-The architecture therefore separates:
-
-```text
-List/Card
-    ↓
-thumbnail
-
-Gallery/Detail
-    ↓
-full image where appropriate
-```
-
-This reduces bandwidth and improves page performance.
+Avoid downloading full-size images unnecessarily in lists.
 
 ---
 
-# 12. Responsive Image Strategy
+## 12. Responsive Image Strategy
 
-Images use responsive sizing.
+Images use responsive sizing appropriate to their actual layout.
 
-The image component determines the appropriate `sizes` value based on the layout.
-
-Typical cases:
-
-```text
-Full-width hero:
-100vw
-
-Two-column gallery:
-50vw
-
-Three-column cards:
-33vw
-
-Mobile-first card:
-~100vw with responsive breakpoints
-```
-
-Exact values are defined by the actual component layout rather than hard-coded globally when they differ.
+The exact `sizes` value belongs to the component/layout that renders the image rather than one universal hard-coded value.
 
 ---
 
-# 13. Image Accessibility
+## 13. Image Accessibility
 
-Every meaningful content image has meaningful `alt` text.
+Meaningful content images require meaningful `alt` text.
 
 Decorative images use appropriate empty alt behavior.
 
-Image galleries provide accessible controls.
-
-Lightboxes provide:
-
-* keyboard interaction
-* close controls
-* accessible labels
-* focus handling
+Interactive galleries and previews must provide accessible controls and keyboard support where applicable.
 
 ---
 
-# 14. Image Upload Architecture
+## 14. Image Upload Architecture
 
 Uploads are interactive Client Components.
 
@@ -468,30 +325,32 @@ ImageUpload
     ↓
 client validation
     ↓
-API service
+Service
+    ↓
+Feature API
+    ↓
+api/client.ts
     ↓
 Axios
     ↓
-Backend multipart endpoint
+Backend
 ```
 
-Client validation is for UX.
+Client validation improves UX.
 
 Backend validation remains authoritative.
 
-The frontend respects:
+The frontend respects the backend contract for:
 
 * maximum file size
 * supported file types
 * maximum image count
 
-The frontend never assumes an upload succeeded until the backend response confirms it.
-
 ---
 
-# 15. API Layer
+## 15. API Architecture
 
-All backend communication goes through the API layer.
+All HackTrip Backend communication goes through the API layer.
 
 ```text
 src/api/
@@ -505,25 +364,35 @@ src/api/
 └── config/
 ```
 
-`client.ts` contains shared HTTP behavior.
+`client.ts` owns shared HTTP behavior.
 
-Feature modules contain endpoint-specific operations.
+Feature API modules own endpoint-specific operations.
 
-Example:
+The intended flow is:
 
 ```text
-api/trips/tripsApi.ts
-api/points/pointsApi.ts
-api/comments/commentsApi.ts
+Page / Component
+       ↓
+Service
+       ↓
+Feature API
+       ↓
+api/client.ts
+       ↓
+Axios
+       ↓
+HackTrip Backend
 ```
 
-Pages and components should not construct arbitrary API URLs.
+Pages and components must not construct arbitrary API URLs.
+
+Pages and components must not make raw Axios calls directly.
 
 ---
 
-# 16. Services Layer
+## 16. Services Layer
 
-Services contain application-level operations.
+Services contain application-level orchestration.
 
 ```text
 src/services/
@@ -540,93 +409,94 @@ A service may coordinate multiple API operations.
 Example:
 
 ```text
-TripService
+Trip Service
     ↓
 Trip API
     ↓
 Point API
-    ↓
-Image API
 ```
 
-The service layer prevents UI components from becoming business-logic containers.
+Services prevent UI components from becoming business-logic containers.
+
+Services do not own generic HTTP transport configuration.
 
 ---
 
-# 17. Authentication Architecture
+## 17. Authentication Architecture
 
-Authentication uses the backend contract.
+Authentication follows the backend contract.
 
 ```text
-Browser
-   │
-   ├── access token
-   │
-   └── HttpOnly refresh cookie
-            │
-            ▼
-        Backend
+login
+  ↓
+access token → memory only
+refresh token → HttpOnly cookie
 ```
 
-The refresh cookie is never read by JavaScript.
+The refresh token is never readable by JavaScript.
 
-Axios requests requiring the cookie use:
+Requests requiring the refresh cookie use:
 
 ```text
+Axios:
 withCredentials: true
-```
 
-Equivalent Fetch requests use:
-
-```text
+Fetch:
 credentials: 'include'
 ```
 
-The application never stores the refresh token itself.
+After a browser reload:
+
+```text
+memory access token gone
+        ↓
+POST /auth/refresh
+        ↓
+browser sends HttpOnly cookie
+        ↓
+backend validates refresh token
+        ↓
+new access token
+        ↓
+memory
+```
+
+The frontend never stores the refresh token itself.
 
 ---
 
-# 18. Public Authentication Boundary
+## 18. Authentication Boundaries
 
-Public frontend API requests still identify themselves as the web client.
+Three different concepts must remain separate:
 
-Every API request uses:
-
-```http
+```text
 x-hacktrip-client: web
+        ↓
+frontend client identification
+
+
+Public bearer token
+        ↓
+public frontend access where required
+
+
+User access JWT
+        ↓
+authenticated user
+
+
+HttpOnly refresh cookie
+        ↓
+session restoration
 ```
 
-Public reads additionally use the backend-defined public bearer token.
+These concepts are not interchangeable.
 
-Authentication endpoints such as:
-
-```text
-register
-login
-verify-email
-resend-verification
-forgot-password
-reset-password
-refresh
-```
-
-do not require a user Authorization credential where the backend defines them as unauthenticated.
-
-They still require the frontend client marker.
-
-This distinction is important:
-
-```text
-Client identification
-        ≠
-User authentication
-        ≠
-Authorization
-```
+The exact behavior is defined by `docs/API_CONTRACT.md`.
 
 ---
 
-# 19. Zod Architecture
+## 19. Zod Architecture
 
 Validation is feature-oriented.
 
@@ -641,85 +511,60 @@ src/validations/
 └── shared/
 ```
 
-The architecture mirrors backend feature boundaries.
-
-Example:
-
-```text
-validations/auth/
-├── register.schema.ts
-├── login.schema.ts
-├── verifyEmail.schema.ts
-├── resendVerification.schema.ts
-├── updateProfile.schema.ts
-├── confirmPassword.schema.ts
-├── changePassword.schema.ts
-├── forgotPassword.schema.ts
-└── resetPassword.schema.ts
-```
-
-Equivalent feature-specific structures are used for Trips, Points, Social, Comments and Admin.
+Frontend schemas reflect the backend contract but do not replace backend validation.
 
 ---
 
-# 20. Constants Architecture
+## 20. Constants Architecture
 
-Constants are centralized.
+Constants are organized by responsibility.
+
+The current structure uses areas such as:
 
 ```text
 src/constants/
-├── api.ts
-├── auth.ts
-├── routes.ts
-├── images.ts
-├── trips.ts
-├── points.ts
-├── comments.ts
-├── social.ts
-├── admin.ts
-├── config.ts
-├── ui.ts
-└── index.ts
+├── images/
+├── maps/
+├── points/
+├── trips/
+├── ui/
+└── ...
 ```
 
-Examples:
+Do not document or recreate the old flat structure as the target architecture.
+
+Constants should remain close to the responsibility they configure.
+
+Examples include:
 
 ```text
-api.ts
-    API prefix
-    API paths
-    HTTP-related constants
+images/
+    image presets and image-related constants
 
-auth.ts
-    roles
-    auth states
-    authentication-related constants
+maps/
+    map-related constants
 
-routes.ts
-    frontend route paths
-
-images.ts
-    upload limits
-    image-related UI constants
-
-trips.ts
-    trip filters
-    pagination
-    sorting
-
-points.ts
+points/
     point-related constants
 
-social.ts
-    target types
-    social-related constants
+trips/
+    trip-related constants
+
+ui/
+    shared UI constants
 ```
 
-This prevents inconsistent strings throughout the application.
+Do not introduce a new constants architecture as part of ordinary migration.
+
+Do not move frontend constants into backend configuration during the current modernization stage.
+
+Backend-driven configuration is a separate future concern.
 
 ---
 
-# 21. Type Architecture
+## 21. Type Architecture
+
+Types are organized by feature.
 
 ```text
 src/types/
@@ -734,9 +579,7 @@ src/types/
 └── api/
 ```
 
-Types represent API contracts and frontend domain models.
-
-Where useful, keep:
+Where useful:
 
 ```text
 API DTO
@@ -750,9 +593,11 @@ This prevents backend implementation details from leaking throughout the UI.
 
 ---
 
-# 22. Components Architecture
+## 22. Components Architecture
 
 Components are organized by responsibility.
+
+Typical areas include:
 
 ```text
 src/components/
@@ -769,36 +614,13 @@ src/components/
 └── admin/
 ```
 
-Examples:
+Generic components must not contain feature-specific business logic.
 
-```text
-components/trips/
-├── TripCard
-├── TripHeader
-├── TripGallery
-├── TripDetails
-├── TripFilters
-└── TripActions
-
-components/points/
-├── PointCard
-├── PointDetails
-├── PointGallery
-└── PointActions
-
-components/images/
-├── AppImage
-├── ImageGallery
-├── ImageThumbnail
-├── ImagePreview
-└── ImageUpload
-```
-
-Generic components do not contain feature-specific business logic.
+Presentational components should not make direct API calls.
 
 ---
 
-# 23. Hooks
+## 23. Hooks
 
 Reusable React behavior belongs in:
 
@@ -806,26 +628,18 @@ Reusable React behavior belongs in:
 src/hooks/
 ```
 
-Examples:
+Hooks may compose:
 
-```text
-useAuth
-useCurrentUser
-useTrip
-usePoints
-useComments
-useLikes
-useFavorites
-useImageUpload
-useMap
-useGeolocation
-```
+* services
+* local state
+* browser APIs
+* reusable interaction logic
 
-Hooks should compose services and state rather than duplicate API calls.
+Hooks must not duplicate API transport configuration.
 
 ---
 
-# 24. Maps
+## 24. Maps
 
 Maps are isolated Client Components.
 
@@ -837,26 +651,36 @@ components/maps/
 └── MapMarker.tsx
 ```
 
-Map code may use browser APIs and interactive state.
+Map code may use:
 
-Public Trip pages remain Server Components around the map.
+* Google Maps SDK
+* browser APIs
+* geolocation
+* interactive state
+* markers
+* polylines
+* live tracking
+
+Maps are a separate frontend integration boundary from the HackTrip Backend API.
 
 ```text
-TripPage
-├── server-rendered content
-├── server-rendered SEO metadata
-└── client-side TripMap
+HackTrip Backend
+    ↑
+Axios / API layer
+
+
+Google Maps
+    ↑
+Google Maps SDK
 ```
 
-This preserves SEO while allowing full map interactivity.
+A map does not require the entire surrounding page to become a Client Component.
 
 ---
 
-# 25. Live Tracking
+## 25. Live Tracking
 
 Live tracking is client-side.
-
-The architecture separates:
 
 ```text
 GPS / browser
@@ -868,13 +692,15 @@ tracking state
 map component
 ```
 
-Tracking does not force the entire Trip page into Client Component mode.
+Tracking state must remain localized to the interactive portion of the application.
 
 ---
 
-# 26. Comments and Social Features
+## 26. Comments and Social Features
 
-Comments, likes, favorites and reports are feature modules.
+Comments, likes, favorites and reports remain feature modules.
+
+Typical separation:
 
 ```text
 components/comments/
@@ -893,13 +719,13 @@ types/comments/
 types/social/
 ```
 
-Public reads can be server-rendered when appropriate.
+Public reads may be server-rendered where appropriate.
 
 Interactive mutations are Client Components.
 
 ---
 
-# 27. Admin Architecture
+## 27. Admin Architecture
 
 Admin functionality is isolated from public application features.
 
@@ -910,34 +736,27 @@ api/admin/
 services/admin/
 validations/admin/
 types/admin/
-constants/admin.ts
 ```
 
-Role checks in the frontend are UI guards only.
+Frontend role checks are UI guards only.
 
 Backend authorization remains authoritative.
 
-Manager and admin capabilities follow the backend API contract.
-
 ---
 
-# 28. Configuration
+## 28. Configuration
 
-Frontend configuration is centralized under:
+Frontend configuration is centralized under the existing configuration layer.
 
-```text
-src/config/
-```
-
-Runtime/public configuration must be clearly separated from secrets.
-
-Browser-visible configuration is treated as public.
+Browser-visible configuration is public.
 
 Backend-only environment variables must never be imported into Client Components.
 
+Do not introduce backend-driven configuration migration as part of the current frontend modernization stage.
+
 ---
 
-# 29. Static Informational Pages
+## 29. Static Informational Pages
 
 Pages such as:
 
@@ -948,23 +767,19 @@ Pages such as:
 
 are ordinary public Next.js pages.
 
-They do not need backend API requests when their content is static.
-
-Their content should be maintained as normal application content and rendered server-side.
+Static pages do not need backend API requests merely because the rest of the application uses an API.
 
 They still participate in:
 
 * metadata
 * canonical URLs
-* SEO
 * accessibility
 * responsive UI
+* SEO
 
 ---
 
-# 30. Performance Architecture
-
-Performance is based on minimizing unnecessary browser JavaScript.
+## 30. Performance Architecture
 
 Preferred pattern:
 
@@ -978,19 +793,19 @@ Server-rendered page
        └── Client Components only where interaction exists
 ```
 
-Heavy components such as maps may be dynamically imported where appropriate.
+Heavy browser-only components such as maps may be dynamically loaded where appropriate.
 
 Images use thumbnails and responsive loading.
 
 Public data uses caching/revalidation where appropriate.
 
+Avoid unnecessary client JavaScript.
+
 ---
 
-# 31. Error Boundary Architecture
+## 31. Error Boundary Architecture
 
-Next.js error boundaries are used for page-level failures.
-
-Use appropriate:
+Use Next.js error boundaries where appropriate:
 
 ```text
 error.tsx
@@ -998,17 +813,17 @@ not-found.tsx
 loading.tsx
 ```
 
-where the route benefits from them.
-
 API errors are translated into safe UI messages.
 
 Backend error codes remain available to application logic.
 
+Do not expose backend internals.
+
 ---
 
-# 32. Security Architecture
+## 32. Security Architecture
 
-The browser is treated as an untrusted environment.
+The browser is an untrusted environment.
 
 Never trust:
 
@@ -1028,9 +843,11 @@ The backend is authoritative for:
 * image validation
 * business rules
 
+The frontend must follow the API contract exactly.
+
 ---
 
-# 33. Request Data Flow
+## 33. Request Data Flow
 
 Typical public Trip page:
 
@@ -1041,9 +858,11 @@ Trip Service
         ↓
 Trip API
         ↓
+api/client.ts
+        ↓
 Axios
         ↓
-Backend /api/v1/trips/:id
+Backend
         ↓
 Trip DTO
         ↓
@@ -1061,7 +880,9 @@ Zod validation
         ↓
 Service
         ↓
-API module
+Feature API
+        ↓
+api/client.ts
         ↓
 Axios
         ↓
@@ -1074,9 +895,7 @@ UI update
 
 ---
 
-# 34. Data Ownership
-
-The backend owns domain truth.
+## 34. Data Ownership
 
 The frontend owns:
 
@@ -1085,7 +904,6 @@ The frontend owns:
 * interaction
 * local UI state
 * form state
-* optimistic UI only where safe
 * rendering
 * SEO presentation
 
@@ -1094,14 +912,86 @@ The backend owns:
 * persistent state
 * authorization
 * ownership
-* IDs
+* generated identifiers
 * numbering
 * validation authority
 * business rules
 
+Do not reproduce backend domain truth in frontend state.
+
 ---
 
-# 35. Architectural Boundaries
+## 35. Legacy Migration Architecture
+
+### Modernization is a migration, not a redesign.
+
+The target architecture must preserve the behavior of the existing HackTrip application.
+
+Before removing or replacing legacy functionality:
+
+```text
+Legacy implementation
+        ↓
+Inspect behavior
+        ↓
+Identify functionality
+        ↓
+Implement equivalent behavior in new architecture
+        ↓
+Compare old vs new
+        ↓
+Verify
+        ↓
+Remove obsolete implementation
+```
+
+Functional equivalence includes behavior that may not be obvious from the visual UI.
+
+The migration must explicitly account for:
+
+* mouse click behavior
+* mouse hover behavior
+* touch events
+* swipe gestures
+* keyboard interactions
+* mobile behavior
+* tablet behavior
+* desktop behavior
+* responsive breakpoints
+* device/input-specific behavior
+* image interactions
+* map interactions
+* drag/drop
+* navigation behavior
+* loading states
+* error states
+* animations when they affect behavior
+
+A component must not be considered successfully migrated merely because the new UI looks similar.
+
+If the old implementation supported a behavior, inspect and preserve it unless its removal is explicitly required.
+
+---
+
+## 36. Documentation and Comments
+
+Architecture documentation describes stable architectural rules.
+
+Code comments should not merely repeat the code.
+
+Prefer comments explaining:
+
+* why a non-obvious architectural decision exists
+* why a backend requirement is necessary
+* why a compatibility workaround exists
+* why browser/device-specific behavior is required
+* why a migration temporarily keeps an unusual implementation
+
+Avoid comments that only describe obvious operations.
+
+---
+
+## 37. Architectural Boundaries
 
 The following boundaries are intentional:
 
@@ -1142,62 +1032,86 @@ Types
 Image layer
     owns image presentation and optimization
 
+Google Maps SDK
+    owns map rendering and map interaction
+
 Backend
     owns domain truth and authorization
 ```
 
 ---
 
-# 36. Canonical Documentation
+## 38. Canonical Documentation
 
-The frontend architecture is described here.
-
-Engineering agent rules are described in:
+Frontend engineering rules are defined in:
 
 `AGENTS.md`
 
-The backend API is described in:
+Frontend architecture is defined in:
+
+`docs/ARCHITECTURE.md`
+
+The backend API contract is defined in:
 
 `docs/API_CONTRACT.md`
 
-`docs/API_CONTRACT.md` is the canonical API reference.
+`docs/API_CONTRACT.md` remains the canonical API reference.
 
-Frontend architecture documentation must not contradict it.
+Frontend architecture documentation must not contradict the backend API contract.
+
+Do not create a second frontend API contract.
+
+Do not move backend API rules into a new frontend-specific contract.
 
 ---
 
-# 37. Final Architecture Principle
+## 39. Final Architecture Principle
 
-HackTrip is structured as a modern production Next.js application where:
+HackTrip is an established production application being modernized incrementally.
+
+The target architecture is:
 
 ```text
-SEO/public content
-        ↓
-Next.js Server Components + SSR/ISR
-        ↓
-optimized HTML + metadata + images
-
-Interactive application
-        ↓
-React Client Components
-        ↓
-hooks + services + API modules
-        ↓
-HackTrip Backend
+                 HackTrip Frontend
+                        │
+          ┌─────────────┴─────────────┐
+          │                           │
+          ▼                           ▼
+    HackTrip Backend            Google Maps SDK
+          │                           │
+   api/client.ts                Map Components
+          │
+       Axios
+          │
+      Services
+          │
+   Client/Server UI
 ```
 
-The architecture deliberately keeps:
+Public content remains:
 
-* public content indexable
-* Trips and Points directly shareable
-* social previews image-rich
-* images centralized and optimized
-* thumbnails efficient
-* maps interactive without sacrificing SEO
-* authentication secure
-* validation feature-oriented
-* constants centralized
-* API integration typed
-* backend authorization authoritative
-* application boundaries explicit
-* UI scalable as the product grows
+* server-renderable
+* SEO-friendly
+* directly shareable
+
+Interactive functionality remains:
+
+* client-side where required
+* isolated
+* reusable
+* responsive
+
+API integration remains:
+
+* centralized
+* typed
+* contract-driven
+
+Authentication remains:
+
+* access token in memory
+* refresh token in HttpOnly cookie
+
+And most importantly:
+
+**The modernization must not silently remove existing HackTrip functionality.**

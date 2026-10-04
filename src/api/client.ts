@@ -23,10 +23,16 @@ declare module 'axios' {
 // Memory-only access token; the refresh token lives in an HttpOnly cookie owned by the browser.
 let accessToken: string | null = null;
 
+// Latched after the backend definitively refuses a refresh (401/403): there is no session, so
+// further 401s must not trigger more refresh requests until a new token arrives (login/refresh).
+let refreshRefused = false;
+
 export const authToken = {
-  get: (): string | null => accessToken,
   set: (token: string | null): void => {
     accessToken = token;
+    if (token) {
+      refreshRefused = false;
+    }
   },
 };
 
@@ -66,12 +72,11 @@ export function isAccountStatusError(code?: string): boolean {
 
 let refreshPromise: Promise<RefreshResult> | null = null;
 
+// The refresh call lives here rather than in `src/api/auth` because the 401 interceptor owns
+// this single-flight flow; importing `api/auth` (which imports this client) would be circular.
 function refreshSession(): Promise<RefreshResult> {
-  return axios
-    .post<AuthSessionDto>(`${config.apiBaseUrl}${AUTH}/refresh`, undefined, {
-      withCredentials: true,
-      headers: { [CLIENT_MARKER_HEADER]: CLIENT_MARKER_VALUE },
-    })
+  return apiClient
+    .post<AuthSessionDto>(`${AUTH}/refresh`, undefined, { skipAuthHeader: true })
     .then((response) => {
       const token = response.data.accessToken;
       authToken.set(token);
@@ -79,6 +84,12 @@ function refreshSession(): Promise<RefreshResult> {
     })
     .catch((error) => {
       authToken.set(null);
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 401 || status === 403) {
+          refreshRefused = true;
+        }
+      }
       const code = normalizeApiError(error).code;
       if (isAccountStatusError(code)) {
         return { status: 'accountError' as const };
@@ -88,6 +99,9 @@ function refreshSession(): Promise<RefreshResult> {
 }
 
 export function restoreSession(): Promise<RefreshResult> {
+  if (refreshRefused) {
+    return Promise.resolve({ status: 'failed' });
+  }
   return (
     refreshPromise ??
     (refreshPromise = refreshSession().finally(() => {
