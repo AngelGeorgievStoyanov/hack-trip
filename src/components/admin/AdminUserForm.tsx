@@ -7,8 +7,10 @@ import { useRouter } from 'next/navigation';
 import { Alert, Box, Button, CircularProgress, MenuItem, TextField, Typography } from '@mui/material';
 import { adminApi, type AdminUserUpdateInput } from '@/api/admin';
 import { useAuth } from '@/hooks/useAuth';
+import { useConfirm } from '@/components/common/ConfirmDialog';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
+import { ADMIN_PAGE_SIZE_MAX } from '@/constants/ui';
 import { adminUserUpdateSchema } from '@/validations/admin';
 import type { AuthUserDto, Role, UserStatus } from '@/types';
 
@@ -17,7 +19,7 @@ const STATUS_OPTIONS: UserStatus[] = ['PENDING_VERIFICATION', 'ACTIVE', 'SUSPEND
 
 // The contract exposes no single-user admin endpoint, so the target user is located in the paginated list.
 async function findUserById(userId: string): Promise<AuthUserDto | null> {
-  const pageSize = 100;
+  const pageSize = ADMIN_PAGE_SIZE_MAX;
   const first = await adminApi.listUsers({ page: 1, pageSize });
   const inFirst = first.items.find((u) => u.id === userId);
   if (inFirst) return inFirst;
@@ -35,6 +37,7 @@ export function AdminUserForm({ userId }: { userId: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { confirm } = useConfirm();
   const [serverError, setServerError] = useState<string | null>(null);
   const isAdmin = user?.role === 'admin';
 
@@ -135,7 +138,19 @@ export function AdminUserForm({ userId }: { userId: string }) {
       ) : null}
 
       <Box>
-        <Button color="error" disabled={deleteMutation.isPending} onClick={() => { if (window.confirm('Delete this user?')) deleteMutation.mutate(); }}>
+        <Button
+          color="error"
+          disabled={deleteMutation.isPending}
+          onClick={() =>
+            void confirm('Are you sure you want to delete this user?', 'Delete Confirmation').then(
+              (confirmed) => {
+                if (confirmed) {
+                  deleteMutation.mutate();
+                }
+              },
+            )
+          }
+        >
           Delete user
         </Button>
       </Box>

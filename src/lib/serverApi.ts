@@ -4,10 +4,6 @@ import { pointApi } from '@/api/points';
 import { normalizeApiError } from '@/api/client';
 import { API_ERROR_CODES } from '@/constants/api';
 
-/**
- * Server-only, request-scoped API access for public pages. `cache()` dedupes the call so
- * `generateMetadata` and the page body share a single backend request per render.
- */
 export const getTrip = cache((id: number) => tripApi.getTrip(id));
 export const getPoint = cache((pointId: number) => pointApi.getPoint(pointId));
 

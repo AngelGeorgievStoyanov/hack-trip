@@ -1,9 +1,5 @@
 import type { Role, UserStatus } from './common';
 
-/**
- * Auth response DTOs.
- */
-
 export interface AuthUserDto {
   id: string;
   email: string;

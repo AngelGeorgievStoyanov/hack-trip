@@ -29,8 +29,6 @@ interface DayFormValues {
 }
 
 /**
- * Day create/edit form.
- *
  * A day's number is fixed once the day exists: the API rejects `dayNumber` on update and only
  * reorders days through the reorder endpoint, so the number is editable while creating only.
  * `existingDays` is the trip's in-memory day list, used to keep the create action away from a

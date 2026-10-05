@@ -1,10 +1,3 @@
-/**
- * HackTrip API transport constants.
- *
- * These are static, application-wide values for the versioned `/api/v1` backend.
- * Environment-dependent values (such as the API base URL) live in `src/config`.
- */
-
 export const API_PREFIX = '/api/v1';
 
 export const CLIENT_MARKER_HEADER = 'x-hacktrip-client';
@@ -18,7 +11,6 @@ export const PUBLIC_FRONTEND_TOKEN = 'hacktrip-public-v1';
 /** HttpOnly refresh cookie name (never read by the frontend). */
 export const REFRESH_COOKIE_NAME = 'hack_trip_refresh';
 
-// Endpoint base paths.
 export const AUTH = `${API_PREFIX}/auth`;
 export const CONFIG = `${API_PREFIX}/config`;
 export const TRIPS = `${API_PREFIX}/trips`;

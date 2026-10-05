@@ -11,10 +11,7 @@ interface RequireTripOwnerProps {
   children: ReactNode;
 }
 
-/**
- * Client-side ownership guard for the trip edit screen. Backend authorization remains
- * authoritative; this only prevents the edit UI from being exposed to non-owners.
- */
+/** Backend authorization remains authoritative; this only hides the edit UI from non-owners. */
 export function RequireTripOwner({ tripId, authorId, children }: RequireTripOwnerProps) {
   const { status, user } = useAuth();
   const router = useRouter();

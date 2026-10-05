@@ -8,7 +8,6 @@ import { ReportButton } from '@/components/social/ReportButton';
 import { absoluteUrl } from '@/config';
 import type { TripPoint } from '@/types';
 
-/** Client-side interactive actions for a point (share/like/report). */
 export function PointActions({ point }: { point: TripPoint }) {
   const { status } = useAuth();
   const isAuthenticated = status === 'authenticated';

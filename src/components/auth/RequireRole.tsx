@@ -6,9 +6,8 @@ import { NotFound } from '@/components/common/NotFound';
 import type { Role } from '@/types';
 
 /**
- * Client-side role guard for sensitive routes. Unauthorized visitors receive the normal
- * not-found page so the existence of the route and its role requirement are not revealed.
- * Backend authorization remains authoritative.
+ * Unauthorized visitors receive the normal not-found page so the existence of the route and
+ * its role requirement are not revealed. Backend authorization remains authoritative.
  */
 export function RequireRole({ roles, children }: { roles: Role[]; children: ReactNode }) {
   const { status, user } = useAuth();

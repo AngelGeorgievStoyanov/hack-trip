@@ -6,20 +6,21 @@ import Link from 'next/link';
 import { Alert, Box, Button, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { adminApi } from '@/api/admin';
 import { useAuth } from '@/hooks/useAuth';
+import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
-
-const PAGE_SIZE = 50;
+import { ADMIN_PAGE_SIZE_DEFAULT } from '@/constants/ui';
 
 export function AdminUsers() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { confirm } = useConfirm();
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const isAdmin = user?.role === 'admin';
 
   const { data, isLoading, error: queryError } = useQuery({
-    queryKey: ['admin', 'users', page, PAGE_SIZE],
-    queryFn: () => adminApi.listUsers({ page, pageSize: PAGE_SIZE }),
+    queryKey: ['admin', 'users', page, ADMIN_PAGE_SIZE_DEFAULT],
+    queryFn: () => adminApi.listUsers({ page, pageSize: ADMIN_PAGE_SIZE_DEFAULT }),
   });
 
   const deleteMutation = useMutation({
@@ -61,7 +62,21 @@ export function AdminUsers() {
                         <Button size="small">Edit</Button>
                       </Link>
                     ) : null}
-                    <Button size="small" color="error" onClick={() => { if (window.confirm('Delete this user?')) deleteMutation.mutate(u.id); }}>Delete</Button>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={() =>
+                        void confirm('Are you sure you want to delete this user?', 'Delete Confirmation').then(
+                          (confirmed) => {
+                            if (confirmed) {
+                              deleteMutation.mutate(u.id);
+                            }
+                          },
+                        )
+                      }
+                    >
+                      Delete
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

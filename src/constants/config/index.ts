@@ -1,6 +1,4 @@
 /**
- * Dynamic select configuration (`GET /config/selects`).
- *
  * Only the select type keys live here. The selectable options themselves are owned by the
  * backend runtime config and must never be mirrored as frontend constants.
  */

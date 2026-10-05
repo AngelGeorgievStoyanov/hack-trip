@@ -1,8 +1,6 @@
 import type { SelectConfigDto, SelectOptionDto } from '@/types';
 
 /**
- * Runtime select helpers shared by every consumer of `GET /config/selects`.
- *
  * An option's `key` is the canonical value the backend stores and expects in requests; the
  * option's `value` is only the display label.
  */

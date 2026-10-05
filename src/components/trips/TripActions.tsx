@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useMutation } from '@tanstack/react-query';
 import { Alert, Box, Button } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
+import { useConfirm } from '@/components/common/ConfirmDialog';
 import { tripApi } from '@/api/trips';
 import { ShareButton } from '@/components/social/ShareButton';
 import { LikeButton } from '@/components/social/LikeButton';
@@ -16,12 +17,10 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { ROLES } from '@/constants/roles';
 import type { TripDetails } from '@/types';
 
-/**
- * Client-side interactive actions for a trip (share/like/favorite/report/edit/delete).
- * The trip page stays a Server Component; only these interactions run client-side.
- */
+/** The trip page stays a Server Component; only these interactions run client-side. */
 export function TripActions({ trip }: { trip: TripDetails }) {
   const { status, user } = useAuth();
+  const { confirm } = useConfirm();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
@@ -70,7 +69,15 @@ export function TripActions({ trip }: { trip: TripDetails }) {
           <Button
             variant="outlined"
             color="error"
-            onClick={() => deleteMutation.mutate()}
+            onClick={() =>
+              void confirm('Are you sure you want to delete this trip?', 'Delete Confirmation').then(
+                (confirmed) => {
+                  if (confirmed) {
+                    deleteMutation.mutate();
+                  }
+                },
+              )
+            }
             disabled={deleteMutation.isPending}
           >
             Delete

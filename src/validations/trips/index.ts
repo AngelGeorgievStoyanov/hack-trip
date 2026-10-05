@@ -13,8 +13,15 @@ import { idList, optionalInt, optionalText, patchText, trimmedString } from '../
 
 export const tripWriteSchema = z
   .object({
-    title: trimmedString({ min: 1, max: TRIP_TITLE_MAX_LENGTH }),
-    description: optionalText({ max: TRIP_DESCRIPTION_MAX_LENGTH }),
+    title: trimmedString({
+      min: 3,
+      max: TRIP_TITLE_MAX_LENGTH,
+      minMessage: 'Title cannot be empty string and must contain at least 3 characters .',
+    }),
+    description: optionalText(
+      { max: TRIP_DESCRIPTION_MAX_LENGTH },
+      { max: `Description max length is ${TRIP_DESCRIPTION_MAX_LENGTH} chars` },
+    ),
     group: trimmedString({ min: 1, max: TRIP_GROUP_MAX_LENGTH }),
     transport: trimmedString({ min: 1, max: TRIP_TRANSPORT_MAX_LENGTH }),
   })
@@ -35,14 +42,20 @@ export const dayCreateSchema = z
   .object({
     dayNumber: optionalInt({ min: 1, max: DAY_NUMBER_MAX }),
     title: optionalText({ min: 1, max: DAY_TITLE_MAX_LENGTH }),
-    description: optionalText({ max: TRIP_DESCRIPTION_MAX_LENGTH }),
+    description: optionalText(
+      { max: TRIP_DESCRIPTION_MAX_LENGTH },
+      { max: `Description max length is ${TRIP_DESCRIPTION_MAX_LENGTH} chars` },
+    ),
   })
   .strict();
 
 export const dayUpdateSchema = z
   .object({
     title: patchText({ min: 1, max: DAY_TITLE_MAX_LENGTH }),
-    description: patchText({ max: TRIP_DESCRIPTION_MAX_LENGTH }),
+    description: patchText(
+      { max: TRIP_DESCRIPTION_MAX_LENGTH },
+      { max: `Description max length is ${TRIP_DESCRIPTION_MAX_LENGTH} chars` },
+    ),
   })
   .strict()
   .refine(

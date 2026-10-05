@@ -1,7 +1,3 @@
-/**
- * Social state attached to trip groups, days, points, and images.
- */
-
 export type SocialTargetType = 'tripGroup' | 'trip' | 'point' | 'image';
 
 /** Accepted client input values for likes/reports (normalized by the backend). */

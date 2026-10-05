@@ -1,10 +1,6 @@
 import type { SocialImageDto } from './images';
 import type { SocialState } from './social';
 
-/**
- * Point and day response DTOs.
- */
-
 export interface TripPoint {
   id: number;
   title: string;

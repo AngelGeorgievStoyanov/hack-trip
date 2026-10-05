@@ -18,10 +18,6 @@ interface TripFormProps {
   tripId?: number;
 }
 
-/**
- * Create/edit trip form. Sends only the documented request fields (`title`, `description`,
- * `group`, `transport`) — never server-generated fields.
- */
 export function TripForm({ initial, tripId }: TripFormProps) {
   const router = useRouter();
   const isEdit = tripId !== undefined;

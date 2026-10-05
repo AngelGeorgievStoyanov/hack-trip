@@ -7,6 +7,7 @@ import { pointApi } from '@/api/points';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { pointCreateSchema } from '@/validations/points';
+import { PointLocationPicker } from '@/components/maps/PointLocationPicker';
 import type { TripPoint } from '@/types';
 
 interface PointFormProps {
@@ -32,6 +33,8 @@ export function PointForm({ dayId, point, onDone }: PointFormProps) {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<PointFormValues>({
     resolver: zodResolver(formSchema),
@@ -42,6 +45,9 @@ export function PointForm({ dayId, point, onDone }: PointFormProps) {
       longitude: point?.longitude != null ? String(point.longitude) : '',
     },
   });
+
+  const latitude = watch('latitude');
+  const longitude = watch('longitude');
 
   async function onSubmit(values: PointFormValues): Promise<void> {
     setSubmitting(true);
@@ -74,6 +80,14 @@ export function PointForm({ dayId, point, onDone }: PointFormProps) {
       <TextField label="Description" multiline minRows={2} {...register('description')} error={!!errors.description} helperText={errors.description?.message} />
       <TextField label="Latitude" {...register('latitude')} error={!!errors.latitude} helperText={errors.latitude?.message} />
       <TextField label="Longitude" {...register('longitude')} error={!!errors.longitude} helperText={errors.longitude?.message} />
+      <PointLocationPicker
+        latitude={latitude}
+        longitude={longitude}
+        onChange={(nextLatitude, nextLongitude) => {
+          setValue('latitude', nextLatitude, { shouldValidate: true });
+          setValue('longitude', nextLongitude, { shouldValidate: true });
+        }}
+      />
       <Box sx={{ display: 'flex', gap: 1 }}>
         <Button type="submit" variant="contained" disabled={submitting} startIcon={submitting ? <CircularProgress size={16} /> : undefined}>
           {isEdit ? 'Save' : 'Add'}

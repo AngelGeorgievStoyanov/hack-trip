@@ -1,9 +1,5 @@
 import type { SocialState } from './social';
 
-/**
- * Image response DTOs.
- */
-
 export interface ImageDto {
   id: number;
   url: string;

@@ -1,9 +1,5 @@
 import type { SocialTargetType } from './social';
 
-/**
- * Comment and report response DTOs.
- */
-
 export interface CommentAuthor {
   id: string;
   name: string;

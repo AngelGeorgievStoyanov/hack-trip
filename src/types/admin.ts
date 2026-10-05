@@ -1,9 +1,5 @@
 import type { AuthUserDto } from './auth';
 
-/**
- * Admin endpoint response DTOs.
- */
-
 export interface AdminPagination {
   page: number;
   pageSize: number;

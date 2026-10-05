@@ -1,10 +1,4 @@
-/**
- * Role constants.
- *
- * Backend authorization remains authoritative; these values only control UI visibility.
- * Keep in sync with the `Role` type in `src/types`.
- */
-
+/** Backend authorization remains authoritative; these values only control UI visibility. */
 export const ROLES = {
   user: 'user',
   manager: 'manager',

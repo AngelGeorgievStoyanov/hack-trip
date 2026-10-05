@@ -1,10 +1,6 @@
 import { z } from 'zod';
 import { optionalText, positiveId, targetTypeInput } from '../shared';
 
-/**
- * Social request schemas (API_CONTRACT.md §18.5). All `.strict()`.
- */
-
 export const socialTargetBodySchema = z
   .object({
     targetType: targetTypeInput,

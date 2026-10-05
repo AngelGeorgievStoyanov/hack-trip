@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { AppImage } from '@/components/images/AppImage';
+import { SocialImageGallery } from '@/components/images/SocialImageGallery';
+import { ExpandableText } from '@/components/common/ExpandableText';
 import { EngagementBar } from '@/components/social/EngagementBar';
 import { TripActions } from './TripActions';
 import { CommentsSection } from '@/components/comments/CommentsSection';
@@ -10,7 +12,7 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
     <article>
       <header>
         <h1>{trip.title}</h1>
-        {trip.description ? <p>{trip.description}</p> : null}
+        {trip.description ? <ExpandableText text={trip.description} /> : null}
         <p>
           By {trip.author.firstName} {trip.author.lastName} · {trip.group.name} ·{' '}
           {trip.transport.name}
@@ -25,21 +27,7 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
       {trip.days.map((day) => (
         <section key={day.id}>
           <h2>{day.title ?? `Day ${day.day}`}</h2>
-          {day.images.length > 0 ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-              {day.images.map((img) => (
-                <div key={img.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <AppImage image={img} alt={day.title ?? `Day ${day.day}`} preset="gallery" />
-                  <EngagementBar
-                    targetType="image"
-                    targetId={img.id}
-                    social={img.social}
-                    commentTarget={{ type: 'image', imageId: img.id }}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : null}
+          <SocialImageGallery images={day.images} alt={day.title ?? `Day ${day.day}`} preset="gallery" />
           {day.points.length > 0 ? (
             <ol>
               {day.points.map((point) => (
@@ -47,27 +35,13 @@ export function TripDetails({ trip }: { trip: TripDetailsDto }) {
                   <h3>
                     <Link href={`/points/${point.id}`}>{point.title}</Link>
                   </h3>
-                  {point.description ? <p>{point.description}</p> : null}
+                  {point.description ? <ExpandableText text={point.description} /> : null}
                   {point.latitude != null && point.longitude != null ? (
                     <p>
                       {point.latitude.toFixed(6)}, {point.longitude.toFixed(6)}
                     </p>
                   ) : null}
-                  {point.images.length > 0 ? (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                      {point.images.map((img) => (
-                        <div key={img.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                          <AppImage image={img} alt={point.title} preset="tripPointThumb" />
-                          <EngagementBar
-                            targetType="image"
-                            targetId={img.id}
-                            social={img.social}
-                            commentTarget={{ type: 'image', imageId: img.id }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
+                  <SocialImageGallery images={point.images} alt={point.title} preset="tripPointThumb" />
                 </li>
               ))}
             </ol>

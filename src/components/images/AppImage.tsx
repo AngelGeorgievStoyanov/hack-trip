@@ -21,9 +21,6 @@ interface AppImageProps {
   style?: CSSProperties;
 }
 
-/**
- * Canonical image component — the only place `next/image` is used.
- */
 export function AppImage({
   image,
   src,

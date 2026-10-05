@@ -5,8 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Alert, Box, Button, CircularProgress, List, ListItem, ListItemText, Tab, Tabs, Typography } from '@mui/material';
 import { adminApi } from '@/api/admin';
 import { getGenericErrorMessage } from '@/lib/errors';
-
-const PAGE_SIZE = 50;
+import { ADMIN_PAGE_SIZE_DEFAULT } from '@/constants/ui';
 
 function stringList(items: string[], empty: string) {
   if (items.length === 0) {
@@ -18,8 +17,8 @@ function stringList(items: string[], empty: string) {
 function CloudImages() {
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useQuery({
-    queryKey: ['admin', 'images', 'cloud', page, PAGE_SIZE],
-    queryFn: () => adminApi.listCloudImages({ page, pageSize: PAGE_SIZE }),
+    queryKey: ['admin', 'images', 'cloud', page, ADMIN_PAGE_SIZE_DEFAULT],
+    queryFn: () => adminApi.listCloudImages({ page, pageSize: ADMIN_PAGE_SIZE_DEFAULT }),
   });
   const hasNext = data?.pagination.hasNext ?? false;
 
@@ -44,8 +43,8 @@ function CloudImages() {
 function DatabaseImages() {
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useQuery({
-    queryKey: ['admin', 'images', 'database', page, PAGE_SIZE],
-    queryFn: () => adminApi.listDatabaseImages({ page, pageSize: PAGE_SIZE }),
+    queryKey: ['admin', 'images', 'database', page, ADMIN_PAGE_SIZE_DEFAULT],
+    queryFn: () => adminApi.listDatabaseImages({ page, pageSize: ADMIN_PAGE_SIZE_DEFAULT }),
   });
   const pagination = data?.pagination;
 
@@ -72,8 +71,8 @@ function DatabaseImages() {
 function OrphanImages() {
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useQuery({
-    queryKey: ['admin', 'images', 'orphans', page, PAGE_SIZE],
-    queryFn: () => adminApi.listOrphanImages({ page, pageSize: PAGE_SIZE }),
+    queryKey: ['admin', 'images', 'orphans', page, ADMIN_PAGE_SIZE_DEFAULT],
+    queryFn: () => adminApi.listOrphanImages({ page, pageSize: ADMIN_PAGE_SIZE_DEFAULT }),
   });
   const hasNext = data ? data.pagination.cloudHasNext || data.pagination.databaseHasNext : false;
 

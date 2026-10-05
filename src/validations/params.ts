@@ -1,10 +1,6 @@
 import { z } from 'zod';
 import { positiveIdParam, userIdParam } from './shared';
 
-/**
- * Route-parameter schemas (API_CONTRACT.md §18.7). All `.strict()`.
- */
-
 export const userIdParams = z.object({ userId: userIdParam }).strict();
 export const tripIdParams = z.object({ id: positiveIdParam }).strict();
 export const tripIdOnlyParams = z.object({ tripId: positiveIdParam }).strict();

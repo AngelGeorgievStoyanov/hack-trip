@@ -3,7 +3,6 @@ import { tripApi } from '@/api/trips';
 import { absoluteUrl } from '@/config';
 
 /**
- * Sitemap for public content. Trips are discovered from the real `GET /trips` endpoint.
  * Points are intentionally omitted: there is no public "list points" endpoint, so points
  * cannot be discovered without inventing URLs.
  */

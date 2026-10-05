@@ -1,10 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Shared Zod helpers mirroring the backend request schemas (API_CONTRACT.md §18.1).
- * All schemas preserve `.strict()` behavior where applicable.
- */
-
 const MAX_RESOURCE_ID = 2147483647;
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -15,16 +10,23 @@ interface LengthOptions {
   min?: number;
 }
 
-/** `z.string() -> trim() -> pipe(min/max/regex)`. */
+/** `z.string() -> trim() -> pipe(min/max/regex)` with optional legacy wording. */
 export function trimmedString({
   max,
   min,
   pattern,
   patternMessage,
-}: LengthOptions & { pattern?: RegExp; patternMessage?: string }): z.ZodString {
+  minMessage,
+  maxMessage,
+}: LengthOptions & {
+  pattern?: RegExp;
+  patternMessage?: string;
+  minMessage?: string;
+  maxMessage?: string;
+}): z.ZodString {
   const base = z.string().trim();
-  const withMin = min !== undefined ? base.min(min) : base;
-  const withMax = withMin.max(max);
+  const withMin = min !== undefined ? (minMessage ? base.min(min, minMessage) : base.min(min)) : base;
+  const withMax = maxMessage ? withMin.max(max, maxMessage) : withMin.max(max);
   if (pattern) {
     return patternMessage ? withMax.regex(pattern, patternMessage) : withMax.regex(pattern);
   }
@@ -36,29 +38,40 @@ export const emailString = (message = 'Invalid email address') =>
   trimmedString({ min: 1, max: 45, pattern: EMAIL_REGEX, patternMessage: message });
 
 /** Password: min/max chars plus a byte-length ceiling. Never trimmed. */
-export const passwordString = ({ min, max }: { min: number; max: number }) =>
+export const passwordString = (
+  { min, max }: { min: number; max: number },
+  messages?: { min?: string; max?: string },
+) =>
   z
     .string()
-    .min(min)
-    .max(max)
+    .min(min, messages?.min ?? `Password must contain at least ${min} characters.`)
+    .max(max, messages?.max ?? `Password must not exceed ${max} characters.`)
     .refine(
       (value) => new TextEncoder().encode(value).length <= max,
       `Password must be at most ${max} bytes`,
     );
 
 /** Optional/nullable text: `undefined`/`null`/`''` -> `null`. Output `string | null`. */
-export const optionalText = ({ max, min }: LengthOptions) =>
+export const optionalText = ({ max, min }: LengthOptions, messages?: { max?: string }) =>
   z
-    .union([trimmedString({ max, min }), z.null(), z.literal('')])
+    .union([
+      trimmedString({ max, min, maxMessage: messages?.max }),
+      z.null(),
+      z.literal(''),
+    ])
     .optional()
     .transform((value) =>
       value === undefined || value === null || value === '' ? null : value,
     );
 
 /** Patch text: keeps `undefined`; `null`/`''` -> `null`. Output `string | null | undefined`. */
-export const patchText = ({ max, min }: LengthOptions) =>
+export const patchText = ({ max, min }: LengthOptions, messages?: { max?: string }) =>
   z
-    .union([trimmedString({ max, min }), z.null(), z.literal('')])
+    .union([
+      trimmedString({ max, min, maxMessage: messages?.max }),
+      z.null(),
+      z.literal(''),
+    ])
     .optional()
     .transform((value) => (value === null || value === '' ? null : value));
 

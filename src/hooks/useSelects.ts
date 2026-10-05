@@ -7,9 +7,6 @@ import { SELECTS_QUERY_KEY, SELECTS_STALE_TIME_MS } from '@/constants/config';
 import { toSelectChoices, type SelectChoice } from '@/lib/selects';
 
 /**
- * The single React Query entry point for the public `/config/selects` payload, shared by the
- * anonymous trip list and the authenticated create/edit screens.
- *
  * The query is deliberately never surfaced as an error: the runtime config only refines the UI,
  * so a pending, failed or malformed response must leave each consumer on its own fallback
  * instead of throwing or blocking the page.

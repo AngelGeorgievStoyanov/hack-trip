@@ -36,9 +36,6 @@ export const authToken = {
   },
 };
 
-/**
- * Centralized Axios client for HackTrip backend communication.
- */
 export const apiClient: AxiosInstance = axios.create({
   baseURL: config.apiBaseUrl,
   withCredentials: true,

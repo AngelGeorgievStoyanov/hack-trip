@@ -1,11 +1,6 @@
 import { normalizeApiError } from '@/api/client';
 import { API_ERROR_CODES } from '@/constants/api';
 
-/**
- * Centralized mapping of backend error codes to safe, user-facing messages
- * (AGENTS.md §17 — never expose stack traces or internal server details).
- */
-
 const GENERIC_MESSAGE = 'Something went wrong. Please try again.';
 
 export function getAuthErrorMessage(error: unknown): string {

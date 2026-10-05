@@ -1,10 +1,4 @@
-/**
- * Runtime configuration resolution.
- *
- * Environment-dependent values are resolved here and kept separate from static constants
- * in `src/constants`. Next.js exposes public values through `NEXT_PUBLIC_*` env vars.
- */
-
+/** Environment-dependent values live here; static values belong in `src/constants`. */
 export interface RuntimeConfig {
   /** Deployed HackTrip backend API origin (no trailing slash). */
   apiBaseUrl: string;

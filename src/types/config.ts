@@ -1,7 +1,3 @@
-/**
- * Config endpoint response DTOs.
- */
-
 export interface SelectOptionDto {
   id: number;
   selectTypeId: number;

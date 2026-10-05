@@ -3,12 +3,36 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
-import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { z } from 'zod';
 import { authApi } from '@/api/auth';
 import type { RegisterInput } from '@/api/auth';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { registerSchema } from '@/validations/auth';
+
+const registerFormSchema = registerSchema
+  .extend({
+    confirmPassword: z.string().min(1, 'Confirm password is required.'),
+    acceptedTerms: z.literal(true, {
+      error: 'You must accept the terms of use and privacy policy.',
+    }),
+  })
+  .refine((values) => values.confirmPassword === values.password, {
+    path: ['confirmPassword'],
+    message: 'Passwords must match',
+  });
+
+type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
 export function RegisterForm() {
   const [message, setMessage] = useState<string | null>(null);
@@ -19,14 +43,20 @@ export function RegisterForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterInput>({ resolver: zodResolver(registerSchema) });
+  } = useForm<RegisterFormValues>({ resolver: zodResolver(registerFormSchema) });
 
-  async function onSubmit(values: RegisterInput): Promise<void> {
+  async function onSubmit(values: RegisterFormValues): Promise<void> {
     setSubmitting(true);
     setError(null);
     setMessage(null);
     try {
-      const response = await authApi.register(values);
+      const input: RegisterInput = {
+        email: values.email,
+        password: values.password,
+        firstName: values.firstName,
+        lastName: values.lastName,
+      };
+      const response = await authApi.register(input);
       // Anti-enumeration: the backend returns a neutral message whether or not the email
       // is already registered.
       setMessage(response.message);
@@ -78,6 +108,27 @@ export function RegisterForm() {
         error={!!errors.password}
         helperText={errors.password?.message}
       />
+      <TextField
+        label="Confirm password"
+        type="password"
+        autoComplete="new-password"
+        {...register('confirmPassword')}
+        error={!!errors.confirmPassword}
+        helperText={errors.confirmPassword?.message}
+      />
+      <FormControlLabel
+        control={<Checkbox {...register('acceptedTerms')} />}
+        label={
+          <>
+            I accept the <Link href="/privacy-policy">terms of use and privacy policy</Link>
+          </>
+        }
+      />
+      {errors.acceptedTerms?.message ? (
+        <Typography color="error" role="alert">
+          {errors.acceptedTerms.message}
+        </Typography>
+      ) : null}
       <Button
         type="submit"
         variant="contained"
@@ -87,6 +138,7 @@ export function RegisterForm() {
         Register
       </Button>
       <Link href="/login">Already have an account? Login</Link>
+      <Link href="/resend-verification">Resend verification email</Link>
     </Box>
   );
 }

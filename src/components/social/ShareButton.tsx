@@ -8,10 +8,6 @@ interface ShareButtonProps {
   text?: string;
 }
 
-/**
- * Reusable share control. Uses the native Web Share API where available (mobile), falling
- * back to copying the URL to the clipboard. No third-party share library is required.
- */
 export function ShareButton({ url, title, text }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 

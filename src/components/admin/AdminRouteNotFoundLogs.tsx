@@ -5,8 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Alert, Box, Button, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { adminApi } from '@/api/admin';
 import { getGenericErrorMessage } from '@/lib/errors';
-
-const PAGE_SIZE = 50;
+import { ADMIN_PAGE_SIZE_DEFAULT } from '@/constants/ui';
 
 function formatDate(value: string | null): string {
   if (!value) return '—';
@@ -18,8 +17,8 @@ export function AdminRouteNotFoundLogs() {
   const [page, setPage] = useState(1);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['admin', 'route-not-found-logs', page, PAGE_SIZE],
-    queryFn: () => adminApi.listRouteNotFoundLogs({ page, pageSize: PAGE_SIZE }),
+    queryKey: ['admin', 'route-not-found-logs', page, ADMIN_PAGE_SIZE_DEFAULT],
+    queryFn: () => adminApi.listRouteNotFoundLogs({ page, pageSize: ADMIN_PAGE_SIZE_DEFAULT }),
   });
 
   const pagination = data?.pagination;

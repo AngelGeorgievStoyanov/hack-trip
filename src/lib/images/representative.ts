@@ -1,6 +1,5 @@
 import type { TripDetails, TripPoint } from '@/types';
 
-/** Representative image for a trip (cover, else first day/point image). */
 export function tripRepresentativeImage(trip: TripDetails): string | null {
   if (trip.coverImage) {
     return trip.coverImage;
@@ -18,7 +17,6 @@ export function tripRepresentativeImage(trip: TripDetails): string | null {
   return null;
 }
 
-/** Representative image for a point (first image, if any). */
 export function pointRepresentativeImage(point: TripPoint): string | null {
   return point.images[0]?.url ?? null;
 }

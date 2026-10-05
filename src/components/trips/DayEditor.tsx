@@ -9,6 +9,7 @@ import { AppImage } from '@/components/images/AppImage';
 import { ImageUploadButton } from '@/components/images/ImageUploadButton';
 import { DayForm } from './DayForm';
 import { PointForm } from '@/components/points/PointForm';
+import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
 import type { TripDay } from '@/types';
@@ -23,6 +24,7 @@ interface DayEditorProps {
 
 export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: DayEditorProps) {
   const queryClient = useQueryClient();
+  const { confirm } = useConfirm();
   const [addingPoint, setAddingPoint] = useState(false);
   const [editingPointId, setEditingPointId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +96,22 @@ export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: Day
         <Button size="small" onClick={() => onMove(-1)}>↑</Button>
         <Button size="small" onClick={() => onMove(1)}>↓</Button>
         <Button size="small" onClick={() => onEditingChange(true)}>Edit</Button>
-        <Button size="small" color="error" disabled={deleteDayMutation.isPending} onClick={() => { if (window.confirm('Delete this day?')) deleteDayMutation.mutate(); }}>Delete</Button>
+        <Button
+          size="small"
+          color="error"
+          disabled={deleteDayMutation.isPending}
+          onClick={() =>
+            void confirm('Are you sure you want to delete this day?', 'Delete Confirmation').then(
+              (confirmed) => {
+                if (confirmed) {
+                  deleteDayMutation.mutate();
+                }
+              },
+            )
+          }
+        >
+          Delete
+        </Button>
       </Box>
       {error ? <Alert severity="error" onClose={() => setError(null)}>{error}</Alert> : null}
 
@@ -102,7 +119,21 @@ export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: Day
         {day.images.map((img) => (
           <Box key={img.id} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
             <AppImage image={img} alt={day.title ?? `Day ${day.day}`} preset="editorDayThumb" />
-            <Button size="small" color="error" onClick={() => deleteImageMutation.mutate(img.id)}>Remove</Button>
+            <Button
+              size="small"
+              color="error"
+              onClick={() =>
+                void confirm('Are you sure you want to delete this image?', 'Delete Confirmation').then(
+                  (confirmed) => {
+                    if (confirmed) {
+                      deleteImageMutation.mutate(img.id);
+                    }
+                  },
+                )
+              }
+            >
+              Remove
+            </Button>
           </Box>
         ))}
       </Box>
@@ -130,11 +161,39 @@ export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: Day
                   <Button size="small" onClick={() => reorderPoint(index, -1)}>↑</Button>
                   <Button size="small" onClick={() => reorderPoint(index, 1)}>↓</Button>
                   <Button size="small" onClick={() => setEditingPointId(point.id)}>Edit</Button>
-                  <Button size="small" color="error" onClick={() => { if (window.confirm('Delete this point?')) deletePointMutation.mutate(point.id); }}>Delete</Button>
+                  <Button
+                    size="small"
+                    color="error"
+                    onClick={() =>
+                      void confirm('Are you sure you want to delete this point?', 'Delete Confirmation').then(
+                        (confirmed) => {
+                          if (confirmed) {
+                            deletePointMutation.mutate(point.id);
+                          }
+                        },
+                      )
+                    }
+                  >
+                    Delete
+                  </Button>
                   {point.images.map((img) => (
                     <Box key={img.id} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                       <AppImage image={img} alt={point.title} preset="editorPointThumb" />
-                      <Button size="small" color="error" onClick={() => deletePointImageMutation.mutate({ pointId: point.id, imageId: img.id })}>Remove</Button>
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() =>
+                          void confirm('Are you sure you want to delete this image?', 'Delete Confirmation').then(
+                            (confirmed) => {
+                              if (confirmed) {
+                                deletePointImageMutation.mutate({ pointId: point.id, imageId: img.id });
+                              }
+                            },
+                          )
+                        }
+                      >
+                        Remove
+                      </Button>
                     </Box>
                   ))}
                   <ImageUploadButton

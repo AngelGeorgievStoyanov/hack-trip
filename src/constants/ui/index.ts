@@ -11,3 +11,5 @@ export const COMMENT_LIMIT_MAX = 100;
 export const ADMIN_PAGE_DEFAULT = 1;
 export const ADMIN_PAGE_SIZE_DEFAULT = 50;
 export const ADMIN_PAGE_SIZE_MAX = 100;
+
+export const LIGHTBOX_SWIPE_THRESHOLD_PX = 45;

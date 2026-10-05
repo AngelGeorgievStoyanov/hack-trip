@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Box, Button, Checkbox, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { adminApi } from '@/api/admin';
+import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
-
-const PAGE_SIZE = 50;
+import { ADMIN_PAGE_SIZE_DEFAULT } from '@/constants/ui';
 
 function formatDate(value: string | null): string {
   if (!value) return '—';
@@ -16,13 +16,14 @@ function formatDate(value: string | null): string {
 
 export function AdminFailedLogs() {
   const queryClient = useQueryClient();
+  const { confirm } = useConfirm();
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
   const { data, isLoading, error: queryError } = useQuery({
-    queryKey: ['admin', 'failed-logs', page, PAGE_SIZE],
-    queryFn: () => adminApi.listFailedLogs({ page, pageSize: PAGE_SIZE }),
+    queryKey: ['admin', 'failed-logs', page, ADMIN_PAGE_SIZE_DEFAULT],
+    queryFn: () => adminApi.listFailedLogs({ page, pageSize: ADMIN_PAGE_SIZE_DEFAULT }),
   });
 
   const deleteMutation = useMutation({
@@ -59,7 +60,19 @@ export function AdminFailedLogs() {
       {selected.size > 0 ? (
         <Box sx={{ my: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
           <Typography>{selected.size} selected</Typography>
-          <Button color="error" disabled={deleteMutation.isPending} onClick={() => deleteMutation.mutate([...selected])}>
+          <Button
+            color="error"
+            disabled={deleteMutation.isPending}
+            onClick={() =>
+              void confirm('Are you sure you want to delete the selected logs?', 'Delete Confirmation').then(
+                (confirmed) => {
+                  if (confirmed) {
+                    deleteMutation.mutate([...selected]);
+                  }
+                },
+              )
+            }
+          >
             Delete selected
           </Button>
         </Box>

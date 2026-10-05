@@ -1,10 +1,6 @@
 import type { TripDay } from './points';
 import type { SocialState } from './social';
 
-/**
- * Trip response DTOs.
- */
-
 export interface AuthorDto {
   id: string;
   firstName: string;

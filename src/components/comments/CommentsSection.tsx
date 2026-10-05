@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import { commentApi, type CommentCreateInput, type CommentTarget } from '@/api/comments';
 import { useAuth } from '@/hooks/useAuth';
+import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
 
 function commentKey(target: CommentTarget): unknown[] {
@@ -22,6 +23,7 @@ function commentKey(target: CommentTarget): unknown[] {
 
 export function CommentsSection({ target }: { target: CommentTarget }) {
   const { status, user } = useAuth();
+  const { confirm } = useConfirm();
   const queryClient = useQueryClient();
   const [text, setText] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -147,7 +149,15 @@ export function CommentsSection({ target }: { target: CommentTarget }) {
                     <Button
                       size="small"
                       color="error"
-                      onClick={() => deleteMutation.mutate(comment.id)}
+                      onClick={() =>
+                        void confirm('Are you sure you want to delete this comment?', 'Delete Confirmation').then(
+                          (confirmed) => {
+                            if (confirmed) {
+                              deleteMutation.mutate(comment.id);
+                            }
+                          },
+                        )
+                      }
                     >
                       Delete
                     </Button>
