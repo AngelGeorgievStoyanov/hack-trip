@@ -153,6 +153,18 @@ refresh token → HttpOnly cookie
 
 After a browser reload:
 
+For a public page opened by an anonymous user, the frontend must not call the refresh-token endpoint merely because the browser was reloaded. The refresh flow is only attempted when the frontend has an authenticated session that requires restoration.
+
+```text
+anonymous public page reload
+  ↓
+no refresh-token request
+  ↓
+continue as anonymous/public viewer
+```
+
+For an authenticated session:
+
 ```text
 browser reload
   ↓
