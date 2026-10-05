@@ -414,7 +414,6 @@ HttpOnly cookie
 
 The frontend never reads the refresh token.
 
----
 
 ## 11.1 Login
 
@@ -436,47 +435,54 @@ access token stored in memory
 
 The refresh token must never enter React state or JavaScript-accessible storage.
 
----
 
 ## 11.2 Session Restoration
 
-After a browser reload:
+After a browser reload, session restoration depends on whether the frontend currently considers the browser to have an authenticated session.
+
+An anonymous visitor on a public page must not proactively call `POST /auth/refresh` just because the page was reloaded. Public anonymous navigation must remain anonymous and must not generate an unnecessary refresh request.
+
+The frontend may keep a non-sensitive client-side session-presence hint (for example, a boolean indicating that the user previously logged in). This hint is not an access token, refresh token, identity, role or authorization state. It is only an optimization that prevents anonymous public reloads from attempting refresh.
+
+The expected behavior is:
 
 ```text
-Browser reload
+Public page reload
       ↓
-memory access token lost
-      ↓
-restoreSession()
-      ↓
-POST /auth/refresh
-      ↓
-HttpOnly cookie automatically included
-      ↓
-backend validates refresh token
-      ↓
-new access token
-      ↓
-memory
-      ↓
-GET /auth/me
-      ↓
-authenticated state
+Is authenticated-session hint present?
+      ├── NO  → remain anonymous
+      │          no /auth/refresh request
+      │
+      └── YES → restoreSession()
+                   ↓
+              POST /auth/refresh
+                   ↓
+              HttpOnly cookie automatically included
+                   ↓
+              backend validates refresh token
+                   ↓
+              new access token
+                   ↓
+              memory
+                   ↓
+              GET /auth/me
+                   ↓
+              authenticated state
 ```
 
-If no valid refresh session exists:
+If the session-presence hint is stale and refresh fails definitively, the frontend must clear the hint and transition to anonymous state. It must not retry refresh indefinitely.
 
-```text
-POST /auth/refresh
-      ↓
-401/403
-      ↓
-anonymous/account error
-```
+A failed refresh does not by itself mean that a public page must fail. Public content may continue to render anonymously when the page does not require authentication.
 
-The frontend must not repeatedly refresh indefinitely after a definitive refresh failure.
+The refresh endpoint remains the mechanism for restoring an authenticated session; the frontend must not attempt to read or validate the HttpOnly refresh cookie itself.
 
----
+
+## 11.3 Anonymous Public Pages
+
+Public pages must remain usable for anonymous visitors. Anonymous page loads and reloads must not require a user access token or an authenticated refresh session unless the page itself is protected.
+
+Public API requests follow the public-access rules in `docs/API_CONTRACT.md`. The public frontend token identifies the frontend client for public access; it is not a substitute for a user's authentication token.
+
 
 # 12. Access Token Handling
 
@@ -1619,3 +1625,93 @@ The frontend architecture remains responsible for clean separation between:
 * constants
 
 No layer should silently absorb another layer's responsibility.
+
+# 49. Public, User-Specific and Moderation Flows
+
+These rules add frontend-specific behavior for functionality defined by `docs/API_CONTRACT.md`. The API contract remains authoritative for endpoint paths, DTOs, authentication, authorization and errors.
+
+## 49.1 Public Top 5 Trips
+
+Top 5 trips is a public feature. An anonymous visitor may load it without logging in.
+
+The frontend must use the public endpoint defined by the API contract and must send the required `PUBLIC_FRONTEND_TOKEN` for public anonymous API access. It must not call `/auth/refresh` merely to load Top 5.
+
+The response contains up to five trip groups, ranked by the number of likes associated with each trip group. If fewer than five trip groups exist, the frontend displays the returned groups only. Equal like counts are valid; the frontend must not invent a secondary ranking.
+
+The returned items use the normal trip/trip-group response structure defined by the API contract.
+
+## 49.2 My Trips and My Favorites
+
+My Trips and My Favorites are authenticated-user features.
+
+The frontend must not send a `userId` in these new requests when the API contract defines the current user from the authenticated session. The backend is responsible for determining the authenticated user.
+
+My Trips returns the trip groups actually owned by the authenticated user.
+
+My Favorites returns the trip groups for which the authenticated user has an actual persisted favorite record. A favorite is based on the backend relationship between the user and `tripGroupId`; the frontend must not infer a favorite from local UI state.
+
+If the authenticated user has no favorites, the API response should be handled as the documented empty collection and the UI should represent that there are currently no favorites.
+
+## 49.3 Background Images
+
+Background images are public resources and must work for anonymous visitors.
+
+The frontend must not read the Google Cloud Storage bucket directly and must not request the complete background-image list from Google Cloud Storage.
+
+The backend's existing `refreshSlow()` flow loads background object names from Google Cloud Storage into dynamic configuration. A successful refresh replaces the stored list with the newly discovered names. If a later refresh fails, the last successful list remains available; the failure may be logged as a warning and must not break startup or dynamic-config refresh.
+
+The backend background service selects a random image from the dynamic-config list and returns the ready-to-use public value through the public background endpoint.
+
+The frontend calls that public endpoint when it needs a background image and consumes the single returned value. The frontend does not implement the random-selection algorithm.
+
+The frontend must send the required `PUBLIC_FRONTEND_TOKEN` for this public anonymous API request. Loading a background image must not require user login or `/auth/refresh`.
+
+## 49.4 Reports and Admin Triage
+
+Reports are moderation data created when a user reports a trip or comment that may violate the application's content/good-conduct policy.
+
+The frontend moderation area must retrieve current reports from the backend so existing reports appear automatically when an authorized moderation user opens the relevant page.
+
+Report data includes at least trip reports and comment reports. The moderation flow supports listing/triage and deleting/removing resolved reports according to the API contract.
+
+Only authenticated users with the required manager/admin privileges may access report-triage endpoints. A normal authenticated user must not be able to list, inspect or delete reports merely because they are logged in.
+
+Report deletion/removal is a moderation action and must remain protected by backend authorization. The frontend guard is UX only.
+
+Legacy report endpoints are migration references only. Once the new contract is implemented, the frontend must use the new documented endpoints rather than calling legacy admin endpoints directly.
+
+## 49.5 Authentication Boundary on Public Reload
+
+For any public route, the frontend must distinguish anonymous navigation from authenticated-session restoration.
+
+```text
+Anonymous public reload
+        ↓
+no authenticated-session hint
+        ↓
+remain anonymous
+        ↓
+do not call /auth/refresh
+```
+
+If the frontend has a non-sensitive authenticated-session hint because the user previously logged in, it may attempt the normal session restoration flow. If that refresh fails definitively, clear the hint, remain anonymous and do not enter a refresh loop.
+
+This rule prevents an anonymous visitor from generating a refresh-token request on every public page reload while preserving authenticated-session restoration for users who actually have an existing session.
+
+## 49.6 Verification Requirements
+
+When migrating these features, verify both functionality and access boundaries:
+
+```text
+Anonymous → Top 5 → public token → success
+Anonymous → Background → public token → one random value → success
+Anonymous → public page reload → no /auth/refresh
+Authenticated → reload → refresh session → /auth/me
+Authenticated → My Trips → own trip groups only
+Authenticated → My Favorites → persisted favorite trip groups only
+Manager/Admin → Reports → current trip/comment reports
+Manager/Admin → delete report → authorized moderation action
+Normal user → Reports → denied
+```
+
+These rules supplement the existing architecture and migration-verification sections. They do not remove or replace existing functionality or documentation.
