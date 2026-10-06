@@ -438,44 +438,54 @@ The refresh token must never enter React state or JavaScript-accessible storage.
 
 ## 11.2 Session Restoration
 
-After a browser reload, session restoration depends on whether the frontend currently considers the browser to have an authenticated session.
+After a browser reload, the frontend must not use `localStorage`, `sessionStorage`, IndexedDB, or another client-side persistence mechanism to store authentication/session state or a session-presence hint.
 
-An anonymous visitor on a public page must not proactively call `POST /auth/refresh` just because the page was reloaded. Public anonymous navigation must remain anonymous and must not generate an unnecessary refresh request.
+An anonymous visitor on a public page must not proactively call `POST /auth/refresh` merely because the page was reloaded.
 
-The frontend may keep a non-sensitive client-side session-presence hint (for example, a boolean indicating that the user previously logged in). This hint is not an access token, refresh token, identity, role or authorization state. It is only an optimization that prevents anonymous public reloads from attempting refresh.
+Because the refresh token is HttpOnly and the access token is memory-only, the frontend cannot inspect the refresh cookie directly before making a request. The contract therefore provides a read-only session-presence probe:
 
-The expected behavior is:
+```text
+GET /auth/session
+```
+
+The probe:
+
+* uses the public frontend bearer token;
+* is sent with credentials enabled so the browser may include the HttpOnly refresh cookie;
+* returns only `{ "hasSession": true|false }`;
+* does not return or rotate access/refresh tokens;
+* does not return user identity, role, account status or other account data;
+* does not establish an authenticated access-token context;
+* must return the same response shape for absent or invalid sessions.
+
+The expected public-page reload behavior is:
 
 ```text
 Public page reload
       ↓
-Is authenticated-session hint present?
-      ├── NO  → remain anonymous
-      │          no /auth/refresh request
-      │
-      └── YES → restoreSession()
-                   ↓
-              POST /auth/refresh
-                   ↓
-              HttpOnly cookie automatically included
-                   ↓
-              backend validates refresh token
-                   ↓
-              new access token
-                   ↓
-              memory
-                   ↓
-              GET /auth/me
-                   ↓
-              authenticated state
+GET /auth/session
+      ↓
+hasSession?
+   ┌───┴────┐
+   ↓        ↓
+ false     true
+   ↓        ↓
+remain     POST /auth/refresh
+anonymous       ↓
+   ↓       new access token
+no refresh       ↓
+             memory
+                ↓
+            GET /auth/me
+                ↓
+          authenticated state
 ```
 
-If the session-presence hint is stale and refresh fails definitively, the frontend must clear the hint and transition to anonymous state. It must not retry refresh indefinitely.
+If `hasSession` is `false`, the frontend must not call `POST /auth/refresh` and must continue as anonymous using the public frontend token for public API requests.
 
-A failed refresh does not by itself mean that a public page must fail. Public content may continue to render anonymously when the page does not require authentication.
+If `hasSession` is `true`, the frontend may intentionally call the normal refresh flow. A definitive refresh failure must result in anonymous state without an infinite retry loop.
 
-The refresh endpoint remains the mechanism for restoring an authenticated session; the frontend must not attempt to read or validate the HttpOnly refresh cookie itself.
-
+The session probe is read-only and is not a substitute for authentication. A successful probe only indicates that a valid refresh session is present; the backend remains authoritative when the actual refresh and authenticated requests occur.
 
 ## 11.3 Anonymous Public Pages
 
@@ -1571,15 +1581,22 @@ Session restoration:
 ```text
 Reload
   ↓
-/auth/refresh
+GET /auth/session
   ↓
-HttpOnly cookie
-  ↓
-new access token
-  ↓
-memory
-  ↓
-/auth/me
+hasSession?
+  ├── false → remain anonymous
+  │
+  └── true
+        ↓
+    /auth/refresh
+        ↓
+    HttpOnly cookie
+        ↓
+    new access token
+        ↓
+    memory
+        ↓
+    /auth/me
 ```
 
 Authorization:
@@ -1682,21 +1699,34 @@ Legacy report endpoints are migration references only. Once the new contract is 
 
 ## 49.5 Authentication Boundary on Public Reload
 
-For any public route, the frontend must distinguish anonymous navigation from authenticated-session restoration.
+For any public route, the frontend must distinguish anonymous navigation from authenticated-session restoration without persisting authentication/session state in browser storage.
 
 ```text
-Anonymous public reload
+Public page reload
         ↓
-no authenticated-session hint
+GET /auth/session
         ↓
-remain anonymous
-        ↓
-do not call /auth/refresh
+hasSession?
+   ┌────┴────┐
+   ↓         ↓
+ false      true
+   ↓         ↓
+anonymous   POST /auth/refresh
+   ↓         ↓
+no refresh  memory access token
+                ↓
+            GET /auth/me
+                ↓
+          authenticated
 ```
 
-If the frontend has a non-sensitive authenticated-session hint because the user previously logged in, it may attempt the normal session restoration flow. If that refresh fails definitively, clear the hint, remain anonymous and do not enter a refresh loop.
+The frontend must not use `localStorage`, `sessionStorage`, IndexedDB, or another client-side persistence mechanism as a session-presence hint.
 
-This rule prevents an anonymous visitor from generating a refresh-token request on every public page reload while preserving authenticated-session restoration for users who actually have an existing session.
+If `hasSession` is `false`, the frontend must not call `POST /auth/refresh`.
+
+If `hasSession` is `true`, the frontend may intentionally attempt the normal refresh flow. A definitive refresh failure results in anonymous state and must not create a refresh loop.
+
+`GET /auth/session` is read-only and returns only the boolean session-presence result. It does not expose or rotate tokens or account information.
 
 ## 49.6 Verification Requirements
 
@@ -1778,4 +1808,3 @@ single ready background value
 ```
 
 Loading a background image must work for an anonymous visitor and must not require `/auth/refresh`.
-
