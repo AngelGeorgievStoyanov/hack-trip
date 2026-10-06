@@ -164,6 +164,7 @@ The emailed verification and password-reset links are constructed as `<appUrl><p
 
 The raw token only appears inside the email sent to the account owner; it is never logged or returned in an API response.
 
+
 ### 2.6 Session presence probe
 
 The Frontend may use the following read-only endpoint to determine whether the browser currently has a valid refresh session before deciding to call POST /auth/refresh:
@@ -205,7 +206,6 @@ or:
 A `false` result must not cause POST /auth/refresh. A `true` result allows the Frontend to intentionally attempt the normal refresh flow.
 
 The endpoint is protected by the normal public API rate limit and requires the public Frontend bearer token. The public token remains non-secret and is never treated as proof of a user session.
-
 
 ---
 
@@ -1917,7 +1917,7 @@ This is separate from normal trip/day/point images, which continue to use the ex
 
 ## 24. Trip Data Endpoint Rules
 
-The new `/data/trips/*` endpoints are intentionally separated from the existing CRUD `/trips/*` endpoints.
+The new `/trips/*` endpoints are intentionally separated from the existing CRUD `/trips/*` endpoints.
 
 ### 24.1 Public data endpoints
 
