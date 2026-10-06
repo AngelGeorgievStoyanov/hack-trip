@@ -1715,3 +1715,67 @@ Normal user → Reports → denied
 ```
 
 These rules supplement the existing architecture and migration-verification sections. They do not remove or replace existing functionality or documentation.
+
+
+# 49.7 Current-user Trip and Favorite API Boundary
+
+The current-user endpoints are:
+
+```text
+GET /me/trips
+GET /me/favorites
+```
+
+They resolve the current user from the authenticated session and do not send a `userId` in the URL or request as an ownership selector.
+
+`GET /me/trips` returns trip groups actually owned by the authenticated user.
+
+`GET /me/favorites` returns trip groups for which the authenticated user has a real persisted favorite relationship. Favorites are based on the backend `userId` + `tripGroupId` relationship; frontend state must not be treated as proof of a favorite.
+
+The frontend should call these endpoints through the existing service/API-client architecture:
+
+```text
+Page / hook
+    ↓
+service
+    ↓
+feature API
+    ↓
+api/client.ts
+    ↓
+Axios
+    ↓
+GET /me/trips or GET /me/favorites
+```
+
+The frontend does not provide the user ID and does not infer ownership client-side. Backend authorization and ownership checks remain authoritative.
+
+# 49.8 Public Trip Discovery and Background API Boundary
+
+The public endpoints remain:
+
+```text
+GET /trips/top
+GET /trips/background
+```
+
+Both are available to anonymous visitors using the required public Frontend authentication contract. They must use the public Frontend token and must not require an authenticated user session.
+
+`GET /trips/top` returns up to five trip groups ranked by their total likes. The frontend consumes the normal trip response structure and does not implement the ranking or grouping logic.
+
+`GET /trips/background` returns one ready background value. Background images are not read directly from Google Cloud Storage by the frontend. The backend refreshes the available filenames through its slow dynamic-config refresh, keeps the last successful list when a refresh fails, and the backend background service selects the random image.
+
+The frontend therefore performs only:
+
+```text
+public page / component
+    ↓
+service / API module
+    ↓
+GET /trips/background
+    ↓
+single ready background value
+```
+
+Loading a background image must work for an anonymous visitor and must not require `/auth/refresh`.
+
