@@ -166,7 +166,7 @@ The raw token only appears inside the email sent to the account owner; it is nev
 
 ### 2.6 Session presence probe
 
-The Frontend may use the following read-only endpoint to determine whether the browser currently has a valid refresh session before deciding whether to call POST /auth/refresh:
+The Frontend may use the following read-only endpoint to determine whether the browser currently has a valid refresh session before deciding to call POST /auth/refresh:
 
 ```text
 GET /auth/session
@@ -205,6 +205,7 @@ or:
 A `false` result must not cause POST /auth/refresh. A `true` result allows the Frontend to intentionally attempt the normal refresh flow.
 
 The endpoint is protected by the normal public API rate limit and requires the public Frontend bearer token. The public token remains non-secret and is never treated as proof of a user session.
+
 
 ---
 
