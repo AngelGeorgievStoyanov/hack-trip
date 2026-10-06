@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { tripApi } from '@/api/trips';
 import { ShareButton } from '@/components/social/ShareButton';
+import { tripRepresentativeImage } from '@/lib/images/representative';
 import { LikeButton } from '@/components/social/LikeButton';
 import { FavoriteButton } from '@/components/social/FavoriteButton';
 import { ReportButton } from '@/components/social/ReportButton';
@@ -44,6 +45,7 @@ export function TripActions({ trip }: { trip: TripDetails }) {
         url={absoluteUrl(`/trips/${trip.id}`)}
         title={trip.title}
         text={trip.description ?? undefined}
+        image={tripRepresentativeImage(trip)}
       />
       {isAuthenticated ? (
         <>

@@ -6,6 +6,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/hooks/useAuth';
+import { BackgroundProvider } from '@/hooks/useBackground';
 import { ConfirmDialogProvider } from '@/components/common/ConfirmDialog';
 
 const theme = createTheme();
@@ -19,7 +20,9 @@ export function Providers({ children }: { children: ReactNode }) {
         <CssBaseline />
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <ConfirmDialogProvider>{children}</ConfirmDialogProvider>
+            <BackgroundProvider>
+              <ConfirmDialogProvider>{children}</ConfirmDialogProvider>
+            </BackgroundProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ThemeProvider>
