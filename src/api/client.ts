@@ -17,6 +17,12 @@ declare module 'axios' {
      * (`register`, `login`, `refresh`, `logout`, ...) that require no bearer token.
      */
     skipAuthHeader?: boolean;
+    /**
+     * Set by the request interceptor: true when the request carried the public frontend
+     * token because no user access token was in memory. A 401 on such a request is
+     * anonymous and must not trigger a refresh attempt.
+     */
+    _usedPublicToken?: boolean;
   }
 }
 
@@ -45,8 +51,13 @@ apiClient.interceptors.request.use((requestConfig: InternalAxiosRequestConfig) =
   requestConfig.headers.set(CLIENT_MARKER_HEADER, CLIENT_MARKER_VALUE);
 
   if (!requestConfig.skipAuthHeader) {
-    const token = accessToken ?? PUBLIC_FRONTEND_TOKEN;
-    requestConfig.headers.set(AUTHORIZATION_HEADER, `Bearer ${token}`);
+    if (accessToken) {
+      requestConfig.headers.set(AUTHORIZATION_HEADER, `Bearer ${accessToken}`);
+      requestConfig._usedPublicToken = false;
+    } else {
+      requestConfig.headers.set(AUTHORIZATION_HEADER, `Bearer ${PUBLIC_FRONTEND_TOKEN}`);
+      requestConfig._usedPublicToken = true;
+    }
   }
 
   return requestConfig;
@@ -80,16 +91,23 @@ function refreshSession(): Promise<RefreshResult> {
       return { status: 'ok' as const, token };
     })
     .catch((error) => {
-      authToken.set(null);
+      const code = normalizeApiError(error).code;
+      if (isAccountStatusError(code)) {
+        authToken.set(null);
+        return { status: 'accountError' as const };
+      }
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         if (status === 401 || status === 403) {
           refreshRefused = true;
         }
-      }
-      const code = normalizeApiError(error).code;
-      if (isAccountStatusError(code)) {
-        return { status: 'accountError' as const };
+        if (status === 401) {
+          authToken.set(null);
+        } else {
+          accessToken = null;
+        }
+      } else {
+        accessToken = null;
       }
       return { status: 'failed' as const };
     });
@@ -110,12 +128,15 @@ export function restoreSession(): Promise<RefreshResult> {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const original = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
+    const original = error.config as
+      | (InternalAxiosRequestConfig & { _retry?: boolean; _usedPublicToken?: boolean })
+      | undefined;
 
     if (
       original &&
       !original._retry &&
       !original.skipAuthHeader &&
+      !original._usedPublicToken &&
       error.response?.status === 401
     ) {
       original._retry = true;

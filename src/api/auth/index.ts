@@ -2,6 +2,7 @@ import { apiClient } from '../client';
 import { AUTH } from '../../constants/api';
 import type {
   AuthSessionDto,
+  AuthSessionProbeDto,
   AuthUserResponse,
   ImageDto,
   MessageResponse,
@@ -106,6 +107,11 @@ export const authApi = {
   me: async (): Promise<AuthUserResponse> => {
     const { data } = await apiClient.get<AuthUserResponse>(`${AUTH}/me`);
     return data;
+  },
+
+  sessionProbe: async (): Promise<AuthSessionProbeDto> => {
+    const { data } = await apiClient.get<AuthSessionProbeDto>(`${AUTH}/session`);
+    return { hasSession: data.hasSession === true };
   },
 
   updateProfile: async (input: UpdateProfileInput): Promise<AuthUserResponse> => {

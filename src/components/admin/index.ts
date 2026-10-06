@@ -4,4 +4,5 @@ export { AdminUserForm } from './AdminUserForm';
 export { AdminFailedLogs } from './AdminFailedLogs';
 export { AdminRouteNotFoundLogs } from './AdminRouteNotFoundLogs';
 export { AdminImages } from './AdminImages';
+export { AdminReports } from './AdminReports';
 

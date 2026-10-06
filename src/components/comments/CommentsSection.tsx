@@ -6,6 +6,7 @@ import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mu
 import { commentApi, type CommentCreateInput, type CommentTarget } from '@/api/comments';
 import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
+import { ReportButton } from '@/components/social/ReportButton';
 import { getGenericErrorMessage } from '@/lib/errors';
 
 function commentKey(target: CommentTarget): unknown[] {
@@ -135,32 +136,37 @@ export function CommentsSection({ target }: { target: CommentTarget }) {
                 <Typography variant="caption" color="text.secondary">
                   {comment.author.name}
                 </Typography>
-                {user && user.id === comment.author.id ? (
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                      size="small"
-                      onClick={() => {
-                        setEditingId(comment.id);
-                        setEditingText(comment.text);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      onClick={() =>
-                        void confirm('Are you sure you want to delete this comment?', 'Delete Confirmation').then(
-                          (confirmed) => {
-                            if (confirmed) {
-                              deleteMutation.mutate(comment.id);
-                            }
-                          },
-                        )
-                      }
-                    >
-                      Delete
-                    </Button>
+                {isAuthenticated ? (
+                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <ReportButton targetType="comment" targetId={comment.id} />
+                    {user && user.id === comment.author.id ? (
+                      <>
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            setEditingId(comment.id);
+                            setEditingText(comment.text);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="small"
+                          color="error"
+                          onClick={() =>
+                            void confirm('Are you sure you want to delete this comment?', 'Delete Confirmation').then(
+                              (confirmed) => {
+                                if (confirmed) {
+                                  deleteMutation.mutate(comment.id);
+                                }
+                              },
+                            )
+                          }
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    ) : null}
                   </Box>
                 ) : null}
               </>

@@ -116,12 +116,19 @@ export const userIdParam = z.string().regex(UUID_REGEX, 'Invalid UUID');
 /** Positive integer id (coerced, for bodies/query). */
 export const positiveId = z.coerce.number().int().min(1).max(MAX_RESOURCE_ID);
 
-/** Like/report target type input: trimmed, lowercased, then enumerated. */
+/** Like target type input: trimmed, lowercased, then enumerated. */
 export const targetTypeInput = z
   .string()
   .trim()
   .transform((value) => value.toLowerCase())
   .pipe(z.enum(['tripgroup', 'day', 'trip', 'point', 'image']));
+
+/** Report target type input: like targets plus comment targets. */
+export const reportTargetTypeInput = z
+  .string()
+  .trim()
+  .transform((value) => value.toLowerCase())
+  .pipe(z.enum(['tripgroup', 'day', 'trip', 'point', 'image', 'comment']));
 
 /** Array of positive ids with min/max length and no duplicates. */
 export const idList = ({ min, max }: { min: number; max: number }) =>

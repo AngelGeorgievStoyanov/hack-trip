@@ -36,7 +36,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    restoreSession().then((result) => {
+    async function initialize(): Promise<void> {
+      let probe: { hasSession: boolean };
+      try {
+        probe = await authApi.sessionProbe();
+      } catch {
+        if (!cancelled) {
+          setUser(null);
+          setStatus('anonymous');
+        }
+        return;
+      }
+      if (cancelled) {
+        return;
+      }
+      if (!probe.hasSession) {
+        setUser(null);
+        setStatus('anonymous');
+        return;
+      }
+      const result = await restoreSession();
       if (cancelled) {
         return;
       }
@@ -49,7 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         setStatus('anonymous');
       }
-    });
+    }
+    void initialize();
     return () => {
       cancelled = true;
     };

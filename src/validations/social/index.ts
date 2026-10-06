@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { optionalText, positiveId, targetTypeInput } from '../shared';
+import { optionalText, positiveId, reportTargetTypeInput, targetTypeInput } from '../shared';
 
 export const socialTargetBodySchema = z
   .object({
@@ -29,7 +29,7 @@ export const favoriteQuerySchema = z
 
 export const reportBodySchema = z
   .object({
-    targetType: targetTypeInput,
+    targetType: reportTargetTypeInput,
     targetId: positiveId,
     reason: optionalText({ max: 1000 }),
   })

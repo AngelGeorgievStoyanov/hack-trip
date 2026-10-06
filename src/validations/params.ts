@@ -15,3 +15,4 @@ export const pointImageParams = z
 export const imageIdParams = z.object({ imageId: positiveIdParam }).strict();
 export const commentIdParams = z.object({ commentId: positiveIdParam }).strict();
 export const tripGroupIdParams = z.object({ tripGroupId: positiveIdParam }).strict();
+export const adminReportIdParams = z.object({ reportId: positiveIdParam }).strict();

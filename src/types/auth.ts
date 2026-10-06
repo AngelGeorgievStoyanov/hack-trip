@@ -21,6 +21,10 @@ export interface AuthUserResponse {
   user: AuthUserDto;
 }
 
+export interface AuthSessionProbeDto {
+  hasSession: boolean;
+}
+
 export interface MessageResponse {
   message: string;
 }

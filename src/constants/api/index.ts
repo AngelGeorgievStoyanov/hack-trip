@@ -23,6 +23,7 @@ export const LIKES = `${API_PREFIX}/likes`;
 export const FAVORITES = `${API_PREFIX}/favorites`;
 export const REPORTS = `${API_PREFIX}/reports`;
 export const ADMIN = `${API_PREFIX}/admin`;
+export const ME = `${API_PREFIX}/me`;
 
 /** Documented backend error codes (see API_CONTRACT.md §4). */
 export const API_ERROR_CODES = {

@@ -1,6 +1,6 @@
 import { apiClient } from '../client';
 import { FAVORITES, LIKES, REPORTS } from '../../constants/api';
-import type { ReportDto, SocialState, SocialTargetTypeInput } from '../../types';
+import type { ReportDto, ReportTargetTypeInput, SocialState, SocialTargetTypeInput } from '../../types';
 import {
   favoriteBodySchema,
   favoriteQuerySchema,
@@ -19,7 +19,7 @@ export interface FavoriteInput {
 }
 
 export interface ReportInput {
-  targetType: SocialTargetTypeInput;
+  targetType: ReportTargetTypeInput;
   targetId: number;
   reason?: string | null;
 }

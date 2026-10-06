@@ -41,6 +41,10 @@ export interface TripListResponse {
   pagination: TripListPagination;
 }
 
+export interface BackgroundImageResponse {
+  url: string;
+}
+
 export interface TripDetails {
   id: number;
   title: string;

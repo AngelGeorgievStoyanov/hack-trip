@@ -1,4 +1,5 @@
 import type { AuthUserDto } from './auth';
+import type { SocialTargetType } from './social';
 
 export interface AdminPagination {
   page: number;
@@ -44,6 +45,14 @@ export interface RouteNotFoundLogDto {
 
 export interface DeleteCountResponse {
   deleted: number;
+}
+
+export interface AdminReportDto {
+  id: number;
+  targetType: SocialTargetType;
+  targetId: number;
+  reason: string | null;
+  createdAt: string | null;
 }
 
 export interface ImageInventoryComparison {

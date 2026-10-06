@@ -5,10 +5,10 @@ import { useMutation } from '@tanstack/react-query';
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import { socialApi } from '@/api/social';
 import { getGenericErrorMessage } from '@/lib/errors';
-import type { SocialTargetTypeInput } from '@/types';
+import type { ReportTargetTypeInput } from '@/types';
 
 interface ReportButtonProps {
-  targetType: SocialTargetTypeInput;
+  targetType: ReportTargetTypeInput;
   targetId: number;
 }
 

@@ -23,8 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const response = await tripApi.listTrips({ limit: 5, sort: 'newest' }).catch(() => null);
-  const trips = response?.items ?? [];
+  const trips = await tripApi.getTopTrips().catch(() => []);
   const siteUrl = absoluteUrl('/');
 
   return (

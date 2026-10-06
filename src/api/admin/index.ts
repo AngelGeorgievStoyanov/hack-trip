@@ -3,6 +3,7 @@ import { ADMIN } from '../../constants/api';
 import type { Role, UserStatus } from '../../types';
 import type {
   AdminPage,
+  AdminReportDto,
   AuthUserDto,
   DeleteCountResponse,
   FailedLogDto,
@@ -11,6 +12,7 @@ import type {
 } from '../../types';
 import {
   adminPaginationQuerySchema,
+  adminReportIdParams,
   adminUserUpdateSchema,
   failedLogDeleteSchema,
 } from '../../validations';
@@ -96,5 +98,18 @@ export const adminApi = {
       params,
     });
     return data;
+  },
+
+  listReports: async (query: AdminListQuery = {}): Promise<AdminPage<AdminReportDto>> => {
+    const params = adminPaginationQuerySchema.parse(query);
+    const { data } = await apiClient.get<AdminPage<AdminReportDto>>(`${ADMIN}/reports`, {
+      params,
+    });
+    return data;
+  },
+
+  deleteReport: async (reportId: number): Promise<void> => {
+    const params = adminReportIdParams.parse({ reportId });
+    await apiClient.delete(`${ADMIN}/reports/${params.reportId}`);
   },
 };

@@ -1,7 +1,14 @@
 import { apiClient } from '../client';
-import { IMAGES, TRIPS } from '../../constants/api';
+import { IMAGES, ME, TRIPS } from '../../constants/api';
 import type { TripSort } from '../../constants/trips';
-import type { ImageDto, TripDay, TripDetails, TripListResponse } from '../../types';
+import type {
+  BackgroundImageResponse,
+  ImageDto,
+  TripDay,
+  TripDetails,
+  TripListItem,
+  TripListResponse,
+} from '../../types';
 import {
   dayCreateSchema,
   dayReorderSchema,
@@ -45,6 +52,26 @@ export const tripApi = {
   listTrips: async (query: TripListQuery = {}): Promise<TripListResponse> => {
     const params = tripListQuerySchema.parse(query);
     const { data } = await apiClient.get<TripListResponse>(TRIPS, { params });
+    return data;
+  },
+
+  getTopTrips: async (): Promise<TripListItem[]> => {
+    const { data } = await apiClient.get<TripListItem[]>(`${TRIPS}/top`);
+    return data;
+  },
+
+  getBackgroundImage: async (): Promise<BackgroundImageResponse> => {
+    const { data } = await apiClient.get<BackgroundImageResponse>(`${TRIPS}/background`);
+    return data;
+  },
+
+  listMyTrips: async (): Promise<TripListItem[]> => {
+    const { data } = await apiClient.get<TripListItem[]>(`${ME}/trips`);
+    return data;
+  },
+
+  listMyFavorites: async (): Promise<TripListItem[]> => {
+    const { data } = await apiClient.get<TripListItem[]>(`${ME}/favorites`);
     return data;
   },
 
