@@ -398,6 +398,66 @@ When a frontend requirement conflicts with the API contract, stop and resolve th
 
 ---
 
+# 10.1 Trip GET response model
+
+The frontend must use the same Trip Group response model defined in `docs/API_CONTRACT.md` for these three endpoints:
+
+```text
+GET /api/v1/trips
+GET /api/v1/trips/top
+GET /api/v1/trips/:id
+```
+
+The response model is:
+
+```text
+TripGroup
+├── tripGroupId
+├── social
+└── days[]
+    ├── id
+    ├── dayNumber
+    ├── title
+    ├── description
+    ├── price
+    ├── currency { id, code, name }
+    ├── transport
+    ├── group
+    ├── images[] + social
+    ├── social
+    └── points[]
+        ├── Point + social
+        └── images[] + social
+```
+
+A Trip Group is only the grouping container. It does not have its own day metadata such as title, description, group, transport or price. All `trips` rows belonging to the same `tripGroupId` are represented as entries in `days[]`.
+
+Missing day numbers are preserved. For example, a group containing days 1, 3 and 5 returns exactly `days[1,3,5]`; the frontend must not generate missing days.
+
+The `currency` object is supplied by the backend configuration:
+
+```json
+{
+  "id": 22,
+  "code": "BGN",
+  "name": "Bulgarian Lev"
+}
+```
+
+The frontend displays `code` and may use `name` for the tooltip/hover text. Currency options must not be hard-coded.
+
+Day images, point images, Point data and their existing social structures must be consumed exactly as defined by `docs/API_CONTRACT.md`. Do not create a second frontend-specific image or social DTO.
+
+Endpoint cardinality:
+
+* `GET /trips` → `TripGroup[]`
+* `GET /trips/top` → up to 5 `TripGroup[]`
+* `GET /trips/:id` → one complete `TripGroup`
+
+For `GET /trips/:id`, `id` is the `tripGroupId`. The backend returns the complete group and all its days. If the user clicked a particular day, the frontend selects that day from the returned `days[]`; it must not expect the endpoint to return only that day.
+
+The same TypeScript/API model should be reused for all three endpoints.
+
 # 11. Authentication Architecture
 
 Authentication has two separate token mechanisms:
