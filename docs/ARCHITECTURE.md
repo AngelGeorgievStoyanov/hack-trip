@@ -1960,11 +1960,58 @@ GET /me/trips
 GET /me/favorites
 ```
 
-They resolve the current user from the authenticated session and do not send a `userId` in the URL or request as an ownership selector.
+Both endpoints resolve the current user exclusively from the authenticated session. The frontend must not send a `userId` or `ownerId` as an ownership selector.
 
-`GET /me/trips` returns trip groups actually owned by the authenticated user.
+Both endpoints return the same unified trip-group response model used by the other modern trip GET endpoints:
 
-`GET /me/favorites` returns trip groups for which the authenticated user has a real persisted favorite relationship. Favorites are based on the backend `userId` + `tripGroupId` relationship; frontend state must not be treated as proof of a favorite.
+```text
+GET /me/trips      → TripGroupResponse[]
+GET /me/favorites  → TripGroupResponse[]
+```
+
+Each returned item has the normal complete Trip Group structure:
+
+```text
+TripGroupResponse
+├── tripGroupId
+├── social
+└── days[]
+    ├── id
+    ├── dayNumber
+    ├── title
+    ├── description
+    ├── price
+    ├── currency { id, code, name } | null
+    ├── transport
+    ├── group
+    ├── images[] + social
+    ├── social
+    └── points[]
+        ├── Point + social
+        └── images[] + social
+```
+
+The frontend must consume these responses exactly as the unified Trip Group model. It must not expect the old `TripListItem` summary structure and must not maintain a separate response model for these two endpoints.
+
+The Trip Group is only the container identified by `tripGroupId`. Trip-specific content belongs to `days[]`. The frontend must not expect `title`, `description`, `price`, `currency`, `transport` or `group` directly on the Trip Group.
+
+For both endpoints:
+
+* `tripGroupId` identifies the Trip Group.
+* `days[].id` identifies the actual `trips` row/day.
+* `days[].dayNumber` is the displayed/logical day number and is not the database ID.
+* Existing day numbers must be preserved; the frontend must not generate missing days.
+* Day, point and image social state must be consumed from their respective response levels.
+
+### Security boundary
+
+The response must not expose `userId`, `ownerId`, or an `author.id`/owner UUID for the trip owner. In particular, `GET /me/favorites` must never expose the UUID of another user's account merely because that user's trip was favorited.
+
+The authenticated user identity is a backend security concern. The frontend must use the endpoint result without receiving or relying on database user identifiers. The backend remains responsible for resolving the current user, checking ownership/favorite relationships and enforcing authorization.
+
+For `GET /me/trips`, only groups owned by the authenticated user are returned.
+
+For `GET /me/favorites`, only groups for which the authenticated user has a persisted favorite relationship are returned. The frontend must not infer favorite state from local UI state.
 
 The frontend should call these endpoints through the existing service/API-client architecture:
 
@@ -1982,7 +2029,7 @@ Axios
 GET /me/trips or GET /me/favorites
 ```
 
-The frontend does not provide the user ID and does not infer ownership client-side. Backend authorization and ownership checks remain authoritative.
+The frontend does not provide the user ID and does not infer ownership client-side. Backend authentication, authorization, ownership and favorite checks remain authoritative.
 
 # 49.8 Public Trip Discovery and Background API Boundary
 
