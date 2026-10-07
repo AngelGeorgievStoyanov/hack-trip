@@ -328,11 +328,18 @@ Example responsibility:
 trips API
     ↓
 GET /trips
+GET /trips/top
 GET /trips/:id
 POST /trips
-PUT /trips/:id
 DELETE /trips/:id
+POST /trips/:tripId/days
+PUT /trips/:tripId/days/reorder
+PUT /trips/:tripId/days/:dayId
+DELETE /trips/:tripId/days/:dayId
+POST /trips/:tripId/days/:dayId/images
 ```
+
+Trip Group is only the container that associates days and carries group-level social state. Day content is created and edited through the day endpoints defined above.
 
 The exact endpoints and payloads are defined by `docs/API_CONTRACT.md`.
 
@@ -457,6 +464,143 @@ Endpoint cardinality:
 For `GET /trips/:id`, `id` is the `tripGroupId`. The backend returns the complete group and all its days. If the user clicked a particular day, the frontend selects that day from the returned `days[]`; it must not expect the endpoint to return only that day.
 
 The same TypeScript/API model should be reused for all three endpoints.
+
+# 10.2 Trip creation and day workflow
+
+The frontend must treat `tripGroupId` only as the identifier that groups days together. It is not a day identifier and it does not contain day metadata such as title, description, price, currency, transport or group.
+
+All trip creation actions must use the backend response as the source of truth. The backend returns a complete `TripGroupResponse` containing the current group and its `days[]`.
+
+## Add Trip
+
+`Add Trip` creates the day currently being entered in the form. It does not mean that the day must be Day 1.
+
+The frontend chooses the endpoint from whether a Trip Group already exists:
+
+```text
+tripGroupId exists?
+    │
+    ├── NO
+    │    ↓
+    │  POST /trips
+    │    ↓
+    │  BE creates Trip Group + current Day
+    │
+    └── YES
+         ↓
+       POST /trips/:tripId/days
+         ↓
+       BE creates current Day in existing Trip Group
+```
+
+Both operations return the same `TripGroupResponse` structure.
+
+For example, if the existing group contains days 1, 2 and 3 and the user is currently creating Day 6, `Add Trip` creates Day 6 and then navigates to Trip Details with Day 6 selected.
+
+After either POST:
+
+1. Use the returned `tripGroupId`.
+2. Find the newly created day in the returned `days[]`.
+3. Use that day's `id` as the day identifier.
+4. Navigate to Trip Details.
+5. Open exactly the newly created day, not the first day by default.
+
+The frontend must not construct a fake day from the form after the request succeeds. The returned backend data is authoritative.
+
+## Add Next Day Trip
+
+`Add Next Day Trip` creates a day. It may be used when the Trip Group already exists, and the current form may also represent a day being created as part of the same creation flow.
+
+When a Trip Group already exists:
+
+```text
+POST /trips/:tripId/days
+→ BE creates the current day
+→ returns TripGroupResponse
+→ FE stays on the current trip form
+```
+
+When no Trip Group exists yet:
+
+```text
+POST /trips
+→ BE creates Trip Group + current Day
+→ returns TripGroupResponse
+→ FE stays on the form
+```
+
+After receiving the response, the frontend uses the returned `days[]` to determine the highest existing `dayNumber`. The next form is prepared with:
+
+```text
+next dayNumber = highest existing dayNumber + 1
+currency       = values from the latest day
+transport      = values from the latest day
+group          = values from the latest day
+```
+
+The values must come from the backend response, not from a separate hard-coded default.
+
+## Add Points for this Day
+
+The button is named `Add Points for this Day`.
+
+The current day may belong to an existing Trip Group or may be the first day being persisted. The frontend therefore uses the same creation decision:
+
+```text
+tripGroupId exists?
+    │
+    ├── NO → POST /trips
+    │
+    └── YES → POST /trips/:tripId/days
+```
+
+The returned `TripGroupResponse` is then used to identify both required IDs:
+
+```text
+TripGroupResponse
+├── tripGroupId
+└── days[]
+    └── newly created Day
+        └── id
+```
+
+The frontend navigates to the Add Points flow using:
+
+```text
+tripGroupId → identifies the Trip Group
+day.id      → identifies the specific Day to which points belong
+```
+
+Point creation must use the specific `day.id`; points are not attached directly to the Trip Group.
+
+## Editing a Day
+
+To edit a specific day, the frontend uses:
+
+```text
+PUT /trips/:tripId/days/:dayId
+```
+
+The backend returns the updated `TripGroupResponse`.
+
+After a successful edit:
+
+1. Keep the `dayId` that was being edited.
+2. Use the returned `days[]` from the response.
+3. Find the same day by its `id`.
+4. Navigate to Trip Details.
+5. Open exactly that day and display the newly returned values.
+
+The frontend must not perform a second request merely to reconstruct the result of the successful PUT when the returned `TripGroupResponse` already contains the complete updated group.
+
+## Trip Details navigation rule
+
+`GET /trips/:id` uses `id = tripGroupId` and returns the complete Trip Group with all existing days.
+
+When navigation originates from a specific day, the frontend must preserve that target day's `day.id` or `dayNumber` and select that day after the complete response is loaded.
+
+The frontend must never assume that the first day is the selected day.
+
 
 # 11. Authentication Architecture
 
