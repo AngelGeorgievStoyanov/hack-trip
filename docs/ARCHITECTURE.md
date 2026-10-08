@@ -407,13 +407,7 @@ When a frontend requirement conflicts with the API contract, stop and resolve th
 
 # 10.1 Trip GET response model
 
-The frontend must use the same Trip Group response model defined in `docs/API_CONTRACT.md` for these three endpoints:
-
-```text
-GET /api/v1/trips
-GET /api/v1/trips/top
-GET /api/v1/trips/:id
-```
+The frontend must use exactly the same Trip Group response model defined in `docs/API_CONTRACT.md` and returned by the Backend for all Trip GET endpoints.
 
 The canonical response model is:
 
@@ -434,18 +428,103 @@ TripGroupResponse
     ├── currency { id, code, name }
     ├── transport
     ├── group
+    ├── countEdited
+    ├── tripGroupId
     ├── images[] + social
     ├── social
     ├── points[]
-    │   ├── Point + social
-    │   └── images[] + social
+    │   ├── id
+    │   ├── name
+    │   ├── description
+    │   ├── lat
+    │   ├── lng
+    │   ├── pointNumber
+    │   ├── countEdited
+    │   ├── tripId
+    │   ├── images[] + social
+    │   └── social
     ├── createdAt
     └── updatedAt
 ```
 
-A Trip Group is only the grouping container. It does not have its own day metadata such as title, description, group, transport or price. All `trips` rows belonging to the same `tripGroupId` are represented as entries in `days[]`.
+The response is intentionally aligned with the database field naming for public Trip/Point fields. Do not rename or reshape these fields in the frontend API model.
 
-Missing day numbers are preserved. For example, a group containing days 1, 3 and 5 returns exactly `days[1,3,5]`; the frontend must not generate missing days.
+### TripGroupDay
+
+Each item in `TripGroupResponse.days[]` represents one `trips` database row and contains the public day-level fields:
+
+```json
+{
+  "id": 1001,
+  "dayNumber": 1,
+  "title": "Day 1",
+  "description": "Day description",
+  "countPeoples": 2,
+  "destination": "Sofia",
+  "lat": 42.6975,
+  "lng": 23.3241,
+  "price": 250,
+  "currency": {
+    "id": 22,
+    "code": "BGN",
+    "name": "Bulgarian Lev"
+  },
+  "transport": {
+    "key": "car",
+    "name": "Car"
+  },
+  "group": {
+    "key": "friends",
+    "name": "Friends"
+  },
+  "countEdited": 0,
+  "tripGroupId": 123,
+  "images": [ SocialImageDto ],
+  "social": SocialState,
+  "points": [ TripPoint ],
+  "createdAt": "ISO 8601 timestamp",
+  "updatedAt": "ISO 8601 timestamp"
+}
+```
+
+All four day-specific database fields `countPeoples`, `destination`, `lat` and `lng` belong inside each `days[]` item. They must not be moved to `TripGroupResponse` level.
+
+`countEdited` and `tripGroupId` are also day-level fields when they are part of the canonical API response. `tripGroupId` identifies the containing Trip Group and has the same value as `TripGroupResponse.tripGroupId`.
+
+### TripPoint
+
+Each point uses the database/API field names directly:
+
+```json
+{
+  "id": 2001,
+  "name": "Point title",
+  "description": "Point description",
+  "lat": 42.6975,
+  "lng": 23.3241,
+  "pointNumber": 1,
+  "countEdited": 0,
+  "tripId": 1001,
+  "images": [ SocialImageDto ],
+  "social": SocialState
+}
+```
+
+Point coordinates are `lat` and `lng`. Do not rename them to `latitude` / `longitude` in the API DTO.
+
+`pointNumber` is the persisted point order and must be preserved. Points are returned in numeric `pointNumber` order, with `id` as the tie-break where required by the backend.
+
+`tripId` identifies the specific Day/Trip row to which the point belongs. `ownerId` is never part of the public Point response.
+
+### Ownership/security
+
+`ownerId` and `userId` are never part of the public Trip Group, Day or Point response. They remain server-side ownership/authentication data and must not be added to frontend API DTOs, UI models, query parameters, or client-generated request identity.
+
+### Shared response rules
+
+A Trip Group is the grouping container. Day-specific metadata belongs to `days[]`, not to the Trip Group root.
+
+Missing day numbers are preserved. For example, a group containing days 1, 3 and 5 returns exactly those existing days; the frontend must not generate missing days.
 
 The `currency` object is supplied by the backend configuration:
 
@@ -457,19 +536,21 @@ The `currency` object is supplied by the backend configuration:
 }
 ```
 
-The frontend displays `code` and may use `name` for the tooltip/hover text. Currency options must not be hard-coded.
+Currency options must not be hard-coded in the frontend.
 
-Day images, point images, Point data and their existing social structures must be consumed exactly as defined by `docs/API_CONTRACT.md`. Do not create a second frontend-specific image or social DTO.
+Day images, point images and all social structures must be consumed exactly as defined by `docs/API_CONTRACT.md`. Do not create a second frontend-specific image or social DTO.
 
 Endpoint cardinality:
 
 * `GET /trips` → `TripGroupResponse[]`
 * `GET /trips/top` → up to 5 `TripGroupResponse[]`
 * `GET /trips/:id` → one complete `TripGroupResponse`
+* `GET /me/trips` → `TripGroupResponse[]`
+* `GET /me/favorites` → `TripGroupResponse[]`
 
-For `GET /trips/:id`, `id` is the `tripGroupId`. The backend returns the complete group and all its days. If the user clicked a particular day, the frontend selects that day from the returned `days[]`; it must not expect the endpoint to return only that day.
+For `GET /trips/:id`, `id` is the `tripGroupId`. The backend returns the complete group and all its days. If the user opened a specific day, the frontend selects that day from the returned `days[]`; it must not expect the endpoint to return only that day.
 
-The same TypeScript/API model should be reused for all three endpoints. The fields `countPeoples`, `destination`, `lat` and `lng` are day-level fields and belong inside each `days[]` item. They must not be moved to `TripGroupResponse` level. `ownerId` and `userId` are not part of this public response and must never be added to the frontend DTO.
+The same TypeScript/API model must be reused for all five endpoints. The frontend must not maintain a legacy Trip response shape alongside the canonical response.
 
 # 10.2 Trip creation and day workflow
 
