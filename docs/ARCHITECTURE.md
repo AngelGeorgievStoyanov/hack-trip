@@ -504,7 +504,7 @@ Point coordinates are `lat` and `lng`. Do not rename them to `latitude` / `longi
 
 `pointNumber` is the persisted point order and must be preserved. Points are returned in numeric `pointNumber` order, with `id` as the tie-break where required by the backend.
 
-`ownerId` and other internal ownership fields are never part of the public Point response.
+`ownerId`, `countEdited`, `createdAt`, and `updatedAt` are never part of the public Point response. `tripId` is public and identifies the parent trip/day row for the point.
 
 ### Ownership/security
 
