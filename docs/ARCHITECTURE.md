@@ -437,8 +437,6 @@ TripGroupResponse
     │   ├── lat
     │   ├── lng
     │   ├── pointNumber
-    │   ├── countEdited
-    │   ├── tripId
     │   ├── images[] + social
     │   └── social
     ├── createdAt
