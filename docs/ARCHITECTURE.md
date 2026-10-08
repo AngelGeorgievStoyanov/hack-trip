@@ -428,8 +428,6 @@ TripGroupResponse
     ├── currency { id, code, name }
     ├── transport
     ├── group
-    ├── countEdited
-    ├── tripGroupId
     ├── images[] + social
     ├── social
     ├── points[]
@@ -477,8 +475,6 @@ Each item in `TripGroupResponse.days[]` represents one `trips` database row and 
     "key": "friends",
     "name": "Friends"
   },
-  "countEdited": 0,
-  "tripGroupId": 123,
   "images": [ SocialImageDto ],
   "social": SocialState,
   "points": [ TripPoint ],
@@ -488,8 +484,6 @@ Each item in `TripGroupResponse.days[]` represents one `trips` database row and 
 ```
 
 All four day-specific database fields `countPeoples`, `destination`, `lat` and `lng` belong inside each `days[]` item. They must not be moved to `TripGroupResponse` level.
-
-`countEdited` and `tripGroupId` are also day-level fields when they are part of the canonical API response. `tripGroupId` identifies the containing Trip Group and has the same value as `TripGroupResponse.tripGroupId`.
 
 ### TripPoint
 
@@ -503,8 +497,6 @@ Each point uses the database/API field names directly:
   "lat": 42.6975,
   "lng": 23.3241,
   "pointNumber": 1,
-  "countEdited": 0,
-  "tripId": 1001,
   "images": [ SocialImageDto ],
   "social": SocialState
 }
@@ -514,7 +506,7 @@ Point coordinates are `lat` and `lng`. Do not rename them to `latitude` / `longi
 
 `pointNumber` is the persisted point order and must be preserved. Points are returned in numeric `pointNumber` order, with `id` as the tie-break where required by the backend.
 
-`tripId` identifies the specific Day/Trip row to which the point belongs. `ownerId` is never part of the public Point response.
+`ownerId` and other internal ownership fields are never part of the public Point response.
 
 ### Ownership/security
 
