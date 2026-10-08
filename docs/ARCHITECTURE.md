@@ -490,6 +490,7 @@ Each point uses the database/API field names directly:
 ```json
 {
   "id": 2001,
+  "tripId": 1001,
   "name": "Point title",
   "description": "Point description",
   "lat": 42.6975,
