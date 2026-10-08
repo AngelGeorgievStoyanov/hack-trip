@@ -415,10 +415,10 @@ GET /api/v1/trips/top
 GET /api/v1/trips/:id
 ```
 
-The response model is:
+The canonical response model is:
 
 ```text
-TripGroup
+TripGroupResponse
 ├── tripGroupId
 ├── social
 └── days[]
@@ -426,15 +426,21 @@ TripGroup
     ├── dayNumber
     ├── title
     ├── description
+    ├── countPeoples
+    ├── destination
+    ├── lat
+    ├── lng
     ├── price
     ├── currency { id, code, name }
     ├── transport
     ├── group
     ├── images[] + social
     ├── social
-    └── points[]
-        ├── Point + social
-        └── images[] + social
+    ├── points[]
+    │   ├── Point + social
+    │   └── images[] + social
+    ├── createdAt
+    └── updatedAt
 ```
 
 A Trip Group is only the grouping container. It does not have its own day metadata such as title, description, group, transport or price. All `trips` rows belonging to the same `tripGroupId` are represented as entries in `days[]`.
@@ -457,13 +463,13 @@ Day images, point images, Point data and their existing social structures must b
 
 Endpoint cardinality:
 
-* `GET /trips` → `TripGroup[]`
-* `GET /trips/top` → up to 5 `TripGroup[]`
-* `GET /trips/:id` → one complete `TripGroup`
+* `GET /trips` → `TripGroupResponse[]`
+* `GET /trips/top` → up to 5 `TripGroupResponse[]`
+* `GET /trips/:id` → one complete `TripGroupResponse`
 
 For `GET /trips/:id`, `id` is the `tripGroupId`. The backend returns the complete group and all its days. If the user clicked a particular day, the frontend selects that day from the returned `days[]`; it must not expect the endpoint to return only that day.
 
-The same TypeScript/API model should be reused for all three endpoints.
+The same TypeScript/API model should be reused for all three endpoints. The fields `countPeoples`, `destination`, `lat` and `lng` are day-level fields and belong inside each `days[]` item. They must not be moved to `TripGroupResponse` level. `ownerId` and `userId` are not part of this public response and must never be added to the frontend DTO.
 
 # 10.2 Trip creation and day workflow
 
