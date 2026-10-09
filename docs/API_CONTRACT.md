@@ -94,6 +94,9 @@ Administrative rate limit (applied to every admin endpoint):
 * Request validation uses Zod with `.strict()` on every body/params/query schema: undeclared body fields, query parameters, and route parameters are rejected with `400 VALIDATION_ERROR`.
 * Endpoints that declare no body/query/params must receive an empty corresponding part; a non-empty undeclared part is rejected with `400 VALIDATION_ERROR`.
 * A rejected request is `400` with code `VALIDATION_ERROR` and a message naming the offending field. At most 3 issues are reported per validation failure.
+* Numeric fields in a JSON body must use actual JSON numbers; numeric strings and booleans are rejected. Integer fields reject fractional values. `null` is rejected unless that specific schema explicitly allows it (for example, `lat` and `lng` in `PUT /points/:pointId`, where `null` clears the coordinate).
+* Numeric query parameters arrive as strings and are parsed to numbers by their query schemas; route parameters are validated as digit strings (positive integer ids) or UUID strings (`userId`).
+* Validated request parts are handed to the service layer, which re-reads them through its own domain parsers (dynamic-config select resolution, rejection of client-controlled ownership/parent/sequence fields) before persistence.
 
 ### 1.8 Strictness summary
 
@@ -186,10 +189,10 @@ The endpoint:
 
 * is read-only and must not rotate, revoke, create, or modify a refresh token;
 * must not return an access token, refresh token, user id, email, role, account status, or other user/account data;
-* must not establish an authenticated access-token context;
+* The `hasSession` value is determined from the refresh cookie and its stored refresh-token/user state, not access-token identity; `optionalAuthentication` validates any supplied bearer before the handler, so an invalid/expired user JWT or unusable account may return `401`/`403` before the cookie probe runs.
 * returns only whether the current browser request has a valid refresh session;
 * returns the same response shape whether the session is absent or invalid, without exposing why it is unavailable;
-* must be safe for a completely anonymous browser request and must not require a user access JWT.
+* does not require a user access JWT, but the required `Authorization` header cannot be omitted because the shared boundary rejects a missing bearer.
 
 Response:
 
@@ -234,7 +237,7 @@ The public token is never passed to JWT verification. An invalid user JWT is nev
 
 ## 4. Error Contract
 
-Every error (including route-not-found and rate-limit) uses the same JSON shape:
+Errors emitted by the versioned API use the following JSON shape, including API route-not-found and rate-limit responses. The deliberate empty `404` for non-`/api/v1` paths with a missing client marker is the exception described in §1.1:
 
 ```json
 { "error": { "code": "<CODE>", "message": "<message>" } }
@@ -289,41 +292,43 @@ Authorization model:
 | Endpoint                                  | Anonymous          | Authenticated                        | Owner | Manager | Admin |
 | ----------------------------------------- | ------------------ | ------------------------------------ | ----- | ------- | ----- |
 | GET `/auth/me`                            | NO (404/401)       | YES                                  | —     | —       | —     |
-| GET `/auth/session`                       | YES (public token) | YES (session cookie)                 | —     | —       | —     |
+| GET `/auth/session`                       | YES (public token + cookie probe) | YES (valid JWT accepted; result remains cookie-based) | — | — | — |
 | PUT `/auth/me`                            | NO                 | YES (self only)                      | —     | —       | —     |
 | GET/POST/DELETE `/auth/me/image`          | NO                 | YES (self only)                      | —     | —       | —     |
 | GET `/config/selects`                     | YES (public token) | YES                                  | —     | —       | —     |
 | GET `/config/services`                    | YES (public token) | YES                                  | —     | —       | —     |
 | GET `/trips`                              | YES (public token) | YES                                  | —     | —       | —     |
-| GET `/trips/:id`                          | YES (public token) | YES                                  | —     | —       | —     |
+| GET `/trips/:tripGroupId`                          | YES (public token) | YES                                  | —     | —       | —     |
 | GET `/trips/top`                     | YES (public token) | YES                                  | —     | —       | —     |
 | GET `/trips/background`              | YES (public token) | YES                                  | —     | —       | —     |
 | GET `/me/trips`                | NO                 | YES                                  | YES*  | —       | —     |
 | GET `/me/favorites`            | NO                 | YES                                  | —     | —       | —     |
 | POST `/trips`                             | NO                 | YES                                  | —     | —       | —     |
-| DELETE `/trips/:id`                       | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
-| POST `/trips/:tripId/days`                | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
-| PUT `/trips/:tripId/days/reorder`         | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
-| PUT `/trips/:tripId/days/:dayId`          | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
-| DELETE `/trips/:tripId/days/:dayId`       | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
-| POST `/trips/:tripId/days/:dayId/images`  | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
+| DELETE `/trips/:tripGroupId`                       | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
+| POST `/trips/:tripGroupId/days`            | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
+| PUT `/trips/:tripGroupId/days/reorder`     | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
+| PUT `/trips/:tripGroupId/days/:tripId`     | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
+| DELETE `/trips/:tripGroupId/days/:tripId`  | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
+| POST `/trips/:tripGroupId/days/:tripId/images` | NO             | CONDITIONAL                          | YES   | YES     | YES   |
+| GET `/trips/:tripId/points`               | YES (public token) | YES                                  | —     | —       | —     |
 | GET `/points/:pointId`                    | YES (public token) | YES                                  | —     | —       | —     |
 | POST `/points`                            | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
 | PUT `/points/:pointId`                    | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
 | DELETE `/points/:pointId`                 | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
 | POST `/points/:pointId/images`            | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
 | DELETE `/points/:pointId/images/:imageId` | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
-| PUT `/days/:dayId/points/reorder`         | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
+| PUT `/days/:tripId/points/reorder`         | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
 | DELETE `/images/:imageId`                 | NO                 | CONDITIONAL                          | YES   | YES     | YES   |
 | GET (comments)                            | YES (public token) | YES                                  | —     | —       | —     |
 | POST (comments)                           | NO                 | YES                                  | —     | —       | —     |
-| PUT `/comments/:commentId`                | NO                 | CONDITIONAL (author only)            | —     | —       | —     |
-| DELETE `/comments/:commentId`             | NO                 | CONDITIONAL (author/owner/moderator) | YES   | YES     | YES   |
-| POST/DELETE `/likes/`                     | NO                 | YES                                  | —     | —       | —     |
-| POST/DELETE `/favorites/`                 | NO                 | YES                                  | —     | —       | —     |
-| POST `/reports/`                          | NO                 | YES                                  | —     | —       | —     |
+| PUT `/comments/:commentId`                | NO                 | CONDITIONAL (author/moderator)       | —     | YES     | YES   |
+| DELETE `/comments/:commentId`             | NO                 | CONDITIONAL (author/moderator)       | NO    | YES     | YES   |
+| POST/DELETE `/likes`                     | NO                 | YES                                  | —     | —       | —     |
+| POST/DELETE `/favorites`                 | NO                 | YES                                  | —     | —       | —     |
+| POST `/reports`                          | NO                 | YES                                  | —     | —       | —     |
+| DELETE `/reports/:reportId`                | NO                 | CONDITIONAL (own report only)        | —     | CONDITIONAL (own report only) | CONDITIONAL (own report only) |
 | GET `/admin/users`                        | NO                 | NO                                   | NO    | YES     | YES   |
-| PUT `/admin/users/:userId`                | NO                 | NO                                   | NO    | NO      | YES   |
+| PUT `/admin/users/:userId`                | NO                 | NO                                   | NO    | PARTIAL (no role/password) | YES |
 | DELETE `/admin/users/:userId`             | NO                 | NO                                   | NO    | YES     | YES   |
 | GET/DELETE `/admin/failed-login-logs`     | NO                 | NO                                   | NO    | YES     | YES   |
 | GET `/admin/route-not-found-logs`         | NO                 | NO                                   | NO    | YES     | YES   |
@@ -335,7 +340,7 @@ Authorization model:
 
 `*` The authenticated actor is the owner being used to scope the result. The request does not contain a user id.
 
-> CONDITIONAL on trip/day/point/image mutation endpoints means: the authenticated actor must be the trip-group owner OR have role `admin`/`manager`. On `PUT /comments/:commentId` it means: the actor must be the comment author. On `DELETE /comments/:commentId` it means: the actor must be the author, the trip-group owner, or a moderator (`admin`/`manager`).
+> CONDITIONAL on trip/day/point/image mutation endpoints means: the authenticated actor must be the trip-group owner OR have role `admin`/`manager`. On `PUT /comments/:commentId` and `DELETE /comments/:commentId` it means: the actor must be the comment author or a moderator (`admin`/`manager`); the trip-group owner has no special comment right beyond being the author or a moderator.
 
 ---
 
@@ -356,7 +361,7 @@ All auth routes are mounted at `/api/v1/auth`.
 
 * Auth: none. Rate-limited (`verify-email` bucket).
 * Body (strict): `{ token }`.
-* Response `200`: `{ "user": AuthUserDto }`.
+* Response `200`: `{ "user": ProfileDto }`.
 * Errors: unknown/used/expired token -> `400 VALIDATION_ERROR`.
 
 ### 6.3 POST `/auth/resend-verification`
@@ -375,8 +380,8 @@ All auth routes are mounted at `/api/v1/auth`.
 
 `AuthSessionDto`:
 
-```json
-{ "accessToken": "<jwt>", "tokenType": "Bearer", "expiresIn": 900, "user": AuthUserDto }
+```text
+{ "accessToken": "<jwt>", "tokenType": "Bearer", "expiresIn": 900, "user": ProfileDto }
 ```
 
 ### 6.5 POST `/auth/refresh`
@@ -393,13 +398,13 @@ All auth routes are mounted at `/api/v1/auth`.
 ### 6.7 GET `/auth/me`
 
 * Auth: `requireAuthentication`. No body/query/params.
-* Response `200`: `{ "user": AuthUserDto }`.
+* Response `200`: `{ "user": ProfileDto }`.
 
 ### 6.8 PUT `/auth/me`
 
 * Auth: `requireAuthentication`.
 * Body (strict): `{ firstName, lastName }`.
-* Response `200`: `{ "user": AuthUserDto }`.
+* Response `200`: `{ "user": ProfileDto }`.
 
 ### 6.9 POST `/auth/confirm-password`
 
@@ -442,9 +447,25 @@ All auth routes are mounted at `/api/v1/auth`.
 * Response `200`: `{ "message": "..." }`. Revokes all refresh sessions of the account.
 * Errors: unknown/used/expired token -> `400 VALIDATION_ERROR`.
 
-### 6.16 `AuthUserDto` (returned by auth endpoints)
+### 6.16 `ProfileDto` and `AuthUserDto`
+
+The auth/profile endpoints return `ProfileDto` (inside `{ "user": ... }` and inside `AuthSessionDto`):
 
 ```json
+{
+  "email": "<string>",
+  "firstName": "<string>",
+  "lastName": "<string>",
+  "permissions": { "isManager": true, "isAdmin": true }
+}
+```
+
+* `permissions` is present only for `manager`/`admin` accounts; regular users receive no `permissions` field.
+* `id`, `role`, `status` and verification state are NOT part of `ProfileDto`.
+
+`AuthUserDto` is returned only by the admin user endpoints (`GET/PUT /admin/users`):
+
+```text
 {
   "id": "<uuid>",
   "email": "<string>",
@@ -488,7 +509,7 @@ Mounted at `/api/v1/config`. Auth: `optionalAuthentication` (public token = anon
 
 `PublicServiceConfig`:
 
-```json
+```text
 {
   "id": 0,
   "key": "google_maps" | "mui" | "ui" | "visual" | "routing",
@@ -531,34 +552,38 @@ Mounted at `/api/v1/trips`.
 * Days are returned in `dayNumber` ascending order (tie-break `id` ascending).
 * Points within a day are returned in `pointNumber` ascending order (tie-break `id` ascending).
 
-## 8. Trip GET response structure (three endpoints)
+### Canonical TripGroupResponse structure
 
-The following three GET endpoints use the same unified Trip Group response structure:
+The following three public trip-group GET endpoints use the same unified TripGroupResponse structure. The authenticated `/me/trips` and `/me/favorites` reads and specified trip/day write endpoints reuse this canonical response shape as documented below:
 
 ```text
 GET /api/v1/trips
 GET /api/v1/trips/top
-GET /api/v1/trips/:id
+GET /api/v1/trips/:tripGroupId
 ```
 
 A **Trip Group** is only the grouping container. It has no title, description, transport, group, currency, author, cover image, or other day metadata.
 
-The **`tripGroupId`** identifies the grouping record. It is an integer database id. Every day in `days[]` belongs to that trip group through this id.
+The **`tripGroupId`** identifies the grouping record. It is an integer database id. Every day in `days[]` belongs to that trip group through this id. In the response JSON the trip group is serialized as the `id` field of the `TripGroupResponse` root (next to `permissions` and `social`); there is no `tripGroupId` field in the response body.
 
-A trip group does not generate missing day numbers. For example, a trip group may contain exactly Day 1, Day 3, and Day 5.
+Every day row must have a non-null `dayNumber`. Day numbers are explicitly selected and may contain gaps; the server does not generate or fill them automatically. For example, a trip group may contain Day 1, Day 3, and Day 5.
 
 ### Shared response shape
+
+The following example uses an actor who can edit and delete the trip group. The backend computes `permissions` for the requesting actor; this value is passed consistently to the trip-group root, its days, and the nested points.
 
 For `GET /trips` and `GET /trips/top`:
 
 ```json
 [
   {
-    "tripGroupId": 123,
+    "id": 123,
+    "permissions": { "canEdit": true, "canDelete": true },
     "social": {
       "likes": 25,
       "likedByMe": true,
       "comments": { "count": 8 },
+      "reportedByMe": false,
       "favorites": 3,
       "favoritedByMe": false
     },
@@ -566,12 +591,13 @@ For `GET /trips` and `GET /trips/top`:
       {
         "id": 1001,
         "dayNumber": 1,
+        "permissions": { "canEdit": true, "canDelete": true },
         "title": "Day 1 title",
         "description": "Day description",
-      "countPeoples": 2,
-      "destination": "Sofia, Bulgaria",
-      "lat": 42.6975,
-      "lng": 23.3241,
+        "countPeoples": 2,
+        "destination": "Sofia, Bulgaria",
+        "lat": 42.6975,
+        "lng": 23.3241,
         "price": 250,
         "currency": {
           "id": 22,
@@ -594,14 +620,16 @@ For `GET /trips` and `GET /trips/top`:
             "social": {
               "likes": 5,
               "likedByMe": false,
-              "comments": { "count": 2 }
+              "comments": { "count": 2 },
+              "reportedByMe": false
             }
           }
         ],
         "social": {
           "likes": 10,
           "likedByMe": false,
-          "comments": { "count": 3 }
+          "comments": { "count": 3 },
+          "reportedByMe": false
         },
         "points": [
           {
@@ -612,6 +640,8 @@ For `GET /trips` and `GET /trips/top`:
             "lng": 23.3241,
             "pointNumber": 1,
             "tripId": 1001,
+            "createdAt": "2026-01-15T10:30:00.000Z",
+            "updatedAt": "2026-01-20T14:45:00.000Z",
             "images": [
               {
                 "id": 5002,
@@ -620,14 +650,17 @@ For `GET /trips` and `GET /trips/top`:
                 "social": {
                   "likes": 2,
                   "likedByMe": false,
-                  "comments": { "count": 1 }
+                  "comments": { "count": 1 },
+                  "reportedByMe": false
                 }
               }
             ],
+            "permissions": { "canEdit": true, "canDelete": true },
             "social": {
               "likes": 4,
               "likedByMe": false,
-              "comments": { "count": 2 }
+              "comments": { "count": 2 },
+              "reportedByMe": false
             }
           }
         ],
@@ -639,24 +672,17 @@ For `GET /trips` and `GET /trips/top`:
 ]
 ```
 
-For `GET /trips/:id`, the same object is returned instead of an array:
-
-```json
-{
-  "tripGroupId": 123,
-  "social": { "...": "same Trip Group social structure" },
-  "days": [ "same TripGroupDay structure as above" ]
-}
-```
+For `GET /trips/:tripGroupId`, the same `TripGroupResponse` object shape is returned instead of an array. Its `days` property contains the same `TripGroupDay` objects shown above; the literal string placeholder is not a response value.
 
 ### TripGroupDay
 
 Each element of `days[]` represents one existing day row belonging to the trip group.
 
-```json
+```text
 {
   "id": 1001,
   "dayNumber": 1,
+  "permissions": { "canEdit": true, "canDelete": true },
   "title": "Day 1 title",
   "description": "Day description",
   "countPeoples": 2,
@@ -697,7 +723,7 @@ The `currency` object is resolved from the backend `currency` select options:
 
 The Frontend displays `code` and may use `name` as the hover/tooltip text. Currency options are loaded from the Backend; the Frontend must not hard-code the currency list.
 
-The complete TripGroupDay response includes all public day-level data stored on the `trips` row that is part of the API contract: `id`, `dayNumber`, `title`, `description`, `countPeoples`, `destination`, `lat`, `lng`, `price`, `currency`, `transport`, `group`, `images`, `social`, `points`, `createdAt`, and `updatedAt`. `countEdited`, `tripGroupId`, and `ownerId` are not part of the public day response.
+The complete TripGroupDay response includes all public day-level data stored on the `trips` row that is part of the API contract: `id`, `dayNumber`, `permissions`, `title`, `description`, `countPeoples`, `destination`, `lat`, `lng`, `price`, `currency`, `transport`, `group`, `images`, `social`, `points`, `createdAt`, and `updatedAt`. `countEdited`, `tripGroupId`, and `ownerId` are not part of the public day response.
 
 Field semantics:
 * `countPeoples`: integer number of people for this day/trip row.
@@ -709,7 +735,7 @@ Field semantics:
 
 Day images and point images keep the existing `SocialImageDto` structure:
 
-```json
+```text
 {
   "id": 5001,
   "url": "<url>",
@@ -728,11 +754,11 @@ The trip-group social state is the global social state for the whole trip. In pa
 
 Day comments remain day-scoped. There is no separate day-independent comment count used for the trip-group like/favorite behavior.
 
-Days are ordered by `dayNumber ASC`, with `id ASC` as the tie-breaker. Missing day numbers are preserved; they are never generated.
+Days are ordered by `dayNumber ASC`, with `id ASC` as the tie-breaker. Gaps in the `dayNumber` sequence are preserved; day numbers are never generated or defaulted by the server.
 
 Points are ordered by `pointNumber ASC`, with `id ASC` as the tie-breaker.
 
-### GET /trips
+### 8.1 GET `/trips`
 
 * Auth: `optionalAuthentication`.
 * Query: `page`, `limit`, `search`, `group`, `transport`, `sort`.
@@ -740,29 +766,31 @@ Points are ordered by `pointNumber ASC`, with `id ASC` as the tie-breaker.
 * There is no `items` wrapper and no `pagination` object in the response.
 * Query pagination/filtering is used only to select which trip groups are returned.
 
-### GET /trips/top
+### 8.2 GET `/trips/top`
 
 * Auth: `optionalAuthentication`.
 * No query/body/params are required.
 * Response `200`: raw `TripGroupResponse[]`.
-* Maximum 5 trip groups.
-* Ranking is by likes belonging to the trip group.
+* Returns at most 5 trip groups with at least one persisted like on the trip-group target; groups with zero trip-group likes are omitted by the query.
+* Orders the returned groups by descending trip-group like count.
+* May return fewer than 5 even when more than 5 trip groups exist, if fewer than 5 groups have at least one group-level like.
+* Tie ordering is not guaranteed because the query has no secondary sort.
 * A trip group is returned only once regardless of how many day rows it contains.
 * The response structure is exactly the same as `GET /trips`.
 
-### GET /trips/:id
+### 8.3 GET `/trips/:tripGroupId`
 
 * Auth: `optionalAuthentication`.
 * Path parameter `id` is the **`tripGroupId` (INT)**, not a day id.
 * Response `200`: one `TripGroupResponse`.
-* The response contains the complete trip group: `tripGroupId`, trip-group `social`, and all existing `days[]`.
+* The response contains the complete trip group: `id` (the trip-group id), `permissions`, trip-group `social`, and all existing `days[]`.
 * The Frontend may open a specific day from the returned `days[]`; the Backend still returns the complete trip group.
 * Missing trip group -> `404 TRIP_NOT_FOUND`.
 
 All three endpoints therefore share exactly the same nested data model; only the cardinality differs:
 * `/trips` -> array of trip groups;
 * `/trips/top` -> array of up to 5 trip groups;
-* `/trips/:id` -> one trip group.
+* `/trips/:tripGroupId` -> one trip group.
 
 ### 8.4 GET `/me/trips`
 
@@ -775,8 +803,8 @@ This is the authenticated user's own trip-group list.
 * The backend must return only trip groups actually owned by that authenticated user.
 * Ownership is determined from the trip-group ownership relation (`trip_groups.ownerId`), never from a client-supplied identifier.
 * Response `200`: raw `TripGroupResponse[]`.
-* The response uses the exact same unified trip-group structure as `GET /trips`, `GET /trips/top`, and `GET /trips/:id`.
-* Each item contains only `tripGroupId`, trip-group `social`, and the existing `days[]` structure.
+* The response uses the exact same unified trip-group structure as `GET /trips`, `GET /trips/top`, and `GET /trips/:tripGroupId`.
+* Each item contains only `id` (the trip-group id), server-computed `permissions`, trip-group `social`, and the existing `days[]` structure.
 * The response contains **no `userId`, `ownerId`, or author/owner object**.
 * The authenticated user's UUID is used only server-side for ownership filtering and is never serialized into the response.
 * A user cannot use this endpoint to request another user's trips.
@@ -798,16 +826,12 @@ This is the authenticated user's favorite trip-group list.
 * The backend resolves the authenticated user's favorite records by the authenticated actor's server-side user id and then resolves the corresponding `tripGroupId` values.
 * A favorite points to a trip group, never to an individual day/trip row.
 * Response `200`: raw `TripGroupResponse[]`.
-* The response uses the exact same unified trip-group structure as `GET /trips`, `GET /trips/top`, and `GET /trips/:id`.
-* Each item contains only `tripGroupId`, trip-group `social`, and the existing `days[]` structure.
+* The response uses the exact same unified trip-group structure as `GET /trips`, `GET /trips/top`, and `GET /trips/:tripGroupId`.
+* Each item contains only `id` (the trip-group id), server-computed `permissions`, trip-group `social`, and the existing `days[]` structure.
 * The response contains **no `userId`, `ownerId`, or author/owner object**, including the owner id of a trip created by another user.
 * The authenticated user's UUID and all favorite-record ownership fields are used only server-side and are never serialized into the response.
 * The backend must never accept a client-supplied `userId` to retrieve another user's favorites.
 * If the user has no favorites, response is `200` with an empty array:
-
-```json
-[]
-```
 
 ```json
 []
@@ -864,50 +888,61 @@ The controller must not contain GCS access logic, random-selection logic, file-l
 ### 8.7 POST `/trips`
 
 * Auth: `requireAuthentication`.
-* Body (strict): `{ title, description, group, transport }`.
+* Body (strict): `{ dayNumber, title, description, group, transport }`.
+* `dayNumber` is REQUIRED: the user-selected ordinal of the initial day row (true JSON integer, 1..500). A missing, null, boolean, string, zero, negative, fractional or out-of-range value -> `400 VALIDATION_ERROR`. The server never defaults it.
 * Response `201`: `TripGroupResponse` (same complete trip-group response structure as the GET endpoints).
 
-### 8.9 DELETE `/trips/:id`
+### 8.8 DELETE `/trips/:tripGroupId`
 
 * Auth: `requireAuthentication` + owner/moderator.
-* Path params (strict): `{ id }`.
+* Path params (strict): `{ tripGroupId }` — the `trip_groups.id` of the whole trip.
 * Response `204` (empty).
 
-### 8.10 POST `/trips/:tripId/days`
+### 8.9 POST `/trips/:tripGroupId/days`
 
 * Auth: `requireAuthentication` + owner/moderator.
-* Path params (strict): `{ tripId }`. Body (strict): `{ dayNumber?, title?, description? }`.
-* Response `201`: `TripGroupResponse` (same complete trip-group response structure as `GET /trips/:id`).
-* `dayNumber` omitted -> assigned `max(dayNumber)+1`. Duplicate `dayNumber` -> `409 CONFLICT` ("Day N already exists in this trip.").
+* Path params (strict): `{ tripGroupId }` — the `trip_groups.id` of the trip the day is added to.
+* Body (strict): `{ dayNumber, title?, description? }`.
+* `dayNumber` is REQUIRED: the user-selected ordinal of the new day row (true JSON integer, 1..500). A missing, null, boolean, string, zero, negative, fractional or out-of-range value -> `400 VALIDATION_ERROR`. The server never assigns `max(dayNumber)+1` or any other default.
+* Response `201`: `TripGroupResponse` (same complete trip-group response structure as `GET /trips/:tripGroupId`).
+* Duplicate `dayNumber` within the same trip group -> `409 CONFLICT` ("Day N already exists in this trip."); the same number in a different trip group is allowed.
 
-### 8.11 PUT `/trips/:tripId/days/reorder`
+### 8.10 PUT `/trips/:tripGroupId/days/reorder`
 
 * Auth: `requireAuthentication` + owner/moderator.
-* Path params (strict): `{ tripId }`. Body (strict): `{ dayIds: number[] }`.
+* Path params (strict): `{ tripGroupId }`. Body (strict): `{ tripIds: number[] }` — every entry must be a true JSON number (integer id).
 * Response `200`: `TripDay[]` (re-ordered).
-* `dayIds` must contain exactly all day ids of the trip; otherwise `400 VALIDATION_ERROR`.
+* Each `tripIds` entry is the primary key `trips.id` of one day row of the trip group — never a `dayNumber` and never a `trip_groups.id`. The list must contain exactly all day ids of the trip group; otherwise `400 VALIDATION_ERROR`. Days are renumbered to their position in the submitted order.
 
-### 8.12 PUT `/trips/:tripId/days/:dayId`
+### 8.11 PUT `/trips/:tripGroupId/days/:tripId`
 
 * Auth: `requireAuthentication` + owner/moderator.
-* Path params (strict): `{ tripId, dayId }` (`dayId` = the day row's `Trip.id`).
+* Path params (strict): `{ tripGroupId, tripId }` (`tripId` = the day row's `Trip.id`).
 * Body (strict): `{ title?, description? }` (at least one required).
-* Response `200`: `TripGroupResponse` (same complete trip-group response structure as `GET /trips/:id`).
+* Response `200`: `TripGroupResponse` (same complete trip-group response structure as `GET /trips/:tripGroupId`).
 
-### 8.13 DELETE `/trips/:tripId/days/:dayId`
+### 8.12 DELETE `/trips/:tripGroupId/days/:tripId`
 
 * Auth: `requireAuthentication` + owner/moderator.
-* Path params (strict): `{ tripId, dayId }`.
+* Path params (strict): `{ tripGroupId, tripId }` (`tripId` = the day row's `Trip.id`).
 * Response `204` (empty).
 * Error: deleting the last remaining day -> `409 CONFLICT` ("The last day of a trip cannot be deleted.").
 
-### 8.14 POST `/trips/:tripId/days/:dayId/images`
+### 8.13 POST `/trips/:tripGroupId/days/:tripId/images`
 
 * Auth: `requireAuthentication` + owner/moderator (ownership checked BEFORE the file is stored).
-* Path params (strict): `{ tripId, dayId }`.
+* Path params (strict): `{ tripGroupId, tripId }` (`tripId` = the day row's `Trip.id`).
 * Multipart: field `file`, exactly one file.
 * Response `201`: `ImageDto`.
 * Error: day already has 9 images -> `409 CONFLICT`.
+
+### 8.14 GET `/trips/:tripId/points`
+
+* Auth: `optionalAuthentication` (public read; an anonymous request uses the public Frontend token).
+* Path params (strict): `{ tripId }`; `tripId` is the day row's `Trip.id`. Every point belongs to exactly one day row and carries that day's `Trip.id` in its `TripPoint.tripId` field (`points.tripId` is required and is never null).
+* Response `200`: raw `TripPoint[]` — the complete point collection of that day, in `pointNumber` order.
+* Every element is the full `TripPoint` response DTO (§10.7): `images` with image social state, point `social` state and server-computed `permissions` included.
+* A missing day -> `404 NOT_FOUND`; an existing day without points -> `200` with an empty array.
 
 ---
 
@@ -915,11 +950,11 @@ The controller must not contain GCS access logic, random-selection logic, file-l
 
 Mounted at `/api/v1/days`.
 
-### 9.1 PUT `/days/:dayId/points/reorder`
+### 9.1 PUT `/days/:tripId/points/reorder`
 
 * Auth: `requireAuthentication` + owner/moderator.
-* Path params (strict): `{ dayId }` (`dayId` = the day row's `Trip.id`).
-* Body (strict): `{ pointIds: number[] }`.
+* Path params (strict): `{ tripId }` (`tripId` = the day row's `Trip.id`).
+* Body (strict): `{ pointIds: number[] }` — every entry must be a true JSON number (integer id).
 * Response `200`: `TripPoint[]` (re-ordered).
 * `pointIds` must contain exactly all point ids of the day (may be an empty array for zero points); otherwise `400 VALIDATION_ERROR`.
 
@@ -932,10 +967,10 @@ Mounted at `/api/v1/points`.
 ### 10.1 POST `/points`
 
 * Auth: `requireAuthentication` + owner/moderator (of the day's trip group).
-* Body (strict): `{ dayId, title, description?, latitude, longitude }`.
-* Response `201`: `TripPoint`.
-* `dayId` is the API's name for the day the point belongs to; its value is the day row's `Trip.id`.
-* `pointNumber` MUST NOT be sent: it is generated by the server (the next number in the day). Client-controlled ownership/sequence fields (`ownerId`, `userId`, `tripId`, `pointNumber`, `numberPoint`, `_ownerId`, `_ownerTripId`) are rejected.
+* Body (strict): `{ tripId, name, description?, lat, lng }` — `tripId`, `lat` and `lng` must be true JSON numbers (strings/booleans are rejected).
+* Response `201`: `TripPoint[]` — the complete current point collection of the day the point was created in, in `pointNumber` order (same full DTO as §10.7).
+* `tripId` is the primary key `trips.id` of the day row the point belongs to — never the trip-group id and never `trips.dayNumber`.
+* `pointNumber` MUST NOT be sent: it is generated by the server as `max(existing pointNumber) + 1` of that day. Client-controlled ownership/sequence/legacy fields (`ownerId`, `userId`, `dayId`, `pointNumber`, `numberPoint`, `_ownerId`, `_ownerTripId`) are rejected.
 
 ### 10.2 GET `/points/:pointId`
 
@@ -947,8 +982,8 @@ Mounted at `/api/v1/points`.
 
 * Auth: `requireAuthentication` + owner/moderator.
 * Path params (strict): `{ pointId }`.
-* Body (strict): `{ title?, description?, latitude?, longitude? }` (at least one required).
-* Response `200`: `TripPoint`.
+* Body (strict): `{ name?, description?, lat?, lng? }` (at least one required). `lat`/`lng` must be true JSON numbers within their bounds or `null` (which clears the coordinate); strings/booleans are rejected.
+* Response `200`: `TripPoint[]` — the complete current point collection of the day the updated point belongs to, in `pointNumber` order (same full DTO as §8.14).
 * `pointNumber`/`numberPoint` cannot be changed (rejected).
 
 ### 10.4 DELETE `/points/:pointId`
@@ -973,9 +1008,9 @@ Mounted at `/api/v1/points`.
 
 ### 10.7 `TripPoint` (point response DTO)
 
-The point response keeps the public database-aligned field names and types for the point data. `tripId` is included as the public parent-trip reference. Internal fields `ownerId`, `countEdited`, `createdAt`, and `updatedAt` are never exposed. Social and image data are API-level additions.
+The point response keeps the public database-aligned field names and types for the point data. `tripId` is required (non-null) and identifies the parent day row (`points.tripId` = `trips.id`); every point is attached to exactly one day. Internal fields `ownerId` and `countEdited` are never exposed. `createdAt`/`updatedAt` are returned as ISO strings. Social and image data are API-level additions.
 
- ```json
+ ```text
 {
   "id": 2001,
   "name": "Point title",
@@ -984,7 +1019,13 @@ The point response keeps the public database-aligned field names and types for t
   "lng": 23.3241,
   "pointNumber": 1,
   "tripId": 1001,
+  "createdAt": null | "<iso>",
+  "updatedAt": null | "<iso>",
   "images": [ SocialImageDto ],
+  "permissions": {
+    "canEdit": true,
+    "canDelete": true
+  },
   "social": SocialState
 }
 ```
@@ -993,20 +1034,25 @@ Non-negotiable point field rules:
 
 * `name` is the database `Point.name` field; do not rename it to `title`.
 * `lat` and `lng` are the database coordinate fields; do not rename them to `latitude` / `longitude`.
-* `pointNumber` is returned and represents the persisted point order.
-* `tripId` is returned as the public parent-trip reference for the point. It is not accepted from the client in point create/update requests. `countEdited`, `createdAt`, and `updatedAt` are not part of the public point response.
+* `pointNumber` is returned as a JSON **number**: the column is a signed INT managed entirely by the backend (`max + 1` on create, renumbering on reorder/delete).
+* `tripId` is required (non-null) in `TripPoint`; it is always the parent day-row reference (`trips.id`). It is required from the client in `POST /points` (as the day the point belongs to) and is never accepted in point update requests.
 * `ownerId` is never returned to the Frontend. Ownership is resolved server-side.
+* `permissions` is the server-computed edit/delete right of the requesting actor; anonymous callers receive `canEdit: false` and `canDelete: false`.
 * `images` and `social` remain API-level nested fields.
 
 ### 10.8 `TripDay` (day response DTO)
 
-```json
+```text
 {
   "id": 0,
-  "day": 1,
+  "dayNumber": 1,
   "title": null | "<string>",
   "images": [ SocialImageDto ],
   "points": [ TripPoint ],
+  "permissions": {
+    "canEdit": true,
+    "canDelete": true
+  },
   "social": SocialState
 }
 ```
@@ -1018,16 +1064,17 @@ Non-negotiable point field rules:
   "likes": 0,
   "likedByMe": false,
   "comments": { "count": 0 },
+  "reportedByMe": false,
   "favorites": 0,
   "favoritedByMe": false
 }
 ```
 
-`favorites` and `favoritedByMe` are present only on trip-group targets.
+`favorites` and `favoritedByMe` are present only on trip-group targets. `reportedByMe` reflects whether the authenticated actor has reported the target and is `false` for anonymous callers.
 
 ### 10.10 `ImageDto` / `SocialImageDto`
 
-```json
+```text
 // ImageDto
 { "id": 0, "url": "<url>", "thumbnailUrl": "<url>" }
 
@@ -1049,7 +1096,7 @@ Mounted at `/api/v1/images`.
 
 ### 11.2 Image upload contract (all image uploads)
 
-Applies to `POST /auth/me/image`, `POST /trips/:tripId/days/:dayId/images`, and `POST /points/:pointId/images`.
+Applies to `POST /auth/me/image`, `POST /trips/:tripGroupId/days/:tripId/images`, and `POST /points/:pointId/images`.
 
 * Multipart field name: `file`.
 * Exactly one binary part per request; no text fields are part of the contract (`files: 1`, `fields: 0`, `parts: 1`).
@@ -1059,7 +1106,7 @@ Applies to `POST /auth/me/image`, `POST /trips/:tripId/days/:dayId/images`, and 
 * Decoded format (authoritative; bytes are inspected with Sharp): `jpeg`, `png`, `webp`, `gif`. HEIC/HEIF, SVG, TIFF, AVIF are not accepted.
 * Decoded dimension ceilings: width/height <= `10000`, total pixels <= `50_000_000` (counting all frames).
 * Processing: the backend re-encodes/sanitizes the image (EXIF orientation applied via `rotate()`; re-encoded per format). The frontend is expected only to stay within the 25 MB upload cap; the backend does its own sanitizing/re-encoding and thumbnail generation.
-* Storage: server-generated object key `images/<uuid>.<ext>`; create-only writes (`ifGenerationMatch: 0`). The original is stored as-is (sanitized), and a thumbnail sidecar `<name>_thumb.webp` (800x600, `fit: inside`, quality 80, webp) is generated.
+* Storage: the processed full-size image is stored at the server-generated object key `images/<uuid>.<ext>` using create-only writes (`ifGenerationMatch: 0`); a thumbnail sidecar `<name>_thumb.webp` (800x600, `fit: inside`, quality 80, webp) is generated.
 * Max images per entity: `9` per day row and `9` per point (a day image row has `Image.tripId` = day row id; a point image row has `Image.pointId`).
 * Oversized/unsupported uploads are `400 VALIDATION_ERROR`; a generated-key collision is `409 CONFLICT`.
 
@@ -1082,7 +1129,7 @@ Mounted at the v1 root (`commentController` spans several prefixes). Reading is 
 
 * `GET /trip-groups/:tripGroupId/comments`
 
-* `GET /trips/:tripId/days/:dayId/comments`
+* `GET /trips/:tripGroupId/days/:tripId/comments`
 
 * `GET /points/:pointId/comments`
 
@@ -1098,28 +1145,33 @@ Mounted at the v1 root (`commentController` spans several prefixes). Reading is 
 
 `CommentListResponse`:
 
-```json
+```text
 { "items": [ CommentDto ], "page": 1, "limit": 10, "total": 0 }
 ```
 
 `CommentDto`:
 
-```json
+```text
 {
   "id": 0,
-  "author": { "id": "<uuid>", "name": "<string>" },
-  "text": "<string>",
-  "editCount": 0,
+  "author": { "name": "<string>" },
+  "comment": "<string>",
+  "permissions": { "canEdit": true, "canDelete": true },
+  "social": { "reportedByMe": false },
   "createdAt": null | "<iso>",
   "updatedAt": null | "<iso>"
 }
 ```
 
+* `comment` is the text field of the DTO and of the request body (the database column is `comments.comment`); do not rename it to `text`.
+* `author` carries only the server-side `name` snapshot — no user id is exposed.
+* The internal edit counter is not part of the response.
+
 ### 12.2 Create comment (POST)
 
 * `POST /trip-groups/:tripGroupId/comments`
 
-* `POST /trips/:tripId/days/:dayId/comments`
+* `POST /trips/:tripGroupId/days/:tripId/comments`
 
 * `POST /points/:pointId/comments`
 
@@ -1127,7 +1179,7 @@ Mounted at the v1 root (`commentController` spans several prefixes). Reading is 
 
 * Auth: `requireAuthentication`.
 
-* Body (strict): `{ text }`.
+* Body (strict): `{ comment }` (trimmed, 1..1000).
 
 * Response `201`: `CommentDto`.
 
@@ -1135,14 +1187,14 @@ Mounted at the v1 root (`commentController` spans several prefixes). Reading is 
 
 ### 12.3 PUT `/comments/:commentId`
 
-* Auth: `requireAuthentication` + author only (else `403 FORBIDDEN`).
+* Auth: `requireAuthentication`; allowed for the comment author or a moderator (else `403 FORBIDDEN`).
 * Path params (strict): `{ commentId }`.
-* Body (strict): `{ text }`.
-* Response `200`: `CommentDto` (increments `editCount`).
+* Body (strict): `{ comment }` (trimmed, 1..1000).
+* Response `200`: `CommentDto`. The internal edit counter is incremented server-side (not exposed in the response).
 
 ### 12.4 DELETE `/comments/:commentId`
 
-* Auth: `requireAuthentication`; allowed for the comment author, the trip-group owner, or a moderator (`admin`/`manager`).
+* Auth: `requireAuthentication`; allowed for the comment author or a moderator (`admin`/`manager`). The trip-group owner has no special deletion right beyond being the author or a moderator.
 * Path params (strict): `{ commentId }`.
 * Response `204` (empty).
 
@@ -1152,17 +1204,17 @@ Mounted at the v1 root (`commentController` spans several prefixes). Reading is 
 
 Mounted at `/api/v1/likes`.
 
-### 13.1 POST `/likes/`
+### 13.1 POST `/likes`
 
 * Auth: `requireAuthentication`.
-* Body (strict): `{ targetType, targetId }`.
+* Body (strict): `{ targetType, targetId }` — `targetId` must be a true JSON number (integer id).
 * Response `200`: `SocialState` (idempotent; repeating a like is a no-op).
 * The target must exist; otherwise `404 NOT_FOUND`.
 
-### 13.2 DELETE `/likes/`
+### 13.2 DELETE `/likes`
 
 * Auth: `requireAuthentication`.
-* Query (strict): `{ targetType, targetId }`.
+* Query (strict): `{ targetType, targetId }` — query values arrive as strings; `targetId` must be a numeric string that parses to an integer id.
 * Response `204` (empty). Idempotent.
 
 ### 13.3 Valid `targetType` values
@@ -1187,16 +1239,16 @@ Canonical mapping:
 
 Mounted at `/api/v1/favorites`. Favorites exist on trip groups only.
 
-### 14.1 POST `/favorites/`
+### 14.1 POST `/favorites`
 
 * Auth: `requireAuthentication`.
-* Body (strict): `{ tripGroupId }`.
+* Body (strict): `{ tripGroupId }` — `tripGroupId` must be a true JSON number (integer id).
 * Response `200`: `SocialState` (the group's state, including `favorites`/`favoritedByMe`). Idempotent.
 
-### 14.2 DELETE `/favorites/`
+### 14.2 DELETE `/favorites`
 
 * Auth: `requireAuthentication`.
-* Query (strict): `{ tripGroupId }`.
+* Query (strict): `{ tripGroupId }` — the query value arrives as a numeric string that parses to an integer id.
 * Response `204` (empty). Idempotent.
 
 ---
@@ -1205,10 +1257,10 @@ Mounted at `/api/v1/favorites`. Favorites exist on trip groups only.
 
 Mounted at `/api/v1/reports`.
 
-### 15.1 POST `/reports/`
+### 15.1 POST `/reports`
 
 * Auth: `requireAuthentication`.
-* Body (strict): `{ targetType, targetId, reason? }`.
+* Body (strict): `{ targetType, targetId, reason? }` — `targetId` must be a true JSON number (integer id).
 * Response `201`: `ReportDto`.
 * Error: the same user already reported the same target -> `409 CONFLICT` ("You have already reported this resource.").
 * Reports may target a trip group, trip/day, point, image, or comment.
@@ -1216,7 +1268,7 @@ Mounted at `/api/v1/reports`.
 
 `ReportDto`:
 
-```json
+```text
 {
   "id": 0,
   "targetType": "tripGroup" | "trip" | "point" | "image" | "comment",
@@ -1226,7 +1278,15 @@ Mounted at `/api/v1/reports`.
 }
 ```
 
-Reports are write-only from the public/user API. Users never receive the administrative report queue through `/reports`.
+Reports are never read back through `/reports`: users never receive the administrative report queue; the queue is served only by `GET /admin/reports` (§16.10). A report's author may, however, withdraw their own report:
+
+### 15.2 DELETE `/reports/:reportId`
+
+* Auth: `requireAuthentication`; allowed only for the report's author (else `403 FORBIDDEN`).
+* Path params (strict): `{ reportId }` (positive integer).
+* Response `204` (empty). Removes the report record only; the reported content stays untouched.
+* Errors: missing report -> `404 NOT_FOUND`; not the author -> `403 FORBIDDEN` ("Only the report author can delete this report.").
+* This operation is separate from the administrative removal `DELETE /admin/reports/:reportId` (§16.11), which requires the `admin`/`manager` role and checks no authorship.
 
 ---
 
@@ -1244,7 +1304,7 @@ Admin pagination query (strict, shared by all admin list endpoints):
 * Role: `admin` or `manager`.
 * Response `200`: `AdminPage<AuthUserDto>` (ordered by email asc).
 
-```json
+```text
 {
   "items": [ AuthUserDto ],
   "pagination": { "page": 1, "pageSize": 50, "total": 0, "totalPages": 0 }
@@ -1253,14 +1313,17 @@ Admin pagination query (strict, shared by all admin list endpoints):
 
 ### 16.2 PUT `/admin/users/:userId`
 
-* Role: `admin` ONLY.
+* Role: `admin` or `manager` on the route. Assigning `role` or `password` additionally requires the `admin` role: a `manager` request whose body contains `role` or `password` is rejected with `403 FORBIDDEN` ("Only an admin can change role or password."). `firstName`, `lastName`, `email`, `status` and `emailVerified` are assignable by both roles.
 * Path params (strict): `{ userId: UUID }`.
-* Body (strict): `{ firstName?, lastName?, role?, status? }` (at least one required).
+* Body (strict): `{ firstName?, lastName?, email?, role?, status?, emailVerified?, password? }` (at least one required).
 
-  * `role` enum: `user` | `admin` | `manager`.
+  * `role` enum: `user` | `admin` | `manager` (admin only).
   * `status` enum: `PENDING_VERIFICATION` | `ACTIVE` | `SUSPENDED` | `DEACTIVATED`.
+  * `email` is trimmed, lowercased and pattern-checked; a `emailVerified` boolean is stored as `emailVerifiedAt` (`true` -> now, `false` -> `null`).
+  * `password` follows the account password policy (8..72 bytes) and is stored hashed.
 * Response `200`: `AuthUserDto`.
-* Identity/credential/verification fields (`id`, `email`, `hashedPassword`, `password`, `imageFile`, `verifyEmail`, `emailVerifiedAt`, `createdAt`) are not settable and are rejected.
+* Errors: unknown user -> `404 NOT_FOUND`; email already used by another account -> `409 CONFLICT` ("Another account already uses this email address.").
+* Identity/credential/verification columns (`id`, `hashedPassword`, `imageFile`, `verifyEmail`, `emailVerifiedAt`, `createdAt`) are not settable through this endpoint; the strict schema rejects every undeclared field.
 
 ### 16.3 DELETE `/admin/users/:userId`
 
@@ -1276,7 +1339,7 @@ Admin pagination query (strict, shared by all admin list endpoints):
 
 `FailedLogDto`:
 
-```json
+```text
 {
   "id": 0,
   "date": null | "<string>",
@@ -1296,7 +1359,7 @@ Admin pagination query (strict, shared by all admin list endpoints):
 ### 16.5 DELETE `/admin/failed-login-logs`
 
 * Role: `admin` or `manager`.
-* Body (strict): `{ ids: number[] }` (1..200 ids, no duplicates).
+* Body (strict): `{ ids: number[] }` (1..200 ids, no duplicates) — every entry must be a true JSON number.
 * Response `200`: `{ "deleted": <number> }`.
 
 ### 16.6 GET `/admin/route-not-found-logs`
@@ -1306,7 +1369,7 @@ Admin pagination query (strict, shared by all admin list endpoints):
 
 `RouteNotFoundLogDto`:
 
-```json
+```text
 {
   "id": 0,
   "date": null | "<string>",
@@ -1361,7 +1424,7 @@ Admin pagination query (strict, shared by all admin list endpoints):
 This is the administrative report queue.
 
 * Role: `admin` or `manager`.
-* Reports are automatically available here after a user successfully creates them through `POST /reports/`.
+* Reports are automatically available here after a user successfully creates them through `POST /reports`.
 * The Frontend does not need to manually move or copy a report into the admin area.
 * The endpoint returns reports persisted in the `reports` table.
 * The endpoint must support both trip reports and comment reports.
@@ -1376,7 +1439,7 @@ This is the administrative report queue.
 
 Response:
 
-```json
+```text
 {
   "items": [ AdminReportDto ],
   "pagination": {
@@ -1390,7 +1453,7 @@ Response:
 
 `AdminReportDto`:
 
-```json
+```text
 {
   "id": 0,
   "targetType": "tripGroup" | "trip" | "point" | "image" | "comment",
@@ -1448,7 +1511,7 @@ The initial report queue intentionally keeps the DTO minimal. The backend must n
 
 ## 18. Zod Request Schemas
 
-All schemas are `.strict()` unless noted. Numbers may be sent as numeric JSON values or as numeric strings where noted (query strings).
+All schemas are `.strict()` unless noted. Numeric fields in a JSON body must use actual JSON numbers; numeric strings and booleans are rejected, and integer fields reject fractional values. `null` is rejected unless the specific schema explicitly permits it (for example, `lat` and `lng` in `pointUpdateSchema`, where `null` clears the coordinate). Numeric query values arrive as strings and are parsed by the query schemas.
 
 ### 18.1 Shared helpers
 
@@ -1456,14 +1519,16 @@ All schemas are `.strict()` unless noted. Numbers may be sent as numeric JSON va
 * `passwordString({min,max})`: `z.string().min(min).max(max).refine(byteLength <= max)`. Never trimmed.
 * `optionalText({max,min?})`: `union(trimmedString, null).optional()` then transforms `undefined`/`null`/`''` -> `null`. Output `string | null`.
 * `patchText({max,min?})`: same as optionalText but keeps `undefined` as `undefined` (partial update; blank clears to null).
-* `requiredNumber({min,max})`: `union(number, string(min 1 char) -> Number)` then `pipe(number.min.max)`.
-* `patchNumber({min,max})`: `union(number.min.max, string->Number.min.max, null).optional()`. Output `number | null | undefined`.
+* `requiredNumber({min,max})`: `number().min.max` — a true JSON number only; strings, booleans and `null` are rejected.
+* `patchNumber({min,max})`: `union(number.min.max, null).optional()`. Output `number | null | undefined`; strings and booleans are rejected.
+* `requiredInt({min,max})`: `number().int().min.max` — required; a missing, null, boolean, string, fractional or non-integer value is rejected (no default).
 * `optionalInt({min,max})`: preprocess `''`/`null` -> `undefined`, then `coerce.number().int().min.max.optional()`.
 * `positiveIdParam`: `z.string().regex(/^\d+$/)` and refine 1..2147483647.
 * `userIdParam`: `z.string().regex(UUID)`.
-* `positiveId`: `z.coerce.number().int().min(1).max(2147483647)`.
+* `positiveId`: `z.number().int().min(1).max(2147483647)` — a true JSON number id, used in JSON-body schemas.
+* `positiveIdQuery`: `z.coerce.number().int().min(1).max(2147483647)` — the query-string variant used by the DELETE query schemas (query values arrive as strings).
 * `targetTypeInput`: `z.string().trim().toLowerCase().pipe(z.enum(['tripgroup','day','trip','point','image']))`.
-* `idList({min,max})`: `z.array(positiveId).min(min).max(max).refine(no duplicate ids)`.
+* `idList({min,max})`: `z.array(positiveId).min(min).max(max).refine(no duplicate ids)` — true JSON numbers only.
 
 ### 18.2 Auth schemas
 
@@ -1483,12 +1548,12 @@ All schemas are `.strict()` unless noted. Numbers may be sent as numeric JSON va
 
 | Schema                | Fields                                                                                         | Notes                                                                                                      |
 | --------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `tripWriteSchema`     | `title` (1..60), `description` (optional/null, <=2000), `group` (1..45), `transport` (1..45)   | `group`/`transport` are validated against active dynamic-config select values at the service layer         |
+| `tripWriteSchema`     | `dayNumber` (1..500, required), `title` (1..60), `description` (optional/null, <=2000), `group` (1..45), `transport` (1..45) | `dayNumber` is the user-selected ordinal of the initial day row and is never defaulted; `group`/`transport` are validated against active dynamic-config select values at the service layer |
 | `tripListQuerySchema` | `page?`, `limit?`, `search?`, `group?`, `transport?`, `sort?`                                  | `page` 1..10000; `limit` 1..100; `search` 1..200; `group`/`transport` 1..45; `sort` enum `newest`/`oldest` |
-| `dayCreateSchema`     | `dayNumber?` (1..500), `title?` (optional/null, 1..60), `description?` (optional/null, <=2000) |                                                                                                            |
-| `dayUpdateSchema`     | `title?`, `description?` (at least one)                                                        | patch semantics                                                                                            |
-| `dayReorderSchema`    | `dayIds`                                                                                       | array 1..500, no duplicates                                                                                |
-| `pointReorderSchema`  | `pointIds`                                                                                     | array 0..500, no duplicates                                                                                |
+| `dayCreateSchema`     | `dayNumber` (1..500, required), `title?` (optional/null, 1..60), `description?` (optional/null, <=2000) | `dayNumber` is required and persisted unchanged; the server never assigns `max(dayNumber)+1` |
+| `dayUpdateSchema`     | `title?`, `description?` (at least one)                                                        | patch semantics; `dayNumber` is rejected (use the reorder endpoint)                                        |
+| `dayReorderSchema`    | `tripIds`                                                                                      | array 1..500 of `trips.id` day-row ids (true JSON numbers), no duplicates                                                      |
+| `pointReorderSchema`  | `pointIds`                                                                                     | array 0..500 (true JSON numbers), no duplicates                                                                                |
 
 The new trip-data endpoints do not accept query parameters unless explicitly documented in their endpoint sections. In particular:
 
@@ -1501,53 +1566,52 @@ The new trip-data endpoints do not accept query parameters unless explicitly doc
 
 | Schema              | Fields                                                                                                           | Notes                                                       |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `pointCreateSchema` | `dayId`, `title` (1..100), `description` (optional/null, <=1050), `latitude` (-90..90), `longitude` (-180..180)  | `pointNumber` MUST NOT be sent                              |
-| `pointUpdateSchema` | `title?` (1..100), `description?` (patch, <=1050), `latitude?` (patch, -90..90), `longitude?` (patch, -180..180) | at least one required; `pointNumber`/`numberPoint` rejected |
+| `pointCreateSchema` | `tripId` (positive int), `name` (1..100), `description` (optional/null, <=1050), `lat` (-90..90), `lng` (-180..180)  | `tripId` is the day row's `trips.id`; `tripId`/`lat`/`lng` must be true JSON numbers; `pointNumber` MUST NOT be sent                                        |
+| `pointUpdateSchema` | `name?` (1..100), `description?` (patch, <=1050), `lat?` (patch, -90..90), `lng?` (patch, -180..180) | at least one required; `lat?`/`lng?` are true JSON numbers or `null` (clears); `pointNumber`/`numberPoint`/`tripId`/`dayId` rejected                                |
 
 ### 18.5 Social schemas
 
 | Schema                    | Fields                                                       | Notes                                                                                   |
 | ------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| `socialTargetBodySchema`  | `targetType`, `targetId`                                     | `targetType` = `targetTypeInput`; `targetId` = positive id                              |
-| `socialTargetQuerySchema` | `targetType`, `targetId`                                     | same, used for DELETE query strings                                                     |
-| `favoriteBodySchema`      | `tripGroupId`                                                | positive id                                                                             |
-| `favoriteQuerySchema`     | `tripGroupId`                                                | positive id                                                                             |
-| `commentBodySchema`       | `text` (1..1000)                                             | trimmed                                                                                 |
+| `socialTargetBodySchema`  | `targetType`, `targetId`                                     | `targetType` = `targetTypeInput`; `targetId` = positive id (true JSON number)                              |
+| `socialTargetQuerySchema` | `targetType`, `targetId`                                     | same, but `targetId` uses the query-string id schema (numeric string)                                                     |
+| `favoriteBodySchema`      | `tripGroupId`                                                | positive id (true JSON number)                                                                             |
+| `favoriteQuerySchema`     | `tripGroupId`                                                | positive id (query-string variant: numeric string)                                                                             |
+| `commentBodySchema`       | `comment` (1..1000)                                          | trimmed; the request field and DTO field are `comment` (never `text`)                                   |
 | `reportBodySchema`        | `targetType`, `targetId`, `reason?` (optional/null, <=1000)  | Report target type additionally allows `comment`                                        |
-| `reportTargetTypeInput`   | `tripgroup` | `day` | `trip` | `point` | `image` | `comment` | Case-insensitive, trimmed and lowercased; `day` and `trip` resolve to a trip/day target |
+| `reportTargetTypeInput`   | `tripgroup`, `day`, `trip`, `point`, `image`, `comment` | Case-insensitive, trimmed and lowercased; `day` and `trip` resolve to a trip/day target |
 | `commentPageQuerySchema`  | `page?`, `limit?`                                            | `page` 1..10000; `limit` 1..100                                                         |
 
 ### 18.6 Admin schemas
 
 | Schema                       | Fields                                                       | Notes                                                                                                         |
 | ---------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `adminUserUpdateSchema`      | `firstName?`, `lastName?`, `role?`, `status?` (at least one) | `role` enum `user`/`admin`/`manager`; `status` enum `PENDING_VERIFICATION`/`ACTIVE`/`SUSPENDED`/`DEACTIVATED` |
-| `failedLogDeleteSchema`      | `ids`                                                        | array 1..200, no duplicates                                                                                   |
+| `adminUserUpdateSchema`      | `firstName?`, `lastName?`, `email?`, `role?`, `status?`, `emailVerified?`, `password?` (at least one) | `role` enum `user`/`admin`/`manager`; `status` enum `PENDING_VERIFICATION`/`ACTIVE`/`SUSPENDED`/`DEACTIVATED`; `emailVerified` boolean is stored as `emailVerifiedAt`; `role` and `password` changes are admin-only (a manager sending them receives `403 FORBIDDEN`) |
+| `failedLogDeleteSchema`      | `ids`                                                        | array 1..200 (true JSON numbers), no duplicates                                                                                   |
 | `adminPaginationQuerySchema` | `page?`, `pageSize?`                                         | transforms to defaults `page=1`, `pageSize=50`; `page` 1..10000, `pageSize` 1..100                            |
 | `adminReportIdParams`        | `reportId`                                                   | positive integer                                                                                              |
 
 ### 18.7 Route-parameter schemas (all `.strict()`)
 
-| Schema                | Params                                   |
-| --------------------- | ---------------------------------------- |
-| `userIdParams`        | `userId` (UUID)                          |
-| `tripIdParams`        | `id` (positive int)                      |
-| `tripIdOnlyParams`    | `tripId` (positive int)                  |
-| `tripDayParams`       | `tripId`, `dayId` (both positive int)    |
-| `dayIdParams`         | `dayId` (positive int)                   |
-| `pointIdParams`       | `pointId` (positive int)                 |
-| `pointImageParams`    | `pointId`, `imageId` (both positive int) |
-| `imageIdParams`       | `imageId` (positive int)                 |
-| `commentIdParams`     | `commentId` (positive int)               |
-| `tripGroupIdParams`   | `tripGroupId` (positive int)             |
-| `adminReportIdParams` | `reportId` (positive int)                |
+| Schema                | Params                                        |
+| --------------------- | --------------------------------------------- |
+| `userIdParams`        | `userId` (UUID)                               |
+| `tripIdOnlyParams`    | `tripId` (positive int) — a day row's `trips.id` |
+| `tripDayParams`       | `tripGroupId`, `tripId` (both positive int; `tripId` = the day row's `trips.id`) |
+| `pointIdParams`       | `pointId` (positive int)                      |
+| `pointImageParams`    | `pointId`, `imageId` (both positive int)      |
+| `imageIdParams`       | `imageId` (positive int)                      |
+| `commentIdParams`     | `commentId` (positive int)                    |
+| `tripGroupIdParams`   | `tripGroupId` (positive int)                  |
+| `reportIdParams`      | `reportId` (positive int) — author-facing report removal |
+| `adminReportIdParams` | `reportId` (positive int)                     |
 
 The new `/me/trips` and `/me/favorites` endpoints intentionally do not use `userIdParams`.
 
 ### 18.8 Server-generated / forbidden fields (must NOT be sent by the frontend)
 
 * `ownerId`, `userId`, `_ownerId`, `_ownerTripId` — ownership always derives from the authenticated actor; rejected on any write.
-* `tripId`, `dayId` as parent references in trip/day/point writes (except `dayId` which IS an accepted field on point create to name the day).
+* `dayId` — the legacy name of the point-create parent field; rejected (the contract uses `tripId`, the day row's `trips.id`).
 * `pointNumber`, `numberPoint` — assigned by the server.
 * `id`, `email`, `hashedPassword`, `password`, `imageFile`, `verifyEmail`, `emailVerifiedAt`, `createdAt` — never settable on admin user update.
 * `days`, `points` — nested structures are rejected on trip writes.
@@ -1561,17 +1625,17 @@ The API returns DTOs, not database models. The following are the API response sh
 
 | DTO                                   | Where returned                                              |
 | ------------------------------------- | ----------------------------------------------------------- |
-| `AuthUserDto`                         | register/verify/login/refresh/me/update profile/admin users |
-| `AuthSessionDto`                      | login, refresh                                              |
+| `AuthUserDto`                         | admin users list/update only                                 |
+| `ProfileDto` (in `{ user }`)          | register/verify/login/refresh/me/update profile               |
+| `AuthSessionDto`                      | login, refresh                                               |
 | `AuthUserResponse` (`{ user }`)       | verify-email, me, update profile                            |
 | `MessageResponse` (`{ message }`)     | register, resend, logout, forgot, reset                     |
 | `ImageDto`                            | image create endpoints, profile image GET/POST              |
 | `SocialImageDto`                      | trip/point image lists                                      |
 | `SocialState`                         | trip detail, day, point, image, like/favorite responses     |
-| `TripGroupResponse`                   | POST /trips, POST /trips/:tripId/days, PUT /trips/:tripId/days/:dayId |
-| `TripDay`                             | PUT /trips/:tripId/days/reorder                              |
+| `TripGroupResponse`                    | POST /trips, POST /trips/:tripGroupId/days, PUT /trips/:tripGroupId/days/:tripId, GET /trips, GET /trips/top, GET /trips/:tripGroupId, GET /me/trips, GET /me/favorites |
+| `TripDay`                             | PUT /trips/:tripGroupId/days/reorder                         |
 | `TripPoint`                           | point GET/POST/PUT, point reorder                           |
-| `TripGroupResponse`                    | GET /trips, GET /trips/top, GET /trips/:id                 |
 | `CommentDto`                          | comment list/create/update                                  |
 | `CommentListResponse`                 | comment list                                                |
 | `ReportDto`                           | report create                                               |
@@ -1603,7 +1667,7 @@ DATABASE MODELS (not returned by the API): `User`, `TripGroup`, `Trip`, `Point`,
 11. **Manager accessing moderator functionality**: allowed — `manager` is in `MODERATOR_ROLES`.
 12. **Admin accessing admin functionality**: allowed — `admin` is in both `ADMIN_ROLES` and `MODERATOR_ROLES`.
 13. **Public GET with no Authorization**: `404 NOT_FOUND`.
-14. **Public GET with a valid Authorization token**: authenticated viewer context; viewer-specific fields (`likedByMe`, `favoritedByMe`) are returned where the existing DTO supports them.
+14. **Public GET with a valid user access JWT**: authenticated viewer context; viewer-specific fields (`likedByMe`, `favoritedByMe`) are returned where the existing DTO supports them. The public frontend bearer token instead creates an anonymous context.
 15. **Public GET with an invalid Authorization token**: `401 UNAUTHORIZED`; never silently turned anonymous.
 16. **My Trips never accepts a user id from the Frontend**: the authenticated actor is always obtained server-side from the access token.
 17. **My Favorites never accepts a user id from the Frontend**: the authenticated actor is always obtained server-side from the access token.
@@ -1630,6 +1694,7 @@ Base path: `/api/v1`. "Public" = public bearer token (anonymous read); "Auth" = 
 | POST   | `/auth/login`                         | None             | `{ email, password }`                                                   | 200 `AuthSessionDto` + cookie        | 401, 403, 400           |
 | POST   | `/auth/refresh`                       | Cookie           | none                                                                    | 200 `AuthSessionDto` + cookie        | 401, 403                |
 | POST   | `/auth/logout`                        | Cookie           | none                                                                    | 200 `{ message }`                    | 500                     |
+| GET    | `/auth/session`                       | Public/OptionalAuth | public token or valid user JWT; credentials enabled for refresh cookie | 200 `{ hasSession }`                 | 400, 401, 403, 404      |
 | GET    | `/auth/me`                            | Auth             | none                                                                    | 200 `{ user }`                       | 401, 403                |
 | PUT    | `/auth/me`                            | Auth             | `{ firstName, lastName }`                                               | 200 `{ user }`                       | 400, 401, 403           |
 | POST   | `/auth/confirm-password`              | Auth             | `{ password }`                                                          | 200 `{ valid }`                      | 400, 401, 403           |
@@ -1642,43 +1707,45 @@ Base path: `/api/v1`. "Public" = public bearer token (anonymous read); "Auth" = 
 | GET    | `/config/selects`                     | Public           | none                                                                    | 200 `SelectConfig[]`                 | 401                     |
 | GET    | `/config/services`                    | Public           | none                                                                    | 200 `PublicServiceConfig[]`          | 401                     |
 | GET    | `/trips`                              | Public           | query `page,limit,search,group,transport,sort`                          | 200 `TripGroupResponse[]`            | 400, 401                |
-| GET    | `/trips/:id`                          | Public           | param `id` = `tripGroupId` (INT)                                       | 200 `TripGroupResponse`              | 400, 401, 404           |
+| GET    | `/trips/:tripGroupId`                 | Public           | param `tripGroupId` (INT)                                              | 200 `TripGroupResponse`              | 400, 401, 404           |
 | GET    | `/trips/top`                           | Public           | none                                                                    | 200 `TripGroupResponse[]` (max 5)    | 401                     |
 | GET    | `/me/trips`                | Auth             | none                                                                    | 200 `TripGroupResponse[]`            | 401, 403                |
 | GET    | `/me/favorites`            | Auth             | none                                                                    | 200 `TripGroupResponse[]`            | 401, 403                |
 | GET    | `/trips/background`              | Public           | none                                                                    | 200 `{ url }`                        | 401, 404                |
-| POST   | `/trips`                              | Auth             | `{ title, description, group, transport }`                              | 201 `TripGroupResponse`              | 400, 401, 403           |
-| DELETE | `/trips/:id`                          | Owner/Mod        | param `id`                                                              | 204                                  | 400, 401, 403, 404      |
-| POST   | `/trips/:tripId/days`                 | Owner/Mod        | param `tripId`; body `{ dayNumber?, title?, description? }`             | 201 `TripGroupResponse`              | 400, 401, 403, 404, 409 |
-| PUT    | `/trips/:tripId/days/reorder`         | Owner/Mod        | param `tripId`; body `{ dayIds }`                                       | 200 `TripDay[]`                      | 400, 401, 403, 404      |
-| PUT    | `/trips/:tripId/days/:dayId`          | Owner/Mod        | params `tripId,dayId`; body `{ title?, description? }`                  | 200 `TripGroupResponse`              | 400, 401, 403, 404      |
-| DELETE | `/trips/:tripId/days/:dayId`          | Owner/Mod        | params `tripId,dayId`                                                   | 204                                  | 400, 401, 403, 404, 409 |
-| POST   | `/trips/:tripId/days/:dayId/images`   | Owner/Mod        | params `tripId,dayId`; multipart `file`                                 | 201 `ImageDto`                       | 400, 401, 403, 404, 409 |
-| POST   | `/points`                             | Owner/Mod        | `{ dayId, title, description?, latitude, longitude }`                   | 201 `TripPoint`                      | 400, 401, 403, 404      |
+| POST   | `/trips`                              | Auth             | `{ dayNumber, title, description, group, transport }`                   | 201 `TripGroupResponse`              | 400, 401, 403           |
+| DELETE | `/trips/:tripGroupId`                 | Owner/Mod        | param `tripGroupId`                                                     | 204                                  | 400, 401, 403, 404      |
+| POST   | `/trips/:tripGroupId/days`            | Owner/Mod        | param `tripGroupId`; body `{ dayNumber, title?, description? }`         | 201 `TripGroupResponse`              | 400, 401, 403, 404, 409 |
+| PUT    | `/trips/:tripGroupId/days/reorder`    | Owner/Mod        | param `tripGroupId`; body `{ tripIds }`                                 | 200 `TripDay[]`                      | 400, 401, 403, 404      |
+| PUT    | `/trips/:tripGroupId/days/:tripId`    | Owner/Mod        | params `tripGroupId,tripId`; body `{ title?, description? }`            | 200 `TripGroupResponse`              | 400, 401, 403, 404      |
+| DELETE | `/trips/:tripGroupId/days/:tripId`    | Owner/Mod        | params `tripGroupId,tripId`                                             | 204                                  | 400, 401, 403, 404, 409 |
+| POST   | `/trips/:tripGroupId/days/:tripId/images` | Owner/Mod    | params `tripGroupId,tripId`; multipart `file`                           | 201 `ImageDto`                       | 400, 401, 403, 404, 409 |
+| POST   | `/points`                             | Owner/Mod        | `{ tripId, name, description?, lat, lng }`                              | 201 `TripPoint[]`                    | 400, 401, 403, 404      |
+| GET    | `/trips/:tripId/points`               | Public           | param `tripId` (day row id)                                             | 200 `TripPoint[]`                    | 400, 401, 404           |
 | GET    | `/points/:pointId`                    | Public           | param `pointId`                                                         | 200 `TripPoint`                      | 400, 401, 404           |
-| PUT    | `/points/:pointId`                    | Owner/Mod        | param `pointId`; body `{ title?, description?, latitude?, longitude? }` | 200 `TripPoint`                      | 400, 401, 403, 404      |
+| PUT    | `/points/:pointId`                    | Owner/Mod        | param `pointId`; body `{ name?, description?, lat?, lng? }`             | 200 `TripPoint[]`                    | 400, 401, 403, 404      |
 | DELETE | `/points/:pointId`                    | Owner/Mod        | param `pointId`                                                         | 204                                  | 400, 401, 403, 404      |
 | POST   | `/points/:pointId/images`             | Owner/Mod        | param `pointId`; multipart `file`                                       | 201 `ImageDto`                       | 400, 401, 403, 404, 409 |
 | DELETE | `/points/:pointId/images/:imageId`    | Owner/Mod        | params `pointId,imageId`                                                | 204                                  | 400, 401, 403, 404      |
-| PUT    | `/days/:dayId/points/reorder`         | Owner/Mod        | param `dayId`; body `{ pointIds }`                                      | 200 `TripPoint[]`                    | 400, 401, 403, 404      |
+| PUT    | `/days/:tripId/points/reorder`        | Owner/Mod        | param `tripId`; body `{ pointIds }`                                     | 200 `TripPoint[]`                    | 400, 401, 403, 404      |
 | DELETE | `/images/:imageId`                    | Owner/Mod        | param `imageId`                                                         | 204                                  | 400, 401, 403, 404      |
 | GET    | `/trip-groups/:tripGroupId/comments`  | Public           | param `tripGroupId`; query `page,limit`                                 | 200 `CommentListResponse`            | 400, 401, 404           |
-| POST   | `/trip-groups/:tripGroupId/comments`  | Auth             | param `tripGroupId`; body `{ text }`                                    | 201 `CommentDto`                     | 400, 401, 404           |
-| GET    | `/trips/:tripId/days/:dayId/comments` | Public           | params `tripId,dayId`; query `page,limit`                               | 200 `CommentListResponse`            | 400, 401, 404           |
-| POST   | `/trips/:tripId/days/:dayId/comments` | Auth             | params `tripId,dayId`; body `{ text }`                                  | 201 `CommentDto`                     | 400, 401, 404           |
+| POST   | `/trip-groups/:tripGroupId/comments`  | Auth             | param `tripGroupId`; body `{ comment }`                                 | 201 `CommentDto`                     | 400, 401, 404           |
+| GET    | `/trips/:tripGroupId/days/:tripId/comments` | Public      | params `tripGroupId,tripId`; query `page,limit`                         | 200 `CommentListResponse`            | 400, 401, 404           |
+| POST   | `/trips/:tripGroupId/days/:tripId/comments` | Auth        | params `tripGroupId,tripId`; body `{ comment }`                         | 201 `CommentDto`                     | 400, 401, 404           |
 | GET    | `/points/:pointId/comments`           | Public           | param `pointId`; query `page,limit`                                     | 200 `CommentListResponse`            | 400, 401, 404           |
-| POST   | `/points/:pointId/comments`           | Auth             | param `pointId`; body `{ text }`                                        | 201 `CommentDto`                     | 400, 401, 404           |
+| POST   | `/points/:pointId/comments`           | Auth             | param `pointId`; body `{ comment }`                                     | 201 `CommentDto`                     | 400, 401, 404           |
 | GET    | `/images/:imageId/comments`           | Public           | param `imageId`; query `page,limit`                                     | 200 `CommentListResponse`            | 400, 401, 404           |
-| POST   | `/images/:imageId/comments`           | Auth             | param `imageId`; body `{ text }`                                        | 201 `CommentDto`                     | 400, 401, 404           |
-| PUT    | `/comments/:commentId`                | Author           | param `commentId`; body `{ text }`                                      | 200 `CommentDto`                     | 400, 401, 403, 404      |
-| DELETE | `/comments/:commentId`                | Author/Owner/Mod | param `commentId`                                                       | 204                                  | 400, 401, 403, 404      |
-| POST   | `/likes/`                             | Auth             | `{ targetType, targetId }`                                              | 200 `SocialState`                    | 400, 401, 404           |
-| DELETE | `/likes/`                             | Auth             | query `targetType,targetId`                                             | 204                                  | 400, 401, 404           |
-| POST   | `/favorites/`                         | Auth             | `{ tripGroupId }`                                                       | 200 `SocialState`                    | 400, 401, 404           |
-| DELETE | `/favorites/`                         | Auth             | query `tripGroupId`                                                     | 204                                  | 400, 401, 404           |
-| POST   | `/reports/`                           | Auth             | `{ targetType, targetId, reason? }`                                     | 201 `ReportDto`                      | 400, 401, 404, 409      |
+| POST   | `/images/:imageId/comments`           | Auth             | param `imageId`; body `{ comment }`                                     | 201 `CommentDto`                     | 400, 401, 404           |
+| PUT    | `/comments/:commentId`                | Author/Mod       | param `commentId`; body `{ comment }`                                   | 200 `CommentDto`                     | 400, 401, 403, 404      |
+| DELETE | `/comments/:commentId`                | Author/Mod       | param `commentId`                                                       | 204                                  | 400, 401, 403, 404      |
+| POST   | `/likes`                             | Auth             | `{ targetType, targetId }`                                              | 200 `SocialState`                    | 400, 401, 404           |
+| DELETE | `/likes`                             | Auth             | query `targetType,targetId`                                             | 204                                  | 400, 401, 404           |
+| POST   | `/favorites`                         | Auth             | `{ tripGroupId }`                                                       | 200 `SocialState`                    | 400, 401, 404           |
+| DELETE | `/favorites`                         | Auth             | query `tripGroupId`                                                     | 204                                  | 400, 401, 404           |
+| POST   | `/reports`                           | Auth             | `{ targetType, targetId, reason? }`                                     | 201 `ReportDto`                      | 400, 401, 404, 409      |
+| DELETE | `/reports/:reportId`                  | Author           | param `reportId`                                                        | 204                                  | 400, 401, 403, 404      |
 | GET    | `/admin/users`                        | admin/manager    | query `page,pageSize`                                                   | 200 `AdminPage<AuthUserDto>`         | 400, 401, 403           |
-| PUT    | `/admin/users/:userId`                | admin            | param `userId`; body `{ firstName?, lastName?, role?, status? }`        | 200 `AuthUserDto`                    | 400, 401, 403, 404      |
+| PUT    | `/admin/users/:userId`                | admin/manager    | param `userId`; body `{ firstName?, lastName?, email?, role?, status?, emailVerified?, password? }` (role/password admin-only) | 200 `AuthUserDto`                    | 400, 401, 403, 404, 409 |
 | DELETE | `/admin/users/:userId`                | admin/manager    | param `userId`                                                          | 204                                  | 400, 401, 403, 404, 409 |
 | GET    | `/admin/failed-login-logs`            | admin/manager    | query `page,pageSize`                                                   | 200 `AdminPage<FailedLogDto>`        | 400, 401, 403           |
 | DELETE | `/admin/failed-login-logs`            | admin/manager    | body `{ ids }`                                                          | 200 `{ deleted }`                    | 400, 401, 403           |
@@ -1729,7 +1796,7 @@ The following are public anonymous examples:
 
 ```text
 GET /api/v1/trips
-GET /api/v1/trips/:id
+GET /api/v1/trips/:tripGroupId
 GET /api/v1/points/:pointId
 GET /api/v1/trips/top
 GET /api/v1/trips/background
@@ -1800,45 +1867,7 @@ The Frontend must not repeatedly request the full background file list. Backgrou
 
 ### 22.7 Dynamic configuration and background images
 
-The slow dynamic-config refresh is responsible for background-image discovery.
-
-Required behavior:
-
-```text
-refreshSlow()
-    |
-    +--> load dynamic configuration
-    |
-    +--> load background object names from GCS
-    |
-    +--> success:
-    |       replace current background-name list
-    |
-    +--> failure:
-            warn log
-            keep last successful background-name list
-            do not fail application startup
-```
-
-The background service then performs:
-
-```text
-dynamic config background names
-        |
-        v
-random selection
-        |
-        v
-public image URL
-        |
-        v
-background controller
-        |
-        v
-JSON response
-```
-
-The controller must not perform GCS access or random selection itself.
+`GET /trips/background` returns one selected public image URL as `{ "url": "<public-background-image-url>" }`. The Frontend consumes that URL; it must not list GCS objects, choose object names, or hard-code bucket contents. Background discovery, caching, last-known-good behavior, warning logs, random selection, and URL construction are Backend responsibilities documented in §23.
 
 ### 22.8 Frontend Zod module map
 
@@ -1863,7 +1892,7 @@ src/validations/
 | `social/`   | `socialTargetBodySchema`, `socialTargetQuerySchema`, `favoriteBodySchema`, `favoriteQuerySchema`, `reportBodySchema`, `reportTargetTypeInput`                                                           |
 | `admin/`    | `adminUserUpdateSchema`, `failedLogDeleteSchema`, `adminPaginationQuerySchema`, `adminReportIdParams`                                                                                                   |
 
-Route-parameter schemas (section 18.7) are shared and used across modules: `userIdParams`, `tripIdParams`, `tripIdOnlyParams`, `tripDayParams`, `dayIdParams`, `pointIdParams`, `pointImageParams`, `imageIdParams`, `commentIdParams`, `tripGroupIdParams`, `adminReportIdParams`.
+Route-parameter schemas (section 18.7) are shared and used across modules: `userIdParams`, `tripIdOnlyParams`, `tripDayParams`, `pointIdParams`, `pointImageParams`, `imageIdParams`, `commentIdParams`, `tripGroupIdParams`, `reportIdParams`, `adminReportIdParams`.
 
 ### 22.9 API ownership rule
 
@@ -1904,7 +1933,7 @@ This applies particularly to:
 
 ## 23. Background Image Service Contract
 
-This section defines the backend architecture required for the new background-image behavior.
+This section documents the current backend architecture and behavior for background images.
 
 ### 23.1 Responsibilities
 
@@ -1968,7 +1997,7 @@ const [files] = await storageGoogle
 return files.map((x) => x.name);
 ```
 
-The new implementation must preserve the functional result while moving the operation into the dynamic-config slow refresh architecture.
+The current implementation preserves the object-name listing behavior while running it through the dynamic-config slow refresh architecture.
 
 ### 23.4 Last-known-good behavior
 
@@ -2142,7 +2171,7 @@ and not by an arbitrary day row selected by the Frontend.
 A logged-in user can report supported content through:
 
 ```text
-POST /api/v1/reports/
+POST /api/v1/reports
 ```
 
 The backend derives the reporting user from authentication.
@@ -2159,11 +2188,11 @@ to impersonate another reporter.
 
 ### 25.2 Supported report targets
 
-The initial report contract supports:
+The current report contract supports these canonical targets:
 
 ```text
 tripGroup
-trip
+trip (a day row; `day` is also accepted as an input alias)
 point
 image
 comment
@@ -2178,7 +2207,7 @@ Once a report is successfully persisted:
 ```text
 User
   |
-  +--> POST /reports/
+  +--> POST /reports
           |
           v
        reports table
@@ -2234,19 +2263,19 @@ Actual content moderation/removal is a separate future capability and is not imp
 
 ---
 
-## 26. Contract Change Summary
+## 26. Current API Capabilities Summary
 
-The following additions are part of this API contract and must be implemented consistently in Backend and Frontend.
+The following currently implemented capabilities are part of this API contract. Frontend integration must conform to them; the preceding sections define their behavior.
 
 | Feature        | Endpoint                          | Access        | Main rule                             |
 | -------------- | --------------------------------- | ------------- | ------------------------------------- |
-| Top 5 trips    | `GET /trips/top`             | Public        | 5 trip groups with most likes         |
+| Top 5 trips    | `GET /trips/top`             | Public        | Up to 5 groups with at least one group-level like, sorted by like count |
 | My Trips       | `GET /me/trips`        | Auth          | Current user's owned trip groups      |
 | My Favorites   | `GET /me/favorites`    | Auth          | Current user's favorite trip groups   |
 | Background     | `GET /trips/background`      | Public        | Random public GCS background          |
 | Report list    | `GET /admin/reports`              | Admin/Manager | Automatically lists persisted reports |
 | Delete report  | `DELETE /admin/reports/:reportId` | Admin/Manager | Deletes report record only            |
-| Report comment | `POST /reports/`                  | Auth          | `targetType=comment` supported        |
+| Report comment | `POST /reports`                  | Auth          | `targetType=comment` supported        |
 | Session probe | `GET /auth/session` | Public | Read-only refresh-session presence check; no token rotation or user data |
 
 ### Non-negotiable rules
@@ -2266,6 +2295,6 @@ The following additions are part of this API contract and must be implemented co
 13. **The background controller returns JSON only.**
 14. **Reports created by users automatically become visible to admin/manager through the report queue.**
 15. **Deleting a report does not delete the reported content.**
-16. **Existing API/auth/security/image/comment/trip rules remain unchanged unless explicitly modified above.**
-17. **No existing contract section, endpoint, schema, DTO, or security rule is removed merely because these new endpoints are added.**
+16. **Existing endpoints continue to follow the authentication, security, image, comment, trip, schema, and DTO rules defined in this contract unless a specific section states otherwise.**
+17. **Keep the endpoint inventory, schemas, DTOs, and security rules aligned with the implemented backend when they evolve.
 18. **`GET /auth/session` is the only new session-presence probe: it is read-only, returns only `hasSession`, and must not rotate or expose refresh/access tokens or user identity.**
