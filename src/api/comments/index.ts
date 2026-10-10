@@ -4,7 +4,7 @@ import type { CommentDto, CommentListResponse } from '../../types';
 import { commentBodySchema, commentPageQuerySchema } from '../../validations';
 
 export interface CommentCreateInput {
-  text: string;
+  comment: string;
 }
 
 export interface CommentListQuery {
@@ -14,7 +14,7 @@ export interface CommentListQuery {
 
 export type CommentTarget =
   | { type: 'tripGroup'; tripGroupId: number }
-  | { type: 'day'; tripId: number; dayId: number }
+  | { type: 'day'; tripGroupId: number; tripId: number }
   | { type: 'point'; pointId: number }
   | { type: 'image'; imageId: number };
 
@@ -23,7 +23,7 @@ function commentBasePath(target: CommentTarget): string {
     case 'tripGroup':
       return `${TRIP_GROUPS}/${target.tripGroupId}/comments`;
     case 'day':
-      return `${TRIPS}/${target.tripId}/days/${target.dayId}/comments`;
+      return `${TRIPS}/${target.tripGroupId}/days/${target.tripId}/comments`;
     case 'point':
       return `${POINTS}/${target.pointId}/comments`;
     case 'image':

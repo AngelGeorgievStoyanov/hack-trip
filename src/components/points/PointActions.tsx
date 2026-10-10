@@ -16,7 +16,7 @@ export function PointActions({ point }: { point: TripPoint }) {
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', my: 2 }}>
       <ShareButton
         url={absoluteUrl(`/points/${point.id}`)}
-        title={point.title}
+        title={point.name}
         text={point.description ?? undefined}
       />
       {isAuthenticated ? (

@@ -7,33 +7,35 @@ import { tripApi } from '@/api/trips';
 import { DayForm } from './DayForm';
 import { DayEditor } from './DayEditor';
 import { getGenericErrorMessage } from '@/lib/errors';
-import type { TripDetails } from '@/types';
+import type { TripGroupResponse } from '@/types';
 
 interface TripDaysManagerProps {
-  tripId: number;
-  initialTrip: TripDetails;
+  tripGroupId: number;
+  initialTrip: TripGroupResponse;
 }
 
-export function TripDaysManager({ tripId, initialTrip }: TripDaysManagerProps) {
+export function TripDaysManager({ tripGroupId, initialTrip }: TripDaysManagerProps) {
   const queryClient = useQueryClient();
   const [addingDay, setAddingDay] = useState<{ dayNumber: number } | null>(null);
   const [editingDayId, setEditingDayId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { data: trip } = useQuery({
-    queryKey: ['trip', tripId],
-    queryFn: () => tripApi.getTrip(tripId),
+    queryKey: ['trip', tripGroupId],
+    queryFn: () => tripApi.getTrip(tripGroupId),
     initialData: initialTrip,
   });
 
   const reorderDaysMutation = useMutation({
-    mutationFn: (dayIds: number[]) => tripApi.reorderDays(tripId, { dayIds }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['trip', tripId] }),
+    mutationFn: (dayIds: number[]) => tripApi.reorderDays(tripGroupId, { tripIds: dayIds }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['trip', tripGroupId] }),
     onError: (e) => setError(getGenericErrorMessage(e)),
   });
 
   const days = trip?.days ?? [];
-  const nextDayNumber = days.reduce((max, day) => Math.max(max, day.day), 0) + 1;
+  // A new day defaults to `max(existing dayNumbers) + 1`; the backend value returned by
+  // `POST /trips/:tripId/days` stays authoritative (API_CONTRACT.md §8.10).
+  const nextDayNumber = days.reduce((max, day) => Math.max(max, day.dayNumber), 0) + 1;
 
   function moveDay(index: number, direction: -1 | 1): void {
     const target = index + direction;
@@ -52,7 +54,7 @@ export function TripDaysManager({ tripId, initialTrip }: TripDaysManagerProps) {
       {days.map((day, index) => (
         <DayEditor
           key={day.id}
-          tripId={tripId}
+          tripGroupId={tripGroupId}
           day={day}
           editing={editingDayId === day.id}
           onEditingChange={(next) => setEditingDayId(next ? day.id : null)}
@@ -61,7 +63,7 @@ export function TripDaysManager({ tripId, initialTrip }: TripDaysManagerProps) {
       ))}
       {addingDay ? (
         <DayForm
-          tripId={tripId}
+          tripGroupId={tripGroupId}
           existingDays={days}
           initialDayNumber={addingDay.dayNumber}
           onOpenExistingDay={(dayId) => {

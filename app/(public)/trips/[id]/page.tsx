@@ -1,26 +1,47 @@
 import type { Metadata } from 'next';
+import type { CSSProperties } from 'react';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/common/JsonLd';
-import { TripMap } from '@/components/maps/TripMap';
-import { TripDetails } from '@/components/trips/TripDetails';
+import { TripDetailsView } from '@/components/trips/TripDetailsView';
 import { absoluteUrl } from '@/config';
 import { tripRepresentativeImage } from '@/lib/images/representative';
-import { hasCoordinates } from '@/lib/maps';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
+import { pageBackgroundStyle } from '@/constants/ui';
 import { positiveIdParam } from '@/validations';
-import type { TripDetails as TripDetailsDto } from '@/types';
+import type { TripGroupDay, TripGroupResponse } from '@/types';
 
 interface TripPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
+
+const MAIN_STYLE: CSSProperties = {
+  ...pageBackgroundStyle,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+};
 
 function parseId(value: string): number | null {
   const parsed = positiveIdParam.safeParse(value);
   return parsed.success ? Number(parsed.data) : null;
 }
 
-export async function generateMetadata({ params }: TripPageProps): Promise<Metadata> {
+/** Resolves `?day=N` against the real day numbers; missing numbers are never generated. */
+function resolveDay(
+  days: TripGroupDay[],
+  value: string | string[] | undefined,
+): TripGroupDay | undefined {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return days.find((day) => day.dayNumber === Number(raw)) ?? days[0];
+}
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: TripPageProps): Promise<Metadata> {
   const { id } = await params;
+  const query = await searchParams;
   const tripId = parseId(id);
   if (tripId === null) {
     return { title: 'Trip not found' };
@@ -28,16 +49,19 @@ export async function generateMetadata({ params }: TripPageProps): Promise<Metad
 
   try {
     const trip = await getTrip(tripId);
+    const day = resolveDay(trip.days, query.day);
     const url = absoluteUrl(`/trips/${trip.id}`);
     const image = tripRepresentativeImage(trip);
+    const title = day?.title ?? 'Trip';
+    const description = day?.description ?? undefined;
 
     return {
-      title: trip.title,
-      description: trip.description ?? undefined,
+      title,
+      description,
       alternates: { canonical: url },
       openGraph: {
-        title: trip.title,
-        description: trip.description ?? undefined,
+        title,
+        description,
         url,
         siteName: 'HackTrip',
         type: 'website',
@@ -45,8 +69,8 @@ export async function generateMetadata({ params }: TripPageProps): Promise<Metad
       },
       twitter: {
         card: 'summary_large_image',
-        title: trip.title,
-        description: trip.description ?? undefined,
+        title,
+        description,
         ...(image ? { images: [image] } : {}),
       },
     };
@@ -58,14 +82,15 @@ export async function generateMetadata({ params }: TripPageProps): Promise<Metad
   }
 }
 
-export default async function TripPage({ params }: TripPageProps) {
+export default async function TripPage({ params, searchParams }: TripPageProps) {
   const { id } = await params;
+  const query = await searchParams;
   const tripId = parseId(id);
   if (tripId === null) {
     notFound();
   }
 
-  let trip: TripDetailsDto;
+  let trip: TripGroupResponse;
   try {
     trip = await getTrip(tripId);
   } catch (error) {
@@ -75,21 +100,27 @@ export default async function TripPage({ params }: TripPageProps) {
     throw error;
   }
 
+  const day = resolveDay(trip.days, query.day);
+
+  if (!day) {
+    notFound();
+  }
+
   const url = absoluteUrl(`/trips/${trip.id}`);
   const image = tripRepresentativeImage(trip);
 
-  const points = trip.days.flatMap((day) => day.points);
-
   return (
-    <main style={{ padding: '2rem' }}>
-      <TripDetails trip={trip} />
-      {points.some(hasCoordinates) ? <TripMap points={points} /> : null}
+    <main style={MAIN_STYLE}>
+      {/* Single `GET /trips/:tripGroupId` above; the view opens the requested day and
+          switches days locally without new requests, keeping TripGroup.social global. */}
+      <TripDetailsView trip={trip} initialDayNumber={day.dayNumber} />
+
       <JsonLd
         data={{
           '@context': 'https://schema.org',
           '@type': 'Trip',
-          name: trip.title,
-          description: trip.description ?? undefined,
+          name: day.title ?? 'Trip',
+          description: day.description ?? undefined,
           url,
           image: image ?? undefined,
         }}
@@ -97,4 +128,3 @@ export default async function TripPage({ params }: TripPageProps) {
     </main>
   );
 }
-

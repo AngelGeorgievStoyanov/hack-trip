@@ -4,18 +4,18 @@ import type { ImageDto, TripPoint } from '../../types';
 import { pointCreateSchema, pointReorderSchema, pointUpdateSchema } from '../../validations';
 
 export interface PointCreateInput {
-  dayId: number;
-  title: string;
+  tripId: number;
+  name: string;
   description?: string | null;
-  latitude: number;
-  longitude: number;
+  lat: number;
+  lng: number;
 }
 
 export interface PointUpdateInput {
-  title?: string;
+  name?: string;
   description?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 export interface PointReorderInput {
@@ -23,9 +23,9 @@ export interface PointReorderInput {
 }
 
 export const pointApi = {
-  createPoint: async (input: PointCreateInput): Promise<TripPoint> => {
+  createPoint: async (input: PointCreateInput): Promise<TripPoint[]> => {
     const body = pointCreateSchema.parse(input);
-    const { data } = await apiClient.post<TripPoint>(POINTS, body);
+    const { data } = await apiClient.post<TripPoint[]>(POINTS, body);
     return data;
   },
 
@@ -34,9 +34,9 @@ export const pointApi = {
     return data;
   },
 
-  updatePoint: async (pointId: number, input: PointUpdateInput): Promise<TripPoint> => {
+  updatePoint: async (pointId: number, input: PointUpdateInput): Promise<TripPoint[]> => {
     const body = pointUpdateSchema.parse(input);
-    const { data } = await apiClient.put<TripPoint>(`${POINTS}/${pointId}`, body);
+    const { data } = await apiClient.put<TripPoint[]>(`${POINTS}/${pointId}`, body);
     return data;
   },
 
@@ -55,9 +55,9 @@ export const pointApi = {
     await apiClient.delete(`${POINTS}/${pointId}/images/${imageId}`);
   },
 
-  reorderPoints: async (dayId: number, input: PointReorderInput): Promise<TripPoint[]> => {
+  reorderPoints: async (tripId: number, input: PointReorderInput): Promise<TripPoint[]> => {
     const body = pointReorderSchema.parse(input);
-    const { data } = await apiClient.put<TripPoint[]>(`${DAYS}/${dayId}/points/reorder`, body);
+    const { data } = await apiClient.put<TripPoint[]>(`${DAYS}/${tripId}/points/reorder`, body);
     return data;
   },
 };

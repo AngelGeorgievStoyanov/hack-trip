@@ -1,25 +1,33 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { Fragment, useState, type KeyboardEvent } from 'react';
 import {
+  AppBar,
   Box,
+  Button,
   Divider,
   Drawer,
   IconButton,
-  List,
-  ListItemButton,
-  ListItemText,
+  Toolbar,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
-import { MODERATOR_ROLES } from '@/constants/roles';
-import { CloseIcon, MenuIcon } from '@/components/common/icons';
+import { isModeratorUser } from '@/constants/roles';
+import { BREAKPOINTS, mediaDown, maxWidthQuery } from '@/constants/ui';
+import CloseIcon from '@mui/icons-material/Close';
+import MenuIcon from '@mui/icons-material/Menu';
 
 interface NavLink {
   href: string;
   label: string;
 }
+
+/** Legacy per-item spacing for the navigation buttons. */
+const NAV_BUTTON_SX = { margin: '2px', padding: '2px', boxSizing: 'content-box' } as const;
+
+const MENU_ICON_SX = { fontSize: 32 } as const;
 
 /**
  * Client Component because it reads the auth session to show login/account controls;
@@ -28,108 +36,159 @@ interface NavLink {
 export function Header() {
   const { status, user, logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const useDrawerNav = useMediaQuery(maxWidthQuery(BREAKPOINTS.desktopNav));
   const isAuthenticated = status === 'authenticated';
-  const isModerator = (MODERATOR_ROLES as readonly string[]).includes(user?.role ?? '');
+  const isModerator = isModeratorUser(user);
 
-  const links: NavLink[] = [
-    { href: '/', label: 'HOME' },
-    { href: '/trips', label: 'TRIPS' },
-    ...(isAuthenticated
-      ? [
-          { href: '/trips/create', label: 'CREATE TRIP' },
-          { href: '/profile', label: user?.firstName ?? 'Account' },
-          { href: '/my-trips', label: 'MY TRIPS' },
-          { href: '/favorites', label: 'MY FAVORITES' },
-          { href: '/live-tracking', label: 'LIVE TRIP TRACKING' },
-          { href: '/about', label: 'ABOUT US' },
-          ...(isModerator ? [{ href: '/admin', label: 'ADMIN' }] : []),
-        ]
-      : [
-          { href: '/login', label: 'LOGIN' },
-          { href: '/register', label: 'REGISTER' },
-          { href: '/about', label: 'ABOUT US' },
-        ]),
-  ];
+  const links: NavLink[] = isAuthenticated
+    ? [
+        { href: '/', label: 'HOME' },
+        { href: '/trips', label: 'TRIPS' },
+        { href: '/trips/create', label: 'CREATE TRIP' },
+        { href: '/my-trips', label: 'MY TRIPS' },
+        { href: '/live-tracking', label: 'LIVE TRIP TRACKING' },
+        { href: '/favorites', label: 'MY FAVORITES' },
+        { href: '/about', label: 'ABOUT US' },
+        ...(isModerator ? [{ href: '/admin', label: 'ADMIN' }] : []),
+      ]
+    : [
+        { href: '/', label: 'HOME' },
+        { href: '/trips', label: 'TRIPS' },
+        { href: '/login', label: 'LOGIN' },
+        { href: '/register', label: 'REGISTER' },
+        { href: '/about', label: 'ABOUT US' },
+      ];
 
   function closeDrawer(): void {
     setDrawerOpen(false);
   }
 
-  return (
-    <Box component="header" sx={{ borderBottom: '1px solid #e0e0e0', px: 2, py: 1.25 }}>
-      <Box
-        component="nav"
-        aria-label="Main navigation"
-        sx={{
-          display: { xs: 'none', md: 'flex' },
-          gap: 2,
-          alignItems: 'center',
-          flexWrap: 'wrap',
-        }}
+  function handleDrawerKeyDown(event: KeyboardEvent): void {
+    // Tab/Shift only move focus; the legacy drawer ignored them so keyboard traversal
+    // through the menu does not close it.
+    if (event.key === 'Tab' || event.key === 'Shift') {
+      return;
+    }
+    closeDrawer();
+  }
+
+  async function handleLogout(): Promise<void> {
+    closeDrawer();
+    await logout();
+  }
+
+  function renderWelcome() {
+    return (
+      <Typography
+        variant="h6"
+        component="div"
+        sx={{ display: 'flex', justifyContent: 'space-between' }}
       >
-        {links.map((link, index) => (
-          <Link
-            key={link.href}
+        <Button component={Link} href="/profile" color="inherit">
+          Welcome{'   '}
+          {user?.email}
+        </Button>
+      </Typography>
+    );
+  }
+
+  function renderNavButtons() {
+    return (
+      <>
+        {links.map((link) => (
+          <Button
+            key={`${link.href}-${link.label}`}
+            component={Link}
             href={link.href}
-            style={index === 0 ? { fontWeight: 700 } : undefined}
+            color="inherit"
+            sx={NAV_BUTTON_SX}
           >
             {link.label}
-          </Link>
+          </Button>
         ))}
-        {isAuthenticated ? (
-          <button type="button" onClick={() => void logout()}>
-            Logout
-          </button>
-        ) : null}
-      </Box>
+        <Button onClick={() => void handleLogout()} color="inherit" sx={NAV_BUTTON_SX}>
+          LOGOUT
+        </Button>
+      </>
+    );
+  }
 
-      <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 2 }}>
+  function renderDrawer() {
+    return (
+      <>
         <IconButton
-          edge="start"
-          aria-label="Open navigation menu"
-          onClick={() => setDrawerOpen(true)}
+          color="inherit"
+          aria-label={drawerOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          onClick={() => setDrawerOpen((open) => !open)}
+          sx={MENU_ICON_SX}
         >
-          <MenuIcon />
+          {drawerOpen ? <CloseIcon fontSize="inherit" /> : <MenuIcon fontSize="inherit" />}
         </IconButton>
-        <Link href="/" style={{ fontWeight: 700 }}>
-          HackTrip
-        </Link>
-      </Box>
-
-      <Drawer anchor="right" open={drawerOpen} onClose={closeDrawer}>
-        <Box component="nav" aria-label="Navigation menu" sx={{ width: 280, p: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography variant="h6">Menu</Typography>
-            <IconButton aria-label="Close navigation menu" onClick={closeDrawer}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Divider sx={{ my: 1 }} />
-          <List>
+        <Drawer
+          anchor="left"
+          open={drawerOpen}
+          onClose={closeDrawer}
+          slotProps={{ paper: { elevation: 12, sx: { height: 'auto' } } }}
+        >
+          <Box
+            component="nav"
+            aria-label="Navigation menu"
+            onClick={closeDrawer}
+            onKeyDown={handleDrawerKeyDown}
+            sx={{ display: 'flex', flexDirection: 'column', width: 220 }}
+          >
             {links.map((link) => (
-              <ListItemButton
+              <Fragment key={`${link.href}-${link.label}`}>
+                <Button component={Link} href={link.href} color="inherit">
+                  {link.label}
+                </Button>
+                <Divider />
+              </Fragment>
+            ))}
+            <Button onClick={() => void handleLogout()} color="inherit">
+              LOGOUT
+            </Button>
+          </Box>
+        </Drawer>
+      </>
+    );
+  }
+
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static">
+        <Toolbar
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            paddingBottom: '20px',
+            [mediaDown(760)]: {
+              display: 'flex',
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+            },
+          }}
+        >
+          {isAuthenticated ? (
+            <>
+              {renderWelcome()}
+              {useDrawerNav ? renderDrawer() : renderNavButtons()}
+            </>
+          ) : (
+            links.map((link) => (
+              <Button
                 key={`${link.href}-${link.label}`}
                 component={Link}
                 href={link.href}
-                onClick={closeDrawer}
+                color="inherit"
+                sx={NAV_BUTTON_SX}
               >
-                <ListItemText primary={link.label} />
-              </ListItemButton>
-            ))}
-            {isAuthenticated ? (
-              <ListItemButton
-                onClick={() => {
-                  closeDrawer();
-                  void logout();
-                }}
-              >
-                <ListItemText primary="Logout" />
-              </ListItemButton>
-            ) : null}
-          </List>
-        </Box>
-      </Drawer>
+                {link.label}
+              </Button>
+            ))
+          )}
+        </Toolbar>
+      </AppBar>
     </Box>
   );
 }
-

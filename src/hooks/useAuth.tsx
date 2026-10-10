@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { authToken, isAccountStatusError, normalizeApiError, restoreSession } from '../api/client';
 import { authApi, type LoginInput } from '../api/auth';
-import type { AuthUserDto } from '../types';
+import type { ProfileDto } from '../types';
 
 /**
  * Authentication state, distinguished per API_CONTRACT.md §2.3 and §10:
@@ -20,18 +20,18 @@ export type AuthStatus = 'loading' | 'anonymous' | 'authenticated' | 'accountErr
 
 interface AuthContextValue {
   status: AuthStatus;
-  user: AuthUserDto | null;
+  user: ProfileDto | null;
   token: string | null;
-  login: (input: LoginInput) => Promise<AuthUserDto>;
+  login: (input: LoginInput) => Promise<ProfileDto>;
   logout: () => Promise<void>;
-  updateUser: (user: AuthUserDto) => void;
+  updateUser: (user: ProfileDto) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<AuthUserDto | null>(null);
+  const [user, setUser] = useState<ProfileDto | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [token]);
 
-  const login = useCallback(async (input: LoginInput): Promise<AuthUserDto> => {
+  const login = useCallback(async (input: LoginInput): Promise<ProfileDto> => {
     const session = await authApi.login(input);
     authToken.set(session.accessToken);
     setToken(session.accessToken);
@@ -129,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('anonymous');
   }, []);
 
-  const updateUser = useCallback((nextUser: AuthUserDto): void => {
+  const updateUser = useCallback((nextUser: ProfileDto): void => {
     setUser(nextUser);
   }, []);
 

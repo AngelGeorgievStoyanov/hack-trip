@@ -6,6 +6,16 @@ export const GOOGLE_MAPS_LOADER_ID = 'hacktrip-google-maps';
 
 export const MAP_CONTAINER_HEIGHT = 400;
 
+/** Legacy trip-details map size, hardcoded as 600×250 in the legacy map settings. */
+export const MAP_TRIP_WIDTH = 600;
+export const MAP_TRIP_HEIGHT = 250;
+
+/** Legacy trip-details map options: zoom control shown, greedy gesture handling. */
+export const MAP_TRIP_OPTIONS = {
+  zoomControl: true,
+  gestureHandling: 'greedy',
+} as const;
+
 export const MAP_DEFAULT_ZOOM = 14;
 
 /** Sofia — the fallback centre used before any position exists. */

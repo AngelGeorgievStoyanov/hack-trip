@@ -1,9 +1,6 @@
-import type { TripDetails, TripPoint } from '@/types';
+import type { TripGroupResponse, TripPoint } from '@/types';
 
-export function tripRepresentativeImage(trip: TripDetails): string | null {
-  if (trip.coverImage) {
-    return trip.coverImage;
-  }
+export function tripRepresentativeImage(trip: TripGroupResponse): string | null {
   for (const day of trip.days) {
     if (day.images[0]) {
       return day.images[0].url;

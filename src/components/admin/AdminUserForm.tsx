@@ -12,6 +12,7 @@ import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { ADMIN_PAGE_SIZE_MAX } from '@/constants/ui';
 import { adminUserUpdateSchema } from '@/validations/admin';
+import { isModeratorUser } from '@/constants/roles';
 import type { AuthUserDto, Role, UserStatus } from '@/types';
 
 const ROLE_OPTIONS: Role[] = ['user', 'admin', 'manager'];
@@ -39,7 +40,7 @@ export function AdminUserForm({ userId }: { userId: string }) {
   const { user } = useAuth();
   const { confirm } = useConfirm();
   const [serverError, setServerError] = useState<string | null>(null);
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = isModeratorUser(user);
 
   const { data: target, isLoading, error: queryError } = useQuery({
     queryKey: ['admin', 'user', userId],

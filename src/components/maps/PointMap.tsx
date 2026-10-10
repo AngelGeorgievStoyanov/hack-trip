@@ -18,7 +18,7 @@ export function PointMap({ point }: { point: TripPoint }) {
   return (
     <Box sx={{ width: '100%', height: MAP_CONTAINER_HEIGHT, mt: 2 }}>
       <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} center={position} zoom={MAP_DEFAULT_ZOOM}>
-        <MarkerF position={position} title={point.title} />
+        <MarkerF position={position} title={point.name} />
       </GoogleMap>
     </Box>
   );

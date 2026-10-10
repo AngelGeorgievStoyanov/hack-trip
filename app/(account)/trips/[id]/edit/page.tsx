@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import { NOINDEX } from '@/constants/seo';
 import { notFound } from 'next/navigation';
 import { RequireTripOwner } from '@/components/auth';
-import { TripForm } from '@/components/trips/TripForm';
 import { TripDaysManager } from '@/components/trips/TripDaysManager';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
 import { positiveIdParam } from '@/validations';
+import type { TripGroupResponse } from '@/types';
 
 export const metadata: Metadata = {
   title: 'Edit trip',
@@ -22,11 +22,11 @@ export default async function EditTripPage({ params }: EditTripPageProps) {
   if (!parsed.success) {
     notFound();
   }
-  const tripId = Number(parsed.data);
+  const tripGroupId = Number(parsed.data);
 
-  let trip;
+  let trip: TripGroupResponse;
   try {
-    trip = await getTrip(tripId);
+    trip = await getTrip(tripGroupId);
   } catch (error) {
     if (isNotFoundError(error)) {
       notFound();
@@ -34,19 +34,12 @@ export default async function EditTripPage({ params }: EditTripPageProps) {
     throw error;
   }
 
+  // There is no trip-level update endpoint: trip metadata is day-scoped, so editing the
+  // trip happens through its days (`PUT /trips/:tripGroupId/days/:dayId`).
   return (
-    <RequireTripOwner tripId={trip.id} authorId={trip.author.id}>
+    <RequireTripOwner tripGroupId={trip.id}>
       <div style={{ maxWidth: 720, display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-        <TripForm
-          tripId={trip.id}
-          initial={{
-            title: trip.title,
-            description: trip.description,
-            group: trip.group.key,
-            transport: trip.transport.key,
-          }}
-        />
-        <TripDaysManager tripId={trip.id} initialTrip={trip} />
+        <TripDaysManager tripGroupId={trip.id} initialTrip={trip} />
       </div>
     </RequireTripOwner>
   );

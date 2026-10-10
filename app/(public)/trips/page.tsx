@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import type { CSSProperties } from 'react';
 import { tripApi, type TripListQuery } from '@/api/trips';
 import { TripFilters } from '@/components/trips/TripFilters';
 import { TripList } from '@/components/trips/TripList';
+import { TripPagination } from '@/components/trips/TripPagination';
 import { absoluteUrl } from '@/config';
 import {
   TRIP_GROUP_MAX_LENGTH,
@@ -10,7 +11,13 @@ import {
   TRIP_TRANSPORT_MAX_LENGTH,
   type TripSort,
 } from '@/constants/trips';
-import { PAGE_MAX, TRIP_LIMIT_MAX } from '@/constants/ui';
+import {
+  PAGE_MAX,
+  TRIP_LIMIT_DEFAULT,
+  TRIP_LIMIT_MAX,
+  TRIP_PAGE_DEFAULT,
+  pageBackgroundStyle,
+} from '@/constants/ui';
 
 export const metadata: Metadata = {
   title: 'Trips',
@@ -33,6 +40,13 @@ export const metadata: Metadata = {
 interface TripsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
+
+const MAIN_STYLE: CSSProperties = {
+  ...pageBackgroundStyle,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+};
 
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -69,70 +83,51 @@ function parseQuery(sp: Record<string, string | string[] | undefined>): TripList
   };
 }
 
-function pageUrl(
-  sp: Record<string, string | string[] | undefined>,
-  page: number,
-): string {
-  const params = new URLSearchParams();
-  for (const key of ['search', 'group', 'transport', 'sort'] as const) {
-    const value = first(sp[key]);
-    if (value) {
-      params.set(key, value);
-    }
-  }
-  params.set('page', String(page));
-  return `/trips?${params.toString()}`;
-}
-
 export default async function TripsPage({ searchParams }: TripsPageProps) {
   const sp = await searchParams;
   const query = parseQuery(sp);
+  const page = query.page ?? TRIP_PAGE_DEFAULT;
+  const limit = query.limit ?? TRIP_LIMIT_DEFAULT;
 
-  let items;
-  let pagination;
+  const filters = (
+    <TripFilters
+      search={query.search}
+      sort={query.sort}
+      group={query.group}
+      transport={query.transport}
+    />
+  );
+
   try {
-    const response = await tripApi.listTrips(query);
-    items = response.items;
-    pagination = response.pagination;
+    const trips = await tripApi.listTrips({ ...query, page, limit });
+    // Contract §17.1: the response is a raw `TripGroupResponse[]` with no pagination
+    // object, so the total page count is unknown; a full page implies at least one more.
+    const totalPages = trips.length === limit ? page + 1 : page;
+
+    return (
+      <>
+        {filters}
+        <main style={MAIN_STYLE}>
+          <TripList trips={trips} />
+          <TripPagination
+            page={page}
+            totalPages={totalPages}
+            search={query.search}
+            group={query.group}
+            transport={query.transport}
+            sort={query.sort}
+          />
+        </main>
+      </>
+    );
   } catch {
     return (
-      <main style={{ padding: '2rem' }}>
-        <h1>Trips</h1>
-        <TripFilters
-          search={query.search}
-          sort={query.sort}
-          group={query.group}
-          transport={query.transport}
-        />
-        <p>Trips are temporarily unavailable. Please try again later.</p>
-      </main>
+      <>
+        {filters}
+        <main style={MAIN_STYLE}>
+          <p>Trips are temporarily unavailable. Please try again later.</p>
+        </main>
+      </>
     );
   }
-
-  const currentPage = pagination.page;
-  const totalPages = pagination.totalPages;
-
-  return (
-    <main style={{ padding: '2rem' }}>
-      <h1>Trips</h1>
-      <TripFilters
-        search={query.search}
-        sort={query.sort}
-        group={query.group}
-        transport={query.transport}
-      />
-      <TripList trips={items} />
-
-      {totalPages > 1 ? (
-        <nav style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginTop: '1rem' }}>
-          {currentPage > 1 ? <Link href={pageUrl(sp, currentPage - 1)}>Previous</Link> : null}
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          {currentPage < totalPages ? <Link href={pageUrl(sp, currentPage + 1)}>Next</Link> : null}
-        </nav>
-      ) : null}
-    </main>
-  );
 }
-

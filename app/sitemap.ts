@@ -15,19 +15,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const limit = 100;
     let page = 1;
-    let totalPages = 1;
 
-    while (page <= totalPages && page <= 100) {
-      const response = await tripApi.listTrips({ page, limit, sort: 'newest' });
-      for (const trip of response.items) {
+    // Contract §17.1: `GET /trips` returns a raw array without a pagination object, so
+    // fetch pages until a short page arrives (bounded by a 100-page safety cap).
+    while (page <= 100) {
+      const trips = await tripApi.listTrips({ page, limit, sort: 'newest' });
+      for (const trip of trips) {
+        const lastModified = trip.days.reduce<string | null>((latest, day) => {
+          const value = day.updatedAt ?? day.createdAt;
+          return value && (!latest || value > latest) ? value : latest;
+        }, null);
         entries.push({
           url: absoluteUrl(`/trips/${trip.id}`),
-          lastModified: trip.createdAt ? new Date(trip.createdAt) : new Date(),
+          lastModified: lastModified ? new Date(lastModified) : new Date(),
           changeFrequency: 'weekly',
           priority: 0.7,
         });
       }
-      totalPages = response.pagination.totalPages;
+      if (trips.length < limit) {
+        break;
+      }
       page += 1;
     }
   } catch {

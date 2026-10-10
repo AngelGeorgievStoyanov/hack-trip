@@ -4,7 +4,7 @@ import { optionalInt, trimmedString } from '../shared';
 
 export const commentBodySchema = z
   .object({
-    text: trimmedString({
+    comment: trimmedString({
       min: 1,
       max: 1000,
       minMessage: 'Comment cannot be empty.',

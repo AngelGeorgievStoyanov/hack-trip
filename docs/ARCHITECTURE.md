@@ -413,11 +413,13 @@ The canonical response model is:
 
 ```text
 TripGroupResponse
-├── tripGroupId
+├── id
+├── permissions
 ├── social
 └── days[]
     ├── id
     ├── dayNumber
+    ├── permissions
     ├── title
     ├── description
     ├── countPeoples
@@ -437,7 +439,9 @@ TripGroupResponse
     │   ├── lat
     │   ├── lng
     │   ├── pointNumber
+    │   ├── tripId
     │   ├── images[] + social
+    │   ├── permissions
     │   └── social
     ├── createdAt
     └── updatedAt
@@ -495,17 +499,23 @@ Each point uses the database/API field names directly:
   "description": "Point description",
   "lat": 42.6975,
   "lng": 23.3241,
-  "pointNumber": 1,
+   "pointNumber": 1,
+  "createdAt": "ISO 8601 timestamp",
+  "updatedAt": "ISO 8601 timestamp",
   "images": [ SocialImageDto ],
+  "permissions": {
+    "canEdit": true,
+    "canDelete": true
+  },
   "social": SocialState
 }
 ```
 
 Point coordinates are `lat` and `lng`. Do not rename them to `latitude` / `longitude` in the API DTO.
 
-`pointNumber` is the persisted point order and must be preserved. Points are returned in numeric `pointNumber` order, with `id` as the tie-break where required by the backend.
+`pointNumber` is a server-generated integer that defines the persisted point order. It is never supplied in create/update request bodies (`docs/API_CONTRACT.md` §18.8). Points are returned in numeric `pointNumber` order, with `id` as the tie-break where required by the backend.
 
-`ownerId`, `countEdited`, `createdAt`, and `updatedAt` are never part of the public Point response. `tripId` is public and identifies the parent trip/day row for the point.
+`ownerId` and `countEdited` are never part of the public Point response. `tripId`, `createdAt`, `updatedAt` and the server-computed `permissions` are part of the point response as defined by `docs/API_CONTRACT.md` §10.7.
 
 ### Ownership/security
 
@@ -577,7 +587,7 @@ For example, if the existing group contains days 1, 2 and 3 and the user is curr
 
 After either POST:
 
-1. Use the returned `tripGroupId`.
+1. Use the returned `id`.
 2. Find the newly created day in the returned `days[]`.
 3. Use that day's `id` as the day identifier.
 4. Navigate to Trip Details.
@@ -634,9 +644,10 @@ tripGroupId exists?
 
 The returned `TripGroupResponse` is then used to identify both required IDs:
 
+648:
 ```text
 TripGroupResponse
-├── tripGroupId
+├── id
 └── days[]
     └── newly created Day
         └── id
@@ -2051,7 +2062,7 @@ Each returned item has the normal complete Trip Group structure:
 
 ```text
 TripGroupResponse
-├── tripGroupId
+├── id
 ├── social
 └── days[]
     ├── id

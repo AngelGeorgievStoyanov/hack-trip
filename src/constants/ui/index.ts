@@ -1,3 +1,6 @@
+export * from './breakpoints';
+export * from './styles';
+
 export const PAGE_MAX = 10000;
 
 export const TRIP_PAGE_DEFAULT = 1;

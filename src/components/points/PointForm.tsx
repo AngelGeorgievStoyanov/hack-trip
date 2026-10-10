@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import { pointApi } from '@/api/points';
@@ -8,24 +9,26 @@ import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { pointCreateSchema } from '@/validations/points';
 import { PointLocationPicker } from '@/components/maps/PointLocationPicker';
-import type { TripPoint } from '@/types';
+import type { TripGroupResponse, TripPoint } from '@/types';
 
 interface PointFormProps {
+  tripGroupId: number;
   dayId: number;
   point?: TripPoint;
   onDone: () => void;
 }
 
 interface PointFormValues {
-  title: string;
+  name: string;
   description: string;
-  latitude: string;
-  longitude: string;
+  lat: string;
+  lng: string;
 }
 
-const formSchema = pointCreateSchema.omit({ dayId: true });
+const formSchema = pointCreateSchema.omit({ tripId: true });
 
-export function PointForm({ dayId, point, onDone }: PointFormProps) {
+export function PointForm({ tripGroupId, dayId, point, onDone }: PointFormProps) {
+  const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const isEdit = point !== undefined;
@@ -39,31 +42,42 @@ export function PointForm({ dayId, point, onDone }: PointFormProps) {
   } = useForm<PointFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: point?.title ?? '',
+      name: point?.name ?? '',
       description: point?.description ?? '',
-      latitude: point?.latitude != null ? String(point.latitude) : '',
-      longitude: point?.longitude != null ? String(point.longitude) : '',
+      lat: point?.lat != null ? String(point.lat) : '',
+      lng: point?.lng != null ? String(point.lng) : '',
     },
   });
 
-  const latitude = watch('latitude');
-  const longitude = watch('longitude');
+  const lat = watch('lat');
+  const lng = watch('lng');
 
   async function onSubmit(values: PointFormValues): Promise<void> {
     setSubmitting(true);
     setServerError(null);
     try {
       const input = {
-        title: values.title,
+        name: values.name,
         description: values.description || null,
-        latitude: Number(values.latitude),
-        longitude: Number(values.longitude),
+        lat: Number(values.lat),
+        lng: Number(values.lng),
       };
-      if (isEdit && point) {
-        await pointApi.updatePoint(point.id, input);
-      } else {
-        await pointApi.createPoint({ dayId, ...input });
-      }
+      // POST /points and PUT /points/:id both return the updated TripPoint[]
+      // for the day. The cached trip response is updated by replacing the day's
+      // points array with the returned array.
+      const updatedPoints = isEdit && point
+        ? await pointApi.updatePoint(point.id, input)
+        : await pointApi.createPoint({ tripId: dayId, ...input });
+      queryClient.setQueryData<TripGroupResponse>(['trip', tripGroupId], (current) =>
+        current === undefined
+          ? current
+          : {
+              ...current,
+              days: current.days.map((day) =>
+                day.id === dayId ? { ...day, points: updatedPoints } : day,
+              ),
+            },
+      );
       onDone();
     } catch (error) {
       setServerError(getGenericErrorMessage(error));
@@ -76,16 +90,16 @@ export function PointForm({ dayId, point, onDone }: PointFormProps) {
     <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Typography variant="h6">{isEdit ? 'Edit point' : 'Add point'}</Typography>
       {serverError ? <Alert severity="error">{serverError}</Alert> : null}
-      <TextField label="Title" {...register('title')} error={!!errors.title} helperText={errors.title?.message} />
+      <TextField label="Title" {...register('name')} error={!!errors.name} helperText={errors.name?.message} />
       <TextField label="Description" multiline minRows={2} {...register('description')} error={!!errors.description} helperText={errors.description?.message} />
-      <TextField label="Latitude" {...register('latitude')} error={!!errors.latitude} helperText={errors.latitude?.message} />
-      <TextField label="Longitude" {...register('longitude')} error={!!errors.longitude} helperText={errors.longitude?.message} />
+      <TextField label="Latitude" {...register('lat')} error={!!errors.lat} helperText={errors.lat?.message} />
+      <TextField label="Longitude" {...register('lng')} error={!!errors.lng} helperText={errors.lng?.message} />
       <PointLocationPicker
-        latitude={latitude}
-        longitude={longitude}
+        latitude={lat}
+        longitude={lng}
         onChange={(nextLatitude, nextLongitude) => {
-          setValue('latitude', nextLatitude, { shouldValidate: true });
-          setValue('longitude', nextLongitude, { shouldValidate: true });
+          setValue('lat', nextLatitude, { shouldValidate: true });
+          setValue('lng', nextLongitude, { shouldValidate: true });
         }}
       />
       <Box sx={{ display: 'flex', gap: 1 }}>

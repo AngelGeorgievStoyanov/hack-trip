@@ -1,13 +1,10 @@
 import { apiClient } from '../client';
 import { IMAGES, ME, TRIPS } from '../../constants/api';
+import type { TripGroupResponse, TripDay } from '../../types';
 import type { TripSort } from '../../constants/trips';
 import type {
   BackgroundImageResponse,
   ImageDto,
-  TripDay,
-  TripDetails,
-  TripListItem,
-  TripListResponse,
 } from '../../types';
 import {
   dayCreateSchema,
@@ -18,6 +15,7 @@ import {
 } from '../../validations';
 
 export interface TripWriteInput {
+  dayNumber: number;
   title: string;
   description: string | null;
   group: string;
@@ -34,7 +32,7 @@ export interface TripListQuery {
 }
 
 export interface DayCreateInput {
-  dayNumber?: number;
+  dayNumber: number;
   title?: string | null;
   description?: string | null;
 }
@@ -45,18 +43,18 @@ export interface DayUpdateInput {
 }
 
 export interface DayReorderInput {
-  dayIds: number[];
+  tripIds: number[];
 }
 
 export const tripApi = {
-  listTrips: async (query: TripListQuery = {}): Promise<TripListResponse> => {
+  listTrips: async (query: TripListQuery = {}): Promise<TripGroupResponse[]> => {
     const params = tripListQuerySchema.parse(query);
-    const { data } = await apiClient.get<TripListResponse>(TRIPS, { params });
+    const { data } = await apiClient.get<TripGroupResponse[]>(TRIPS, { params });
     return data;
   },
 
-  getTopTrips: async (): Promise<TripListItem[]> => {
-    const { data } = await apiClient.get<TripListItem[]>(`${TRIPS}/top`);
+  getTopTrips: async (): Promise<TripGroupResponse[]> => {
+    const { data } = await apiClient.get<TripGroupResponse[]>(`${TRIPS}/top`);
     return data;
   },
 
@@ -65,64 +63,60 @@ export const tripApi = {
     return data;
   },
 
-  listMyTrips: async (): Promise<TripListItem[]> => {
-    const { data } = await apiClient.get<TripListItem[]>(`${ME}/trips`);
+  listMyTrips: async (): Promise<TripGroupResponse[]> => {
+    const { data } = await apiClient.get<TripGroupResponse[]>(`${ME}/trips`);
     return data;
   },
 
-  listMyFavorites: async (): Promise<TripListItem[]> => {
-    const { data } = await apiClient.get<TripListItem[]>(`${ME}/favorites`);
+  listMyFavorites: async (): Promise<TripGroupResponse[]> => {
+    const { data } = await apiClient.get<TripGroupResponse[]>(`${ME}/favorites`);
     return data;
   },
 
-  getTrip: async (id: number): Promise<TripDetails> => {
-    const { data } = await apiClient.get<TripDetails>(`${TRIPS}/${id}`);
+  getTrip: async (tripGroupId: number): Promise<TripGroupResponse> => {
+    const { data } = await apiClient.get<TripGroupResponse>(`${TRIPS}/${tripGroupId}`);
     return data;
   },
 
-  createTrip: async (input: TripWriteInput): Promise<TripDetails> => {
+  createTrip: async (input: TripWriteInput): Promise<TripGroupResponse> => {
     const body = tripWriteSchema.parse(input);
-    const { data } = await apiClient.post<TripDetails>(TRIPS, body);
+    const { data } = await apiClient.post<TripGroupResponse>(TRIPS, body);
     return data;
   },
 
-  updateTrip: async (id: number, input: TripWriteInput): Promise<TripDetails> => {
-    const body = tripWriteSchema.parse(input);
-    const { data } = await apiClient.put<TripDetails>(`${TRIPS}/${id}`, body);
-    return data;
+  // `PUT /trips/:id` no longer exists in the API contract (§21): trip-level metadata
+  // is day-scoped, so day edits go through `updateDay` (`PUT /trips/:tripGroupId/days/:dayId`).
+  deleteTrip: async (tripGroupId: number): Promise<void> => {
+    await apiClient.delete(`${TRIPS}/${tripGroupId}`);
   },
 
-  deleteTrip: async (id: number): Promise<void> => {
-    await apiClient.delete(`${TRIPS}/${id}`);
-  },
-
-  createDay: async (tripId: number, input: DayCreateInput): Promise<TripDay> => {
+  createDay: async (tripGroupId: number, input: DayCreateInput): Promise<TripGroupResponse> => {
     const body = dayCreateSchema.parse(input);
-    const { data } = await apiClient.post<TripDay>(`${TRIPS}/${tripId}/days`, body);
+    const { data } = await apiClient.post<TripGroupResponse>(`${TRIPS}/${tripGroupId}/days`, body);
     return data;
   },
 
-  reorderDays: async (tripId: number, input: DayReorderInput): Promise<TripDay[]> => {
+  reorderDays: async (tripGroupId: number, input: DayReorderInput): Promise<TripDay[]> => {
     const body = dayReorderSchema.parse(input);
-    const { data } = await apiClient.put<TripDay[]>(`${TRIPS}/${tripId}/days/reorder`, body);
+    const { data } = await apiClient.put<TripDay[]>(`${TRIPS}/${tripGroupId}/days/reorder`, body);
     return data;
   },
 
-  updateDay: async (tripId: number, dayId: number, input: DayUpdateInput): Promise<TripDay> => {
+  updateDay: async (tripGroupId: number, dayId: number, input: DayUpdateInput): Promise<TripGroupResponse> => {
     const body = dayUpdateSchema.parse(input);
-    const { data } = await apiClient.put<TripDay>(`${TRIPS}/${tripId}/days/${dayId}`, body);
+    const { data } = await apiClient.put<TripGroupResponse>(`${TRIPS}/${tripGroupId}/days/${dayId}`, body);
     return data;
   },
 
-  deleteDay: async (tripId: number, dayId: number): Promise<void> => {
-    await apiClient.delete(`${TRIPS}/${tripId}/days/${dayId}`);
+  deleteDay: async (tripGroupId: number, dayId: number): Promise<void> => {
+    await apiClient.delete(`${TRIPS}/${tripGroupId}/days/${dayId}`);
   },
 
-  uploadDayImage: async (tripId: number, dayId: number, file: File): Promise<ImageDto> => {
+  uploadDayImage: async (tripGroupId: number, dayId: number, file: File): Promise<ImageDto> => {
     const formData = new FormData();
     formData.append('file', file);
     const { data } = await apiClient.post<ImageDto>(
-      `${TRIPS}/${tripId}/days/${dayId}/images`,
+      `${TRIPS}/${tripGroupId}/days/${dayId}/images`,
       formData,
     );
     return data;

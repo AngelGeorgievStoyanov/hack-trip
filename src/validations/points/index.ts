@@ -11,8 +11,8 @@ import { optionalText, patchNumber, patchText, positiveId, requiredNumber, trimm
 
 export const pointCreateSchema = z
   .object({
-    dayId: positiveId,
-    title: trimmedString({
+    tripId: positiveId,
+    name: trimmedString({
       min: 1,
       max: POINT_TITLE_MAX_LENGTH,
       minMessage: 'Title cannot be empty string.',
@@ -21,14 +21,14 @@ export const pointCreateSchema = z
       { max: POINT_DESCRIPTION_MAX_LENGTH },
       { max: `Description max length is ${POINT_DESCRIPTION_MAX_LENGTH} chars` },
     ),
-    latitude: requiredNumber({ min: LATITUDE_MIN, max: LATITUDE_MAX }),
-    longitude: requiredNumber({ min: LONGITUDE_MIN, max: LONGITUDE_MAX }),
+    lat: requiredNumber({ min: LATITUDE_MIN, max: LATITUDE_MAX }),
+    lng: requiredNumber({ min: LONGITUDE_MIN, max: LONGITUDE_MAX }),
   })
   .strict();
 
 export const pointUpdateSchema = z
   .object({
-    title: trimmedString({
+    name: trimmedString({
       min: 1,
       max: POINT_TITLE_MAX_LENGTH,
       minMessage: 'Title cannot be empty string.',
@@ -37,15 +37,15 @@ export const pointUpdateSchema = z
       { max: POINT_DESCRIPTION_MAX_LENGTH },
       { max: `Description max length is ${POINT_DESCRIPTION_MAX_LENGTH} chars` },
     ),
-    latitude: patchNumber({ min: LATITUDE_MIN, max: LATITUDE_MAX }),
-    longitude: patchNumber({ min: LONGITUDE_MIN, max: LONGITUDE_MAX }),
+    lat: patchNumber({ min: LATITUDE_MIN, max: LATITUDE_MAX }),
+    lng: patchNumber({ min: LONGITUDE_MIN, max: LONGITUDE_MAX }),
   })
   .strict()
   .refine(
     (data) =>
-      data.title !== undefined ||
+      data.name !== undefined ||
       data.description !== undefined ||
-      data.latitude !== undefined ||
-      data.longitude !== undefined,
+      data.lat !== undefined ||
+      data.lng !== undefined,
     'At least one field is required',
   );

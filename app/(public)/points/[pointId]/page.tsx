@@ -32,11 +32,11 @@ export async function generateMetadata({ params }: PointPageProps): Promise<Meta
     const image = pointRepresentativeImage(point);
 
     return {
-      title: point.title,
+      title: point.name,
       description: point.description ?? undefined,
       alternates: { canonical: url },
       openGraph: {
-        title: point.title,
+        title: point.name,
         description: point.description ?? undefined,
         url,
         siteName: 'HackTrip',
@@ -45,9 +45,9 @@ export async function generateMetadata({ params }: PointPageProps): Promise<Meta
       },
       twitter: {
         card: 'summary_large_image',
-        title: point.title,
+        title: point.name,
         description: point.description ?? undefined,
-        ...(image ? { images: [image] } : {}),
+        ...(image ? { images: [{ url: image }] } : {}),
       },
     };
   } catch (error) {
@@ -86,16 +86,16 @@ export default async function PointPage({ params }: PointPageProps) {
         data={{
           '@context': 'https://schema.org',
           '@type': 'Place',
-          name: point.title,
+          name: point.name,
           description: point.description ?? undefined,
           url,
           image: image ?? undefined,
-          ...(point.latitude != null && point.longitude != null
+          ...(point.lat != null && point.lng != null
             ? {
                 geo: {
                   '@type': 'GeoCoordinates',
-                  latitude: point.latitude,
-                  longitude: point.longitude,
+                  latitude: point.lat,
+                  longitude: point.lng,
                 },
               }
             : {}),

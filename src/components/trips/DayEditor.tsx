@@ -12,27 +12,27 @@ import { PointForm } from '@/components/points/PointForm';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
-import type { TripDay } from '@/types';
+import type { TripGroupDay } from '@/types';
 
 interface DayEditorProps {
-  tripId: number;
-  day: TripDay;
+  tripGroupId: number;
+  day: TripGroupDay;
   editing: boolean;
   onEditingChange: (editing: boolean) => void;
   onMove: (direction: -1 | 1) => void;
 }
 
-export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: DayEditorProps) {
+export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }: DayEditorProps) {
   const queryClient = useQueryClient();
   const { confirm } = useConfirm();
   const [addingPoint, setAddingPoint] = useState(false);
   const [editingPointId, setEditingPointId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['trip', tripGroupId] });
 
   const deleteDayMutation = useMutation({
-    mutationFn: () => tripApi.deleteDay(tripId, day.id),
+    mutationFn: () => tripApi.deleteDay(tripGroupId, day.id),
     onSuccess: () => void invalidate(),
     onError: (e) => setError(getGenericErrorMessage(e)),
   });
@@ -50,7 +50,7 @@ export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: Day
   });
 
   const uploadDayImageMutation = useMutation({
-    mutationFn: (file: File) => tripApi.uploadDayImage(tripId, day.id, file),
+    mutationFn: (file: File) => tripApi.uploadDayImage(tripGroupId, day.id, file),
     onSuccess: () => void invalidate(),
     onError: (e) => setError(getGenericErrorMessage(e)),
   });
@@ -86,13 +86,13 @@ export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: Day
   }
 
   if (editing) {
-    return <DayForm tripId={tripId} day={day} onDone={() => onEditingChange(false)} />;
+    return <DayForm tripGroupId={tripGroupId} day={day} onDone={() => onEditingChange(false)} />;
   }
 
   return (
     <Box component="section" sx={{ border: '1px solid #e0e0e0', borderRadius: 1, p: 2, my: 1 }}>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-        <Typography variant="h6">{day.title ?? `Day ${day.day}`}</Typography>
+        <Typography variant="h6">{day.title ?? `Day ${day.dayNumber}`}</Typography>
         <Button size="small" onClick={() => onMove(-1)}>↑</Button>
         <Button size="small" onClick={() => onMove(1)}>↓</Button>
         <Button size="small" onClick={() => onEditingChange(true)}>Edit</Button>
@@ -118,7 +118,7 @@ export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: Day
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 1, alignItems: 'flex-start' }}>
         {day.images.map((img) => (
           <Box key={img.id} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-            <AppImage image={img} alt={day.title ?? `Day ${day.day}`} preset="editorDayThumb" />
+            <AppImage image={img} alt={day.title ?? `Day ${day.dayNumber}`} preset="editorDayThumb" />
             <Button
               size="small"
               color="error"
@@ -149,13 +149,13 @@ export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: Day
         {day.points.map((point, index) => (
           <Box key={point.id} sx={{ border: '1px solid #eee', p: 1, my: 1 }}>
             {editingPointId === point.id ? (
-              <PointForm dayId={day.id} point={point} onDone={() => setEditingPointId(null)} />
+              <PointForm tripGroupId={tripGroupId} dayId={day.id} point={point} onDone={() => setEditingPointId(null)} />
             ) : (
               <>
-                <Typography variant="subtitle2">{point.title}</Typography>
+                <Typography variant="subtitle2">{point.name}</Typography>
                 {point.description ? <Typography variant="body2">{point.description}</Typography> : null}
-                {point.latitude != null && point.longitude != null ? (
-                  <Typography variant="caption">{point.latitude.toFixed(6)}, {point.longitude.toFixed(6)}</Typography>
+                {point.lat != null && point.lng != null ? (
+                  <Typography variant="caption">{point.lat.toFixed(6)}, {point.lng.toFixed(6)}</Typography>
                 ) : null}
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', my: 0.5 }}>
                   <Button size="small" onClick={() => reorderPoint(index, -1)}>↑</Button>
@@ -178,7 +178,7 @@ export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: Day
                   </Button>
                   {point.images.map((img) => (
                     <Box key={img.id} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                      <AppImage image={img} alt={point.title} preset="editorPointThumb" />
+                      <AppImage image={img} alt={point.name} preset="editorPointThumb" />
                       <Button
                         size="small"
                         color="error"
@@ -207,7 +207,7 @@ export function DayEditor({ tripId, day, editing, onEditingChange, onMove }: Day
           </Box>
         ))}
         {addingPoint ? (
-          <PointForm dayId={day.id} onDone={() => setAddingPoint(false)} />
+          <PointForm tripGroupId={tripGroupId} dayId={day.id} onDone={() => setAddingPoint(false)} />
         ) : (
           <Button size="small" variant="outlined" onClick={() => setAddingPoint(true)}>Add point</Button>
         )}

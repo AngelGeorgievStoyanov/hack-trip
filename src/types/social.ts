@@ -10,6 +10,7 @@ export interface SocialState {
   likes: number;
   likedByMe: boolean;
   comments: { count: number };
+  reportedByMe: boolean;
   /** Present only on trip-group targets. */
   favorites?: number;
   /** Present only on trip-group targets. */

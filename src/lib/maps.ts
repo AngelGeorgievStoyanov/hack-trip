@@ -28,20 +28,20 @@ export interface MapPosition {
 }
 
 export function toMapPosition(point: {
-  latitude: number | null;
-  longitude: number | null;
+  lat: number | null;
+  lng: number | null;
 }): MapPosition | null {
-  if (point.latitude == null || point.longitude == null) {
+  if (point.lat == null || point.lng == null) {
     return null;
   }
-  return { lat: point.latitude, lng: point.longitude };
+  return { lat: point.lat, lng: point.lng };
 }
 
 export function hasCoordinates(point: {
-  latitude: number | null;
-  longitude: number | null;
+  lat: number | null;
+  lng: number | null;
 }): boolean {
-  return point.latitude != null && point.longitude != null;
+  return point.lat != null && point.lng != null;
 }
 
 export function formatCoordinate(value: number): string {

@@ -3,7 +3,9 @@
 import { useEffect, useRef } from 'react';
 import { Box, Dialog, IconButton, Typography } from '@mui/material';
 import { AppImage } from './AppImage';
-import { ChevronLeftIcon, ChevronRightIcon, CloseIcon } from '@/components/common/icons';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import CloseIcon from '@mui/icons-material/Close';
 import { LIGHTBOX_SWIPE_THRESHOLD_PX } from '@/constants/ui';
 import type { ImageDto } from '@/types';
 

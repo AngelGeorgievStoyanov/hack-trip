@@ -1,15 +1,16 @@
 import type { SocialTargetType } from './social';
+import type { ResourcePermissions } from './points';
 
 export interface CommentAuthor {
-  id: string;
   name: string;
 }
 
 export interface CommentDto {
   id: number;
   author: CommentAuthor;
-  text: string;
-  editCount: number;
+  comment: string;
+  permissions: ResourcePermissions;
+  social: { reportedByMe: boolean };
   createdAt: string | null;
   updatedAt: string | null;
 }

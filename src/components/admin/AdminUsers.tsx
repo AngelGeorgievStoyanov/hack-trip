@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { ADMIN_PAGE_SIZE_DEFAULT } from '@/constants/ui';
+import { isModeratorUser } from '@/constants/roles';
 
 export function AdminUsers() {
   const queryClient = useQueryClient();
@@ -16,7 +17,7 @@ export function AdminUsers() {
   const { confirm } = useConfirm();
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = isModeratorUser(user);
 
   const { data, isLoading, error: queryError } = useQuery({
     queryKey: ['admin', 'users', page, ADMIN_PAGE_SIZE_DEFAULT],

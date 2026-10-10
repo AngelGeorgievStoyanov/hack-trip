@@ -8,19 +8,19 @@ import { tripApi, type TripWriteInput } from '@/api/trips';
 import { SELECT_TYPE_KEYS } from '@/constants/config';
 import { useSelectChoices } from '@/hooks/useSelects';
 import { firstSelectValue } from '@/lib/selects';
+import { DAY_NUMBER_MAX } from '@/constants/trips';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
+import { buildTripUrl } from '@/lib/tripUrl';
 import { tripWriteSchema } from '@/validations/trips';
 import { TripSelectField } from './TripSelectField';
 
-interface TripFormProps {
-  initial?: TripWriteInput;
-  tripId?: number;
-}
-
-export function TripForm({ initial, tripId }: TripFormProps) {
+/**
+ * `Add Trip` (API_CONTRACT.md §8.7): `POST /trips` creates the trip group together with the
+ * day being entered, so after success the frontend opens Trip Details on that day.
+ */
+export function TripForm() {
   const router = useRouter();
-  const isEdit = tripId !== undefined;
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -35,21 +35,21 @@ export function TripForm({ initial, tripId }: TripFormProps) {
   } = useForm<TripWriteInput>({
     resolver: zodResolver(tripWriteSchema),
     defaultValues: {
-      title: initial?.title ?? '',
-      description: initial?.description ?? '',
-      group: initial?.group ?? '',
-      transport: initial?.transport ?? '',
+      dayNumber: 1,
+      title: '',
+      description: '',
+      group: '',
+      transport: '',
     },
   });
 
   const groupChoices = useSelectChoices(SELECT_TYPE_KEYS.group, watch('group'));
   const transportChoices = useSelectChoices(SELECT_TYPE_KEYS.transport, watch('transport'));
 
-  // Runtime options arrive only after mount, so a new trip starts on the first active option;
-  // an existing trip keeps the values it was loaded with.
+  // Runtime options arrive only after mount, so a new trip starts on the first active option.
   const defaultsApplied = useRef(false);
   useEffect(() => {
-    if (isEdit || defaultsApplied.current) {
+    if (defaultsApplied.current) {
       return;
     }
     if (groupChoices.length === 0 || transportChoices.length === 0) {
@@ -63,14 +63,20 @@ export function TripForm({ initial, tripId }: TripFormProps) {
     if (!getValues('transport')) {
       setValue('transport', firstSelectValue(transportChoices));
     }
-  }, [isEdit, groupChoices, transportChoices, getValues, setValue]);
+  }, [groupChoices, transportChoices, getValues, setValue]);
 
   async function onSubmit(values: TripWriteInput): Promise<void> {
     setSubmitting(true);
     setServerError(null);
     try {
-      const trip = isEdit ? await tripApi.updateTrip(tripId, values) : await tripApi.createTrip(values);
-      router.replace(`/trips/${trip.id}`);
+      const created = await tripApi.createTrip(values);
+      // The backend creates exactly the day being entered; verify instead of assuming
+      // a position in `days[]`, and open Trip Details on the created day.
+      const createdDay =
+        created.days.length === 1
+          ? created.days[0]
+          : created.days.find((day) => day.title === values.title.trim());
+      router.replace(buildTripUrl(created.id, createdDay?.dayNumber));
       router.refresh();
     } catch (error) {
       setServerError(getGenericErrorMessage(error));
@@ -86,26 +92,36 @@ export function TripForm({ initial, tripId }: TripFormProps) {
       sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 560 }}
     >
       <Typography variant="h4" component="h1">
-        {isEdit ? 'Edit trip' : 'Create trip'}
+        Create trip
       </Typography>
-      {serverError ? <Alert severity="error">{serverError}</Alert> : null}
-      <TextField
-        label="Title"
-        {...register('title')}
-        error={!!errors.title}
-        helperText={errors.title?.message}
-      />
-      <TextField
-        label="Description"
-        multiline
-        minRows={3}
-        {...register('description')}
-        error={!!errors.description}
-        helperText={errors.description?.message}
-      />
-      <Controller
-        control={control}
-        name="group"
+       {serverError ? <Alert severity="error">{serverError}</Alert> : null}
+       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+         <TextField
+           label="Day number"
+           type="number"
+           {...register('dayNumber', { valueAsNumber: true })}
+           error={!!errors.dayNumber}
+           helperText={errors.dayNumber?.message ?? 'The starting day number for the trip'}
+           slotProps={{ htmlInput: { min: 1, max: DAY_NUMBER_MAX } }}
+         />
+       </Box>
+       <TextField
+         label="Title"
+         {...register('title')}
+         error={!!errors.title}
+         helperText={errors.title?.message}
+       />
+       <TextField
+         label="Description"
+         multiline
+         minRows={3}
+         {...register('description')}
+         error={!!errors.description}
+         helperText={errors.description?.message}
+       />
+       <Controller
+         control={control}
+         name="group"
         render={({ field }) => (
           <TripSelectField
             name={field.name}
@@ -141,7 +157,7 @@ export function TripForm({ initial, tripId }: TripFormProps) {
         disabled={submitting}
         startIcon={submitting ? <CircularProgress size={18} /> : undefined}
       >
-        {isEdit ? 'Save' : 'Create'}
+        Create
       </Button>
     </Box>
   );

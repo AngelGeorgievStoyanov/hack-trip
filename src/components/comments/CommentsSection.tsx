@@ -14,7 +14,7 @@ function commentKey(target: CommentTarget): unknown[] {
     case 'tripGroup':
       return ['comments', 'tripGroup', target.tripGroupId];
     case 'day':
-      return ['comments', 'day', target.tripId, target.dayId];
+      return ['comments', 'day', target.tripGroupId, target.tripId];
     case 'point':
       return ['comments', 'point', target.pointId];
     case 'image':
@@ -23,12 +23,12 @@ function commentKey(target: CommentTarget): unknown[] {
 }
 
 export function CommentsSection({ target }: { target: CommentTarget }) {
-  const { status, user } = useAuth();
+  const { status } = useAuth();
   const { confirm } = useConfirm();
   const queryClient = useQueryClient();
-  const [text, setText] = useState('');
+  const [comment, setComment] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editingText, setEditingText] = useState('');
+  const [editingComment, setEditingComment] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
 
   const { data, isLoading, isError, error } = useQuery({
@@ -40,18 +40,18 @@ export function CommentsSection({ target }: { target: CommentTarget }) {
     mutationFn: (input: CommentCreateInput) => commentApi.create(target, input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: commentKey(target) });
-      setText('');
+      setComment('');
     },
     onError: (e) => setFormError(getGenericErrorMessage(e)),
   });
 
   const updateMutation = useMutation({
-    mutationFn: (input: { id: number; text: string }) =>
-      commentApi.update(input.id, { text: input.text }),
+    mutationFn: (input: { id: number; comment: string }) =>
+      commentApi.update(input.id, { comment: input.comment }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: commentKey(target) });
       setEditingId(null);
-      setEditingText('');
+      setEditingComment('');
     },
     onError: (e) => setFormError(getGenericErrorMessage(e)),
   });
@@ -73,25 +73,25 @@ export function CommentsSection({ target }: { target: CommentTarget }) {
       </Typography>
       {formError ? <Alert severity="error">{formError}</Alert> : null}
 
-      {isAuthenticated ? (
-        <Box
-          component="form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (text.trim()) {
-              createMutation.mutate({ text });
-            }
-          }}
-          sx={{ display: 'flex', flexDirection: 'column', gap: 1, my: 1 }}
-        >
-          <TextField
-            label="Add a comment"
-            multiline
-            minRows={2}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <Box>
+       {isAuthenticated ? (
+         <Box
+           component="form"
+           onSubmit={(e) => {
+             e.preventDefault();
+             if (comment.trim()) {
+               createMutation.mutate({ comment });
+             }
+           }}
+           sx={{ display: 'flex', flexDirection: 'column', gap: 1, my: 1 }}
+         >
+           <TextField
+             label="Add a comment"
+             multiline
+             minRows={2}
+             value={comment}
+             onChange={(e) => setComment(e.target.value)}
+           />
+           <Box>
             <Button type="submit" variant="contained" disabled={createMutation.isPending}>
               Post
             </Button>
@@ -111,17 +111,17 @@ export function CommentsSection({ target }: { target: CommentTarget }) {
               <Box
                 component="form"
                 onSubmit={(e) => {
-                  e.preventDefault();
-                  if (editingText.trim()) {
-                    updateMutation.mutate({ id: comment.id, text: editingText });
-                  }
-                }}
+                   e.preventDefault();
+                   if (editingComment.trim()) {
+                     updateMutation.mutate({ id: comment.id, comment: editingComment });
+                   }
+                 }}
                 sx={{ display: 'flex', gap: 1 }}
               >
                 <TextField
                   size="small"
-                  value={editingText}
-                  onChange={(e) => setEditingText(e.target.value)}
+                  value={editingComment}
+                  onChange={(e) => setEditingComment(e.target.value)}
                 />
                 <Button type="submit" size="small">
                   Save
@@ -132,20 +132,20 @@ export function CommentsSection({ target }: { target: CommentTarget }) {
               </Box>
             ) : (
               <>
-                <Typography variant="body1">{comment.text}</Typography>
+                <Typography variant="body1">{comment.comment}</Typography>
                 <Typography variant="caption" color="text.secondary">
                   {comment.author.name}
                 </Typography>
                 {isAuthenticated ? (
                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
                     <ReportButton targetType="comment" targetId={comment.id} />
-                    {user && user.id === comment.author.id ? (
+                    {comment.permissions?.canEdit ? (
                       <>
                         <Button
                           size="small"
                           onClick={() => {
                             setEditingId(comment.id);
-                            setEditingText(comment.text);
+                            setEditingComment(comment.comment);
                           }}
                         >
                           Edit

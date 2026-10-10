@@ -7,18 +7,18 @@ import type { TripPoint } from '@/types';
 export function PointDetails({ point }: { point: TripPoint }) {
   return (
     <article>
-      <h1>{point.title}</h1>
+      <h1>{point.name}</h1>
       {point.description ? <ExpandableText text={point.description} /> : null}
-      {point.latitude != null && point.longitude != null ? (
+      {point.lat != null && point.lng != null ? (
         <p>
-          Coordinates: {point.latitude.toFixed(6)}, {point.longitude.toFixed(6)}
+          Coordinates: {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
         </p>
       ) : null}
       <PointActions point={point} />
 
       <SocialImageGallery
         images={point.images}
-        alt={point.title}
+        alt={point.name}
         preset="gallery"
         leadPreset="hero"
         variant="stack"

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
@@ -10,13 +11,14 @@ import { API_ERROR_CODES } from '@/constants/api';
 import { DAY_NUMBER_MAX } from '@/constants/trips';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
+import { buildTripUrl } from '@/lib/tripUrl';
 import { dayCreateSchema, dayUpdateSchema } from '@/validations/trips';
-import type { TripDay } from '@/types';
+import type { TripGroupDay } from '@/types';
 
 interface DayFormProps {
-  tripId: number;
-  day?: TripDay;
-  existingDays?: TripDay[];
+  tripGroupId: number;
+  day?: TripGroupDay;
+  existingDays?: TripGroupDay[];
   initialDayNumber?: number;
   onOpenExistingDay?: (dayId: number) => void;
   onDone: () => void;
@@ -28,14 +30,8 @@ interface DayFormValues {
   description: string;
 }
 
-/**
- * A day's number is fixed once the day exists: the API rejects `dayNumber` on update and only
- * reorders days through the reorder endpoint, so the number is editable while creating only.
- * `existingDays` is the trip's in-memory day list, used to keep the create action away from a
- * number that is already taken.
- */
 export function DayForm({
-  tripId,
+  tripGroupId,
   day,
   existingDays = [],
   initialDayNumber,
@@ -43,6 +39,7 @@ export function DayForm({
   onDone,
 }: DayFormProps) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const isEdit = day !== undefined;
@@ -54,15 +51,15 @@ export function DayForm({
     watch,
     formState: { errors },
   } = useForm<DayFormValues>({
-    resolver: zodResolver(isEdit ? dayUpdateSchema.pick({ title: true }) : dayCreateSchema),
+    resolver: zodResolver(isEdit ? dayUpdateSchema : dayCreateSchema),
     defaultValues: {
       dayNumber: isEdit
-        ? String(day.day)
+        ? String(day.dayNumber)
         : initialDayNumber !== undefined
           ? String(initialDayNumber)
           : '',
       title: day?.title ?? '',
-      description: '',
+      description: day?.description ?? '',
     },
   });
 
@@ -71,7 +68,7 @@ export function DayForm({
   const hasDayNumber =
     dayNumberValue.trim() !== '' && Number.isInteger(parsedDayNumber) && parsedDayNumber > 0;
   const takenDay = hasDayNumber
-    ? existingDays.find((candidate) => candidate.day === parsedDayNumber)
+    ? existingDays.find((candidate) => candidate.dayNumber === parsedDayNumber)
     : undefined;
   const takenMessage = hasDayNumber ? `Day ${parsedDayNumber} already exists.` : null;
 
@@ -90,15 +87,22 @@ export function DayForm({
     setServerError(null);
     try {
       if (isEdit && day) {
-        await tripApi.updateDay(tripId, day.id, { title: values.title.trim() || null });
-      } else {
-        await tripApi.createDay(tripId, {
-          dayNumber: values.dayNumber.trim() ? Number(values.dayNumber) : undefined,
+        const response = await tripApi.updateDay(tripGroupId, day.id, {
           title: values.title.trim() || null,
           description: values.description.trim() || null,
         });
+        queryClient.setQueryData(['trip', tripGroupId], response);
+        const updatedDay = response.days.find((candidate) => candidate.id === day.id);
+        router.replace(buildTripUrl(tripGroupId, updatedDay?.dayNumber ?? day.dayNumber));
+        onDone();
+        return;
       }
-      await queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
+      const response = await tripApi.createDay(tripGroupId, {
+        dayNumber: Number(values.dayNumber),
+        title: values.title.trim() || null,
+        description: values.description.trim() || null,
+      });
+      queryClient.setQueryData(['trip', tripGroupId], response);
       onDone();
     } catch (error) {
       const apiError = normalizeApiError(error);
@@ -118,7 +122,7 @@ export function DayForm({
       onSubmit={handleSubmit(onSubmit)}
       sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
     >
-      <Typography variant="h6">{isEdit ? `Edit day ${day.day}` : 'Create a day'}</Typography>
+      <Typography variant="h6">{isEdit ? `Edit day ${day.dayNumber}` : 'Create a day'}</Typography>
       {serverError ? <Alert severity="error">{serverError}</Alert> : null}
       {!isEdit ? (
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
@@ -147,7 +151,7 @@ export function DayForm({
           severity="info"
           action={
             <Button color="inherit" size="small" onClick={() => onOpenExistingDay(takenDay.id)}>
-              {`Edit day ${takenDay.day}`}
+              {`Edit day ${takenDay.dayNumber}`}
             </Button>
           }
         >
@@ -160,16 +164,14 @@ export function DayForm({
         error={!!errors.title}
         helperText={errors.title?.message}
       />
-      {!isEdit ? (
-        <TextField
-          label="Description"
-          multiline
-          minRows={2}
-          {...register('description')}
-          error={!!errors.description}
-          helperText={errors.description?.message}
-        />
-      ) : null}
+      <TextField
+        label="Description"
+        multiline
+        minRows={2}
+        {...register('description')}
+        error={!!errors.description}
+        helperText={errors.description?.message}
+      />
       <Box sx={{ display: 'flex', gap: 1 }}>
         <Button
           type="submit"

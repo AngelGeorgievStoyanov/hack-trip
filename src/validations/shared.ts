@@ -116,6 +116,13 @@ export const userIdParam = z.string().regex(UUID_REGEX, 'Invalid UUID');
 /** Positive integer id (coerced, for bodies/query). */
 export const positiveId = z.coerce.number().int().min(1).max(MAX_RESOURCE_ID);
 
+/** Required integer (coerces form strings/number; rejects empty/null/undefined). */
+export const requiredInt = ({ min, max }: { min: number; max: number }) =>
+  z.preprocess(
+    (value) => (value === '' || value === null ? undefined : value),
+    z.coerce.number().int().min(min).max(max),
+  );
+
 /** Like target type input: trimmed, lowercased, then enumerated. */
 export const targetTypeInput = z
   .string()

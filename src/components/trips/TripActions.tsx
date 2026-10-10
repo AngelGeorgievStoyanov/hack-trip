@@ -3,35 +3,44 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Alert, Box, Button } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { tripApi } from '@/api/trips';
 import { ShareButton } from '@/components/social/ShareButton';
 import { tripRepresentativeImage } from '@/lib/images/representative';
-import { LikeButton } from '@/components/social/LikeButton';
-import { FavoriteButton } from '@/components/social/FavoriteButton';
-import { ReportButton } from '@/components/social/ReportButton';
 import { absoluteUrl } from '@/config';
 import { getGenericErrorMessage } from '@/lib/errors';
-import { ROLES } from '@/constants/roles';
-import type { TripDetails } from '@/types';
+import { isModeratorUser } from '@/constants/roles';
+import type { TripGroupDay, TripGroupResponse } from '@/types';
 
 /** The trip page stays a Server Component; only these interactions run client-side. */
-export function TripActions({ trip }: { trip: TripDetails }) {
+export function TripActions({
+  tripGroup,
+  day,
+}: {
+  tripGroup: TripGroupResponse;
+  day: TripGroupDay;
+}) {
   const { status, user } = useAuth();
   const { confirm } = useConfirm();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
-  const isAuthenticated = status === 'authenticated';
-  const isOwner = user !== null && user.id === trip.author.id;
-  const isModerator = user !== null && (user.role === ROLES.admin || user.role === ROLES.manager);
+  const isModerator = isModeratorUser(user);
+  // Trip responses never expose an owner id, so ownership is derived from the authenticated
+  // `GET /me/trips` result, which returns only the current user's owned trip groups.
+  const { data: myTrips } = useQuery({
+    queryKey: ['me', 'trips'],
+    queryFn: () => tripApi.listMyTrips(),
+    enabled: status === 'authenticated' && !isModerator,
+  });
+  const isOwner = myTrips?.some((group) => group.id === tripGroup.id) ?? false;
   const canManage = isOwner || isModerator;
 
   const deleteMutation = useMutation({
-    mutationFn: () => tripApi.deleteTrip(trip.id),
+    mutationFn: () => tripApi.deleteTrip(tripGroup.id),
     onSuccess: () => {
       router.replace('/trips');
       router.refresh();
@@ -42,30 +51,14 @@ export function TripActions({ trip }: { trip: TripDetails }) {
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', my: 2 }}>
       <ShareButton
-        url={absoluteUrl(`/trips/${trip.id}`)}
-        title={trip.title}
-        text={trip.description ?? undefined}
-        image={tripRepresentativeImage(trip)}
+        url={absoluteUrl(`/trips/${tripGroup.id}`)}
+        title={day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
+        text={day.description ?? undefined}
+        image={tripRepresentativeImage(tripGroup)}
       />
-      {isAuthenticated ? (
-        <>
-          <LikeButton
-            targetType="tripgroup"
-            targetId={trip.id}
-            initialLiked={trip.social.likedByMe}
-            initialLikes={trip.social.likes}
-          />
-          <FavoriteButton
-            tripGroupId={trip.id}
-            initialFavorited={trip.social.favoritedByMe ?? false}
-            initialFavorites={trip.social.favorites ?? 0}
-          />
-          <ReportButton targetType="tripgroup" targetId={trip.id} />
-        </>
-      ) : null}
       {canManage ? (
         <>
-          <Link href={`/trips/${trip.id}/edit`}>
+          <Link href={`/trips/${tripGroup.id}/edit`}>
             <Button variant="outlined">Edit</Button>
           </Link>
           <Button

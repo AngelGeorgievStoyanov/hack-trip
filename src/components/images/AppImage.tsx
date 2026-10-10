@@ -35,6 +35,7 @@ export function AppImage({
   className,
   style,
 }: AppImageProps) {
+  const [useFullImage, setUseFullImage] = useState(false);
   const [errored, setErrored] = useState(false);
   const presetProps: ImagePreset | undefined = preset ? IMAGE_PRESETS[preset] : undefined;
   const resolvedFill = fill ?? presetProps?.fill ?? false;
@@ -43,7 +44,11 @@ export function AppImage({
   const resolvedWidth = width ?? presetProps?.width;
   const resolvedHeight = height ?? presetProps?.height;
   const resolvedSizes = sizes ?? presetProps?.sizes;
-  const resolved = src ?? pickImageUrl(image, resolvedUseThumbnail);
+
+  // A thumbnail URL in the DTO does not guarantee the object exists in storage; retry with
+  // the full image URL once before giving up to the placeholder.
+  const primary = src ?? pickImageUrl(image, resolvedUseThumbnail);
+  const resolved = useFullImage ? image?.url ?? null : primary;
 
   if (errored || !resolved) {
     return <div className={className} style={style} role="img" aria-label={alt} />;
@@ -60,7 +65,19 @@ export function AppImage({
       priority={resolvedPriority}
       className={className}
       style={style}
-      onError={() => setErrored(true)}
+      onError={() => {
+        if (
+          !src &&
+          !useFullImage &&
+          resolvedUseThumbnail &&
+          image &&
+          image.url !== primary
+        ) {
+          setUseFullImage(true);
+          return;
+        }
+        setErrored(true);
+      }}
     />
   );
 }

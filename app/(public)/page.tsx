@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import type { CSSProperties } from 'react';
 import { tripApi } from '@/api/trips';
+import { HomeHero } from '@/components/home';
 import { TripList } from '@/components/trips/TripList';
-import { ScrambleHeading } from '@/components/common/ScrambleHeading';
 import { absoluteUrl } from '@/config';
 import { getShareLinks } from '@/lib/share';
+import { headingTextStyle, pageBackgroundStyle } from '@/constants/ui';
 
 export const metadata: Metadata = {
   title: 'HackTrip — plan and share your trips',
@@ -23,7 +25,20 @@ export const metadata: Metadata = {
   },
 };
 
+const MAIN_STYLE: CSSProperties = {
+  ...pageBackgroundStyle,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+};
+
+const SHARE_ROW_STYLE: CSSProperties = { display: 'flex', alignItems: 'center', margin: '10px' };
+
+const SHARE_HEADING_STYLE: CSSProperties = { marginRight: '10px', ...headingTextStyle };
+
 export default async function HomePage() {
+  // `/trips/top` returns the same unified `TripGroupResponse` structure as `/trips`,
+  // so every card renders from the returned days directly — no detail fetch is needed.
   const trips = await tripApi.getTopTrips().catch(() => []);
   const siteUrl = absoluteUrl('/');
   const [facebook, viber] = getShareLinks(
@@ -32,32 +47,20 @@ export default async function HomePage() {
   );
 
   return (
-    <main style={{ padding: '2rem' }}>
-      <section style={{ marginBottom: '2rem' }}>
-        <ScrambleHeading text="Welcome in Hack Trip!" variant="h1" />
-        <h1>Welcome travelers or future travelers!</h1>
-        <h2>Hack Trip is an app where you can share your trips or get valuable tips for your future trips.</h2>
-      </section>
-      {trips.length > 0 ? (
-        <section>
-          <h3>These are our latest trips in Hack Trip!</h3>
-          <TripList trips={trips} />
-        </section>
-      ) : null}
-      <section aria-label="Share HackTrip">
-        <h3>
-          Share to {facebook?.label ?? 'Facebook'}{' '}
-          <a href={facebook?.href ?? '#'} target="_blank" rel="noopener noreferrer">
-            {facebook?.label ?? 'Facebook'}
+    <main style={MAIN_STYLE}>
+      <HomeHero hasTopTrips={trips.length > 0}>
+        {trips.length > 0 ? <TripList trips={trips} /> : null}
+        <div style={SHARE_ROW_STYLE}>
+          <h3 style={SHARE_HEADING_STYLE}>Share to {facebook.label}</h3>
+          <a href={facebook.href} target="_blank" rel="noopener noreferrer">
+            {facebook.label}
           </a>
-        </h3>
-        <h3>
-          Share to {viber?.label ?? 'Viber'}{' '}
-          <a href={viber?.href ?? '#'}>{viber?.label ?? 'Viber'}</a>
-        </h3>
-      </section>
+        </div>
+        <div style={SHARE_ROW_STYLE}>
+          <h3 style={SHARE_HEADING_STYLE}>Share to {viber.label}</h3>
+          <a href={viber.href}>{viber.label}</a>
+        </div>
+      </HomeHero>
     </main>
   );
 }
-
-
