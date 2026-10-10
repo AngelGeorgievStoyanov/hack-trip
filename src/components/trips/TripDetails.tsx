@@ -48,7 +48,6 @@ export function TripDetails({ tripGroup, day }: TripDetailsProps) {
               initialLiked={tripGroup.social.likedByMe}
               initialLikes={tripGroup.social.likes}
               initialFavorited={tripGroup.social.favoritedByMe ?? false}
-              initialFavorites={tripGroup.social.favorites ?? 0}
               initialReported={tripGroup.social.reportedByMe}
             />
           </Box>

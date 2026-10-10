@@ -18,7 +18,6 @@ interface TripGroupSocialActionsProps {
   initialLiked: boolean;
   initialLikes: number;
   initialFavorited: boolean;
-  initialFavorites: number;
   initialReported: boolean;
 }
 
@@ -27,13 +26,11 @@ export function TripGroupSocialActions({
   initialLiked,
   initialLikes,
   initialFavorited,
-  initialFavorites,
   initialReported,
 }: TripGroupSocialActionsProps) {
   const [liked, setLiked] = useState(initialLiked);
   const [likes, setLikes] = useState(initialLikes);
   const [favorited, setFavorited] = useState(initialFavorited);
-  const [favorites, setFavorites] = useState(initialFavorites);
   const [reported, setReported] = useState(initialReported);
   const [likeError, setLikeError] = useState<string | null>(null);
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
@@ -50,9 +47,6 @@ export function TripGroupSocialActions({
   useEffect(() => {
     setFavorited(initialFavorited);
   }, [initialFavorited]);
-  useEffect(() => {
-    setFavorites(initialFavorites);
-  }, [initialFavorites]);
   useEffect(() => {
     setReported(initialReported);
   }, [initialReported]);
@@ -89,11 +83,6 @@ export function TripGroupSocialActions({
     },
     onSuccess: (state) => {
       setFavorited((prev) => !prev);
-      if (state) {
-        setFavorites(state.favorites ?? 0);
-      } else {
-        setFavorites((prev) => Math.max(0, prev - 1));
-      }
     },
     onError: (e) => setFavoriteError(getGenericErrorMessage(e)),
   });
