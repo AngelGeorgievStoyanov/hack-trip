@@ -13,7 +13,7 @@ interface ShareButtonProps {
 
 export function ShareButton({ url, title, text, image }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
-  const { url: backgroundUrl } = useBackground();
+  const { currentUrl: backgroundUrl } = useBackground();
   const shareImage = resolveShareImage({ primary: image, fallback: backgroundUrl });
 
   async function handleShare(): Promise<void> {

@@ -1970,9 +1970,31 @@ The frontend must not read the Google Cloud Storage bucket directly and must not
 
 The backend's existing `refreshSlow()` flow loads background object names from Google Cloud Storage into dynamic configuration. A successful refresh replaces the stored list with the newly discovered names. If a later refresh fails, the last successful list remains available; the failure may be logged as a warning and must not break startup or dynamic-config refresh.
 
-The backend background service selects a random image from the dynamic-config list and returns the ready-to-use public value through the public background endpoint.
+The backend background service selects random images from the dynamic-config list and returns a pair of ready-to-use public values through the public background endpoint: `current` for the current background and `next` as a candidate for the next navigation.
 
-The frontend calls that public endpoint when it needs a background image and consumes the single returned value. The frontend does not implement the random-selection algorithm.
+The frontend calls the public background endpoint and consumes the image pair. The frontend does not implement the random-selection algorithm.
+
+The frontend must send the required `PUBLIC_FRONTEND_TOKEN` for this public anonymous API request. Loading a background image must not require user login or `/auth/refresh`.
+
+### Background Image Loading and Navigation
+
+The frontend implements a preloading pipeline to enable instant background transitions on navigation:
+
+1. **Initial load**: The frontend fetches the image pair from `GET /api/v1/trips/background`. It loads and decodes the `current` image before displaying it. Once the current image is displayed, the `next` image is preloaded and decoded in the background.
+
+2. **Navigation**: When the pathname changes (and the route is not `/admin`), the background provider checks whether a fully decoded `next` image is available at that moment.
+   - If a ready `next` image exists, it is promoted to `current` immediately and synchronously, without waiting for an API request.
+   - If no ready `next` image exists at that moment, the currently visible background remains unchanged. The navigation proceeds without a background transition.
+
+4. **After navigation**: After a navigation (whether a transition occurred or not), the frontend requests a new image pair from the API and begins preloading the new `next` candidate in the background. The preloaded candidate becomes available for the next navigation.
+
+5. **No delayed transitions**: A candidate that finishes loading *after* a navigation has been handled must not trigger a delayed background transition for that navigation. The preload completion only updates the `next` candidate for future navigations; it never changes the visible `current` background independently.
+
+5. **Error handling**: If an API request or image preload fails, the currently visible background is preserved. The error is logged silently and does not clear or replace the visible background. A subsequent navigation will retry fetching a new image pair.
+
+6. **Exclusions**: The `/admin` route group is excluded from background rendering. When entering `/admin`, the background is cleared. When leaving `/admin`, a fresh initial load begins.
+
+6. **Concurrency and stale results**: The implementation uses generation counters to prevent stale asynchronous operations (API responses or image preloads) from overwriting newer state. Rapid navigation and concurrent requests are handled safely without duplicate or stale transitions.
 
 The frontend must send the required `PUBLIC_FRONTEND_TOKEN` for this public anonymous API request. Loading a background image must not require user login or `/auth/refresh`.
 
@@ -2133,9 +2155,9 @@ Both are available to anonymous visitors using the required public Frontend auth
 
 `GET /trips/top` returns up to five trip groups ranked by their total likes. The frontend consumes the normal trip response structure and does not implement the ranking or grouping logic.
 
-`GET /trips/background` returns one ready background value. Background images are not read directly from Google Cloud Storage by the frontend. The backend refreshes the available filenames through its slow dynamic-config refresh, keeps the last successful list when a refresh fails, and the backend background service selects the random image.
+`GET /trips/background` returns a pair of image objects: `current` for the current background and `next` as a preloaded candidate for the next navigation. Background images are not read directly from Google Cloud Storage by the frontend. The backend refreshes the available filenames through its slow dynamic-config refresh, keeps the last successful list when a refresh fails, and the backend background service selects the random image pair.
 
-The frontend therefore performs only:
+The frontend therefore performs:
 
 ```text
 public page / component
@@ -2144,7 +2166,9 @@ service / API module
     ↓
 GET /trips/background
     ↓
-single ready background value
+{ current: { url }, next: { url } }
 ```
+
+The frontend loads and decodes the `current` image before displaying it. The `next` image is preloaded and decoded in the background. On navigation, if the `next` image is fully ready, it is promoted to `current` immediately without waiting for an API request. If the `next` image is not ready at the moment navigation occurs, the current background is kept and no delayed transition occurs later.
 
 Loading a background image must work for an anonymous visitor and must not require `/auth/refresh`.

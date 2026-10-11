@@ -35,10 +35,9 @@ export const headingTextStyle: CSSProperties = {
   textShadow: '3px 3px 3px rgb(10,10,10)',
 };
 
-/** Page shell background used by home, trips and trip details. */
+/** Page shell style used by home, trips and trip details. */
 export const pageBackgroundStyle: CSSProperties = {
   boxSizing: 'border-box',
-  backgroundColor: COLORS.pageBackground,
   minHeight: '100vh',
   padding: '30px',
 };

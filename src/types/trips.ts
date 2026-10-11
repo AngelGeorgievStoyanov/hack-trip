@@ -49,7 +49,8 @@ export interface TripGroupDay {
   updatedAt: string | null;
 }
 
-/** `GET /trips/background` response (`API_CONTRACT.md` §22.6). */
+/** `GET /trips/background` response (`API_CONTRACT.md` §8.6). */
 export interface BackgroundImageResponse {
-  url: string;
+  current: { url: string };
+  next: { url: string };
 }
