@@ -12,7 +12,7 @@ interface ImageGalleryProps {
   alt: string;
   preset?: ImagePresetName;
   leadPreset?: ImagePresetName;
-  variant?: 'row' | 'stack';
+  variant?: 'row' | 'stack' | 'grid';
 }
 
 export function ImageGallery({
@@ -32,15 +32,34 @@ export function ImageGallery({
     <>
       <Box
         sx={{
-          display: 'flex',
+          display: variant === 'grid' ? 'grid' : 'flex',
+          gridTemplateColumns:
+            variant === 'grid'
+              ? `repeat(${Math.min(images.length, 3)}, minmax(0, 1fr))`
+              : undefined,
           flexDirection: variant === 'stack' ? 'column' : 'row',
           flexWrap: 'wrap',
           alignItems: 'flex-start',
-          gap: '0.5rem',
+          gap: variant === 'grid' ? '4px' : '0.5rem',
+          width: variant === 'grid' ? '100%' : undefined,
+          maxWidth: variant === 'grid' ? 520 : undefined,
+          height: 'auto',
+          '@media (max-width: 600px)': {
+            width: variant === 'grid' ? '100%' : undefined,
+          },
         }}
       >
         {images.map((image, position) => (
-          <Box key={image.id} sx={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <Box
+            key={image.id}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.25rem',
+              minWidth: 0,
+              ...(variant === 'grid' ? { aspectRatio: '1 / 1' } : {}),
+            }}
+          >
             <Box
               component="button"
               type="button"
@@ -53,9 +72,12 @@ export function ImageGallery({
                 bgcolor: 'transparent',
                 cursor: 'pointer',
                 display: 'block',
+                width: variant === 'grid' ? '100%' : undefined,
+                height: variant === 'grid' ? '100%' : undefined,
                 lineHeight: 0,
                 borderRadius: 1,
                 overflow: 'hidden',
+                ...(variant === 'grid' ? { aspectRatio: '1 / 1', position: 'relative' } : {}),
                 '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main' },
               }}
             >
@@ -63,6 +85,8 @@ export function ImageGallery({
                 image={image}
                 alt={alt}
                 preset={position === 0 && leadPreset ? leadPreset : preset}
+                fill={variant === 'grid'}
+                style={variant === 'grid' ? { objectFit: 'cover' } : undefined}
               />
             </Box>
           </Box>
