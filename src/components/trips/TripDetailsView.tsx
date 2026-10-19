@@ -56,15 +56,18 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
         onSelect={handleSelectDay}
       />
 
+      {/* Legacy trip row: the info panel sits beside the day image gallery
+          (space-around), stacked with the gallery above the panel below 900px,
+          exactly like the master `TripDetails` container. */}
       <Box
         sx={{
           display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
+          flexDirection: isMobile ? 'column-reverse' : 'row',
           gap: isMobile ? 0 : 3,
           width: '100%',
           maxWidth: 1200,
           justifyContent: 'space-around',
-          alignItems: isMobile ? 'center' : 'flex-start',
+          alignItems: 'center',
           flexWrap: 'wrap',
           mb: 3,
         }}
@@ -72,19 +75,24 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
         {/* Trip Group social stays mounted here so Like/Favorite survive day switches. */}
         <TripDetails tripGroup={trip} day={day} />
 
-        {pointsHaveCoords ? (
-          <TripMapSection
-            points={day.points}
-            selectedPointIndex={selectedPointIndex}
-            onPointChange={setSelectedPointIndex}
-          />
-        ) : null}
+        {/* Remounted per day so the lightbox index resets with the day content below. */}
+        <DayImagesGallery
+          key={day.dayNumber}
+          day={day}
+          tripCoverImage={tripRepresentativeImage(trip)}
+        />
       </Box>
+
+      {pointsHaveCoords ? (
+        <TripMapSection
+          points={day.points}
+          selectedPointIndex={selectedPointIndex}
+          onPointChange={setSelectedPointIndex}
+        />
+      ) : null}
 
       {/* Day-scoped sections reset per day via `key`, without touching Trip Group social. */}
       <div key={`day-content-${day.dayNumber}`}>
-        <DayImagesGallery day={day} tripCoverImage={tripRepresentativeImage(trip)} />
-
         {day.points.length > 0 ? (
           <PointsSection
             points={day.points}
