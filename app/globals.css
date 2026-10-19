@@ -12,6 +12,20 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*
+ * Sticky-footer app shell (see `app/layout.tsx`): the route group layouts render
+ * `Header`, content and `Footer` inside this flex column. The content area of each
+ * layout uses `flex: 1` so the footer sits at the bottom of the viewport when the
+ * page is short, and directly after the content when the page is long.
+ */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  /* Dynamic-viewport fallback for browsers without `dvh` support. */
+  min-height: 100dvh;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

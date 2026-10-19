@@ -155,7 +155,9 @@ export function Header() {
   }
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    // The legacy `flexGrow: 1` (inert in the old block layout) would absorb the free
+    // space that pushes the footer to the bottom of `.app-shell` on short pages.
+    <Box sx={{ flexShrink: 0 }}>
       <AppBar position="static">
         <Toolbar
           sx={{

@@ -34,7 +34,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        {/*
+          Sticky-footer app shell: a flex column with a viewport minimum height. The route
+          group layouts render `Header`, page content and `Footer` as its children, and the
+          content area uses `flex: 1` so short pages keep the footer at the bottom of the
+          viewport while long pages scroll normally.
+        */}
+        <div className="app-shell">
+          <Providers>{children}</Providers>
+        </div>
       </body>
     </html>
   );

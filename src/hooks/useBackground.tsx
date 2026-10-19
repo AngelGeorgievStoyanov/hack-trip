@@ -126,10 +126,13 @@ export function BackgroundProvider({
     return () => {
       mountedRef.current = false;
 
-      // Invalidate asynchronous work from the previous mounted lifecycle.
-      lifecycleGenerationRef.current += 1;
-      navigationGenerationRef.current += 1;
-      preloadGenerationRef.current += 1;
+      // Deliberately do not bump the lifecycle/navigation generations here. React
+      // Strict Mode (development) simulates an unmount by cleaning up and immediately
+      // re-running this effect; bumping the generations would invalidate the in-flight
+      // initial load while `initialLoadStartedRef` is still true, so the remounted
+      // effect would skip it and no background would ever load. A real unmount is
+      // already guarded by `mountedRef`, and route-level invalidation is owned by the
+      // pathname effect below.
     };
   }, []);
 
@@ -201,8 +204,14 @@ export function BackgroundProvider({
     } catch {
       // Preserve any existing background if the API or image fails.
     } finally {
-      // Permit a later attempt if the initial load did not complete.
-      if (!initialLoadDoneRef.current) {
+      const stillCurrent =
+        lifecycle === lifecycleGenerationRef.current &&
+        requestGeneration === navigationGenerationRef.current;
+
+      // Only the active attempt may release the started flag so a later effect run can
+      // retry; an invalidated attempt (e.g. after entering `/admin`) must not interfere
+      // with a newer attempt that already started.
+      if (stillCurrent && !initialLoadDoneRef.current) {
         initialLoadStartedRef.current = false;
       }
     }

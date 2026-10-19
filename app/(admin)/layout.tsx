@@ -7,7 +7,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <RequireRole roles={[...MODERATOR_ROLES]}>
       <Header />
-      <main style={{ padding: '2rem' }}>{children}</main>
+      <main style={{ padding: '2rem', flex: 1 }}>{children}</main>
       <Footer />
     </RequireRole>
   );

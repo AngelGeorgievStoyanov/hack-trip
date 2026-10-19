@@ -6,7 +6,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
   return (
     <RequireAuth>
       <Header />
-      <main style={{ padding: '2rem' }}>{children}</main>
+      <main style={{ padding: '2rem', flex: 1 }}>{children}</main>
       <Footer />
     </RequireAuth>
   );

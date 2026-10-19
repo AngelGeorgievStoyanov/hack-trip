@@ -35,10 +35,15 @@ export const headingTextStyle: CSSProperties = {
   textShadow: '3px 3px 3px rgb(10,10,10)',
 };
 
-/** Page shell style used by home, trips and trip details. */
+/**
+ * Page shell style used by home, trips and trip details.
+ *
+ * The legacy `minHeight: '100vh'` filled the viewport here; that job now belongs to the
+ * `.app-shell` sticky-footer layout (see `app/layout.tsx`), and keeping it would push
+ * the footer below the fold on short pages.
+ */
 export const pageBackgroundStyle: CSSProperties = {
   boxSizing: 'border-box',
-  minHeight: '100vh',
   padding: '30px',
 };
 
