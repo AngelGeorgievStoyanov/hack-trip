@@ -8,20 +8,15 @@ import { Alert, Box, Button } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { tripApi } from '@/api/trips';
-import { ShareButton } from '@/components/social/ShareButton';
-import { tripRepresentativeImage } from '@/lib/images/representative';
-import { absoluteUrl } from '@/config';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { isModeratorUser } from '@/constants/roles';
-import type { TripGroupDay, TripGroupResponse } from '@/types';
+import type { TripGroupResponse } from '@/types';
 
 /** The trip page stays a Server Component; only these interactions run client-side. */
 export function TripActions({
   tripGroup,
-  day,
 }: {
   tripGroup: TripGroupResponse;
-  day: TripGroupDay;
 }) {
   const { status, user } = useAuth();
   const { confirm } = useConfirm();
@@ -48,14 +43,14 @@ export function TripActions({
     onError: (e) => setError(getGenericErrorMessage(e)),
   });
 
+  // Share moved into TripGroupSocialActions' bottom action row; without it there is
+  // nothing to render for visitors who cannot manage the trip.
+  if (!canManage && !error) {
+    return null;
+  }
+
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', my: 2 }}>
-      <ShareButton
-        url={absoluteUrl(`/trips/${tripGroup.id}`)}
-        title={day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
-        text={day.description ?? undefined}
-        image={tripRepresentativeImage(tripGroup)}
-      />
       {canManage ? (
         <>
           <Link href={`/trips/${tripGroup.id}/edit`}>

@@ -2,12 +2,13 @@
 
 import { useState, type CSSProperties } from 'react';
 import Link from 'next/link';
-import { Typography, Card, CardContent, CardActions, Collapse, IconButton, Tooltip, Box, Button } from '@mui/material';
+import { Typography, CardContent, CardActions, Collapse, IconButton, Tooltip, Box, Button } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import { TripActions } from './TripActions';
 import { TripGroupSocialActions } from '@/components/social/TripGroupSocialActions';
 import { infoPanelStyle } from '@/constants/ui';
+import { tripRepresentativeImage } from '@/lib/images/representative';
 import type { TripGroupDay, TripGroupResponse } from '@/types';
 
 interface TripDetailsProps {
@@ -18,7 +19,6 @@ interface TripDetailsProps {
 
 const NAME_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1.5rem', fontWeight: 500 };
 const LINE_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1rem', fontWeight: 400 };
-const SECTION_DIVIDER: CSSProperties = { margin: '1.5rem 0', borderTop: '1px solid #ddd', width: '100%' };
 const BACK_ROW_STYLE: CSSProperties = { display: 'flex', marginTop: '10px', gap: '10px', flexWrap: 'wrap', alignItems: 'center' };
 
 /**
@@ -37,26 +37,19 @@ export function TripDetails({ tripGroup, day }: TripDetailsProps) {
 
   return (
     <div style={infoPanelStyle}>
-      <Card>
-        <CardContent>
-          <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-            <Typography variant="h5" component="div" style={NAME_STYLE}>
-              TRIP NAME : {day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
-            </Typography>
-            <TripGroupSocialActions
-              tripGroupId={tripGroup.id}
-              initialLiked={tripGroup.social.likedByMe}
-              initialLikes={tripGroup.social.likes}
-              initialFavorited={tripGroup.social.favoritedByMe ?? false}
-              initialReported={tripGroup.social.reportedByMe}
-            />
-          </Box>
-
-          <div style={SECTION_DIVIDER} />
-
-          <TripActions tripGroup={tripGroup} day={day} />
-
-          <div style={SECTION_DIVIDER} />
+        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+          <Typography variant="h5" component="div" style={NAME_STYLE}>
+            TRIP NAME : {day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
+          </Typography>
+          <TripGroupSocialActions
+            tripGroupId={tripGroup.id}
+            initialLiked={tripGroup.social.likedByMe}
+            initialLikes={tripGroup.social.likes}
+            initialFavorited={tripGroup.social.favoritedByMe ?? false}
+            initialReported={tripGroup.social.reportedByMe}
+            variant="favorite"
+          />
+        </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
             <Typography variant="subtitle1" component="h5" style={LINE_STYLE}>
@@ -124,6 +117,8 @@ export function TripDetails({ tripGroup, day }: TripDetailsProps) {
               : 'FOR THIS TRIP DONT HAVE POINTS'}
           </Typography>
 
+          <TripActions tripGroup={tripGroup} />
+
           <div style={BACK_ROW_STYLE}>
             <Link href="/trips" style={{ textDecoration: 'none', color: 'inherit' }}>
               <Button variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px' }}>
@@ -137,8 +132,21 @@ export function TripDetails({ tripGroup, day }: TripDetailsProps) {
               ? `COMMENTS FOR THIS DAY: ${dayCommentCount}`
               : "FOR THIS DAY DON'T HAVE COMMENTS"}
           </Typography>
-        </CardContent>
-      </Card>
+
+          {/* Legacy bottom action row: Like and Report side by side. */}
+          <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around' }}>
+            <TripGroupSocialActions
+              tripGroupId={tripGroup.id}
+              initialLiked={tripGroup.social.likedByMe}
+              initialLikes={tripGroup.social.likes}
+              initialFavorited={tripGroup.social.favoritedByMe ?? false}
+              initialReported={tripGroup.social.reportedByMe}
+              shareTitle={day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
+              shareText={day.description ?? undefined}
+              shareImage={tripRepresentativeImage(tripGroup)}
+              variant="like-report"
+            />
+          </Box>
     </div>
   );
 }
