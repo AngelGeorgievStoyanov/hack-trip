@@ -57,6 +57,7 @@ export function TripDaysNav({ tripGroupId, days, selectedDay, onSelect }: TripDa
   return (
     <AppBar
       position="sticky"
+      data-trip-days-nav="true"
       sx={{
         // MUI pins a sticky AppBar at `top: 0` with `zIndex: appBar`; the site header
         // above is `position: static`, so it scrolls away and no navbar-height offset

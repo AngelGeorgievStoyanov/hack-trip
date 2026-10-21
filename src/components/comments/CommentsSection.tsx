@@ -22,10 +22,24 @@ function commentKey(target: CommentTarget): unknown[] {
   }
 }
 
-export function CommentsSection({ target }: { target: CommentTarget }) {
+interface CommentsSectionProps {
+  target: CommentTarget;
+  /** Day-level comment count already present in the trip DTO; used for the collapsed toggle. */
+  initialCommentsCount?: number;
+  /** When true, the section starts collapsed behind a show/hide toggle (Day-level usage).
+      When false (default), comments render immediately, preserving existing call sites. */
+  collapsible?: boolean;
+}
+
+export function CommentsSection({
+  target,
+  initialCommentsCount = 0,
+  collapsible = false,
+}: CommentsSectionProps) {
   const { status } = useAuth();
   const { confirm } = useConfirm();
   const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = useState(!collapsible);
   const [comment, setComment] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingComment, setEditingComment] = useState('');
@@ -34,6 +48,7 @@ export function CommentsSection({ target }: { target: CommentTarget }) {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: commentKey(target),
     queryFn: () => commentApi.list(target),
+    enabled: isOpen,
   });
 
   const createMutation = useMutation({
@@ -65,33 +80,76 @@ export function CommentsSection({ target }: { target: CommentTarget }) {
   });
 
   const isAuthenticated = status === 'authenticated';
+  const total = data?.total ?? initialCommentsCount;
+  const showToggle = collapsible;
+
+  if (showToggle && !isOpen) {
+    return (
+      <section>
+        {total > 0 ? (
+          <Button
+            variant="contained"
+            onClick={() => setIsOpen(true)}
+            sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}
+          >
+            {`SHOW ALL COMMENTS (${total})`}
+          </Button>
+        ) : (
+          <>
+            <Typography variant="subtitle1" component="div" sx={{ margin: '5px' }}>
+              FOR THIS DAY DON&apos;T HAVE COMMENTS
+            </Typography>
+            {isAuthenticated ? (
+              <Button
+                variant="contained"
+                onClick={() => setIsOpen(true)}
+                sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}
+              >
+                ADD FIRST COMMENT
+              </Button>
+            ) : null}
+          </>
+        )}
+      </section>
+    );
+  }
 
   return (
     <section>
-      <Typography variant="h5" component="h2">
-        Comments ({data?.total ?? 0})
-      </Typography>
+      {showToggle ? (
+        <Button
+          variant="contained"
+          onClick={() => setIsOpen(false)}
+          sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}
+        >
+          HIDE COMMENTS
+        </Button>
+      ) : (
+        <Typography variant="h5" component="h2">
+          Comments ({data?.total ?? initialCommentsCount})
+        </Typography>
+      )}
       {formError ? <Alert severity="error">{formError}</Alert> : null}
 
-       {isAuthenticated ? (
-         <Box
-           component="form"
-           onSubmit={(e) => {
-             e.preventDefault();
-             if (comment.trim()) {
-               createMutation.mutate({ comment });
-             }
-           }}
-           sx={{ display: 'flex', flexDirection: 'column', gap: 1, my: 1 }}
-         >
-           <TextField
-             label="Add a comment"
-             multiline
-             minRows={2}
-             value={comment}
-             onChange={(e) => setComment(e.target.value)}
-           />
-           <Box>
+      {isAuthenticated ? (
+        <Box
+          component="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (comment.trim()) {
+              createMutation.mutate({ comment });
+            }
+          }}
+          sx={{ display: 'flex', flexDirection: 'column', gap: 1, my: 1 }}
+        >
+          <TextField
+            label="Add a comment"
+            multiline
+            minRows={2}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+          />
+          <Box>
             <Button type="submit" variant="contained" disabled={createMutation.isPending}>
               Post
             </Button>
@@ -104,6 +162,12 @@ export function CommentsSection({ target }: { target: CommentTarget }) {
       {isLoading ? <CircularProgress size={24} /> : null}
       {isError ? <Alert severity="error">{getGenericErrorMessage(error)}</Alert> : null}
 
+      {!isLoading && !isError && (data?.items.length ?? 0) === 0 && data && collapsible ? (
+        <Typography variant="body2" color="text.secondary">
+          No comments yet for this day.
+        </Typography>
+      ) : null}
+
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {data?.items.map((comment) => (
           <li key={comment.id} style={{ borderBottom: '1px solid #eee', padding: '0.5rem 0' }}>
@@ -111,11 +175,11 @@ export function CommentsSection({ target }: { target: CommentTarget }) {
               <Box
                 component="form"
                 onSubmit={(e) => {
-                   e.preventDefault();
-                   if (editingComment.trim()) {
-                     updateMutation.mutate({ id: comment.id, comment: editingComment });
-                   }
-                 }}
+                  e.preventDefault();
+                  if (editingComment.trim()) {
+                    updateMutation.mutate({ id: comment.id, comment: editingComment });
+                  }
+                }}
                 sx={{ display: 'flex', gap: 1 }}
               >
                 <TextField

@@ -6,12 +6,11 @@ import { TripDetails } from '@/components/trips/TripDetails';
 import { TripMapSection } from '@/components/trips/TripMapSection';
 import { PointsSection } from '@/components/trips/PointsSection';
 import { DayImagesGallery } from '@/components/trips/DayImagesGallery';
-import { CommentsSection } from '@/components/comments/CommentsSection';
 import { Box, useMediaQuery } from '@mui/material';
 import { hasCoordinates } from '@/lib/maps';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { tripRepresentativeImage } from '@/lib/images/representative';
-import { BREAKPOINTS, maxWidthQuery } from '@/constants/ui';
+import { BREAKPOINTS, maxWidthQuery, mediaDown } from '@/constants/ui';
 import type { TripGroupResponse } from '@/types';
 
 interface TripDetailsViewProps {
@@ -84,30 +83,61 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
       </Box>
 
       {pointsHaveCoords ? (
-        <TripMapSection
-          points={day.points}
-          selectedPointIndex={selectedPointIndex}
-          onPointChange={setSelectedPointIndex}
-        />
-      ) : null}
-
-      {/* Day-scoped sections reset per day via `key`, without touching Trip Group social. */}
-      <div key={`day-content-${day.dayNumber}`}>
-        {day.points.length > 0 ? (
-          <PointsSection
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            width: '100%',
+            maxWidth: 1200,
+            padding: '50px 50px',
+            boxSizing: 'border-box',
+            gap: '24px',
+            [mediaDown(BREAKPOINTS.tripDetails)]: {
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '0px',
+              gap: 0,
+            },
+          }}
+        >
+          <TripMapSection
+            key={`day-map-${day.id}`}
             points={day.points}
             selectedPointIndex={selectedPointIndex}
             onPointChange={setSelectedPointIndex}
           />
-        ) : null}
 
-        <Box sx={{ width: '100%', maxWidth: 1200, mt: 3 }}>
-          <CommentsSection
-            key={`day-comments-${day.id}`}
-            target={{ type: 'day', tripGroupId: trip.id, tripId: day.id }}
-          />
+          {day.points.length > 0 ? (
+            <PointsSection points={day.points} selectedPointIndex={selectedPointIndex} />
+          ) : null}
         </Box>
-      </div>
+      ) : (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            width: '100%',
+            maxWidth: 1200,
+            padding: '50px 50px',
+            boxSizing: 'border-box',
+            [mediaDown(BREAKPOINTS.tripDetails)]: {
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '0px',
+            },
+          }}
+        >
+          {day.points.length > 0 ? (
+            <PointsSection points={day.points} selectedPointIndex={selectedPointIndex} />
+          ) : null}
+        </Box>
+      )}
+
+
     </>
   );
 }

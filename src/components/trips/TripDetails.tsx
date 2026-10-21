@@ -7,6 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import { TripActions } from './TripActions';
 import { TripGroupSocialActions } from '@/components/social/TripGroupSocialActions';
+import { CommentsSection } from '@/components/comments/CommentsSection';
 import { infoPanelStyle } from '@/constants/ui';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import type { TripGroupDay, TripGroupResponse } from '@/types';
@@ -127,11 +128,11 @@ export function TripDetails({ tripGroup, day }: TripDetailsProps) {
             </Link>
           </div>
 
-          <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
-            {dayCommentCount > 0
-              ? `COMMENTS FOR THIS DAY: ${dayCommentCount}`
-              : "FOR THIS DAY DON'T HAVE COMMENTS"}
-          </Typography>
+          <CommentsSection
+            target={{ type: 'day', tripGroupId: tripGroup.id, tripId: day.id }}
+            initialCommentsCount={dayCommentCount}
+            collapsible
+          />
 
           {/* Legacy bottom action row: Like and Report side by side. */}
           <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around' }}>

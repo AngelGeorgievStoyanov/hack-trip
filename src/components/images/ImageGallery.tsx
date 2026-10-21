@@ -35,7 +35,7 @@ export function ImageGallery({
           display: variant === 'grid' ? 'grid' : 'flex',
           gridTemplateColumns:
             variant === 'grid'
-              ? `repeat(${Math.min(images.length, 3)}, minmax(0, 1fr))`
+               ? `repeat(${Math.min(images.length, 3)}, minmax(0, 1fr))`
               : undefined,
           flexDirection: variant === 'stack' ? 'column' : 'row',
           flexWrap: 'wrap',

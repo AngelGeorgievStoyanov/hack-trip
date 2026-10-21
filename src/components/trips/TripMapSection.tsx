@@ -1,11 +1,11 @@
 'use client';
 
-import { useCallback } from 'react';
-import { Box, Button, MobileStepper, useTheme } from '@mui/material';
+import { useCallback, useEffect, useRef } from 'react';
+import { Box, Button, MobileStepper, useMediaQuery, useTheme } from '@mui/material';
 import { TripMap } from '@/components/maps/TripMap';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { BREAKPOINTS, CARD_BORDER, CARD_SHADOW, mediaDown } from '@/constants/ui';
+import { BREAKPOINTS, CARD_BORDER, CARD_SHADOW, maxWidthQuery, mediaDown } from '@/constants/ui';
 import type { TripPoint } from '@/types';
 
 interface TripMapSectionProps {
@@ -17,11 +17,16 @@ interface TripMapSectionProps {
 
 /**
  * Client Component: the legacy map was paired with a point stepper that stepped through the
- * day's points and scrolled the matching point card into view.
+ * day's points. On small screens the stepper is scrolled just below the sticky day nav
+ * (or the top of the page when there is no day nav), matching the legacy `mobileStepperRef`
+ * scroll. `PointSection` never scrolls itself.
  */
 export function TripMapSection({ points, selectedPointIndex, onPointChange }: TripMapSectionProps) {
   const theme = useTheme();
   const focusPointId = points[selectedPointIndex]?.id ?? null;
+  const stepperRef = useRef<HTMLDivElement | null>(null);
+  const previousPointIndex = useRef(selectedPointIndex);
+  const isSmallScreen = useMediaQuery(maxWidthQuery(BREAKPOINTS.tripDetails));
 
   const hasNext = selectedPointIndex < points.length - 1;
   const hasPrev = selectedPointIndex > 0;
@@ -35,6 +40,33 @@ export function TripMapSection({ points, selectedPointIndex, onPointChange }: Tr
     },
     [points, onPointChange],
   );
+
+  // Legacy positioned the stepper just below the sticky nav on small screens when the
+  // selected point changed. Scroll only when the stepper is actually out of place, so
+  // repeated Next/Back at the right position does not move the page.
+  useEffect(() => {
+    const previous = previousPointIndex.current;
+    previousPointIndex.current = selectedPointIndex;
+    if (previous === selectedPointIndex) {
+      return;
+    }
+    if (!isSmallScreen) {
+      return;
+    }
+    const stepper = stepperRef.current;
+    if (!stepper) {
+      return;
+    }
+    const dayNav = document.querySelector('[data-trip-days-nav="true"]');
+    const stickyHeight = dayNav instanceof HTMLElement ? dayNav.getBoundingClientRect().height : 0;
+    const expectedTop = Math.round(stickyHeight + 10);
+    const actualTop = Math.round(stepper.getBoundingClientRect().top);
+    if (Math.abs(actualTop - expectedTop) <= 2) {
+      return;
+    }
+    const targetY = window.scrollY + actualTop - stickyHeight - 10;
+    window.scrollTo({ top: Math.max(targetY, 0), behavior: 'smooth' });
+  }, [isSmallScreen, selectedPointIndex]);
 
   return (
     <Box
@@ -54,6 +86,7 @@ export function TripMapSection({ points, selectedPointIndex, onPointChange }: Tr
     >
       {points.length > 1 ? (
         <MobileStepper
+          ref={stepperRef}
           variant="progress"
           steps={points.length}
           position="static"
