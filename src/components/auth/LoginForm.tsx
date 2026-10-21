@@ -11,6 +11,8 @@ import { getAuthErrorMessage } from '@/lib/errors';
 import { isSafeInternalPath } from '@/lib/returnPath';
 import { loginSchema } from '@/validations/auth';
 import type { LoginInput } from '@/api/auth';
+import { COLORS, CARD_SHADOW, CARD_BORDER } from '@/constants/ui';
+import { WelcomeHeading } from '@/components/common/WelcomeHeading';
 
 export function LoginForm() {
   const { login } = useAuth();
@@ -39,45 +41,84 @@ export function LoginForm() {
     }
   }
 
+  const SECONDARY_BUTTON_SX = {
+    ':hover': { color: 'rgb(248 245 245)' },
+    margin: '5px',
+    backgroundColor: 'rgb(194 194 224)',
+    color: 'black',
+  } as const;
+
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(onSubmit)}
-      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-    >
-      <Typography variant="h4" component="h1">
-        Login
-      </Typography>
-      {serverError ? <Alert severity="error">{serverError}</Alert> : null}
-      <TextField
-        label="Email"
-        type="email"
-        autoComplete="email"
-        {...register('email')}
-        error={!!errors.email}
-        helperText={errors.email?.message}
-      />
-      <TextField
-        label="Password"
-        type="password"
-        autoComplete="current-password"
-        {...register('password')}
-        error={!!errors.password}
-        helperText={errors.password?.message}
-      />
-      <Button
-        type="submit"
-        variant="contained"
-        disabled={submitting}
-        startIcon={submitting ? <CircularProgress size={18} /> : undefined}
+    <WelcomeHeading>
+      <Box
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          backgroundColor: COLORS.formPanelBackground,
+          boxShadow: CARD_SHADOW,
+          border: CARD_BORDER,
+          borderRadius: '0px',
+          padding: '30px',
+          maxWidth: '700px',
+          width: '100%',
+          boxSizing: 'border-box',
+          marginX: 'auto',
+        }}
       >
-        Login
-      </Button>
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <Link href="/register">Register</Link>
-        <Link href="/forgot-password">Forgot password?</Link>
-        <Link href="/resend-verification">Resend verification email</Link>
+        <Typography variant="h5" component="div" sx={{ margin: '10px auto', textAlign: 'center' }}>
+          LOGIN
+        </Typography>
+        {serverError ? <Alert severity="error">{serverError}</Alert> : null}
+        <TextField
+          label="Email"
+          type="email"
+          autoComplete="email"
+          {...register('email')}
+          error={!!errors.email}
+          helperText={errors.email?.message}
+        />
+        <TextField
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          {...register('password')}
+          error={!!errors.password}
+          helperText={errors.password?.message}
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={submitting}
+          startIcon={submitting ? <CircularProgress size={18} /> : undefined}
+          sx={{ ':hover': { backgroundColor: '#4daf30' } }}
+        >
+          Login
+        </Button>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mt: 1 }}>
+          <Button component={Link} href="/register" variant="contained" sx={SECONDARY_BUTTON_SX}>
+            Register
+          </Button>
+          <Button
+            component={Link}
+            href="/forgot-password"
+            variant="contained"
+            sx={SECONDARY_BUTTON_SX}
+          >
+            Forgot password?
+          </Button>
+          <Button
+            component={Link}
+            href="/resend-verification"
+            variant="contained"
+            sx={SECONDARY_BUTTON_SX}
+          >
+            Resend verification email
+          </Button>
+        </Box>
       </Box>
-    </Box>
+    </WelcomeHeading>
   );
 }

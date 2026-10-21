@@ -10,6 +10,7 @@ import {
 import { authToken, isAccountStatusError, normalizeApiError, restoreSession } from '../api/client';
 import { authApi, type LoginInput } from '../api/auth';
 import type { ProfileDto } from '../types';
+import { useRouter } from 'next/navigation';
 
 /**
  * Authentication state, distinguished per API_CONTRACT.md §2.3 and §10:
@@ -30,6 +31,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<ProfileDto | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
@@ -127,7 +129,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     setUser(null);
     setStatus('anonymous');
-  }, []);
+    // All logout cleanup (API call, token/session clearing, auth-state update) has
+    // completed at this point, so it is safe to send the user to the public home page
+    // regardless of which page they logged out from. `replace` avoids restoring the
+    // previous (possibly protected) URL via the browser back button.
+    router.replace('/');
+  }, [router]);
 
   const updateUser = useCallback((nextUser: ProfileDto): void => {
     setUser(nextUser);
