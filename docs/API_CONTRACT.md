@@ -532,9 +532,9 @@ Mounted at `/api/v1/config`. Auth: `optionalAuthentication` (public token = anon
 
 `isActive` enables or disables an action as a whole. `operations` is canonical; the legacy `create`, `edit`, and `delete` booleans are projected from that map. `contextRules` carries contextual settings and does not describe user-specific permissions. A code capability registry allowlists implemented combinations, so configuration cannot create unsupported functionality. Current actions are `like`, `favorite`, `report`, `comment`, and `replyComment`; target types are `tripGroup`, `trip`, `point`, `image`, and `comment`.
 
-Like and Favorite support create/delete on trip groups and travel images. Report supports create/delete on trip groups, days (`trip`), points, travel images, comments, and replies. Root comments can be created on trip groups, days, points, and travel images; comments and replies support configured edit/delete on the `comment` target. Reply create/edit/delete is enabled only when the stored root comment target is a point.
+Like, Favorite, and Report support create/delete on trip groups, days (`trip`), points, travel images, comments, and replies (replies use the `comment` target and their own comment ID). Root comments can be created on trip groups, days, points, and travel images; comments and replies support configured edit/delete on the `comment` target. Reply create/edit/delete is enabled when the stored root comment target is a trip group, day, point, or travel image. Replies cannot be nested.
 
-If an action is absent, inactive, unsupported by the registry, a target is absent, or the requested operation/context is disabled, the shared backend check rejects the operation with `403 FORBIDDEN`. An image social target must resolve to an image attached to a day or point in a trip group; profile images and unattached images have no social context and return `404 NOT_FOUND` before mutation. Authentication, authorship, ownership, and moderator checks remain separate. Comment DTO `permissions` describes viewer authorship/moderator rights; global configuration describes feature availability. Replies are permitted only when the backend resolves the root comment's stored target to `point`; nested replies are unsupported.
+If an action is absent, inactive, unsupported by the registry, a target is absent, or the requested operation/context is disabled, the shared backend check rejects the operation with `403 FORBIDDEN`. An image social target must resolve to an image attached to a day or point in a trip group; profile images and unattached images have no social context and return `404 NOT_FOUND` before mutation. Authentication, authorship, ownership, and moderator checks remain separate. Comment DTO `permissions` describes viewer authorship/moderator rights; global configuration describes feature availability. Replies are permitted only when the backend resolves the root comment's stored target to a trip group, day, point, or travel image; nested replies are unsupported.
 
 `SocialConfig` response example (legacy flags are derived from `operations`):
 
@@ -545,20 +545,20 @@ If an action is absent, inactive, unsupported by the registry, a target is absen
       "key": "like", "isActive": true,
       "targets": [
         { "key": "tripGroup", "operations": { "create": true, "edit": false, "delete": true }, "create": true, "edit": false, "delete": true },
-        { "key": "trip", "operations": { "create": false, "edit": false, "delete": false }, "create": false, "edit": false, "delete": false },
-        { "key": "point", "operations": { "create": false, "edit": false, "delete": false }, "create": false, "edit": false, "delete": false },
+        { "key": "trip", "operations": { "create": true, "edit": false, "delete": true }, "create": true, "edit": false, "delete": true },
+        { "key": "point", "operations": { "create": true, "edit": false, "delete": true }, "create": true, "edit": false, "delete": true },
         { "key": "image", "operations": { "create": true, "edit": false, "delete": true }, "create": true, "edit": false, "delete": true },
-        { "key": "comment", "operations": { "create": false, "edit": false, "delete": false }, "create": false, "edit": false, "delete": false }
+        { "key": "comment", "operations": { "create": true, "edit": false, "delete": true }, "create": true, "edit": false, "delete": true }
       ]
     },
     {
       "key": "favorite", "isActive": true,
       "targets": [
         { "key": "tripGroup", "operations": { "create": true, "edit": false, "delete": true }, "create": true, "edit": false, "delete": true },
-        { "key": "trip", "operations": { "create": false, "edit": false, "delete": false }, "create": false, "edit": false, "delete": false },
-        { "key": "point", "operations": { "create": false, "edit": false, "delete": false }, "create": false, "edit": false, "delete": false },
+        { "key": "trip", "operations": { "create": true, "edit": false, "delete": true }, "create": true, "edit": false, "delete": true },
+        { "key": "point", "operations": { "create": true, "edit": false, "delete": true }, "create": true, "edit": false, "delete": true },
         { "key": "image", "operations": { "create": true, "edit": false, "delete": true }, "create": true, "edit": false, "delete": true },
-        { "key": "comment", "operations": { "create": false, "edit": false, "delete": false }, "create": false, "edit": false, "delete": false }
+        { "key": "comment", "operations": { "create": true, "edit": false, "delete": true }, "create": true, "edit": false, "delete": true }
       ]
     },
     {
@@ -588,7 +588,12 @@ If an action is absent, inactive, unsupported by the registry, a target is absen
         { "key": "trip", "operations": { "create": false, "edit": false, "delete": false }, "create": false, "edit": false, "delete": false },
         { "key": "point", "operations": { "create": false, "edit": false, "delete": false }, "create": false, "edit": false, "delete": false },
         { "key": "image", "operations": { "create": false, "edit": false, "delete": false }, "create": false, "edit": false, "delete": false },
-        { "key": "comment", "operations": { "create": false, "edit": false, "delete": false }, "create": false, "edit": false, "delete": false, "contextRules": [{ "key": "point", "operations": { "create": true, "edit": true, "delete": true } }] }
+        { "key": "comment", "operations": { "create": false, "edit": false, "delete": false }, "create": false, "edit": false, "delete": false, "contextRules": [
+          { "key": "tripGroup", "operations": { "create": true, "edit": true, "delete": true } },
+          { "key": "trip", "operations": { "create": true, "edit": true, "delete": true } },
+          { "key": "point", "operations": { "create": true, "edit": true, "delete": true } },
+          { "key": "image", "operations": { "create": true, "edit": true, "delete": true } }
+        ] }
       ]
     }
   ]
@@ -995,7 +1000,7 @@ Replies are comment rows with a non-null `parentCommentId`. They retain the same
 
 Comment and reply DTOs include `parentCommentId` (`null` for a regular comment) and viewer-aware like, favorite, reply-count, and report fields in `social`. Replies are social targets using their own comment ID.
 
-Reply create/edit/delete is globally available only when the root comment's target is a point. The reply uses the documented parent comment id in the route; the backend derives `parentCommentId` and the target from that parent. No separate Reply target type or body field is used.
+Reply create/edit/delete is available when the root comment targets a trip group, day, point, or travel image. The reply uses the documented parent comment id in the route; the backend derives `parentCommentId` and the target from that parent. No separate Reply target type or body field is used.
 
 ### 8.9 POST `/trips/:tripGroupId/days`
 
@@ -1339,20 +1344,20 @@ Canonical mapping:
 | `image`     | `image`                                      | an image (`images.id`)          |
 | `comment`   | `comment`                                    | a comment or reply (`comments.id`) |
 
-`targetId` is the numeric id of that resource. `trip` is the accepted alias of `day`. Schema acceptance does not imply that an action is enabled: the current capability registry and Social Config enable likes only for trip groups and travel images; other syntactically accepted targets are rejected with `403 FORBIDDEN`.
+`targetId` is the numeric id of that resource. `trip` is the accepted alias of `day`.
 
 ---
 
 ## 14. Favorite Endpoints
 
-Mounted at `/api/v1/favorites`. Existing trip-group requests remain supported. The polymorphic schema accepts the shared target vocabulary, while the capability registry and Social Config currently enable Favorite only for trip groups and travel images; other valid target/action pairs are rejected with `403 FORBIDDEN`.
+Mounted at `/api/v1/favorites`. Existing trip-group requests remain supported; the polymorphic form supports every currently configured target, including comments and replies.
 
 ### 14.1 POST `/favorites`
 
 * Auth: `requireAuthentication`.
 * Body (strict): either `{ tripGroupId }` (legacy-compatible form) or `{ targetType, targetId }`; IDs are true JSON numbers. The polymorphic form uses the shared target vocabulary, with authorization determined by Social Config.
 * Response `200`: `SocialState` for the requested target. Idempotent.
-* The `{ targetType, targetId }` form does not bypass Social Config or the capability registry.
+* The current configuration enables Favorite create/delete on trip groups, days (`trip`), points, travel images, comments, and replies. Image targets must be attached to a day or point in a trip group. The polymorphic form does not bypass Social Config or the capability registry.
 
 ### 14.2 DELETE `/favorites`
 
@@ -1373,7 +1378,8 @@ Mounted at `/api/v1/reports`.
 * Body (strict): `{ targetType, targetId, reason? }` — `targetId` must be a true JSON number (integer id).
 * Response `201`: `ReportDto`.
 * Error: the same user already reported the same target -> `409 CONFLICT` ("You have already reported this resource.").
-* Reports may target a trip group, trip/day, point, image, or comment.
+* Reports may target a trip group, trip/day, point, travel image, comment, or reply. Profile images and unattached images are not valid social targets and resolve as `404 NOT_FOUND`.
+* The configured Report action supports create/delete for each of those target types. A disabled operation/context is rejected with `403 FORBIDDEN`.
 * The reporting user is always taken from authentication context. `userId` must never be accepted from the request body.
 
 `ReportDto`:

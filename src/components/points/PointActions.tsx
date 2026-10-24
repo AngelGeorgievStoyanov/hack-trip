@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 import { ShareButton } from '@/components/social/ShareButton';
 import { LikeButton } from '@/components/social/LikeButton';
+import { FavoriteButton } from '@/components/social/FavoriteButton';
 import { ReportButton } from '@/components/social/ReportButton';
 import { SocialConfigStatus } from '@/components/social/SocialConfigStatus';
 import { useSocialConfig } from '@/hooks/useSocialConfig';
@@ -21,6 +22,12 @@ export function PointActions({ point }: { point: TripPoint }) {
     'point',
     point.social.likedByMe ? 'delete' : 'create',
   );
+  const canFavorite = isSocialOperationAllowed(
+    socialConfig.data,
+    'favorite',
+    'point',
+    point.social.favoritedByMe ? 'delete' : 'create',
+  );
   const canReport = isSocialOperationAllowed(
     socialConfig.data,
     'report',
@@ -29,20 +36,26 @@ export function PointActions({ point }: { point: TripPoint }) {
   );
 
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', my: 2 }}>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25, alignItems: 'center', my: 0 }}>
       <SocialConfigStatus isLoading={socialConfig.isLoading} error={socialConfig.error} />
       <ShareButton
         url={absoluteUrl(`/points/${point.id}`)}
         title={point.name}
         text={point.description ?? undefined}
       />
-      {isAuthenticated && (canLike || canReport) ? (
+      {isAuthenticated && (canLike || canFavorite || canReport) ? (
         <>
           {canLike ? <LikeButton
             targetType="point"
             targetId={point.id}
             initialLiked={point.social.likedByMe}
             initialLikes={point.social.likes}
+          /> : null}
+          {canFavorite ? <FavoriteButton
+            targetType="point"
+            targetId={point.id}
+            initialFavorited={point.social.favoritedByMe ?? false}
+            initialFavorites={point.social.favorites ?? 0}
           /> : null}
           {canReport ? <ReportButton
             targetType="point"

@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { AppBar, Box, Pagination, PaginationItem } from '@mui/material';
 import type { PaginationRenderItemParams } from '@mui/material/Pagination';
-import { pageBackgroundStyle } from '@/constants/ui';
 import { buildTripUrl } from '@/lib/tripUrl';
 
 interface TripDaysNavProps {
@@ -32,14 +31,8 @@ const PAGE_ITEM_SX = {
 } as const;
 
 /**
- * The trip page shell (`pageBackgroundStyle` on the page's `<main>`) pads every side.
- * The strip cancels that padding so it sits flush under the header and spans the full
- * viewport width, while the rest of the page keeps its shell layout untouched.
+ * The parent sticky social/navigation stack owns the shell bleed; this strip fills it.
  */
-const SHELL_PADDING =
-  typeof pageBackgroundStyle.padding === 'string' ? pageBackgroundStyle.padding : '30px';
-const SHELL_BLEED = `-${SHELL_PADDING}`;
-
 /**
  * Client Component: the legacy trip page showed a sticky day strip and swapped the visible
  * day without leaving the page. The selected day lives in the URL so the day's points,
@@ -56,17 +49,12 @@ export function TripDaysNav({ tripGroupId, days, selectedDay, onSelect }: TripDa
 
   return (
     <AppBar
-      position="sticky"
+      position="static"
       data-trip-days-nav="true"
       sx={{
-        // MUI pins a sticky AppBar at `top: 0` with `zIndex: appBar`; the site header
-        // above is `position: static`, so it scrolls away and no navbar-height offset
-        // applies at any breakpoint.
-        width: `calc(100% + ${SHELL_PADDING} + ${SHELL_PADDING})`,
-        marginLeft: SHELL_BLEED,
-        marginRight: SHELL_BLEED,
-        marginTop: SHELL_BLEED,
-        marginBottom: '20px',
+        width: '100%',
+        margin: 0,
+        marginBottom: 0,
       }}
     >
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>

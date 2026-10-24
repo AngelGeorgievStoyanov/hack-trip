@@ -12,13 +12,26 @@ import { hasCoordinates } from '@/lib/maps';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import { useTripGroup } from '@/hooks/useTripGroup';
-import { BREAKPOINTS, maxWidthQuery, mediaDown } from '@/constants/ui';
+import { TripGroupSocialActions } from '@/components/social/TripGroupSocialActions';
+import {
+  BREAKPOINTS,
+  CARD_BORDER,
+  CARD_SHADOW,
+  COLORS,
+  maxWidthQuery,
+  mediaDown,
+  pageBackgroundStyle,
+} from '@/constants/ui';
 import type { TripGroupResponse } from '@/types';
 
 interface TripDetailsViewProps {
   trip: TripGroupResponse;
   initialDayNumber: number;
 }
+
+const SHELL_PADDING =
+  typeof pageBackgroundStyle.padding === 'string' ? pageBackgroundStyle.padding : '30px';
+const SHELL_BLEED = `-${SHELL_PADDING}`;
 
 /**
  * Trip Details view owns the active day in client state.
@@ -55,12 +68,50 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
 
   return (
     <>
-      <TripDaysNav
-        tripGroupId={group.id}
-        days={group.days.map((current) => current.dayNumber)}
-        selectedDay={day.dayNumber}
-        onSelect={handleSelectDay}
-      />
+      <Box
+        sx={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 'appBar',
+          width: `calc(100% + ${SHELL_PADDING} + ${SHELL_PADDING})`,
+          marginLeft: SHELL_BLEED,
+          marginRight: SHELL_BLEED,
+          marginTop: SHELL_BLEED,
+          pb: 1,
+          backgroundColor: 'transparent',
+        }}
+      >
+        <TripDaysNav
+          tripGroupId={group.id}
+          days={group.days.map((current) => current.dayNumber)}
+          selectedDay={day.dayNumber}
+          onSelect={handleSelectDay}
+        />
+        <Box
+          sx={{
+            display: 'inline-flex',
+            maxWidth: 'calc(100% - 32px)',
+            ml: { xs: 2, sm: 3 },
+            mt: 1,
+            px: 0.75,
+            py: 0.5,
+            border: CARD_BORDER,
+            borderRadius: 2.5,
+            backgroundColor: COLORS.cardBackground,
+            boxShadow: CARD_SHADOW,
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+          }}
+        >
+          <TripGroupSocialActions
+            tripGroupId={group.id}
+            social={group.social}
+            shareTitle={day.title ?? group.days[0]?.title ?? 'Trip'}
+            shareText={day.description ?? undefined}
+            shareImage={tripRepresentativeImage(group)}
+          />
+        </Box>
+      </Box>
 
       {/* Legacy trip row: the info panel sits beside the day image gallery
           (space-around), stacked with the gallery above the panel below 900px,
@@ -90,6 +141,9 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
         <DayImagesGallery
           key={day.dayNumber}
           day={day}
+          tripGroupId={group.id}
+          commentsOpen={commentsOpen}
+          onToggleComments={() => setCommentsOpen((previous) => !previous)}
           tripCoverImage={tripRepresentativeImage(group)}
         />
       </Box>

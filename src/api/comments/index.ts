@@ -55,28 +55,28 @@ export const commentApi = {
   },
 
   replies: async (commentId: number, query: CommentListQuery = {}): Promise<CommentListResponse> => {
-    const { commentId: id } = commentIdParams.parse({ commentId });
+    const { commentId: id } = commentIdParams.parse({ commentId: String(commentId) });
     const params = commentPageQuerySchema.parse(query);
     const { data } = await apiClient.get<CommentListResponse>(COMMENTS + '/' + id + '/replies', { params });
     return data;
   },
 
   createReply: async (commentId: number, input: CommentCreateInput): Promise<CommentDto> => {
-    const { commentId: id } = commentIdParams.parse({ commentId });
+    const { commentId: id } = commentIdParams.parse({ commentId: String(commentId) });
     const body = commentBodySchema.parse(input);
     const { data } = await apiClient.post<CommentDto>(COMMENTS + '/' + id + '/replies', body);
     return data;
   },
 
   updateReply: async (replyId: number, input: CommentCreateInput): Promise<CommentDto> => {
-    const { replyId: id } = replyIdParams.parse({ replyId });
+    const { replyId: id } = replyIdParams.parse({ replyId: String(replyId) });
     const body = commentBodySchema.parse(input);
     const { data } = await apiClient.put<CommentDto>(API_PREFIX + '/replies/' + id, body);
     return data;
   },
 
   deleteReply: async (replyId: number): Promise<void> => {
-    const { replyId: id } = replyIdParams.parse({ replyId });
+    const { replyId: id } = replyIdParams.parse({ replyId: String(replyId) });
     await apiClient.delete(API_PREFIX + '/replies/' + id);
   },
 };

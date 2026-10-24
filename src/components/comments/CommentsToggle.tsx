@@ -1,6 +1,8 @@
 'use client';
 
-import { Button, Typography } from '@mui/material';
+import { Badge, IconButton, Tooltip, Typography } from '@mui/material';
+import AddCommentIcon from '@mui/icons-material/AddComment';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface CommentsToggleProps {
   /** Number of comments for the target, taken from the API response. */
@@ -20,33 +22,28 @@ interface CommentsToggleProps {
  */
 export function CommentsToggle({ count, open, onToggle, emptyLabel }: CommentsToggleProps) {
   return (
-    <div>
-      {open ? (
-        <Button
-          variant="contained"
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      {!open && count === 0 && emptyLabel ? (
+        <Typography variant="subtitle1" component="div" sx={{ margin: '5px' }}>
+          {emptyLabel}
+        </Typography>
+      ) : null}
+      <Tooltip title={open ? 'Hide comments' : count > 0 ? `Show ${count} comments` : 'Show comments'} arrow>
+        <IconButton
           onClick={onToggle}
+          aria-label={open ? 'Hide comments' : count > 0 ? `Show ${count} comments` : 'Show comments'}
           aria-expanded={open}
-          sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}
+          color="primary"
         >
-          HIDE COMMENTS
-        </Button>
-      ) : (
-        <>
-          {count === 0 && emptyLabel ? (
-            <Typography variant="subtitle1" component="div" sx={{ margin: '5px' }}>
-              {emptyLabel}
-            </Typography>
-          ) : null}
-          <Button
-            variant="contained"
-            onClick={onToggle}
-            aria-expanded={open}
-            sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px', margin: '5px' }}
-          >
-            {`SHOW ALL COMMENTS (${count})`}
-          </Button>
-        </>
-      )}
+          {open ? (
+            <CloseIcon />
+          ) : (
+            <Badge badgeContent={count} invisible={count === 0} max={Number.MAX_SAFE_INTEGER} color="primary">
+              <AddCommentIcon />
+            </Badge>
+          )}
+        </IconButton>
+      </Tooltip>
     </div>
   );
 }

@@ -9,5 +9,6 @@ export function useSocialConfig() {
     queryKey: SOCIAL_CONFIG_QUERY_KEY,
     queryFn: configApi.getSocial,
     staleTime: SOCIAL_CONFIG_STALE_TIME_MS,
+    refetchOnWindowFocus: 'always',
   });
 }

@@ -56,8 +56,14 @@ export function ReportButton({
     },
   );
 
-  const { status } = useAuth();
+  const { status, viewerCacheKey } = useAuth();
   const isAuthenticated = status === 'authenticated';
+
+  useEffect(() => {
+    setOpen(false);
+    setReason('');
+    clearError();
+  }, [viewerCacheKey, clearError]);
 
   function submit(): void {
     report(reason);
@@ -75,51 +81,53 @@ export function ReportButton({
 
   return (
     <>
-      <Tooltip
-        title={!isAuthenticated ? 'Log in to report' : (done ? 'UN REPORT' : label)}
-        arrow
-      >
-        <span style={{ display: 'inline-flex' }}>
-          <IconButton
-            onClick={handleClick}
-            disabled={!isAuthenticated || pending}
-            aria-label={done ? 'Withdraw report' : 'Report content'}
-            color={done ? 'error' : 'primary'}
-            sx={{ '&:hover': { color: 'red' } }}
-          >
-            {done ? <ReportOffIcon /> : <ReportIcon />}
-          </IconButton>
-        </span>
-      </Tooltip>
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>Report this content</DialogTitle>
-        <DialogContent>
-          {error ? <Alert severity="error">{error}</Alert> : null}
-          <TextField
-            label="Reason (optional)"
-            multiline
-            minRows={2}
-            fullWidth
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            sx={{ mt: 1 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={submit} disabled={pending}>
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
-      {error && !open ? (
+      {isAuthenticated ? (
+        <>
+          <Tooltip title={done ? 'UN REPORT' : label} arrow>
+            <span style={{ display: 'inline-flex' }}>
+              <IconButton
+                onClick={handleClick}
+                disabled={pending}
+                aria-label={done ? 'Withdraw report' : label}
+                aria-pressed={done}
+                color={done ? 'error' : 'primary'}
+                sx={{ '&:hover': { color: 'red' } }}
+              >
+                {done ? <ReportOffIcon /> : <ReportIcon />}
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Dialog open={open} onClose={() => setOpen(false)}>
+            <DialogTitle>Report this content</DialogTitle>
+            <DialogContent>
+              {error ? <Alert severity="error">{error}</Alert> : null}
+              <TextField
+                label="Reason (optional)"
+                multiline
+                minRows={2}
+                fullWidth
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                sx={{ mt: 1 }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={submit} disabled={pending}>
+                Submit
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      ) : null}
+      {isAuthenticated && error && !open ? (
         <span role="alert" style={{ color: 'red', fontSize: '0.75rem' }}>
           {error}
         </span>
       ) : null}
       {/* The icon carries the reported state; the status is announced but not shown as a
           second, text-based control. */}
-      {done ? (
+      {isAuthenticated && done ? (
         <span role="status" style={visuallyHidden}>
           Reported. Thank you.
         </span>

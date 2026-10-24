@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   MobileStepper,
+  Badge,
   Pagination,
   PaginationItem,
   Typography,
@@ -87,6 +88,7 @@ export function TripCard({ tripGroup }: TripCardProps) {
 
   // Likes belong to the whole trip group, so they must not change when the day changes.
   const groupLikes = tripGroup.social.likes;
+  const tripLikes = selectedDay?.social.likes ?? 0;
 
   // The DETAILS link keeps the day the visitor is looking at. `:id` is always the
   // tripGroupId; the day travels as `?day=N` and missing numbers (e.g. Day 1, Day 3,
@@ -188,7 +190,7 @@ export function TripCard({ tripGroup }: TripCardProps) {
       {images.length > 0 ? (
         <>
           <Box
-            sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}
+            sx={{ display: 'flex', justifyContent: 'center', width: '100%', position: 'relative' }}
             onTouchStart={(event) => {
               touchEndX.current = null;
               touchStartX.current = event.touches[0].clientX;
@@ -206,6 +208,33 @@ export function TripCard({ tripGroup }: TripCardProps) {
               height={200}
               style={IMAGE_STYLE}
             />
+            <Box
+              aria-label="Trip social counts"
+              sx={{
+                position: 'absolute',
+                top: 10,
+                left: 10,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0.75,
+                p: 0.75,
+                borderRadius: 2,
+                bgcolor: COLORS.cardBackground,
+                boxShadow: 2,
+                pointerEvents: 'none',
+              }}
+            >
+              <Box component="span" role="img" aria-label={`Trip group likes: ${groupLikes}`} sx={{ display: 'inline-flex' }}>
+                <Badge badgeContent={groupLikes} invisible={groupLikes === 0} max={Number.MAX_SAFE_INTEGER} color="error">
+                  <FavoriteIcon fontSize="small" color="error" />
+                </Badge>
+              </Box>
+              <Box component="span" role="img" aria-label={`Trip likes: ${tripLikes}`} sx={{ display: 'inline-flex' }}>
+                <Badge badgeContent={tripLikes} invisible={tripLikes === 0} max={Number.MAX_SAFE_INTEGER} color="error">
+                  <FavoriteIcon fontSize="small" color="error" />
+                </Badge>
+              </Box>
+            </Box>
           </Box>
 
           <MobileStepper
@@ -233,24 +262,6 @@ export function TripCard({ tripGroup }: TripCardProps) {
       )}
 
       <CardContent sx={CARD_CONTENT_SX}>
-        {groupLikes === 0 ? (
-          <Typography
-            sx={{ margin: '10px', display: 'flex', alignItems: 'center' }}
-            gutterBottom
-            variant="h6"
-            component="div"
-          >
-            LIKES:
-            <Box component="span" sx={{ color: COLORS.brand, display: 'inline-flex' }}>
-              <FavoriteIcon fontSize="inherit" />
-            </Box>
-          </Typography>
-        ) : (
-          <Typography sx={{ margin: '10px' }} gutterBottom variant="h6" component="div">
-            LIKES: {groupLikes}
-          </Typography>
-        )}
-
         <Button
           component={Link}
           href={detailsHref}

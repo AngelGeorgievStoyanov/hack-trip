@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
   Avatar,
+  Badge,
   Box,
-  Button,
   CircularProgress,
   IconButton,
   TextField,
@@ -15,6 +15,11 @@ import {
 } from '@mui/material';
 import AddCommentIcon from '@mui/icons-material/AddComment';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import ReplyIcon from '@mui/icons-material/Reply';
+import SendIcon from '@mui/icons-material/Send';
+import CheckIcon from '@mui/icons-material/Check';
 import { commentApi, type CommentCreateInput, type CommentTarget } from '@/api/comments';
 import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
@@ -26,6 +31,7 @@ import { SocialConfigStatus } from '@/components/social/SocialConfigStatus';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { isSocialOperationAllowed, socialConfigTargetKey } from '@/lib/socialConfig';
 import { useSocialConfig } from '@/hooks/useSocialConfig';
+import { invalidateSocialQueries } from '@/lib/socialQuerySync';
 import { commentCardStyle, commentListStyle, commentsPanelStyle } from '@/constants/ui';
 
 function commentKey(target: CommentTarget, viewerCacheKey: string): unknown[] {
@@ -84,6 +90,7 @@ export function CommentsSection({
   open = true,
 }: CommentsSectionProps) {
   const { status, viewerCacheKey } = useAuth();
+  const isAuthenticated = status === 'authenticated';
   const { confirm } = useConfirm();
   const queryClient = useQueryClient();
   const socialConfig = useSocialConfig();
@@ -95,6 +102,14 @@ export function CommentsSection({
   // The add-comment form starts closed and is opened from the toggle at the bottom of
   // the section; opening it only changes local state, it never refetches the list.
   const [formOpen, setFormOpen] = useState(false);
+
+  useEffect(() => {
+    setEditingId(null);
+    setEditingComment('');
+    setComment('');
+    setFormOpen(false);
+    setFormError(null);
+  }, [viewerCacheKey]);
 
   // The comment list carries the viewer's own report state, so the request must not run
   // before the session is known: an anonymous read would report every comment as
@@ -108,6 +123,11 @@ export function CommentsSection({
     'create',
   );
   const queryKey = commentKey(target, viewerCacheKey);
+  const targetSocialType = target.type === 'tripGroup'
+    ? 'tripgroup'
+    : target.type === 'day'
+      ? 'day'
+      : target.type;
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey,
@@ -119,6 +139,7 @@ export function CommentsSection({
     mutationFn: (input: CommentCreateInput) => commentApi.create(target, input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey });
+      invalidateSocialQueries(queryClient, targetSocialType);
       setComment('');
       setFormOpen(false);
     },
@@ -130,6 +151,7 @@ export function CommentsSection({
       commentApi.update(input.id, { comment: input.comment }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey });
+      invalidateSocialQueries(queryClient, targetSocialType);
       setEditingId(null);
       setEditingComment('');
     },
@@ -140,11 +162,11 @@ export function CommentsSection({
     mutationFn: (id: number) => commentApi.delete(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey });
+      invalidateSocialQueries(queryClient, targetSocialType);
     },
     onError: (e) => setFormError(getGenericErrorMessage(e)),
   });
 
-  const isAuthenticated = status === 'authenticated';
   const total = data?.total ?? initialCommentsCount;
 
   if (!open) {
@@ -153,8 +175,8 @@ export function CommentsSection({
 
   return (
     <section aria-label="Comments" style={commentsPanelStyle}>
-      <Typography variant="h5" component="h2" sx={{ marginBottom: '10px' }}>
-        Comments ({total})
+      <Typography variant="h5" component="h2" aria-label={`Comments, ${total} total`} sx={{ marginBottom: '10px' }}>
+        Comments
       </Typography>
       <SocialConfigStatus isLoading={socialConfig.isLoading} error={socialConfig.error} />
       {formError ? (
@@ -210,7 +232,7 @@ export function CommentsSection({
 
           return (
             <li key={commentItem.id} style={commentCardStyle}>
-              {editingId === commentItem.id ? (
+              {isAuthenticated && editingId === commentItem.id && canEdit ? (
                 <Box
                   component="form"
                   onSubmit={(e) => {
@@ -229,12 +251,18 @@ export function CommentsSection({
                     onChange={(e) => setEditingComment(e.target.value)}
                   />
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    <Button type="submit" size="small" disabled={updateMutation.isPending}>
-                      Save
-                    </Button>
-                    <Button size="small" onClick={() => setEditingId(null)}>
-                      Cancel
-                    </Button>
+                    <Tooltip title="Save comment" arrow>
+                      <span>
+                        <IconButton type="submit" aria-label="Save comment" disabled={updateMutation.isPending}>
+                          <CheckIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    <Tooltip title="Cancel edit" arrow>
+                      <IconButton type="button" aria-label="Cancel edit" onClick={() => setEditingId(null)}>
+                        <CloseIcon />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
                 </Box>
               ) : (
@@ -295,41 +323,68 @@ export function CommentsSection({
                         }}
                       /> : null}
                       {canEdit ? (
-                        <Button
-                          size="small"
-                          onClick={() => {
-                            setEditingId(commentItem.id);
-                            setEditingComment(commentItem.comment);
-                          }}
-                        >
-                          EDIT COMMENT
-                        </Button>
+                        <Tooltip title="Edit comment" arrow>
+                          <IconButton
+                            size="small"
+                            aria-label="Edit comment"
+                            onClick={() => {
+                              setEditingId(commentItem.id);
+                              setEditingComment(commentItem.comment);
+                            }}
+                          >
+                            <EditOutlinedIcon />
+                          </IconButton>
+                        </Tooltip>
                       ) : null}
                       {canDelete ? (
-                        <Button
-                          size="small"
-                          color="error"
-                          onClick={() =>
-                            void confirm(
-                              'Are you sure you want to delete this comment?',
-                              'Delete Confirmation',
-                            ).then((confirmed) => {
-                              if (confirmed) {
-                                deleteMutation.mutate(commentItem.id);
-                              }
-                            })
-                          }
-                        >
-                          DELETE COMMENT
-                        </Button>
+                        <Tooltip title="Delete comment" arrow>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            aria-label="Delete comment"
+                            onClick={() =>
+                              void confirm(
+                                'Are you sure you want to delete this comment?',
+                                'Delete Confirmation',
+                              ).then((confirmed) => {
+                                if (confirmed) {
+                                  deleteMutation.mutate(commentItem.id);
+                                }
+                              })
+                            }
+                          >
+                            <DeleteOutlineIcon />
+                          </IconButton>
+                        </Tooltip>
                       ) : null}
                     </Box>
                   ) : null}
                 </>
               )}
-              <Button size="small" onClick={() => setOpenRepliesId((current) => current === commentItem.id ? null : commentItem.id)}>
-                {openRepliesId === commentItem.id ? 'Hide replies' : 'Replies (' + commentItem.social.comments.count + ')'}
-              </Button>
+              <Tooltip
+                title={openRepliesId === commentItem.id ? 'Hide replies' : `Show ${commentItem.social.comments.count} replies`}
+                arrow
+              >
+                <IconButton
+                  size="small"
+                  aria-label={openRepliesId === commentItem.id ? 'Hide replies' : `Show ${commentItem.social.comments.count} replies`}
+                  aria-expanded={openRepliesId === commentItem.id}
+                  onClick={() => setOpenRepliesId((current) => current === commentItem.id ? null : commentItem.id)}
+                >
+                  {openRepliesId === commentItem.id ? (
+                    <CloseIcon />
+                  ) : (
+                    <Badge
+                      badgeContent={commentItem.social.comments.count}
+                      invisible={commentItem.social.comments.count === 0}
+                      max={Number.MAX_SAFE_INTEGER}
+                      color="primary"
+                    >
+                      <ReplyIcon />
+                    </Badge>
+                  )}
+                </IconButton>
+              </Tooltip>
               {openRepliesId === commentItem.id ? (
                 <RepliesSection
                   commentId={commentItem.id}
@@ -364,13 +419,18 @@ export function CommentsSection({
                 onChange={(e) => setComment(e.target.value)}
               />
               <Box>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={!comment.trim() || createMutation.isPending}
-                >
-                  Post
-                </Button>
+                <Tooltip title="Post comment" arrow>
+                  <span>
+                    <IconButton
+                      type="submit"
+                      aria-label="Post comment"
+                      color="primary"
+                      disabled={!comment.trim() || createMutation.isPending}
+                    >
+                      <SendIcon />
+                    </IconButton>
+                  </span>
+                </Tooltip>
               </Box>
             </Box>
           ) : null}

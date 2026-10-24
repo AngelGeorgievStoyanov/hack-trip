@@ -1,7 +1,11 @@
 'use client';
 
-import { Typography, Card, CardContent } from '@mui/material';
+import { useState } from 'react';
+import { Typography, Card, CardContent, Box } from '@mui/material';
 import { ImageGallery } from '@/components/images/ImageGallery';
+import { PointActions } from '@/components/points/PointActions';
+import { CommentsToggle } from '@/components/comments/CommentsToggle';
+import { CommentsSection } from '@/components/comments/CommentsSection';
 import { ExpandableText } from '@/components/common/ExpandableText';
 import { CARD_BORDER, CARD_SHADOW, COLORS } from '@/constants/ui';
 import type { TripPoint } from '@/types';
@@ -39,6 +43,8 @@ const POINT_NOTE_STYLE = {
 } as const;
 
 export function PointSection({ point }: PointSectionProps) {
+  const [commentsOpen, setCommentsOpen] = useState(false);
+
   if (!point) {
     return null;
   }
@@ -52,7 +58,20 @@ export function PointSection({ point }: PointSectionProps) {
           </Typography>
 
           {point.images.length > 0 ? (
-            <ImageGallery images={point.images} alt={point.name} preset="tripPointThumb" variant="grid" />
+            <ImageGallery
+              images={point.images}
+              alt={point.name}
+              preset="tripPointThumb"
+              variant="grid"
+              engagementTarget={{
+                targetType: 'point',
+                targetId: point.id,
+                social: point.social,
+                commentTarget: { type: 'point', pointId: point.id },
+                commentsOpen,
+                onToggleComments: () => setCommentsOpen((previous) => !previous),
+              }}
+            />
           ) : (
             <Typography variant="body2" sx={POINT_NOTE_STYLE}>
               FOR THIS POINT DON&apos;T HAVE IMAGES
@@ -70,8 +89,23 @@ export function PointSection({ point }: PointSectionProps) {
               <ExpandableText text={point.description} />
             </div>
           ) : null}
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+            <PointActions point={point} />
+            <CommentsToggle
+              count={point.social.comments.count}
+              open={commentsOpen}
+              onToggle={() => setCommentsOpen((previous) => !previous)}
+            />
+          </Box>
         </CardContent>
       </Card>
+      {commentsOpen ? (
+        <CommentsSection
+          target={{ type: 'point', pointId: point.id }}
+          initialCommentsCount={point.social.comments.count}
+        />
+      ) : null}
     </section>
   );
 }

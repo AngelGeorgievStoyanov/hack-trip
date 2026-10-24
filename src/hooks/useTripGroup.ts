@@ -6,6 +6,7 @@ import { socialApi } from '@/api/social';
 import { tripApi } from '@/api/trips';
 import { useAuth } from '@/hooks/useAuth';
 import { useReportActions } from '@/hooks/useReportActions';
+import { invalidateSocialQueries } from '@/lib/socialQuerySync';
 import type { SocialState, TripGroupResponse } from '@/types';
 
 /** React Query keys for trip-group reads. */
@@ -66,6 +67,7 @@ export function useTripGroupSocial(tripGroupId: number, social: SocialState) {
       return socialApi.like({ targetType: 'tripgroup', targetId: tripGroupId });
     },
     onSuccess: (state) => {
+      invalidateSocialQueries(queryClient, 'tripgroup');
       if (state) {
         patchSocial({ likedByMe: state.likedByMe, likes: state.likes });
         return;
@@ -83,6 +85,7 @@ export function useTripGroupSocial(tripGroupId: number, social: SocialState) {
       return socialApi.favorite({ tripGroupId });
     },
     onSuccess: (state) => {
+      invalidateSocialQueries(queryClient, 'tripgroup');
       if (state) {
         patchSocial({
           favoritedByMe: state.favoritedByMe ?? false,

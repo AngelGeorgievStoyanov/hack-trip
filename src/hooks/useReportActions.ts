@@ -1,11 +1,12 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { normalizeApiError } from '@/api/client';
 import { socialApi } from '@/api/social';
 import { API_ERROR_CODES } from '@/constants/api';
 import { getGenericErrorMessage } from '@/lib/errors';
+import { invalidateSocialQueries } from '@/lib/socialQuerySync';
 import type { ReportTargetTypeInput } from '@/types';
 
 interface UseReportActionsOptions {
@@ -33,12 +34,14 @@ export function useReportActions(
 ): ReportActions {
   const { onReportedChange } = options;
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const reportMutation = useMutation({
     mutationFn: (reason: string | undefined) =>
       socialApi.report({ targetType, targetId, reason: reason || undefined }),
     onSuccess: () => {
       setError(null);
+      invalidateSocialQueries(queryClient, targetType);
       onReportedChange?.(true);
     },
     onError: (e) => {
@@ -46,6 +49,7 @@ export function useReportActions(
       // means this user has already reported it.
       if (normalizeApiError(e).code === API_ERROR_CODES.CONFLICT) {
         setError('You have already reported this content.');
+        invalidateSocialQueries(queryClient, targetType);
         onReportedChange?.(true);
         return;
       }
@@ -57,6 +61,7 @@ export function useReportActions(
     mutationFn: () => socialApi.unreport({ targetType, targetId }),
     onSuccess: () => {
       setError(null);
+      invalidateSocialQueries(queryClient, targetType);
       onReportedChange?.(false);
     },
     onError: (e) => setError(getGenericErrorMessage(e)),

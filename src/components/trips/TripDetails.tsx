@@ -6,10 +6,9 @@ import { Typography, CardContent, CardActions, Collapse, IconButton, Tooltip, Bo
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import { TripActions } from './TripActions';
-import { TripGroupSocialActions } from '@/components/social/TripGroupSocialActions';
+import { EngagementBar } from '@/components/social/EngagementBar';
 import { CommentsToggle } from '@/components/comments/CommentsToggle';
 import { infoPanelStyle } from '@/constants/ui';
-import { tripRepresentativeImage } from '@/lib/images/representative';
 import type { TripGroupDay, TripGroupResponse } from '@/types';
 
 interface TripDetailsProps {
@@ -30,8 +29,8 @@ const BACK_ROW_STYLE: CSSProperties = { display: 'flex', marginTop: '10px', gap:
  * Trip Information Panel — standalone visual section matching legacy UI.
  * Contains trip metadata, social actions, trip actions, description.
  * Does NOT include map, point, or day image gallery.
- * Trip Like / Report / Favorite always render from `trip.social` (Trip Group level);
- * the `day` prop only supplies the day-level comment count (`day.social.comments`).
+ * Trip Group actions use `tripGroup.social`; Like/Favorite/Report for the selected day
+ * use that day's `social` state. Comments remain day-level.
  */
 export function TripDetails({ tripGroup, day, commentsOpen, onToggleComments }: TripDetailsProps) {
   const totalPoints = tripGroup.days.reduce((sum, current) => sum + current.points.length, 0);
@@ -46,11 +45,6 @@ export function TripDetails({ tripGroup, day, commentsOpen, onToggleComments }: 
           <Typography variant="h5" component="div" style={NAME_STYLE}>
             TRIP NAME : {day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
           </Typography>
-          <TripGroupSocialActions
-            tripGroupId={tripGroup.id}
-            social={tripGroup.social}
-            variant="favorite"
-          />
         </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
@@ -121,6 +115,22 @@ export function TripDetails({ tripGroup, day, commentsOpen, onToggleComments }: 
 
           <TripActions tripGroup={tripGroup} />
 
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+            <EngagementBar
+              targetType="trip"
+              targetId={day.id}
+              social={day.social}
+              commentTarget={{ type: 'day', tripGroupId: tripGroup.id, tripId: day.id }}
+              showComments={false}
+            />
+            <CommentsToggle
+              count={dayCommentCount}
+              open={commentsOpen}
+              onToggle={onToggleComments}
+              emptyLabel="FOR THIS DAY DON'T HAVE COMMENTS"
+            />
+          </Box>
+
           <div style={BACK_ROW_STYLE}>
             <Link href="/trips" style={{ textDecoration: 'none', color: 'inherit' }}>
               <Button variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px' }}>
@@ -129,26 +139,6 @@ export function TripDetails({ tripGroup, day, commentsOpen, onToggleComments }: 
             </Link>
           </div>
 
-          {/* The comment list is rendered outside this card; only the toggle stays here. */}
-          <CommentsToggle
-            count={dayCommentCount}
-            open={commentsOpen}
-            onToggle={onToggleComments}
-            emptyLabel="FOR THIS DAY DON'T HAVE COMMENTS"
-          />
-
-          {/* Legacy bottom action row: Like and Report side by side. */}
-          <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around' }}>
-            <TripGroupSocialActions
-              tripGroupId={tripGroup.id}
-              social={tripGroup.social}
-              shareTitle={day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
-              shareText={day.description ?? undefined}
-              shareImage={tripRepresentativeImage(tripGroup)}
-              dayReportTarget={{ id: day.id, social: day.social }}
-              variant="like-report"
-            />
-          </Box>
     </div>
   );
 }

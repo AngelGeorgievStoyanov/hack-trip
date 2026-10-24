@@ -1,8 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
+import { Alert, Badge, Box, CircularProgress, IconButton, TextField, Tooltip, Typography } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import CheckIcon from '@mui/icons-material/Check';
+import ReplyIcon from '@mui/icons-material/Reply';
 import { commentApi } from '@/api/comments';
 import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
@@ -13,6 +18,7 @@ import { SocialConfigStatus } from '@/components/social/SocialConfigStatus';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { isSocialOperationAllowed } from '@/lib/socialConfig';
 import { useSocialConfig } from '@/hooks/useSocialConfig';
+import { invalidateSocialQueries } from '@/lib/socialQuerySync';
 import type { CommentDto, SocialConfigTargetKey } from '@/types';
 
 interface RepliesSectionProps {
@@ -34,6 +40,12 @@ export function RepliesSection({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingReply, setEditingReply] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  useEffect(() => {
+    setReply('');
+    setEditingId(null);
+    setEditingReply('');
+    setErrorMessage(null);
+  }, [viewerCacheKey]);
   const queryKey = ['comments', viewerCacheKey, 'replies', commentId];
   const authenticated = status === 'authenticated';
   const sessionResolved = status === 'anonymous' || authenticated;
@@ -52,7 +64,7 @@ export function RepliesSection({
   });
 
   const refresh = () => {
-    return queryClient.invalidateQueries({ queryKey: ['comments'] });
+    invalidateSocialQueries(queryClient, 'comment');
   };
 
   const createMutation = useMutation({
@@ -124,7 +136,7 @@ export function RepliesSection({
         sx={{ borderLeft: '2px solid', borderColor: 'divider', pl: 2, py: 1, mt: 1 }}
       >
         <Typography variant="subtitle2">{item.author.name}</Typography>
-        {editingId === item.id ? (
+        {authenticated && editingId === item.id && canEdit ? (
           <Box
             component="form"
             onSubmit={(event) => {
@@ -141,8 +153,25 @@ export function RepliesSection({
               onChange={(event) => setEditingReply(event.target.value)}
               multiline
             />
-            <Button type="submit" disabled={updateMutation.isPending}>Save</Button>
-            <Button onClick={() => setEditingId(null)}>Cancel</Button>
+            <Tooltip title="Save reply" arrow>
+              <span>
+                <IconButton type="submit" aria-label="Save reply" disabled={updateMutation.isPending}>
+                  <CheckIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title="Cancel edit" arrow>
+              <IconButton
+                type="button"
+                aria-label="Cancel edit"
+                onClick={() => {
+                  setEditingId(null);
+                  setEditingReply('');
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         ) : (
           <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
@@ -171,28 +200,34 @@ export function RepliesSection({
               onReportedChange={() => void refresh()}
             /> : null}
             {canEdit ? (
-              <Button
-                size="small"
-                onClick={() => {
-                  setEditingId(item.id);
-                  setEditingReply(item.comment);
-                }}
-              >
-                Edit reply
-              </Button>
+              <Tooltip title="Edit reply" arrow>
+                <IconButton
+                  size="small"
+                  aria-label="Edit reply"
+                  onClick={() => {
+                    setEditingId(item.id);
+                    setEditingReply(item.comment);
+                  }}
+                >
+                  <EditOutlinedIcon />
+                </IconButton>
+              </Tooltip>
             ) : null}
             {canDelete ? (
-              <Button
-                size="small"
-                color="error"
-                onClick={() =>
-                  void confirm('Delete this reply?', 'Delete Confirmation').then((confirmed) => {
-                    if (confirmed) deleteMutation.mutate(item.id);
-                  })
-                }
-              >
-                Delete reply
-              </Button>
+              <Tooltip title="Delete reply" arrow>
+                <IconButton
+                  size="small"
+                  color="error"
+                  aria-label="Delete reply"
+                  onClick={() =>
+                    void confirm('Delete this reply?', 'Delete Confirmation').then((confirmed) => {
+                      if (confirmed) deleteMutation.mutate(item.id);
+                    })
+                  }
+                >
+                  <DeleteOutlineIcon />
+                </IconButton>
+              </Tooltip>
             ) : null}
           </Box>
         ) : null}
@@ -201,10 +236,8 @@ export function RepliesSection({
   }
 
   return (
-    <Box component="section" aria-label="Replies" sx={{ mt: 1, pl: 2 }}>
-      <Typography variant="subtitle2">
-        Replies ({data?.total ?? initialRepliesCount})
-      </Typography>
+    <Box component="section" aria-label={`Replies, ${data?.total ?? initialRepliesCount} total`} sx={{ mt: 1, pl: 2 }}>
+      <Typography variant="subtitle2">Replies</Typography>
       <SocialConfigStatus isLoading={socialConfig.isLoading} error={socialConfig.error} />
       {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
       {isLoading ? <CircularProgress size={20} /> : null}
@@ -227,9 +260,31 @@ export function RepliesSection({
             multiline
             fullWidth
           />
-          <Button type="submit" disabled={!reply.trim() || createMutation.isPending}>
-            Reply
-          </Button>
+          <Tooltip title="Reply" arrow>
+            <span>
+              <IconButton
+                type="submit"
+                aria-label="Reply"
+                disabled={!reply.trim() || createMutation.isPending}
+                color="primary"
+              >
+                <ReplyIcon aria-hidden="true" />
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip title="Cancel reply" arrow>
+            <IconButton
+              type="button"
+              aria-label="Cancel reply"
+              onClick={() => {
+                setReply('');
+                setErrorMessage(null);
+              }}
+              disabled={createMutation.isPending}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
       ) : status === 'anonymous' ? (
         <Typography variant="body2">Log in to reply.</Typography>

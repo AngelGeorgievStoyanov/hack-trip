@@ -1,10 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { Button } from '@mui/material';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Badge, IconButton, Tooltip } from '@mui/material';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { socialApi } from '@/api/social';
 import { getGenericErrorMessage } from '@/lib/errors';
+import { invalidateSocialQueries } from '@/lib/socialQuerySync';
 import type { SocialTargetTypeInput } from '@/types';
 
 interface FavoriteButtonProps {
@@ -23,6 +26,7 @@ export function FavoriteButton({
   const [favorited, setFavorited] = useState(initialFavorited);
   const [count, setCount] = useState(initialFavorites);
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => setFavorited(initialFavorited), [initialFavorited]);
   useEffect(() => setCount(initialFavorites), [initialFavorites]);
@@ -36,6 +40,8 @@ export function FavoriteButton({
       return socialApi.favorite({ targetType, targetId });
     },
     onSuccess: (state) => {
+      setError(null);
+      invalidateSocialQueries(queryClient, targetType);
       setFavorited(state?.favoritedByMe ?? false);
       if (state) {
         setCount(state.favorites ?? 0);
@@ -48,13 +54,21 @@ export function FavoriteButton({
 
   return (
     <>
-      <Button
-        variant={favorited ? 'contained' : 'outlined'}
-        onClick={() => mutation.mutate()}
-        disabled={mutation.isPending}
-      >
-        {favorited ? 'Favorited' : 'Favorite'} ({count})
-      </Button>
+      <Tooltip title={favorited ? 'Remove from favorites' : 'Add to favorites'} arrow>
+        <span>
+          <IconButton
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+            aria-label={favorited ? `Remove from favorites (${count})` : `Add to favorites (${count})`}
+            aria-pressed={favorited}
+            color={favorited ? 'error' : 'default'}
+          >
+            <Badge badgeContent={count} invisible={count === 0} max={Number.MAX_SAFE_INTEGER} color="error">
+              {favorited ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+            </Badge>
+          </IconButton>
+        </span>
+      </Tooltip>
       {error ? <span role="alert">{error}</span> : null}
     </>
   );

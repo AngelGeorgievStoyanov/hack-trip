@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { IconButton, Tooltip } from '@mui/material';
+import ShareIcon from '@mui/icons-material/Share';
 import { useBackground } from '@/hooks/useBackground';
 import { resolveShareImage, shareWithFallback } from '@/lib/share';
 
@@ -25,8 +27,10 @@ export function ShareButton({ url, title, text, image }: ShareButtonProps) {
   }
 
   return (
-    <button type="button" onClick={() => void handleShare()}>
-      {copied ? 'Link copied!' : 'Share'}
-    </button>
+    <Tooltip title={copied ? 'Link copied' : 'Share'} arrow>
+      <IconButton type="button" onClick={() => void handleShare()} aria-label={copied ? 'Link copied' : 'Share'}>
+        <ShareIcon />
+      </IconButton>
+    </Tooltip>
   );
 }
