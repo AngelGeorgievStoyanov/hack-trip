@@ -6,10 +6,12 @@ import { TripDetails } from '@/components/trips/TripDetails';
 import { TripMapSection } from '@/components/trips/TripMapSection';
 import { PointsSection } from '@/components/trips/PointsSection';
 import { DayImagesGallery } from '@/components/trips/DayImagesGallery';
+import { CommentsSection } from '@/components/comments/CommentsSection';
 import { Box, useMediaQuery } from '@mui/material';
 import { hasCoordinates } from '@/lib/maps';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { tripRepresentativeImage } from '@/lib/images/representative';
+import { useTripGroup } from '@/hooks/useTripGroup';
 import { BREAKPOINTS, maxWidthQuery, mediaDown } from '@/constants/ui';
 import type { TripGroupResponse } from '@/types';
 
@@ -25,8 +27,12 @@ interface TripDetailsViewProps {
  * single source for Trip Like / Favorite / Report and comments stay day-level.
  */
 export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps) {
+  // The server render is anonymous, so the authenticated read is what restores the
+  // viewer's own like / favorite / report state after a reload.
+  const { data: tripGroup } = useTripGroup(trip);
   const [activeDayNumber, setActiveDayNumber] = useState(initialDayNumber);
   const [selectedPointIndex, setSelectedPointIndex] = useState(0);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const isMobile = useMediaQuery(maxWidthQuery(BREAKPOINTS.tripDetails));
 
   // The server resolves `?day=N` once per navigation; adopt it so the view opens
@@ -37,20 +43,21 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
     setSelectedPointIndex(0);
   }, [initialDayNumber]);
 
-  const day = trip.days.find((current) => current.dayNumber === activeDayNumber) ?? trip.days[0];
+  const group = tripGroup ?? trip;
+  const day = group.days.find((current) => current.dayNumber === activeDayNumber) ?? group.days[0];
   const pointsHaveCoords = day.points.some(hasCoordinates);
 
   function handleSelectDay(dayNumber: number): void {
     setActiveDayNumber(dayNumber);
     setSelectedPointIndex(0);
-    window.history.replaceState(null, '', buildTripUrl(trip.id, dayNumber));
+    window.history.replaceState(null, '', buildTripUrl(group.id, dayNumber));
   }
 
   return (
     <>
       <TripDaysNav
-        tripGroupId={trip.id}
-        days={trip.days.map((current) => current.dayNumber)}
+        tripGroupId={group.id}
+        days={group.days.map((current) => current.dayNumber)}
         selectedDay={day.dayNumber}
         onSelect={handleSelectDay}
       />
@@ -72,15 +79,31 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
         }}
       >
         {/* Trip Group social stays mounted here so Like/Favorite survive day switches. */}
-        <TripDetails tripGroup={trip} day={day} />
+        <TripDetails
+          tripGroup={group}
+          day={day}
+          commentsOpen={commentsOpen}
+          onToggleComments={() => setCommentsOpen((previous) => !previous)}
+        />
 
         {/* Remounted per day so the lightbox index resets with the day content below. */}
         <DayImagesGallery
           key={day.dayNumber}
           day={day}
-          tripCoverImage={tripRepresentativeImage(trip)}
+          tripCoverImage={tripRepresentativeImage(group)}
         />
       </Box>
+
+      {/* The comment list is a sibling of the trip information card, never a child of it,
+          so the card only owns the show/hide toggle. */}
+      {commentsOpen ? (
+        <Box sx={{ width: '100%' }}>
+          <CommentsSection
+            target={{ type: 'day', tripGroupId: group.id, tripId: day.id }}
+            initialCommentsCount={day.social.comments.count}
+          />
+        </Box>
+      ) : null}
 
       {pointsHaveCoords ? (
         <Box

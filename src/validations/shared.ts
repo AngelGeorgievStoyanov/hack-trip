@@ -128,7 +128,7 @@ export const targetTypeInput = z
   .string()
   .trim()
   .transform((value) => value.toLowerCase())
-  .pipe(z.enum(['tripgroup', 'day', 'trip', 'point', 'image']));
+  .pipe(z.enum(['tripgroup', 'day', 'trip', 'point', 'image', 'comment']));
 
 /** Report target type input: like targets plus comment targets. */
 export const reportTargetTypeInput = z

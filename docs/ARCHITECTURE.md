@@ -2172,3 +2172,17 @@ GET /trips/background
 The frontend loads and decodes the `current` image before displaying it. The `next` image is preloaded and decoded in the background. On navigation, if the `next` image is fully ready, it is promoted to `current` immediately without waiting for an API request. If the `next` image is not ready at the moment navigation occurs, the current background is kept and no delayed transition occurs later.
 
 Loading a background image must work for an anonymous visitor and must not require `/auth/refresh`.
+
+# 46. Comment and Social API Integration
+
+Trip detail comments are loaded for the selected day using GET /trips/:tripGroupId/days/:tripId/comments; the group id and day row id remain separate identifiers. Comment DTOs preserve parentCommentId and the complete viewer-aware social state from the backend.
+
+Social action availability comes from `GET /config/social`, fetched through the centralized config API and cached with React Query. Components map route/UI aliases (`tripGroup`/`tripgroup`, `day`/`trip`) to the backend configuration keys, then check the action, target, operation, and, for `replyComment`, the root-comment context. A missing or failed configuration check hides that action and displays the configuration load/error state.
+
+This configuration describes global feature capabilities only. It does not grant a user permission to mutate content. Comment author/moderator permissions (`canEdit` and `canDelete`), authentication state, and backend authorization remain independent checks. Replies can be created, edited, or deleted only for point-root comments; the API uses the parent comment id and derives the parent relationship server-side.
+
+Viewer-specific trip, point, comment, and reply query keys include an opaque authentication session version. This prevents cached `likedByMe`, `favoritedByMe`, `reportedByMe`, and permission fields from carrying across login, logout, or session restoration. Queries that return viewer state wait until authentication resolves and remain disabled on account-status errors.
+
+Replies use the dedicated /comments/:commentId/replies collection and /replies/:replyId update/delete routes. They retain the parent comment's target and are displayed one level deep. Like, favorite and report mutations on comments or replies use the comment target id. A user's report is withdrawn with DELETE /reports?targetType=comment&targetId=...; report ids are only used by administrative report removal.
+
+Feature API modules validate query/body inputs and preserve backend DTO field names. The shared Axios error normalizer retains the backend error code and HTTP status so feature UI can display contract-specific outcomes.

@@ -1,19 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@mui/material';
 import { socialApi } from '@/api/social';
 import { getGenericErrorMessage } from '@/lib/errors';
+import type { SocialTargetTypeInput } from '@/types';
 
 interface FavoriteButtonProps {
-  tripGroupId: number;
+  targetType: SocialTargetTypeInput;
+  targetId: number;
   initialFavorited: boolean;
   initialFavorites: number;
 }
 
 export function FavoriteButton({
-  tripGroupId,
+  targetType,
+  targetId,
   initialFavorited,
   initialFavorites,
 }: FavoriteButtonProps) {
@@ -21,16 +24,19 @@ export function FavoriteButton({
   const [count, setCount] = useState(initialFavorites);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => setFavorited(initialFavorited), [initialFavorited]);
+  useEffect(() => setCount(initialFavorites), [initialFavorites]);
+
   const mutation = useMutation({
     mutationFn: async () => {
       if (favorited) {
-        await socialApi.unfavorite({ tripGroupId });
+        await socialApi.unfavorite({ targetType, targetId });
         return null;
       }
-      return socialApi.favorite({ tripGroupId });
+      return socialApi.favorite({ targetType, targetId });
     },
     onSuccess: (state) => {
-      setFavorited((prev) => !prev);
+      setFavorited(state?.favoritedByMe ?? false);
       if (state) {
         setCount(state.favorites ?? 0);
       } else {

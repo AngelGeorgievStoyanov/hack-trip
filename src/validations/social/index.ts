@@ -15,17 +15,11 @@ export const socialTargetQuerySchema = z
   })
   .strict();
 
-export const favoriteBodySchema = z
-  .object({
-    tripGroupId: positiveId,
-  })
-  .strict();
+const favoriteTripGroupSchema = z.object({ tripGroupId: positiveId }).strict();
+const favoriteTargetSchema = z.object({ targetType: targetTypeInput, targetId: positiveId }).strict();
 
-export const favoriteQuerySchema = z
-  .object({
-    tripGroupId: positiveId,
-  })
-  .strict();
+export const favoriteBodySchema = z.union([favoriteTripGroupSchema, favoriteTargetSchema]);
+export const favoriteQuerySchema = z.union([favoriteTripGroupSchema, favoriteTargetSchema]);
 
 export const reportBodySchema = z
   .object({
@@ -33,4 +27,8 @@ export const reportBodySchema = z
     targetId: positiveId,
     reason: optionalText({ max: 1000 }),
   })
+  .strict();
+
+export const reportTargetQuerySchema = z
+  .object({ targetType: reportTargetTypeInput, targetId: positiveId })
   .strict();

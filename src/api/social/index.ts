@@ -7,6 +7,7 @@ import {
   reportBodySchema,
   socialTargetBodySchema,
   socialTargetQuerySchema,
+  reportTargetQuerySchema,
 } from '../../validations';
 
 export interface SocialTargetInput {
@@ -14,9 +15,9 @@ export interface SocialTargetInput {
   targetId: number;
 }
 
-export interface FavoriteInput {
-  tripGroupId: number;
-}
+export type FavoriteInput =
+  | { tripGroupId: number }
+  | { targetType: SocialTargetTypeInput; targetId: number };
 
 export interface ReportInput {
   targetType: ReportTargetTypeInput;
@@ -51,5 +52,14 @@ export const socialApi = {
     const body = reportBodySchema.parse(input);
     const { data } = await apiClient.post<ReportDto>(`${REPORTS}/`, body);
     return data;
+  },
+
+  /**
+   * Withdraws the current user's own report. The backend only allows the report author
+   * to remove it and only removes the report record, never the reported content.
+   */
+  unreport: async (input: Pick<ReportInput, 'targetType' | 'targetId'>): Promise<void> => {
+    const params = reportTargetQuerySchema.parse(input);
+    await apiClient.delete(REPORTS, { params });
   },
 };

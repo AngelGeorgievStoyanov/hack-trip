@@ -16,3 +16,6 @@ export const SELECT_TYPE_KEYS: Record<TripSelectFieldName, string> = {
 export const SELECTS_STALE_TIME_MS = 30 * 60 * 1000;
 
 export const SELECTS_QUERY_KEY = ['config', 'selects'] as const;
+
+export const SOCIAL_CONFIG_STALE_TIME_MS = 30 * 60 * 1000;
+export const SOCIAL_CONFIG_QUERY_KEY = ['config', 'social'] as const;

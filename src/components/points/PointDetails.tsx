@@ -1,30 +1,38 @@
+'use client';
+
 import { SocialImageGallery } from '@/components/images/SocialImageGallery';
 import { ExpandableText } from '@/components/common/ExpandableText';
 import { PointActions } from './PointActions';
 import { CommentsSection } from '@/components/comments/CommentsSection';
+import { usePoint } from '@/hooks/usePoint';
 import type { TripPoint } from '@/types';
 
 export function PointDetails({ point }: { point: TripPoint }) {
+  // The server render is anonymous; the authenticated read restores the viewer's own
+  // like / report state for the point and for its images.
+  const { data } = usePoint(point);
+  const current = data ?? point;
+
   return (
     <article>
-      <h1>{point.name}</h1>
-      {point.description ? <ExpandableText text={point.description} /> : null}
-      {point.lat != null && point.lng != null ? (
+      <h1>{current.name}</h1>
+      {current.description ? <ExpandableText text={current.description} /> : null}
+      {current.lat != null && current.lng != null ? (
         <p>
-          Coordinates: {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
+          Coordinates: {current.lat.toFixed(6)}, {current.lng.toFixed(6)}
         </p>
       ) : null}
-      <PointActions point={point} />
+      <PointActions point={current} />
 
       <SocialImageGallery
-        images={point.images}
-        alt={point.name}
+        images={current.images}
+        alt={current.name}
         preset="gallery"
         leadPreset="hero"
         variant="stack"
       />
 
-      <CommentsSection target={{ type: 'point', pointId: point.id }} />
+      <CommentsSection target={{ type: 'point', pointId: current.id }} />
     </article>
   );
 }

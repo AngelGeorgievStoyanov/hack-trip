@@ -7,7 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import { TripActions } from './TripActions';
 import { TripGroupSocialActions } from '@/components/social/TripGroupSocialActions';
-import { CommentsSection } from '@/components/comments/CommentsSection';
+import { CommentsToggle } from '@/components/comments/CommentsToggle';
 import { infoPanelStyle } from '@/constants/ui';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import type { TripGroupDay, TripGroupResponse } from '@/types';
@@ -16,6 +16,10 @@ interface TripDetailsProps {
   tripGroup: TripGroupResponse;
   /** The day currently selected by the day strip. */
   day: TripGroupDay;
+  /** Whether the comment list (rendered outside this card) is expanded. */
+  commentsOpen: boolean;
+  /** Toggles the comment list. */
+  onToggleComments: () => void;
 }
 
 const NAME_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1.5rem', fontWeight: 500 };
@@ -29,7 +33,7 @@ const BACK_ROW_STYLE: CSSProperties = { display: 'flex', marginTop: '10px', gap:
  * Trip Like / Report / Favorite always render from `trip.social` (Trip Group level);
  * the `day` prop only supplies the day-level comment count (`day.social.comments`).
  */
-export function TripDetails({ tripGroup, day }: TripDetailsProps) {
+export function TripDetails({ tripGroup, day, commentsOpen, onToggleComments }: TripDetailsProps) {
   const totalPoints = tripGroup.days.reduce((sum, current) => sum + current.points.length, 0);
   const dayCommentCount = day.social.comments.count;
   const [expanded, setExpanded] = useState(false);
@@ -44,10 +48,7 @@ export function TripDetails({ tripGroup, day }: TripDetailsProps) {
           </Typography>
           <TripGroupSocialActions
             tripGroupId={tripGroup.id}
-            initialLiked={tripGroup.social.likedByMe}
-            initialLikes={tripGroup.social.likes}
-            initialFavorited={tripGroup.social.favoritedByMe ?? false}
-            initialReported={tripGroup.social.reportedByMe}
+            social={tripGroup.social}
             variant="favorite"
           />
         </Box>
@@ -128,23 +129,23 @@ export function TripDetails({ tripGroup, day }: TripDetailsProps) {
             </Link>
           </div>
 
-          <CommentsSection
-            target={{ type: 'day', tripGroupId: tripGroup.id, tripId: day.id }}
-            initialCommentsCount={dayCommentCount}
-            collapsible
+          {/* The comment list is rendered outside this card; only the toggle stays here. */}
+          <CommentsToggle
+            count={dayCommentCount}
+            open={commentsOpen}
+            onToggle={onToggleComments}
+            emptyLabel="FOR THIS DAY DON'T HAVE COMMENTS"
           />
 
           {/* Legacy bottom action row: Like and Report side by side. */}
           <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around' }}>
             <TripGroupSocialActions
               tripGroupId={tripGroup.id}
-              initialLiked={tripGroup.social.likedByMe}
-              initialLikes={tripGroup.social.likes}
-              initialFavorited={tripGroup.social.favoritedByMe ?? false}
-              initialReported={tripGroup.social.reportedByMe}
+              social={tripGroup.social}
               shareTitle={day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
               shareText={day.description ?? undefined}
               shareImage={tripRepresentativeImage(tripGroup)}
+              dayReportTarget={{ id: day.id, social: day.social }}
               variant="like-report"
             />
           </Box>

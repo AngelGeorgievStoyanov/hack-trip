@@ -62,3 +62,49 @@ export function resolveShareImage(images: {
 }): string | null {
   return images.primary || images.fallback || null;
 }
+
+export type ShareResult = 'shared' | 'copied' | 'failed';
+
+export async function shareWithFallback({
+  url,
+  title,
+  text,
+  image,
+}: {
+  url: string;
+  title: string;
+  text: string;
+  image: string | null;
+}): Promise<ShareResult> {
+  const payload: ShareData = { url, title, text };
+
+  if (typeof navigator !== 'undefined' && 'share' in navigator) {
+    try {
+      if (image) {
+        try {
+          const response = await fetch(image);
+          const blob = await response.blob();
+          const extension = blob.type.split('/')[1] ?? 'jpg';
+          const file = new File([blob], `hacktrip-share.${extension}`, { type: blob.type });
+          if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+            await navigator.share({ ...payload, files: [file] });
+            return 'shared';
+          }
+        } catch {
+          // Fall through to URL-only sharing when the image cannot be shared.
+        }
+      }
+      await navigator.share(payload);
+      return 'shared';
+    } catch {
+      // Copy the URL if native sharing is cancelled or unavailable.
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(url);
+    return 'copied';
+  } catch {
+    return 'failed';
+  }
+}

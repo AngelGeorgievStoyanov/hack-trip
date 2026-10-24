@@ -14,6 +14,8 @@ export const COLORS = {
   brand: '#1976d2',
   /** Legacy translucent card/panel background. */
   cardBackground: '#eee7e79e',
+  /** Legacy translucent comment card background. */
+  commentCardBackground: '#eee7e7cc',
   /** Legacy form panel background. */
   formPanelBackground: '#e5e3e3d9',
 } as const;
@@ -83,6 +85,51 @@ export const infoPanelStyle: CSSProperties = {
   margin: '20px',
   padding: '25px',
   backgroundColor: COLORS.cardBackground,
+  boxShadow: CARD_SHADOW,
+  border: CARD_BORDER,
+  borderRadius: '0px',
+};
+
+/**
+ * Panel skin of the separate comments section. It reuses the trip-details information
+ * panel language so the section reads as part of the same page.
+ */
+export const commentsPanelStyle: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  margin: '20px 0',
+  padding: '25px',
+  backgroundColor: COLORS.cardBackground,
+  boxShadow: CARD_SHADOW,
+  border: CARD_BORDER,
+  borderRadius: '0px',
+};
+
+/**
+ * Comment list layout: the comment cards share the width of the comments section in
+ * evenly sized columns, so the list never leaves an empty gap on the right. `auto-fit`
+ * collapses the unused columns of a partly filled row, and the `min()` keeps a single
+ * column below the track size, so narrow screens stay intact.
+ */
+export const commentListStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
+  gap: '20px',
+  alignItems: 'start',
+  listStyle: 'none',
+  padding: 0,
+  margin: 0,
+};
+
+/** The legacy comment card skin. */
+export const commentCardStyle: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  width: '100%',
+  height: 'fit-content',
+  padding: '30px',
+  backgroundColor: COLORS.commentCardBackground,
   boxShadow: CARD_SHADOW,
   border: CARD_BORDER,
   borderRadius: '0px',

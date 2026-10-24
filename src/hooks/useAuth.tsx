@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -21,6 +22,7 @@ export type AuthStatus = 'loading' | 'anonymous' | 'authenticated' | 'accountErr
 
 interface AuthContextValue {
   status: AuthStatus;
+  viewerCacheKey: string;
   user: ProfileDto | null;
   token: string | null;
   login: (input: LoginInput) => Promise<ProfileDto>;
@@ -35,6 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<ProfileDto | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
+  const [viewerSessionVersion, setViewerSessionVersion] = useState(0);
+  const loginToken = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -82,13 +86,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const isNewLogin = loginToken.current === token;
+    if (isNewLogin) {
+      loginToken.current = null;
+    }
+
     let cancelled = false;
-    setStatus('loading');
     authApi
       .me()
       .then((response) => {
         if (!cancelled) {
           setUser(response.user);
+          if (!isNewLogin) {
+            setViewerSessionVersion((version) => version + 1);
+          }
           setStatus('authenticated');
         }
       })
@@ -101,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           authToken.set(null);
           setToken(null);
           setUser(null);
+          setViewerSessionVersion((version) => version + 1);
           setStatus('anonymous');
         }
       });
@@ -113,8 +125,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (input: LoginInput): Promise<ProfileDto> => {
     const session = await authApi.login(input);
     authToken.set(session.accessToken);
+    loginToken.current = session.accessToken;
     setToken(session.accessToken);
     setUser(session.user);
+    setViewerSessionVersion((version) => version + 1);
     setStatus('authenticated');
     return session.user;
   }, []);
@@ -128,6 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authToken.set(null);
     setToken(null);
     setUser(null);
+    setViewerSessionVersion((version) => version + 1);
     setStatus('anonymous');
     // All logout cleanup (API call, token/session clearing, auth-state update) has
     // completed at this point, so it is safe to send the user to the public home page
@@ -141,8 +156,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ status, user, token, login, logout, updateUser }),
-    [status, user, token, login, logout, updateUser],
+    () => ({
+      status,
+      viewerCacheKey: `${status}:${viewerSessionVersion}`,
+      user,
+      token,
+      login,
+      logout,
+      updateUser,
+    }),
+    [status, viewerSessionVersion, user, token, login, logout, updateUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

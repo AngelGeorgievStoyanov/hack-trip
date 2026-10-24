@@ -1,7 +1,7 @@
 import { apiClient } from '../client';
-import { COMMENTS, IMAGES, POINTS, TRIPS, TRIP_GROUPS } from '../../constants/api';
+import { API_PREFIX, COMMENTS, IMAGES, POINTS, TRIPS, TRIP_GROUPS } from '../../constants/api';
 import type { CommentDto, CommentListResponse } from '../../types';
-import { commentBodySchema, commentPageQuerySchema } from '../../validations';
+import { commentBodySchema, commentIdParams, commentPageQuerySchema, replyIdParams } from '../../validations';
 
 export interface CommentCreateInput {
   comment: string;
@@ -51,6 +51,32 @@ export const commentApi = {
   },
 
   delete: async (commentId: number): Promise<void> => {
-    await apiClient.delete(`${COMMENTS}/${commentId}`);
+    await apiClient.delete(COMMENTS + '/' + commentId);
+  },
+
+  replies: async (commentId: number, query: CommentListQuery = {}): Promise<CommentListResponse> => {
+    const { commentId: id } = commentIdParams.parse({ commentId });
+    const params = commentPageQuerySchema.parse(query);
+    const { data } = await apiClient.get<CommentListResponse>(COMMENTS + '/' + id + '/replies', { params });
+    return data;
+  },
+
+  createReply: async (commentId: number, input: CommentCreateInput): Promise<CommentDto> => {
+    const { commentId: id } = commentIdParams.parse({ commentId });
+    const body = commentBodySchema.parse(input);
+    const { data } = await apiClient.post<CommentDto>(COMMENTS + '/' + id + '/replies', body);
+    return data;
+  },
+
+  updateReply: async (replyId: number, input: CommentCreateInput): Promise<CommentDto> => {
+    const { replyId: id } = replyIdParams.parse({ replyId });
+    const body = commentBodySchema.parse(input);
+    const { data } = await apiClient.put<CommentDto>(API_PREFIX + '/replies/' + id, body);
+    return data;
+  },
+
+  deleteReply: async (replyId: number): Promise<void> => {
+    const { replyId: id } = replyIdParams.parse({ replyId });
+    await apiClient.delete(API_PREFIX + '/replies/' + id);
   },
 };

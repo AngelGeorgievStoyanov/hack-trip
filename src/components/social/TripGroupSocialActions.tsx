@@ -1,14 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Tooltip, IconButton } from '@mui/material';
-import { useMutation } from '@tanstack/react-query';
-import { socialApi } from '@/api/social';
+import { useState } from 'react';
 import { absoluteUrl } from '@/config';
 import { useAuth } from '@/hooks/useAuth';
 import { useBackground } from '@/hooks/useBackground';
+import { useTripGroupSocial } from '@/hooks/useTripGroup';
+import { useSocialConfig } from '@/hooks/useSocialConfig';
 import { getGenericErrorMessage } from '@/lib/errors';
-import { resolveShareImage } from '@/lib/share';
+import { isSocialOperationAllowed, socialConfigTargetKey } from '@/lib/socialConfig';
+import { resolveShareImage, shareWithFallback } from '@/lib/share';
+import { SocialConfigStatus } from './SocialConfigStatus';
+import { ReportButton } from './ReportButton';
 import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
 import BookmarkRemoveIcon from '@mui/icons-material/BookmarkRemove';
 import ReportIcon from '@mui/icons-material/Report';
@@ -16,13 +19,17 @@ import ReportOffIcon from '@mui/icons-material/ReportOff';
 import ShareIcon from '@mui/icons-material/Share';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import { useLikeAnimation } from '@/components/social/LikeAnimation';
+import type { SocialState } from '@/types';
 
 interface TripGroupSocialActionsProps {
   tripGroupId: number;
-  initialLiked: boolean;
-  initialLikes: number;
-  initialFavorited: boolean;
-  initialReported: boolean;
+  /**
+   * Current trip-group social state. It comes straight from the API response, which is the
+   * only source of truth for the rendered icons (the backend reports the viewer's own
+   * `likedByMe` / `favoritedByMe` / `reportedByMe`).
+   */
+  social: SocialState;
   /**
    * Which actions to render. `'all'` (default) keeps the original combined bar.
    * `'favorite'` renders only the Favorite action; `'like-report'` renders only
@@ -36,87 +43,62 @@ interface TripGroupSocialActionsProps {
   shareText?: string;
   /** Primary share image (the trip's representative image). */
   shareImage?: string | null;
+  dayReportTarget?: { id: number; social: SocialState };
 }
 
 export function TripGroupSocialActions({
   tripGroupId,
-  initialLiked,
-  initialLikes,
-  initialFavorited,
-  initialReported,
+  social,
   variant = 'all',
   shareTitle,
   shareText,
   shareImage,
+  dayReportTarget,
 }: TripGroupSocialActionsProps) {
-  const [liked, setLiked] = useState(initialLiked);
-  const [likes, setLikes] = useState(initialLikes);
-  const [favorited, setFavorited] = useState(initialFavorited);
-  const [reported, setReported] = useState(initialReported);
-  const [likeError, setLikeError] = useState<string | null>(null);
-  const [favoriteError, setFavoriteError] = useState<string | null>(null);
-  const [reportError, setReportError] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
 
-  // Trip Group social is global for the whole trip: when fresh server state arrives
-  // (authenticated refetch, revalidation), adopt it; day switches never change it.
-  useEffect(() => {
-    setLiked(initialLiked);
-  }, [initialLiked]);
-  useEffect(() => {
-    setLikes(initialLikes);
-  }, [initialLikes]);
-  useEffect(() => {
-    setFavorited(initialFavorited);
-  }, [initialFavorited]);
-  useEffect(() => {
-    setReported(initialReported);
-  }, [initialReported]);
+  const { likeMutation, favoriteMutation, reportActions } = useTripGroupSocial(tripGroupId, social);
+
+  const liked = social.likedByMe;
+  const likes = social.likes;
+  const favorited = social.favoritedByMe ?? false;
+  const reported = social.reportedByMe;
+
+  // The animation follows the like state, so it plays exactly when a real like/unlike
+  // action changed the state - never on the first render and never on a failed request.
+  const likeAnimation = useLikeAnimation(liked, { failed: likeMutation.isError });
 
   const { status } = useAuth();
   const isAuthenticated = status === 'authenticated';
+  const socialConfig = useSocialConfig();
   const { currentUrl: backgroundUrl } = useBackground();
 
-  const likeMutation = useMutation({
-    mutationFn: async () => {
-      if (liked) {
-        await socialApi.unlike({ targetType: 'tripgroup', targetId: tripGroupId });
-        return null;
-      }
-      return socialApi.like({ targetType: 'tripgroup', targetId: tripGroupId });
-    },
-    onSuccess: (state) => {
-      setLiked((prev) => !prev);
-      if (state) {
-        setLikes(state.likes);
-      } else {
-        setLikes((prev) => Math.max(0, prev - 1));
-      }
-    },
-    onError: (e) => setLikeError(getGenericErrorMessage(e)),
-  });
-
-  const favoriteMutation = useMutation({
-    mutationFn: async () => {
-      if (favorited) {
-        await socialApi.unfavorite({ tripGroupId });
-        return null;
-      }
-      return socialApi.favorite({ tripGroupId: tripGroupId });
-    },
-    onSuccess: (state) => {
-      setFavorited((prev) => !prev);
-    },
-    onError: (e) => setFavoriteError(getGenericErrorMessage(e)),
-  });
-
-  const reportMutation = useMutation({
-    mutationFn: () => socialApi.report({ targetType: 'tripgroup', targetId: tripGroupId }),
-    onSuccess: () => {
-      setReported(true);
-    },
-    onError: (e) => setReportError(getGenericErrorMessage(e)),
-  });
+  const canFavorite = isSocialOperationAllowed(
+    socialConfig.data,
+    'favorite',
+    'tripGroup',
+    favorited ? 'delete' : 'create',
+  );
+  const canLike = isSocialOperationAllowed(
+    socialConfig.data,
+    'like',
+    'tripGroup',
+    liked ? 'delete' : 'create',
+  );
+  const canReport = isSocialOperationAllowed(
+    socialConfig.data,
+    'report',
+    'tripGroup',
+    reported ? 'delete' : 'create',
+  );
+  const canReportDay = dayReportTarget
+    ? isSocialOperationAllowed(
+        socialConfig.data,
+        'report',
+        socialConfigTargetKey('day'),
+        dayReportTarget.social.reportedByMe ? 'delete' : 'create',
+      )
+    : false;
 
   const shareUrl = absoluteUrl(`/trips/${tripGroupId}`);
 
@@ -124,38 +106,16 @@ export function TripGroupSocialActions({
   // action row, so the same native-share-with-image and clipboard fallback applies.
   async function handleShare(): Promise<void> {
     const title = shareTitle ?? 'Trip';
-    const payload: ShareData = { url: shareUrl, title, text: shareText ?? title };
     const image = resolveShareImage({ primary: shareImage, fallback: backgroundUrl });
-
-    if (typeof navigator !== 'undefined' && 'share' in navigator) {
-      try {
-        if (image) {
-          try {
-            const response = await fetch(image);
-            const blob = await response.blob();
-            const extension = blob.type.split('/')[1] ?? 'jpg';
-            const file = new File([blob], `hacktrip-share.${extension}`, { type: blob.type });
-            if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
-              await navigator.share({ ...payload, files: [file] });
-              return;
-            }
-          } catch {
-            // Image fetch/share unavailable; fall through to URL-only share.
-          }
-        }
-        await navigator.share(payload);
-        return;
-      } catch {
-        // Cancelled or unsupported; fall through to copy.
-      }
-    }
-
-    try {
-      await navigator.clipboard.writeText(shareUrl);
+    const result = await shareWithFallback({
+      url: shareUrl,
+      title,
+      text: shareText ?? title,
+      image,
+    });
+    if (result === 'copied') {
       setShareCopied(true);
       window.setTimeout(() => setShareCopied(false), 2000);
-    } catch {
-      // Clipboard unavailable; ignore.
     }
   }
 
@@ -164,7 +124,8 @@ export function TripGroupSocialActions({
 
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-      {showFavorite && (
+      <SocialConfigStatus isLoading={socialConfig.isLoading} error={socialConfig.error} />
+      {showFavorite && canFavorite && (
         <>
           <Tooltip title={!isAuthenticated ? 'Log in to add to favorites' : (favorited ? 'REMOVE FROM FAVORITE' : 'ADD TO FAVORITE')} arrow>
             <span style={{ display: 'inline-flex' }}>
@@ -172,48 +133,103 @@ export function TripGroupSocialActions({
                 onClick={() => favoriteMutation.mutate()}
                 disabled={!isAuthenticated || favoriteMutation.isPending}
                 aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
-                color={favorited ? 'primary' : 'default'}
+                color="primary"
+                sx={favorited ? { '&:hover': { color: 'red' } } : undefined}
               >
                 {favorited ? <BookmarkRemoveIcon /> : <BookmarkAddIcon />}
               </IconButton>
             </span>
           </Tooltip>
-          {favoriteError && <span role="alert" style={{ color: 'red', fontSize: '0.75rem' }}>{favoriteError}</span>}
+          {favoriteMutation.error ? (
+            <span role="alert" style={{ color: 'red', fontSize: '0.75rem' }}>
+              {getGenericErrorMessage(favoriteMutation.error)}
+            </span>
+          ) : null}
         </>
       )}
 
       {showLikeReport && (
         <>
+          {canLike ? <>
           <Tooltip title={!isAuthenticated ? 'Log in to like' : (liked ? 'UN LIKE' : 'LIKE')} arrow>
             <span style={{ display: 'inline-flex' }}>
               <IconButton
-                onClick={() => likeMutation.mutate()}
+                onClick={() => {
+                  // The animation plays when the action actually changed the state.
+                  likeAnimation.requestPlay();
+                  likeMutation.mutate();
+                }}
                 disabled={!isAuthenticated || likeMutation.isPending}
                 aria-label={liked ? 'Unlike' : 'Like'}
-                color={liked ? 'primary' : 'default'}
+                color="primary"
               >
-                {liked ? <ThumbUpIcon /> : <ThumbUpOffAltIcon />}
+                {liked ? (
+                  <ThumbUpIcon
+                    sx={{
+                      ':hover': { cursor: 'pointer' },
+                      margin: '5px',
+                      animation: likeAnimation.animation,
+                    }}
+                  />
+                ) : (
+                  <ThumbUpOffAltIcon
+                    sx={{
+                      ':hover': { cursor: 'pointer' },
+                      margin: '5px',
+                      animation: likeAnimation.animation,
+                    }}
+                  />
+                )}
               </IconButton>
             </span>
           </Tooltip>
           <Tooltip title={`${likes} likes`} arrow>
             <span style={{ fontSize: '0.875rem', minWidth: '2.5rem', textAlign: 'center' }}>{likes}</span>
           </Tooltip>
-          {likeError && <span role="alert" style={{ color: 'red', fontSize: '0.75rem' }}>{likeError}</span>}
+          {likeMutation.error ? (
+            <span role="alert" style={{ color: 'red', fontSize: '0.75rem' }}>
+              {getGenericErrorMessage(likeMutation.error)}
+            </span>
+          ) : null}
+          </> : null}
 
-          <Tooltip title={!isAuthenticated ? 'Log in to report' : (reported ? 'REPORTED' : 'REPORT TRIP')} arrow>
+          {canReport ? <>
+          <Tooltip title={!isAuthenticated ? 'Log in to report' : (reported ? 'UN REPORT TRIP' : 'REPORT TRIP')} arrow>
             <span style={{ display: 'inline-flex' }}>
               <IconButton
-                onClick={() => reportMutation.mutate()}
-                disabled={!isAuthenticated || reportMutation.isPending || reported}
-                aria-label={reported ? 'Reported' : 'Report trip'}
-                color={reported ? 'error' : 'default'}
+                onClick={() => {
+                  if (reported) {
+                    // Already reported by this user: withdraw the report again.
+                    reportActions.unreport();
+                    return;
+                  }
+                  reportActions.clearError();
+                  reportActions.report();
+                }}
+                disabled={!isAuthenticated || reportActions.pending}
+                aria-label={reported ? 'Withdraw report' : 'Report trip'}
+                color={reported ? 'error' : 'primary'}
+                sx={reported ? { '&:hover': { color: 'red' } } : undefined}
               >
                 {reported ? <ReportOffIcon /> : <ReportIcon />}
               </IconButton>
             </span>
           </Tooltip>
-          {reportError && <span role="alert" style={{ color: 'red', fontSize: '0.75rem' }}>{reportError}</span>}
+          {reportActions.error ? (
+            <span role="alert" style={{ color: 'red', fontSize: '0.75rem' }}>
+              {reportActions.error}
+            </span>
+          ) : null}
+          </> : null}
+
+          {canReportDay && dayReportTarget ? (
+            <ReportButton
+              targetType="day"
+              targetId={dayReportTarget.id}
+              initialReported={dayReportTarget.social.reportedByMe}
+              label="REPORT DAY"
+            />
+          ) : null}
 
           <Tooltip title={shareCopied ? 'Link copied!' : 'SHARE'} arrow>
             <span style={{ display: 'inline-flex' }}>

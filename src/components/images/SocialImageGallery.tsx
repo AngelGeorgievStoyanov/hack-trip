@@ -74,6 +74,7 @@ export function SocialImageGallery({
               targetId={image.id}
               social={image.social}
               commentTarget={{ type: 'image', imageId: image.id }}
+              showConfigStatus={position === 0}
             />
           </Box>
         ))}

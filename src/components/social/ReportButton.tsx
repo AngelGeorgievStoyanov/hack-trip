@@ -1,42 +1,96 @@
 'use client';
 
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
-import { socialApi } from '@/api/social';
-import { getGenericErrorMessage } from '@/lib/errors';
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useReportActions } from '@/hooks/useReportActions';
+import { Alert, Button, IconButton, Tooltip } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { visuallyHidden } from '@mui/utils';
+import ReportIcon from '@mui/icons-material/Report';
+import ReportOffIcon from '@mui/icons-material/ReportOff';
 import type { ReportTargetTypeInput } from '@/types';
 
 interface ReportButtonProps {
   targetType: ReportTargetTypeInput;
   targetId: number;
+  /**
+   * Current-user report state for the target, taken from the API response
+   * (`social.reportedByMe`). It is the source of truth for the rendered icon.
+   */
+  initialReported?: boolean;
+  /** Tooltip label for the not-yet-reported state, e.g. `REPORT COMMENT`. */
+  label?: string;
+  /** Called after the current user's report state for the target changed. */
+  onReportedChange?: (reported: boolean) => void;
 }
 
-export function ReportButton({ targetType, targetId }: ReportButtonProps) {
+export function ReportButton({
+  targetType,
+  targetId,
+  initialReported = false,
+  label = 'REPORT TRIP',
+  onReportedChange,
+}: ReportButtonProps) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
-  const [done, setDone] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(initialReported);
 
-  const mutation = useMutation({
-    mutationFn: (text: string) => socialApi.report({ targetType, targetId, reason: text || undefined }),
-    onSuccess: () => {
-      setDone(true);
-      setReason('');
-      setOpen(false);
+  // The API owns the report state: a fresh response (for example after a reload) must
+  // restore the reported icon without another click.
+  useEffect(() => {
+    setDone(initialReported);
+  }, [initialReported]);
+
+  const { report, unreport, pending, error, clearError } = useReportActions(
+    targetType,
+    targetId,
+    {
+      onReportedChange: (reported) => {
+        setDone(reported);
+        onReportedChange?.(reported);
+        if (reported) {
+          setReason('');
+          setOpen(false);
+        }
+      },
     },
-    onError: (e) => setError(getGenericErrorMessage(e)),
-  });
+  );
+
+  const { status } = useAuth();
+  const isAuthenticated = status === 'authenticated';
 
   function submit(): void {
-    mutation.mutate(reason);
+    report(reason);
+  }
+
+  function handleClick(): void {
+    if (done) {
+      // The item is already reported by this user: withdraw the report again.
+      unreport();
+      return;
+    }
+    clearError();
+    setOpen(true);
   }
 
   return (
     <>
-      <Button variant="outlined" onClick={() => setOpen(true)}>
-        Report
-      </Button>
+      <Tooltip
+        title={!isAuthenticated ? 'Log in to report' : (done ? 'UN REPORT' : label)}
+        arrow
+      >
+        <span style={{ display: 'inline-flex' }}>
+          <IconButton
+            onClick={handleClick}
+            disabled={!isAuthenticated || pending}
+            aria-label={done ? 'Withdraw report' : 'Report content'}
+            color={done ? 'error' : 'primary'}
+            sx={{ '&:hover': { color: 'red' } }}
+          >
+            {done ? <ReportOffIcon /> : <ReportIcon />}
+          </IconButton>
+        </span>
+      </Tooltip>
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle>Report this content</DialogTitle>
         <DialogContent>
@@ -53,12 +107,23 @@ export function ReportButton({ targetType, targetId }: ReportButtonProps) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={submit} disabled={mutation.isPending}>
+          <Button onClick={submit} disabled={pending}>
             Submit
           </Button>
         </DialogActions>
       </Dialog>
-      {done ? <span role="status">Reported. Thank you.</span> : null}
+      {error && !open ? (
+        <span role="alert" style={{ color: 'red', fontSize: '0.75rem' }}>
+          {error}
+        </span>
+      ) : null}
+      {/* The icon carries the reported state; the status is announced but not shown as a
+          second, text-based control. */}
+      {done ? (
+        <span role="status" style={visuallyHidden}>
+          Reported. Thank you.
+        </span>
+      ) : null}
     </>
   );
 }
