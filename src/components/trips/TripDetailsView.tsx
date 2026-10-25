@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { CommentTarget } from '@/api/comments';
 import { TripDaysNav } from '@/components/trips/TripDaysNav';
 import { TripDetails } from '@/components/trips/TripDetails';
 import { TripMapSection } from '@/components/trips/TripMapSection';
@@ -45,7 +46,8 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
   const { data: tripGroup } = useTripGroup(trip);
   const [activeDayNumber, setActiveDayNumber] = useState(initialDayNumber);
   const [selectedPointIndex, setSelectedPointIndex] = useState(0);
-  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [tripCommentTarget, setTripCommentTarget] = useState<CommentTarget | null>(null);
+  const [pointCommentTarget, setPointCommentTarget] = useState<CommentTarget | null>(null);
   const isMobile = useMediaQuery(maxWidthQuery(BREAKPOINTS.tripDetails));
 
   // The server resolves `?day=N` once per navigation; adopt it so the view opens
@@ -60,9 +62,57 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
   const day = group.days.find((current) => current.dayNumber === activeDayNumber) ?? group.days[0];
   const pointsHaveCoords = day.points.some(hasCoordinates);
 
+  const dayTarget: CommentTarget = { type: 'day', tripGroupId: group.id, tripId: day.id };
+
+  const isTargetOpen = (activeTarget: CommentTarget | null, target: CommentTarget): boolean => {
+    if (!activeTarget) {
+      return false;
+    }
+    if (activeTarget.type === 'day' && target.type === 'day') {
+      return activeTarget.tripGroupId === target.tripGroupId && activeTarget.tripId === target.tripId;
+    }
+    if (activeTarget.type === 'point' && target.type === 'point') {
+      return activeTarget.pointId === target.pointId;
+    }
+    if (activeTarget.type === 'image' && target.type === 'image') {
+      return activeTarget.imageId === target.imageId;
+    }
+    return false;
+  };
+
+  const toggleTripComments = (target: CommentTarget): void => {
+    setTripCommentTarget((previous) => (isTargetOpen(previous, target) ? null : target));
+  };
+
+  const togglePointComments = (target: CommentTarget): void => {
+    setPointCommentTarget((previous) => (isTargetOpen(previous, target) ? null : target));
+  };
+
+  const commentCountForTarget = (target: CommentTarget): number => {
+    switch (target.type) {
+      case 'day':
+        return day.social.comments.count;
+      case 'point': {
+        const point = day.points.find((current) => current.id === target.pointId);
+        return point?.social.comments.count ?? 0;
+      }
+      case 'image': {
+        const image = [
+          ...day.images,
+          ...day.points.flatMap((current) => current.images),
+        ].find((current) => current.id === target.imageId);
+        return image?.social.comments.count ?? 0;
+      }
+      default:
+        return 0;
+    }
+  };
+
   function handleSelectDay(dayNumber: number): void {
     setActiveDayNumber(dayNumber);
     setSelectedPointIndex(0);
+    setTripCommentTarget(null);
+    setPointCommentTarget(null);
     window.history.replaceState(null, '', buildTripUrl(group.id, dayNumber));
   }
 
@@ -133,28 +183,26 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
         <TripDetails
           tripGroup={group}
           day={day}
-          commentsOpen={commentsOpen}
-          onToggleComments={() => setCommentsOpen((previous) => !previous)}
+          tripCommentTarget={tripCommentTarget}
+          toggleTripComments={toggleTripComments}
         />
 
         {/* Remounted per day so the lightbox index resets with the day content below. */}
         <DayImagesGallery
           key={day.dayNumber}
           day={day}
-          tripGroupId={group.id}
-          commentsOpen={commentsOpen}
-          onToggleComments={() => setCommentsOpen((previous) => !previous)}
+          tripCommentTarget={tripCommentTarget}
+          toggleTripComments={toggleTripComments}
           tripCoverImage={tripRepresentativeImage(group)}
         />
       </Box>
 
-      {/* The comment list is a sibling of the trip information card, never a child of it,
-          so the card only owns the show/hide toggle. */}
-      {commentsOpen ? (
+      {/* Trip comment section: day and its images share one stable display location. */}
+      {tripCommentTarget ? (
         <Box sx={{ width: '100%' }}>
           <CommentsSection
-            target={{ type: 'day', tripGroupId: group.id, tripId: day.id }}
-            initialCommentsCount={day.social.comments.count}
+            target={tripCommentTarget}
+            initialCommentsCount={commentCountForTarget(tripCommentTarget)}
           />
         </Box>
       ) : null}
@@ -183,11 +231,19 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
             key={`day-map-${day.id}`}
             points={day.points}
             selectedPointIndex={selectedPointIndex}
-            onPointChange={setSelectedPointIndex}
+            onPointChange={(index) => {
+              setSelectedPointIndex(index);
+              setPointCommentTarget(null);
+            }}
           />
 
           {day.points.length > 0 ? (
-            <PointsSection points={day.points} selectedPointIndex={selectedPointIndex} />
+            <PointsSection
+              points={day.points}
+              selectedPointIndex={selectedPointIndex}
+              pointCommentTarget={pointCommentTarget}
+              togglePointComments={togglePointComments}
+            />
           ) : null}
         </Box>
       ) : (
@@ -209,10 +265,25 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
           }}
         >
           {day.points.length > 0 ? (
-            <PointsSection points={day.points} selectedPointIndex={selectedPointIndex} />
+            <PointsSection
+              points={day.points}
+              selectedPointIndex={selectedPointIndex}
+              pointCommentTarget={pointCommentTarget}
+              togglePointComments={togglePointComments}
+            />
           ) : null}
         </Box>
       )}
+
+      {/* Point comment section: point and its images share one stable display location. */}
+      {pointCommentTarget ? (
+        <Box sx={{ width: '100%' }}>
+          <CommentsSection
+            target={pointCommentTarget}
+            initialCommentsCount={commentCountForTarget(pointCommentTarget)}
+          />
+        </Box>
+      ) : null}
 
 
     </>

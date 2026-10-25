@@ -7,18 +7,23 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import { TripActions } from './TripActions';
 import { EngagementBar } from '@/components/social/EngagementBar';
+import { FavoriteButton } from '@/components/social/FavoriteButton';
 import { CommentsToggle } from '@/components/comments/CommentsToggle';
+import type { CommentTarget } from '@/api/comments';
 import { infoPanelStyle } from '@/constants/ui';
+import { useAuth } from '@/hooks/useAuth';
+import { useSocialConfig } from '@/hooks/useSocialConfig';
+import { isSocialOperationAllowed, socialConfigTargetKey } from '@/lib/socialConfig';
 import type { TripGroupDay, TripGroupResponse } from '@/types';
 
 interface TripDetailsProps {
   tripGroup: TripGroupResponse;
   /** The day currently selected by the day strip. */
   day: TripGroupDay;
-  /** Whether the comment list (rendered outside this card) is expanded. */
-  commentsOpen: boolean;
-  /** Toggles the comment list. */
-  onToggleComments: () => void;
+  /** The currently open comments target for the Trip section (day / day image), or null when closed. */
+  tripCommentTarget: CommentTarget | null;
+  /** Toggles the comments panel for a given target within the Trip section. */
+  toggleTripComments: (target: CommentTarget) => void;
 }
 
 const NAME_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1.5rem', fontWeight: 500 };
@@ -32,10 +37,26 @@ const BACK_ROW_STYLE: CSSProperties = { display: 'flex', marginTop: '10px', gap:
  * Trip Group actions use `tripGroup.social`; Like/Favorite/Report for the selected day
  * use that day's `social` state. Comments remain day-level.
  */
-export function TripDetails({ tripGroup, day, commentsOpen, onToggleComments }: TripDetailsProps) {
+export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComments }: TripDetailsProps) {
   const totalPoints = tripGroup.days.reduce((sum, current) => sum + current.points.length, 0);
   const dayCommentCount = day.social.comments.count;
   const [expanded, setExpanded] = useState(false);
+
+  const { status } = useAuth();
+  const socialConfig = useSocialConfig();
+  const isAuthenticated = status === 'authenticated';
+  const canFavorite = isSocialOperationAllowed(
+    socialConfig.data,
+    'favorite',
+    socialConfigTargetKey('trip'),
+    day.social.favoritedByMe ? 'delete' : 'create',
+  );
+
+  const dayTarget: CommentTarget = { type: 'day', tripGroupId: tripGroup.id, tripId: day.id };
+  const isDayOpen =
+    tripCommentTarget?.type === 'day' &&
+    tripCommentTarget.tripGroupId === dayTarget.tripGroupId &&
+    tripCommentTarget.tripId === dayTarget.tripId;
 
   const handleExpandClick = () => setExpanded(!expanded);
 
@@ -45,6 +66,14 @@ export function TripDetails({ tripGroup, day, commentsOpen, onToggleComments }: 
           <Typography variant="h5" component="div" style={NAME_STYLE}>
             TRIP NAME : {day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
           </Typography>
+          {isAuthenticated && canFavorite ? (
+            <FavoriteButton
+              targetType="trip"
+              targetId={day.id}
+              initialFavorited={day.social.favoritedByMe ?? false}
+              initialFavorites={day.social.favorites ?? 0}
+            />
+          ) : null}
         </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
@@ -120,13 +149,14 @@ export function TripDetails({ tripGroup, day, commentsOpen, onToggleComments }: 
               targetType="trip"
               targetId={day.id}
               social={day.social}
-              commentTarget={{ type: 'day', tripGroupId: tripGroup.id, tripId: day.id }}
+              commentTarget={dayTarget}
               showComments={false}
+              showFavorite={false}
             />
             <CommentsToggle
               count={dayCommentCount}
-              open={commentsOpen}
-              onToggle={onToggleComments}
+              open={isDayOpen}
+              onToggle={() => toggleTripComments(dayTarget)}
               emptyLabel="FOR THIS DAY DON'T HAVE COMMENTS"
             />
           </Box>

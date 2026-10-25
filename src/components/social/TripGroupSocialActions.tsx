@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Badge, Box, IconButton, Tooltip } from '@mui/material';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
+import BookmarkRemoveIcon from '@mui/icons-material/BookmarkRemove';
 import ReportIcon from '@mui/icons-material/Report';
 import ReportOffIcon from '@mui/icons-material/ReportOff';
 import ShareIcon from '@mui/icons-material/Share';
@@ -120,15 +120,15 @@ export function TripGroupSocialActions({
               disabled={favoriteMutation.isPending}
               aria-label={favorited ? 'Remove trip group from favorites' : 'Add trip group to favorites'}
               aria-pressed={favorited}
-              color={favorited ? 'error' : 'default'}
+              color={'primary'}
             >
               <Badge
                 badgeContent={social.favorites ?? 0}
                 invisible={(social.favorites ?? 0) === 0}
                 max={BADGE_MAX}
-                color="error"
+                color="primary"
               >
-                {favorited ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+                {favorited ? <BookmarkRemoveIcon /> : <BookmarkAddIcon />}
               </Badge>
             </IconButton>
           </span>

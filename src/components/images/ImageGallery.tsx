@@ -9,16 +9,7 @@ import { SocialConfigStatus } from '@/components/social/SocialConfigStatus';
 import { useSocialConfig } from '@/hooks/useSocialConfig';
 import type { CommentTarget } from '@/api/comments';
 import type { ImagePresetName } from '@/constants/images/presets';
-import type { SocialImageDto, SocialState } from '@/types';
-
-interface ImageEngagementTarget {
-  targetType: 'trip' | 'point';
-  targetId: number;
-  social: SocialState;
-  commentTarget: CommentTarget;
-  commentsOpen: boolean;
-  onToggleComments: () => void;
-}
+import type { SocialImageDto } from '@/types';
 
 interface ImageGalleryProps {
   images: SocialImageDto[];
@@ -26,7 +17,8 @@ interface ImageGalleryProps {
   preset?: ImagePresetName;
   leadPreset?: ImagePresetName;
   variant?: 'row' | 'stack' | 'grid';
-  engagementTarget: ImageEngagementTarget;
+  activeCommentTarget: CommentTarget | null;
+  onToggleComments: (target: CommentTarget) => void;
 }
 
 export function ImageGallery({
@@ -35,7 +27,8 @@ export function ImageGallery({
   preset = 'gallery',
   leadPreset,
   variant = 'row',
-  engagementTarget,
+  activeCommentTarget,
+  onToggleComments,
 }: ImageGalleryProps) {
   const [index, setIndex] = useState<number | null>(null);
   const socialConfig = useSocialConfig();
@@ -66,62 +59,68 @@ export function ImageGallery({
           },
         }}
       >
-        {images.map((image, position) => (
-          <Box
-            key={image.id}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.25rem',
-              minWidth: 0,
-              position: 'relative',
-              ...(variant === 'grid' ? { width: '100%' } : {}),
-            }}
-          >
-            <Box sx={{ position: 'relative', width: variant === 'grid' ? '100%' : undefined }}>
-              <Box
-                component="button"
-                type="button"
-                onClick={() => setIndex(position)}
-                aria-label={`Open image ${position + 1} of ${images.length}: ${alt}`}
-                sx={{
-                  p: 0,
-                  m: 0,
-                  border: 0,
-                  bgcolor: 'transparent',
-                  cursor: 'pointer',
-                  display: 'block',
-                  width: variant === 'grid' ? '100%' : undefined,
-                  lineHeight: 0,
-                  borderRadius: 1,
-                  overflow: 'hidden',
-                  ...(variant === 'grid'
-                    ? { aspectRatio: '1 / 1', position: 'relative' }
-                    : {}),
-                  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main' },
-                }}
-              >
-                <AppImage
-                  image={image}
-                  alt={alt}
-                  preset={position === 0 && leadPreset ? leadPreset : preset}
-                  fill={variant === 'grid'}
-                  style={variant === 'grid' ? { objectFit: 'cover' } : undefined}
+        {images.map((image, position) => {
+          const imageTarget: CommentTarget = { type: 'image', imageId: image.id };
+          const isImageOpen =
+            activeCommentTarget?.type === 'image' && activeCommentTarget.imageId === image.id;
+          return (
+            <Box
+              key={image.id}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.25rem',
+                minWidth: 0,
+                position: 'relative',
+                ...(variant === 'grid' ? { width: '100%' } : {}),
+              }}
+            >
+              <Box sx={{ position: 'relative', width: variant === 'grid' ? '100%' : undefined }}>
+                <Box
+                  component="button"
+                  type="button"
+                  onClick={() => setIndex(position)}
+                  aria-label={`Open image ${position + 1} of ${images.length}: ${alt}`}
+                  sx={{
+                    p: 0,
+                    m: 0,
+                    border: 0,
+                    bgcolor: 'transparent',
+                    cursor: 'pointer',
+                    display: 'block',
+                    width: variant === 'grid' ? '100%' : undefined,
+                    lineHeight: 0,
+                    borderRadius: 1,
+                    overflow: 'hidden',
+                    ...(variant === 'grid'
+                      ? { aspectRatio: '1 / 1', position: 'relative' }
+                      : {}),
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main' },
+                  }}
+                >
+                  <AppImage
+                    image={image}
+                    alt={alt}
+                    preset={position === 0 && leadPreset ? leadPreset : preset}
+                    fill={variant === 'grid'}
+                    style={variant === 'grid' ? { objectFit: 'cover' } : undefined}
+                  />
+                </Box>
+                <EngagementBar
+                  targetType="image"
+                  targetId={image.id}
+                  social={image.social}
+                  commentTarget={imageTarget}
+                  showConfigStatus={false}
+                  presentation="overlay"
+                  size="small"
+                  commentsOpen={isImageOpen}
+                  onToggleComments={() => onToggleComments(imageTarget)}
                 />
               </Box>
-              <EngagementBar
-                targetType={engagementTarget.targetType}
-                targetId={engagementTarget.targetId}
-                social={engagementTarget.social}
-                commentTarget={engagementTarget.commentTarget}
-                showConfigStatus={false}
-                presentation="overlay"
-                commentsOpen={engagementTarget.commentsOpen}
-                onToggleComments={engagementTarget.onToggleComments}
-              />
             </Box>
-          </Box>
-        ))}
+          );
+        })}
       </Box>
       <ImageLightbox
         images={images}

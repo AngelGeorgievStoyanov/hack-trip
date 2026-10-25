@@ -22,6 +22,8 @@ interface ReportButtonProps {
   label?: string;
   /** Called after the current user's report state for the target changed. */
   onReportedChange?: (reported: boolean) => void;
+  /** Icon button size. `'medium'` elsewhere, `'small'` for image overlays. */
+  size?: 'small' | 'medium';
 }
 
 export function ReportButton({
@@ -30,6 +32,7 @@ export function ReportButton({
   initialReported = false,
   label = 'REPORT TRIP',
   onReportedChange,
+  size = 'medium',
 }: ReportButtonProps) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
@@ -91,6 +94,7 @@ export function ReportButton({
                 aria-label={done ? 'Withdraw report' : label}
                 aria-pressed={done}
                 color={done ? 'error' : 'primary'}
+                size={size}
                 sx={{ '&:hover': { color: 'red' } }}
               >
                 {done ? <ReportOffIcon /> : <ReportIcon />}

@@ -2,6 +2,7 @@
 
 import { Badge, IconButton, Tooltip, Typography } from '@mui/material';
 import AddCommentIcon from '@mui/icons-material/AddComment';
+import CommentIcon from '@mui/icons-material/Comment';
 import CloseIcon from '@mui/icons-material/Close';
 
 interface CommentsToggleProps {
@@ -37,10 +38,12 @@ export function CommentsToggle({ count, open, onToggle, emptyLabel }: CommentsTo
         >
           {open ? (
             <CloseIcon />
-          ) : (
-            <Badge badgeContent={count} invisible={count === 0} max={Number.MAX_SAFE_INTEGER} color="primary">
-              <AddCommentIcon />
+          ) : count > 0 ? (
+            <Badge badgeContent={count} max={Number.MAX_SAFE_INTEGER} color="primary">
+              <CommentIcon />
             </Badge>
+          ) : (
+            <AddCommentIcon />
           )}
         </IconButton>
       </Tooltip>

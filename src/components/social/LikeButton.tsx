@@ -21,9 +21,11 @@ interface LikeButtonProps {
   initialLiked: boolean;
   /** Total number of likes, taken from the API response (`social.likes`). */
   initialLikes: number;
+  /** Icon button size. `'medium'` elsewhere, `'small'` for image overlays. */
+  size?: 'small' | 'medium';
 }
 
-export function LikeButton({ targetType, targetId, initialLiked, initialLikes }: LikeButtonProps) {
+export function LikeButton({ targetType, targetId, initialLiked, initialLikes, size = 'medium' }: LikeButtonProps) {
   const [liked, setLiked] = useState(initialLiked);
   const [likes, setLikes] = useState(initialLikes);
   const [error, setError] = useState<string | null>(null);
@@ -78,8 +80,9 @@ export function LikeButton({ targetType, targetId, initialLiked, initialLikes }:
             aria-label={liked ? `Unlike (${likes} likes)` : `Like (${likes} likes)`}
             aria-pressed={liked}
             color={liked ? 'primary' : 'default'}
+            size={size}
           >
-            <Badge badgeContent={likes} invisible={likes === 0} max={Number.MAX_SAFE_INTEGER} color="primary">
+            <Badge badgeContent={likes} invisible={likes === 0} max={Number.MAX_SAFE_INTEGER} color="primary" sx={size === 'small' ? { '& .MuiBadge-badge': { fontSize: '0.65rem', height: 14, minWidth: 14, padding: '0 3px', lineHeight: 1 } } : undefined}>
               {liked ? (
                 <ThumbUpIcon sx={{ animation: likeAnimation.animation }} />
               ) : (

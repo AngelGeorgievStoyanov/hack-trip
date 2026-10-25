@@ -1,17 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import { Typography, Card, CardContent, Box } from '@mui/material';
 import { ImageGallery } from '@/components/images/ImageGallery';
 import { PointActions } from '@/components/points/PointActions';
 import { CommentsToggle } from '@/components/comments/CommentsToggle';
-import { CommentsSection } from '@/components/comments/CommentsSection';
 import { ExpandableText } from '@/components/common/ExpandableText';
 import { CARD_BORDER, CARD_SHADOW, COLORS } from '@/constants/ui';
+import type { CommentTarget } from '@/api/comments';
 import type { TripPoint } from '@/types';
 
 interface PointSectionProps {
   point: TripPoint;
+  pointCommentTarget: CommentTarget | null;
+  togglePointComments: (target: CommentTarget) => void;
 }
 
 // Legacy `TripDetailsPointCard` skin: card with centered content, translucent
@@ -29,25 +30,14 @@ const POINT_CARD_STYLE = {
   borderRadius: '0px',
 } as const;
 
-const POINT_NAME_STYLE = {
-  margin: '0 0 0.35em',
-  padding: '0px 15px',
-  fontSize: '1.5rem',
-  fontWeight: 500,
-} as const;
-
-const POINT_NOTE_STYLE = {
-  margin: '0 0 0.35em',
-  padding: '0px 25px',
-  fontSize: '0.875rem',
-} as const;
-
-export function PointSection({ point }: PointSectionProps) {
-  const [commentsOpen, setCommentsOpen] = useState(false);
-
+export function PointSection({ point, pointCommentTarget, togglePointComments }: PointSectionProps) {
   if (!point) {
     return null;
   }
+
+  const pointTarget: CommentTarget = { type: 'point', pointId: point.id };
+  const isPointOpen =
+    pointCommentTarget?.type === 'point' && pointCommentTarget.pointId === point.id;
 
   return (
     <section aria-label="Trip points">
@@ -63,14 +53,8 @@ export function PointSection({ point }: PointSectionProps) {
               alt={point.name}
               preset="tripPointThumb"
               variant="grid"
-              engagementTarget={{
-                targetType: 'point',
-                targetId: point.id,
-                social: point.social,
-                commentTarget: { type: 'point', pointId: point.id },
-                commentsOpen,
-                onToggleComments: () => setCommentsOpen((previous) => !previous),
-              }}
+              activeCommentTarget={pointCommentTarget}
+              onToggleComments={togglePointComments}
             />
           ) : (
             <Typography variant="body2" sx={POINT_NOTE_STYLE}>
@@ -94,18 +78,25 @@ export function PointSection({ point }: PointSectionProps) {
             <PointActions point={point} />
             <CommentsToggle
               count={point.social.comments.count}
-              open={commentsOpen}
-              onToggle={() => setCommentsOpen((previous) => !previous)}
+              open={isPointOpen}
+              onToggle={() => togglePointComments(pointTarget)}
             />
           </Box>
         </CardContent>
       </Card>
-      {commentsOpen ? (
-        <CommentsSection
-          target={{ type: 'point', pointId: point.id }}
-          initialCommentsCount={point.social.comments.count}
-        />
-      ) : null}
     </section>
   );
 }
+
+const POINT_NAME_STYLE = {
+  margin: '0 0 0.35em',
+  padding: '0px 15px',
+  fontSize: '1.5rem',
+  fontWeight: 500,
+} as const;
+
+const POINT_NOTE_STYLE = {
+  margin: '0 0 0.35em',
+  padding: '0px 25px',
+  fontSize: '0.875rem',
+} as const;

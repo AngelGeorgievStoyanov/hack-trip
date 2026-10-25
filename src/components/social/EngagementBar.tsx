@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Badge, Box, IconButton, Tooltip } from '@mui/material';
-import AddCommentIcon from '@mui/icons-material/AddComment';
+import CommentIcon from '@mui/icons-material/Comment';
 import CloseIcon from '@mui/icons-material/Close';
 import { useAuth } from '@/hooks/useAuth';
 import { LikeButton } from './LikeButton';
@@ -22,7 +22,12 @@ interface EngagementBarProps {
   commentTarget: CommentTarget;
   showConfigStatus?: boolean;
   showComments?: boolean;
+  /** Whether to render the Favorite action. Used by Trip Details, which renders its own
+   * Favorite at the original top-row position to avoid duplicating it in the same card. */
+  showFavorite?: boolean;
   presentation?: 'inline' | 'overlay';
+  /** Icon button size. `'medium'` inline, `'small'` for image overlays. */
+  size?: 'small' | 'medium';
   commentsOpen?: boolean;
   onToggleComments?: () => void;
 }
@@ -34,7 +39,9 @@ export function EngagementBar({
   commentTarget,
   showConfigStatus = true,
   showComments = true,
+  showFavorite = true,
   presentation = 'inline',
+  size = 'medium',
   commentsOpen,
   onToggleComments,
 }: EngagementBarProps) {
@@ -97,8 +104,15 @@ export function EngagementBar({
             boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
-            '& .MuiIconButton-root': { color: 'common.white', p: 0.65 },
-            '& .MuiIconButton-root:hover': { backgroundColor: 'rgba(255,255,255,0.16)' },
+      '& .MuiIconButton-root': { color: 'common.white', p: size === 'small' ? 0.5 : 0.65 },
+      '& .MuiIconButton-root:hover': { backgroundColor: 'rgba(255,255,255,0.16)' },
+      '& .MuiBadge-badge': {
+        fontSize: size === 'small' ? '0.65rem' : undefined,
+        height: size === 'small' ? 14 : undefined,
+        minWidth: size === 'small' ? 14 : undefined,
+        padding: size === 'small' ? '0 3px' : undefined,
+        lineHeight: size === 'small' ? 1 : undefined,
+      },
           }
         : { display: 'flex', flexDirection: 'column', gap: '0.25rem', margin: '0.25rem 0' }}
     >
@@ -114,14 +128,16 @@ export function EngagementBar({
                 targetId={targetId}
                 initialLiked={social.likedByMe}
                 initialLikes={social.likes}
+                size={size}
               />
             ) : null}
-            {canFavorite ? (
+            {showFavorite && canFavorite ? (
               <FavoriteButton
                 targetType={targetType}
                 targetId={targetId}
                 initialFavorited={social.favoritedByMe ?? false}
                 initialFavorites={social.favorites ?? 0}
+                size={size}
               />
             ) : null}
             {canReport ? (
@@ -130,6 +146,7 @@ export function EngagementBar({
                 targetId={targetId}
                 initialReported={social.reportedByMe}
                 label={reportLabel}
+                size={size}
               />
             ) : null}
           </>
@@ -141,18 +158,16 @@ export function EngagementBar({
               aria-label={isCommentsOpen ? 'Hide comments' : `Show comments (${social.comments.count})`}
               aria-expanded={isCommentsOpen}
               color="primary"
+              size={size}
             >
               {isCommentsOpen ? (
                 <CloseIcon />
-              ) : (
-                <Badge
-                  badgeContent={social.comments.count}
-                  invisible={social.comments.count === 0}
-                  max={Number.MAX_SAFE_INTEGER}
-                  color="primary"
-                >
-                  <AddCommentIcon />
+              ) : social.comments.count > 0 ? (
+                <Badge badgeContent={social.comments.count} max={Number.MAX_SAFE_INTEGER} color="primary">
+                  <CommentIcon />
                 </Badge>
+              ) : (
+                <CommentIcon />
               )}
             </IconButton>
           </Tooltip>
