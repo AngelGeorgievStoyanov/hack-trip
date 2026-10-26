@@ -19,6 +19,9 @@ import { isSocialOperationAllowed } from '@/lib/socialConfig';
 import { resolveShareImage, shareWithFallback } from '@/lib/share';
 import { SocialConfigStatus } from './SocialConfigStatus';
 import { useLikeAnimation } from '@/components/social/LikeAnimation';
+import { CommentsToggle } from '@/components/comments/CommentsToggle';
+import { CommentsSection } from '@/components/comments/CommentsSection';
+import type { CommentTarget } from '@/api/comments';
 import type { SocialState } from '@/types';
 
 interface TripGroupSocialActionsProps {
@@ -27,6 +30,10 @@ interface TripGroupSocialActionsProps {
   shareTitle?: string;
   shareText?: string;
   shareImage?: string | null;
+  /** Whether the Trip Group comment section is open (controlled by TripDetailsView). */
+  open?: boolean;
+  /** Toggles the Trip Group comment section. */
+  onToggle?: () => void;
 }
 
 const BADGE_MAX = Number.MAX_SAFE_INTEGER;
@@ -37,8 +44,11 @@ export function TripGroupSocialActions({
   shareTitle,
   shareText,
   shareImage,
+  open,
+  onToggle,
 }: TripGroupSocialActionsProps) {
   const [shareCopied, setShareCopied] = useState(false);
+  const [internalTripGroupCommentsOpen, setInternalTripGroupCommentsOpen] = useState(false);
   const { likeMutation, favoriteMutation, reportActions } = useTripGroupSocial(tripGroupId, social);
   const { status } = useAuth();
   const isAuthenticated = status === 'authenticated';
@@ -69,6 +79,23 @@ export function TripGroupSocialActions({
     'tripGroup',
     reported ? 'delete' : 'create',
   );
+  const canComment = isSocialOperationAllowed(
+    socialConfig.data,
+    'comment',
+    'tripGroup',
+    'create',
+  );
+  const tripGroupCommentTarget: CommentTarget = { type: 'tripGroup', tripGroupId };
+
+  const isTripGroupCommentsOpen = open !== undefined ? open : internalTripGroupCommentsOpen;
+
+  const handleToggleTripGroupComments = (): void => {
+    if (onToggle) {
+      onToggle();
+      return;
+    }
+    setInternalTripGroupCommentsOpen((previous) => !previous);
+  };
 
   async function handleShare(): Promise<void> {
     const title = shareTitle ?? 'Trip';
@@ -156,6 +183,13 @@ export function TripGroupSocialActions({
           </span>
         </Tooltip>
       ) : null}
+      {isAuthenticated && canComment ? (
+        <CommentsToggle
+          count={social.comments.count}
+          open={isTripGroupCommentsOpen}
+          onToggle={handleToggleTripGroupComments}
+        />
+      ) : null}
       <Tooltip title={shareCopied ? 'Link copied' : 'Share trip group'} arrow>
         <IconButton onClick={() => void handleShare()} aria-label={shareCopied ? 'Link copied' : 'Share trip group'}>
           <ShareIcon />
@@ -175,6 +209,15 @@ export function TripGroupSocialActions({
         <span role="alert" style={{ color: 'red', fontSize: '0.75rem' }}>
           {reportActions.error}
         </span>
+      ) : null}
+      {isTripGroupCommentsOpen ? (
+        <Box sx={{ width: '100%', mt: 1 }}>
+          <CommentsSection
+            target={tripGroupCommentTarget}
+            initialCommentsCount={social.comments.count}
+            defaultFormOpen={social.comments.count === 0}
+          />
+        </Box>
       ) : null}
     </Box>
   );

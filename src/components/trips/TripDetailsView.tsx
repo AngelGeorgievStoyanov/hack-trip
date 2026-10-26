@@ -48,6 +48,7 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
   const [selectedPointIndex, setSelectedPointIndex] = useState(0);
   const [tripCommentTarget, setTripCommentTarget] = useState<CommentTarget | null>(null);
   const [pointCommentTarget, setPointCommentTarget] = useState<CommentTarget | null>(null);
+  const [tripGroupCommentsOpen, setTripGroupCommentsOpen] = useState(false);
   const isMobile = useMediaQuery(maxWidthQuery(BREAKPOINTS.tripDetails));
 
   // The server resolves `?day=N` once per navigation; adopt it so the view opens
@@ -113,6 +114,7 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
     setSelectedPointIndex(0);
     setTripCommentTarget(null);
     setPointCommentTarget(null);
+    setTripGroupCommentsOpen(false);
     window.history.replaceState(null, '', buildTripUrl(group.id, dayNumber));
   }
 
@@ -159,6 +161,8 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
             shareTitle={day.title ?? group.days[0]?.title ?? 'Trip'}
             shareText={day.description ?? undefined}
             shareImage={tripRepresentativeImage(group)}
+            open={tripGroupCommentsOpen}
+            onToggle={() => setTripGroupCommentsOpen((previous) => !previous)}
           />
         </Box>
       </Box>
@@ -203,6 +207,7 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
           <CommentsSection
             target={tripCommentTarget}
             initialCommentsCount={commentCountForTarget(tripCommentTarget)}
+            defaultFormOpen={commentCountForTarget(tripCommentTarget) === 0}
           />
         </Box>
       ) : null}
@@ -281,6 +286,7 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
           <CommentsSection
             target={pointCommentTarget}
             initialCommentsCount={commentCountForTarget(pointCommentTarget)}
+            defaultFormOpen={commentCountForTarget(pointCommentTarget) === 0}
           />
         </Box>
       ) : null}

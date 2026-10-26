@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Badge, Box, IconButton, Tooltip } from '@mui/material';
 import CommentIcon from '@mui/icons-material/Comment';
+import AddCommentIcon from '@mui/icons-material/AddComment';
 import CloseIcon from '@mui/icons-material/Close';
 import { useAuth } from '@/hooks/useAuth';
 import { LikeButton } from './LikeButton';
@@ -152,10 +153,10 @@ export function EngagementBar({
           </>
         ) : null}
         {showComments ? (
-          <Tooltip title={isCommentsOpen ? 'Hide comments' : 'Show comments'} arrow>
-            <IconButton
-              onClick={toggleComments}
-              aria-label={isCommentsOpen ? 'Hide comments' : `Show comments (${social.comments.count})`}
+        <Tooltip title={isCommentsOpen ? 'Hide comments' : social.comments.count > 0 ? `Show ${social.comments.count} comments` : 'Add comment'} arrow>
+          <IconButton
+            onClick={toggleComments}
+            aria-label={isCommentsOpen ? 'Hide comments' : social.comments.count > 0 ? `Show ${social.comments.count} comments` : 'Add comment'}
               aria-expanded={isCommentsOpen}
               color="primary"
               size={size}
@@ -167,14 +168,17 @@ export function EngagementBar({
                   <CommentIcon />
                 </Badge>
               ) : (
-                <CommentIcon />
+                <AddCommentIcon />
               )}
             </IconButton>
           </Tooltip>
         ) : null}
       </Box>
       {!externallyControlledComments && showComments && isCommentsOpen ? (
-        <CommentsSection target={commentTarget} />
+        <CommentsSection
+          target={commentTarget}
+          defaultFormOpen={social.comments.count === 0}
+        />
       ) : null}
     </Box>
   );

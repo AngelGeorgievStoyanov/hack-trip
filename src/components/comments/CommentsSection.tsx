@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
@@ -74,6 +74,8 @@ interface CommentsSectionProps {
    * separate section, so the two concerns stay independent.
    */
   open?: boolean;
+  /** When true and the section opens, the add-comment form is active directly. */
+  defaultFormOpen?: boolean;
 }
 
 /**
@@ -88,6 +90,7 @@ export function CommentsSection({
   target,
   initialCommentsCount = 0,
   open = true,
+  defaultFormOpen = false,
 }: CommentsSectionProps) {
   const { status, viewerCacheKey } = useAuth();
   const isAuthenticated = status === 'authenticated';
@@ -101,15 +104,24 @@ export function CommentsSection({
   const [formError, setFormError] = useState<string | null>(null);
   // The add-comment form starts closed and is opened from the toggle at the bottom of
   // the section; opening it only changes local state, it never refetches the list.
-  const [formOpen, setFormOpen] = useState(false);
+  // `defaultFormOpen` is honoured on mount (for example the first comment on a target);
+  // the form is not reset here so a freshly opened section can show the form directly.
+  const [formOpen, setFormOpen] = useState(defaultFormOpen);
+  const commentTextRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     setEditingId(null);
     setEditingComment('');
     setComment('');
-    setFormOpen(false);
     setFormError(null);
   }, [viewerCacheKey]);
+
+  // Focus the comment field when the form opens directly (first comment flow).
+  useEffect(() => {
+    if (formOpen) {
+      commentTextRef.current?.focus();
+    }
+  }, [formOpen]);
 
   // The comment list carries the viewer's own report state, so the request must not run
   // before the session is known: an anonymous read would report every comment as
@@ -415,6 +427,7 @@ export function CommentsSection({
                 label="Add a comment"
                 multiline
                 minRows={2}
+                inputRef={commentTextRef}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
               />

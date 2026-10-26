@@ -29,10 +29,10 @@ export function CommentsToggle({ count, open, onToggle, emptyLabel }: CommentsTo
           {emptyLabel}
         </Typography>
       ) : null}
-      <Tooltip title={open ? 'Hide comments' : count > 0 ? `Show ${count} comments` : 'Show comments'} arrow>
+      <Tooltip title={open ? 'Hide comments' : count > 0 ? `Show ${count} comments` : 'Add comment'} arrow>
         <IconButton
           onClick={onToggle}
-          aria-label={open ? 'Hide comments' : count > 0 ? `Show ${count} comments` : 'Show comments'}
+          aria-label={open ? 'Hide comments' : count > 0 ? `Show ${count} comments` : 'Add comment'}
           aria-expanded={open}
           color="primary"
         >
