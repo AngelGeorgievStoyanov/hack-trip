@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type Dispatch, type SetStateAction } from 'react';
 import {
   Alert,
   Box,
@@ -20,7 +20,7 @@ const JPEG_QUALITY = 0.88;
 
 interface ImageUploadFieldProps {
   files: File[];
-  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  setFiles: Dispatch<SetStateAction<File[]>>;
 }
 
 function loadImage(file: File): Promise<{ image: CanvasImageSource; width: number; height: number; cleanup: () => void }> {
