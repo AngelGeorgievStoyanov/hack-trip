@@ -8,7 +8,11 @@ import { tripApi, type TripWriteInput } from '@/api/trips';
 import { SELECT_TYPE_KEYS } from '@/constants/config';
 import { useSelectChoices } from '@/hooks/useSelects';
 import { firstSelectValue } from '@/lib/selects';
-import { DAY_NUMBER_MAX } from '@/constants/trips';
+import {
+  DAY_NUMBER_MAX,
+  TRIP_DESCRIPTION_MAX_LENGTH,
+  TRIP_TITLE_MAX_LENGTH,
+} from '@/constants/trips';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
@@ -31,9 +35,10 @@ export function TripForm() {
     watch,
     getValues,
     setValue,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<TripWriteInput>({
     resolver: zodResolver(tripWriteSchema),
+    mode: 'onChange',
     defaultValues: {
       dayNumber: 1,
       title: '',
@@ -63,13 +68,13 @@ export function TripForm() {
 
     defaultsApplied.current = true;
     if (!getValues('typeOfPeople') && groupChoices.length > 0) {
-      setValue('typeOfPeople', firstSelectValue(groupChoices));
+      setValue('typeOfPeople', firstSelectValue(groupChoices), { shouldValidate: true });
     }
     if (!getValues('transport') && transportChoices.length > 0) {
-      setValue('transport', firstSelectValue(transportChoices));
+      setValue('transport', firstSelectValue(transportChoices), { shouldValidate: true });
     }
     if (!getValues('currency') && currencyChoices.length > 0) {
-      setValue('currency', firstSelectValue(currencyChoices));
+      setValue('currency', firstSelectValue(currencyChoices), { shouldValidate: true });
     }
   }, [groupChoices, transportChoices, currencyChoices, getValues, setValue]);
 
@@ -143,7 +148,7 @@ export function TripForm() {
         {...register('countPeoples', { valueAsNumber: true })}
         error={!!errors.countPeoples}
         helperText={errors.countPeoples?.message}
-        slotProps={{ htmlInput: { min: 1, step: 1 } }}
+        slotProps={{ htmlInput: { min: 1, max: 2147483647, step: 1 } }}
       />
 
       <Controller
@@ -207,7 +212,7 @@ export function TripForm() {
       <Button
         type="submit"
         variant="contained"
-        disabled={submitting}
+        disabled={submitting || !isValid}
         startIcon={submitting ? <CircularProgress size={18} /> : undefined}
       >
         Create
