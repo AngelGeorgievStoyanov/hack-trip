@@ -261,14 +261,6 @@ export function TripForm() {
         />
       </Box>
 
-      <TextField
-        label="Destination (optional)"
-        {...register('destination')}
-        slotProps={{ htmlInput: { maxLength: TRIP_TITLE_MAX_LENGTH } }}
-        error={!!errors.destination}
-        helperText={errors.destination?.message}
-      />
-
       <Controller
         control={control}
         name="transport"
@@ -310,6 +302,14 @@ export function TripForm() {
             helperText={errors.typeOfPeople?.message}
           />
         )}
+      />
+
+      <TextField
+        label="Destination (optional)"
+        {...register('destination')}
+        slotProps={{ htmlInput: { maxLength: TRIP_TITLE_MAX_LENGTH } }}
+        error={!!errors.destination}
+        helperText={errors.destination?.message}
       />
 
       <Box
