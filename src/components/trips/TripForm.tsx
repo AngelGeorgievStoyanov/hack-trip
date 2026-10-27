@@ -13,8 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
+import { AddIcon, RemoveIcon } from '@/constants/icons';
 import { tripApi, type TripWriteInput } from '@/api/trips';
 import { SELECT_TYPE_KEYS } from '@/constants/config';
 import { useSelectChoices } from '@/hooks/useSelects';
