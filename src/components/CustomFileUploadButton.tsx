@@ -2,7 +2,7 @@
 
 import { type ChangeEvent, type FC } from 'react';
 import { Box, Button, IconButton, Tooltip } from '@mui/material';
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import { UploadIcon } from '@/constants/icons';
 
 interface CustomFileUploadButtonProps {
   handleFilesChange: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -41,7 +41,7 @@ const CustomFileUploadButton: FC<CustomFileUploadButtonProps> = ({
               onChange={handleFilesChange}
               disabled={isDisabled}
             />
-            <PhotoCamera fontSize="large" />
+            <UploadIcon fontSize="large" />
           </IconButton>
         </span>
       </Tooltip>
