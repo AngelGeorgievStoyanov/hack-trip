@@ -197,15 +197,7 @@ export function TripForm() {
               height: 36,
               p: 0,
               m: 0,
-              color: '#fff',
-              backgroundColor: '#4caf50',
-              borderColor: '#388e3c',
-              '&:hover': { backgroundColor: '#388e3c', borderColor: '#2e7d32' },
-              '&.Mui-disabled': {
-                color: 'rgba(255,255,255,0.65)',
-                backgroundColor: '#bdbdbd',
-                borderColor: '#bdbdbd',
-              },
+              '&:hover': { backgroundColor: 'primary.dark' },
             },
           }}
         >
@@ -390,9 +382,11 @@ export function TripForm() {
           '& .MuiButton-root': {
             m: 0,
             minWidth: 0,
-            minHeight: 40,
-            px: { xs: 1, sm: 1.5 },
-            py: 1.25,
+            minHeight: 36,
+            px: 1,
+            py: 0.75,
+            fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' },
+            lineHeight: 1.2,
             whiteSpace: 'normal',
             overflowWrap: 'anywhere',
             textTransform: 'uppercase',
