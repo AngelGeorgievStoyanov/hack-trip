@@ -120,6 +120,7 @@ export function TripForm() {
       <TextField
         label="Title"
         {...register('title')}
+        slotProps={{ htmlInput: { maxLength: TRIP_TITLE_MAX_LENGTH } }}
         error={!!errors.title}
         helperText={errors.title?.message}
       />
@@ -129,6 +130,7 @@ export function TripForm() {
         multiline
         minRows={3}
         {...register('description')}
+        slotProps={{ htmlInput: { maxLength: TRIP_DESCRIPTION_MAX_LENGTH } }}
         error={!!errors.description}
         helperText={errors.description?.message}
       />
@@ -205,6 +207,7 @@ export function TripForm() {
       <TextField
         label="Destination (optional)"
         {...register('destination')}
+        slotProps={{ htmlInput: { maxLength: TRIP_TITLE_MAX_LENGTH } }}
         error={!!errors.destination}
         helperText={errors.destination?.message}
       />
