@@ -25,7 +25,7 @@ export const tripWriteSchema = z
     ),
     price: requiredNumber({ min: 0, max: 1000000 }),
     transport: trimmedString({ min: 1, max: TRIP_TRANSPORT_MAX_LENGTH }),
-    countPeoples: requiredInt({ min: 1, max: 2147483647 }),
+    countPeoples: requiredInt({ min: 1, max: 1000 }),
     typeOfPeople: trimmedString({ min: 1, max: TRIP_GROUP_MAX_LENGTH }),
     currency: trimmedString({ min: 1, max: 3 }),
     destination: z.preprocess(
