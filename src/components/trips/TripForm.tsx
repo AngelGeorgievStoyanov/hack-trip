@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import {
@@ -12,7 +12,6 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { AddIcon, RemoveIcon } from '@/constants/icons';
 import { tripApi, type TripWriteInput } from '@/api/trips';
 import { SELECT_TYPE_KEYS } from '@/constants/config';
@@ -21,7 +20,6 @@ import { firstSelectValue, type SelectChoice } from '@/lib/selects';
 import {
   DAY_NUMBER_MAX,
   TRIP_DESCRIPTION_MAX_LENGTH,
-  TRIP_MAX_IMAGES,
   TRIP_TITLE_MAX_LENGTH,
 } from '@/constants/trips';
 import { zodResolver } from '@/lib/zodResolver';
@@ -29,7 +27,7 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { tripWriteSchema } from '@/validations/trips';
 import { TripSelectField } from './TripSelectField';
-import CustomFileUploadButton from '@/components/CustomFileUploadButton';
+import ImageUploadField from './ImageUploadField';
 
 function preferredSelectValue(choices: SelectChoice[], preferred: string): string {
   const normalize = (value: string) => value.toLowerCase().replace(/[\\s_-]/g, '');
@@ -51,7 +49,6 @@ export function TripForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const isMobileUpload = useMediaQuery('(max-width:599px)');
 
   const {
     control,
@@ -107,15 +104,6 @@ export function TripForm() {
     }
   }, [currencyChoices, getValues, setValue]);
 
-  function handleImageFilesChange(event: ChangeEvent<HTMLInputElement>): void {
-    const incomingFiles = Array.from(event.target.files ?? []);
-    if (incomingFiles.length > 0) {
-      setSelectedFiles((currentFiles) =>
-        [...currentFiles, ...incomingFiles].slice(0, TRIP_MAX_IMAGES),
-      );
-    }
-    event.target.value = '';
-  }
 
   function changeDayNumber(delta: number): void {
     const current = getValues('dayNumber');
@@ -332,39 +320,8 @@ export function TripForm() {
         helperText={errors.destination?.message}
       />
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1,
-          mt: 1,
-          mx: '4px',
-          minWidth: 0,
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 1,
-          }}
-        >
-          <CustomFileUploadButton
-            handleFilesChange={handleImageFilesChange}
-            images={[]}
-            fileSelected={selectedFiles}
-            iconFotoCamera={isMobileUpload}
-            maxImages={TRIP_MAX_IMAGES}
-          />
-          <Typography variant="overline" sx={{ mr: 1 }}>
-            {selectedFiles.length}/{TRIP_MAX_IMAGES} uploaded images
-          </Typography>
-        </Box>
-        <Typography variant="caption" color="text.secondary">
-          {TRIP_MAX_IMAGES} images maximum.
-        </Typography>
+      <Box sx={{ mt: 1, mx: '4px', minWidth: 0 }}>
+        <ImageUploadField files={selectedFiles} setFiles={setSelectedFiles} />
       </Box>
 
       <TextField
