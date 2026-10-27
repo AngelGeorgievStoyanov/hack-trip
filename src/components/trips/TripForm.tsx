@@ -9,13 +9,11 @@ import {
   Button,
   ButtonGroup,
   CircularProgress,
-  IconButton,
   TextField,
   Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { tripApi, type TripWriteInput } from '@/api/trips';
 import { SELECT_TYPE_KEYS } from '@/constants/config';
@@ -189,8 +187,26 @@ export function TripForm() {
           size="small"
           aria-label="Change day number"
           sx={{
-            m: 1,
-            '& .MuiButton-root': { minWidth: 50, width: 50, height: 30, p: 0, m: 0 },
+            ml: 0.5,
+            mr: 0,
+            my: 0,
+            alignSelf: 'center',
+            '& .MuiButton-root': {
+              minWidth: 40,
+              width: 40,
+              height: 36,
+              p: 0,
+              m: 0,
+              color: '#fff',
+              backgroundColor: '#4caf50',
+              borderColor: '#388e3c',
+              '&:hover': { backgroundColor: '#388e3c', borderColor: '#2e7d32' },
+              '&.Mui-disabled': {
+                color: 'rgba(255,255,255,0.65)',
+                backgroundColor: '#bdbdbd',
+                borderColor: '#bdbdbd',
+              },
+            },
           }}
         >
           <Button
@@ -331,8 +347,19 @@ export function TripForm() {
             gap: 1,
           }}
         >
-          <Button type="button" variant="contained" startIcon={<PhotoCameraIcon />} >
-            Upload images
+          <Button
+            type="button"
+            variant="contained"
+            aria-label="Upload images"
+            sx={{
+              minWidth: { xs: 42, sm: 'auto' },
+              px: { xs: 1, sm: 2 },
+            }}
+          >
+            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+              UPLOAD
+            </Box>
+            <PhotoCameraIcon sx={{ display: { xs: 'inline-flex', sm: 'none' } }} />
           </Button>
           <Typography variant="overline" sx={{ mr: 1 }}>
             0/{TRIP_MAX_IMAGES} uploaded images
@@ -341,31 +368,6 @@ export function TripForm() {
         <Typography variant="caption" color="text.secondary">
           {TRIP_MAX_IMAGES} images maximum.
         </Typography>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 1,
-            p: 1,
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 1,
-            minHeight: 54,
-          }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            No images selected
-          </Typography>
-          <IconButton type="button" aria-label="Remove image" disabled size="small">
-            <HighlightOffSharpIcon />
-          </IconButton>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button type="button" variant="outlined" disabled>
-            Remove all images
-          </Button>
-        </Box>
       </Box>
 
       <TextField
@@ -380,88 +382,57 @@ export function TripForm() {
 
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: 'grid',
+          gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', sm: 'repeat(4, minmax(0, 1fr))' },
+          gap: 1,
           width: '100%',
           mt: 1,
-          '& .MuiButton-root': { m: 1, minHeight: 40, whiteSpace: 'normal' },
+          '& .MuiButton-root': {
+            m: 0,
+            minWidth: 0,
+            minHeight: 40,
+            px: { xs: 1, sm: 1.5 },
+            py: 1.25,
+            whiteSpace: 'normal',
+            overflowWrap: 'anywhere',
+            textTransform: 'uppercase',
+          },
         }}
       >
-        <Box
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={submitting || !isValid}
+          startIcon={submitting ? <CircularProgress size={18} /> : undefined}
+          sx={{ '&:hover': { backgroundColor: '#4daf30' } }}
+        >
+          Add trip
+        </Button>
+        <Button
+          type="button"
+          variant="contained"
+          sx={{ '&:hover': { backgroundColor: '#4daf30' } }}
+        >
+          Add next day trip
+        </Button>
+        <Button
+          type="button"
+          variant="contained"
           sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-            width: '100%',
+            color: 'black',
+            backgroundColor: 'rgb(194 194 224)',
+            '&:hover': { color: 'white', backgroundColor: 'rgb(194 194 224)' },
           }}
         >
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={submitting || !isValid}
-            startIcon={submitting ? <CircularProgress size={18} /> : undefined}
-            sx={{
-              minWidth: 180,
-              px: 3,
-              py: 1.25,
-              textTransform: 'uppercase',
-              '&:hover': { backgroundColor: '#4daf30' },
-            }}
-          >
-            Add trip
-          </Button>
-          <Button
-            type="button"
-            variant="contained"
-            sx={{
-              minWidth: 180,
-              px: 3,
-              py: 1.25,
-              textTransform: 'uppercase',
-              '&:hover': { backgroundColor: '#4daf30' },
-            }}
-          >
-            Add next day trip
-          </Button>
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-            width: '100%',
-          }}
+          Add point's for the trip
+        </Button>
+        <Button
+          type="button"
+          variant="contained"
+          sx={{ '&:hover': { backgroundColor: '#4daf30' } }}
         >
-          <Button
-            type="button"
-            variant="contained"
-            sx={{
-              minWidth: 180,
-              px: 3,
-              py: 1.25,
-              color: 'black',
-              backgroundColor: 'rgb(194 194 224)',
-              textTransform: 'uppercase',
-              '&:hover': { color: 'white', backgroundColor: 'rgb(194 194 224)' },
-            }}
-          >
-            Add point's for the trip
-          </Button>
-          <Button
-            type="button"
-            variant="contained"
-            sx={{
-              minWidth: 180,
-              px: 3,
-              py: 1.25,
-              textTransform: 'uppercase',
-              '&:hover': { backgroundColor: '#4daf30' },
-            }}
-          >
-            Back
-          </Button>
-        </Box>
+          Back
+        </Button>
       </Box>
     </Box>
   );
