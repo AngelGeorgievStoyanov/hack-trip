@@ -189,12 +189,12 @@ export default function ImageUploadField({ files, setFiles }: ImageUploadFieldPr
           {files.length > 0 ? (
             isMobileUpload ? (
               <Tooltip title="REMOVE ALL IMAGES" arrow>
-                <IconButton aria-label="Remove all images" color="primary" onClick={removeAllFiles} size="large">
+                <IconButton aria-label="Remove all images" color="primary" onClick={removeAllFiles} disabled={processing} size="large">
                   <DeleteAllImagesIcon fontSize="large" />
                 </IconButton>
               </Tooltip>
             ) : (
-              <Button variant="contained" onClick={removeAllFiles}>
+              <Button variant="contained" onClick={removeAllFiles} disabled={processing}>
                 Remove all images
               </Button>
             )
@@ -225,7 +225,7 @@ export default function ImageUploadField({ files, setFiles }: ImageUploadFieldPr
                 {file.name}
               </Typography>
               <Tooltip title="Remove image" arrow>
-                <IconButton aria-label={`Remove ${file.name}`} color="error" onClick={() => removeFile(index)} size="small">
+                <IconButton aria-label={`Remove ${file.name}`} color="error" onClick={() => removeFile(index)} disabled={processing} size="small">
                   <RemoveImageIcon />
                 </IconButton>
               </Tooltip>
