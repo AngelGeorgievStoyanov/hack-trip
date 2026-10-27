@@ -9,9 +9,14 @@ import {
   Button,
   ButtonGroup,
   CircularProgress,
+  IconButton,
   TextField,
   Typography,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { tripApi, type TripWriteInput } from '@/api/trips';
 import { SELECT_TYPE_KEYS } from '@/constants/config';
 import { useSelectChoices } from '@/hooks/useSelects';
@@ -19,6 +24,7 @@ import { firstSelectValue, type SelectChoice } from '@/lib/selects';
 import {
   DAY_NUMBER_MAX,
   TRIP_DESCRIPTION_MAX_LENGTH,
+  TRIP_MAX_IMAGES,
   TRIP_TITLE_MAX_LENGTH,
 } from '@/constants/trips';
 import { zodResolver } from '@/lib/zodResolver';
@@ -135,7 +141,9 @@ export function TripForm() {
         justifyContent: 'space-between',
         boxSizing: 'border-box',
         width: 'min(100%, 620px)',
+        mx: 'auto',
         height: 'fit-content',
+        minWidth: 0,
         p: { xs: 2, sm: '30px' },
         mb: '5px',
         backgroundColor: '#eee7e79e',
@@ -145,7 +153,8 @@ export function TripForm() {
         gap: 1,
         '& .MuiFormControl-root': {
           m: '4px',
-          width: 'calc(100% - 8px)',
+          width: '100%',
+          minWidth: 0,
         },
         '& .MuiButton-root': {
           m: 1,
@@ -190,7 +199,7 @@ export function TripForm() {
             disabled={watch('dayNumber') <= 1}
             onClick={() => changeDayNumber(-1)}
           >
-            −
+            <RemoveIcon fontSize="small" />
           </Button>
           <Button
             type="button"
@@ -198,7 +207,7 @@ export function TripForm() {
             disabled={watch('dayNumber') >= DAY_NUMBER_MAX}
             onClick={() => changeDayNumber(1)}
           >
-            +
+            <AddIcon fontSize="small" />
           </Button>
         </ButtonGroup>
       </Box>
@@ -211,22 +220,14 @@ export function TripForm() {
         helperText={errors.title?.message}
       />
 
-      <TextField
-        label="Description"
-        multiline
-        minRows={3}
-        {...register('description')}
-        slotProps={{ htmlInput: { maxLength: TRIP_DESCRIPTION_MAX_LENGTH } }}
-        error={!!errors.description}
-        helperText={errors.description?.message}
-      />
-
       <Box
         sx={{
           display: 'flex',
           alignItems: 'flex-start',
           gap: 1,
-          '& > *': { minWidth: 0 },
+          width: '100%',
+          minWidth: 0,
+          '& > *': { minWidth: 0, flex: '1 1 0' },
           '@media (max-width: 480px)': { flexDirection: 'column' },
         }}
       >
@@ -244,7 +245,7 @@ export function TripForm() {
           control={control}
           name="currency"
           render={({ field }) => (
-            <Box sx={{ flex: { xs: '1 1 auto', sm: '0 0 150px' }, width: { xs: '100%', sm: '150px' } }}>
+            <Box sx={{ flex: '0 0 150px', width: '150px', minWidth: 0, '@media (max-width: 480px)': { flex: '1 1 auto', width: '100%' } }}>
               <TripSelectField
                 name={field.name}
                 label="Currency"
@@ -259,6 +260,31 @@ export function TripForm() {
           )}
         />
       </Box>
+
+      <TextField
+        label="Destination (optional)"
+        {...register('destination')}
+        slotProps={{ htmlInput: { maxLength: TRIP_TITLE_MAX_LENGTH } }}
+        error={!!errors.destination}
+        helperText={errors.destination?.message}
+      />
+
+      <Controller
+        control={control}
+        name="transport"
+        render={({ field }) => (
+          <TripSelectField
+            name={field.name}
+            label="Transport"
+            value={field.value}
+            choices={transportChoices}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            error={!!errors.transport}
+            helperText={errors.transport?.message}
+          />
+        )}
+      />
 
       <TextField
         label="Number of people"
@@ -286,29 +312,70 @@ export function TripForm() {
         )}
       />
 
-      <Controller
-        control={control}
-        name="transport"
-        render={({ field }) => (
-          <TripSelectField
-            name={field.name}
-            label="Transport"
-            value={field.value}
-            choices={transportChoices}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={!!errors.transport}
-            helperText={errors.transport?.message}
-          />
-        )}
-      />
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+          mt: 1,
+          mx: '4px',
+          minWidth: 0,
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 1,
+          }}
+        >
+          <Button type="button" variant="contained" startIcon={<PhotoCameraIcon />} >
+            Upload images
+          </Button>
+          <Typography variant="overline" sx={{ mr: 1 }}>
+            0/{TRIP_MAX_IMAGES} uploaded images
+          </Typography>
+        </Box>
+        <Typography variant="caption" color="text.secondary">
+          {TRIP_MAX_IMAGES} images maximum.
+        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 1,
+            p: 1,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 1,
+            minHeight: 54,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            No images selected
+          </Typography>
+          <IconButton type="button" aria-label="Remove image" disabled size="small">
+            <HighlightOffSharpIcon />
+          </IconButton>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button type="button" variant="outlined" disabled>
+            Remove all images
+          </Button>
+        </Box>
+      </Box>
 
       <TextField
-        label="Destination (optional)"
-        {...register('destination')}
-        slotProps={{ htmlInput: { maxLength: TRIP_TITLE_MAX_LENGTH } }}
-        error={!!errors.destination}
-        helperText={errors.destination?.message}
+        label="Description"
+        multiline
+        minRows={3}
+        {...register('description')}
+        slotProps={{ htmlInput: { maxLength: TRIP_DESCRIPTION_MAX_LENGTH } }}
+        error={!!errors.description}
+        helperText={errors.description?.message}
       />
 
       <Box
