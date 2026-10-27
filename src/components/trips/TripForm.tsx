@@ -311,22 +311,91 @@ export function TripForm() {
         helperText={errors.destination?.message}
       />
 
-      <Button
-        type="submit"
-        variant="contained"
-        disabled={submitting || !isValid}
-        startIcon={submitting ? <CircularProgress size={18} /> : undefined}
+      <Box
         sx={{
-          alignSelf: 'center',
-          minWidth: 180,
-          px: 5,
-          py: 1.25,
-          textTransform: 'uppercase',
-          '&:hover': { backgroundColor: '#4daf30' },
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+          mt: 1,
+          '& .MuiButton-root': { m: 1, minHeight: 40, whiteSpace: 'normal' },
         }}
       >
-        Create
-      </Button>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            width: '100%',
+          }}
+        >
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={submitting || !isValid}
+            startIcon={submitting ? <CircularProgress size={18} /> : undefined}
+            sx={{
+              minWidth: 180,
+              px: 3,
+              py: 1.25,
+              textTransform: 'uppercase',
+              '&:hover': { backgroundColor: '#4daf30' },
+            }}
+          >
+            Add trip
+          </Button>
+          <Button
+            type="button"
+            variant="contained"
+            sx={{
+              minWidth: 180,
+              px: 3,
+              py: 1.25,
+              textTransform: 'uppercase',
+              '&:hover': { backgroundColor: '#4daf30' },
+            }}
+          >
+            Add next day trip
+          </Button>
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            width: '100%',
+          }}
+        >
+          <Button
+            type="button"
+            variant="contained"
+            sx={{
+              minWidth: 180,
+              px: 3,
+              py: 1.25,
+              color: 'black',
+              backgroundColor: 'rgb(194 194 224)',
+              textTransform: 'uppercase',
+              '&:hover': { color: 'white', backgroundColor: 'rgb(194 194 224)' },
+            }}
+          >
+            Add point's for the trip
+          </Button>
+          <Button
+            type="button"
+            variant="contained"
+            sx={{
+              minWidth: 180,
+              px: 3,
+              py: 1.25,
+              textTransform: 'uppercase',
+              '&:hover': { backgroundColor: '#4daf30' },
+            }}
+          >
+            Back
+          </Button>
+        </Box>
+      </Box>
     </Box>
   );
 }
