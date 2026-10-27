@@ -150,7 +150,7 @@ export function TripForm() {
         {...register('countPeoples', { valueAsNumber: true })}
         error={!!errors.countPeoples}
         helperText={errors.countPeoples?.message}
-        slotProps={{ htmlInput: { min: 1, max: 2147483647, step: 1 } }}
+        slotProps={{ htmlInput: { min: 1, max: 1000, step: 1 } }}
       />
 
       <Controller
