@@ -18,8 +18,12 @@ export interface TripWriteInput {
   dayNumber: number;
   title: string;
   description: string | null;
-  group: string;
+  price: number;
   transport: string;
+  countPeoples: number;
+  typeOfPeople: string;
+  currency: string;
+  destination?: string;
 }
 
 export interface TripListQuery {
@@ -79,7 +83,14 @@ export const tripApi = {
   },
 
   createTrip: async (input: TripWriteInput): Promise<TripGroupResponse> => {
-    const body = tripWriteSchema.parse(input);
+    const parsed = tripWriteSchema.parse(input);
+    const { destination, ...fields } = parsed;
+    const body = {
+      ...fields,
+      ...(destination ? { destination } : {}),
+      lat: null,
+      lng: null,
+    };
     const { data } = await apiClient.post<TripGroupResponse>(TRIPS, body);
     return data;
   },
