@@ -10,6 +10,7 @@ export type TripSelectFieldName = (typeof TRIP_SELECT_FIELDS)[number];
 export const SELECT_TYPE_KEYS: Record<TripSelectFieldName, string> = {
   group: 'group_type',
   transport: 'transport',
+  currency: 'currency',
 };
 
 /** Dynamic config only changes with a backend deployment, so a single load covers a long session. */
