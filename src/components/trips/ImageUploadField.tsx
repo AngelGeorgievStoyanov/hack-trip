@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type Dispatch, type SetS
 import {
   Alert,
   Box,
+  Button,
   CircularProgress,
   IconButton,
   Tooltip,
@@ -75,7 +76,7 @@ async function compressImage(file: File): Promise<File> {
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
     let blob = await canvasToBlob(canvas, JPEG_QUALITY);
-    for (const quality of [0.78, 0.68, 0.58, 0.48]) {
+    for (const quality of [0.78, 0.68, 0.58, 0.48, 0.38, 0.28]) {
       if (blob.size <= MAX_COMPRESSED_FILE_SIZE) break;
       blob = await canvasToBlob(canvas, quality);
     }
@@ -193,9 +194,9 @@ export default function ImageUploadField({ files, setFiles }: ImageUploadFieldPr
                 </IconButton>
               </Tooltip>
             ) : (
-              <button type="button" onClick={removeAllFiles} style={{ cursor: 'pointer' }}>
+              <Button variant="contained" onClick={removeAllFiles}>
                 Remove all images
-              </button>
+              </Button>
             )
           ) : null}
         </Box>
