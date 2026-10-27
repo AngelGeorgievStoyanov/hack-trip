@@ -729,6 +729,24 @@ Only add comments when they provide information that cannot be understood direct
 
 ---
 
+## Icon Centralization Rule
+
+All application icons must be exported through the central icon registry:
+
+`src/constants/icons/index.ts`
+
+Rules:
+
+* Components must not import icons directly from icon libraries such as `@mui/icons-material/*`. Import them from `@/constants/icons` instead.
+* Give each exported icon a stable, semantic name based on its purpose, such as `UploadIcon`, `AddIcon`, `RemoveIcon`, or `DeleteIcon`.
+* The registry maps these semantic names to the actual library icons. To change an icon's appearance, update its export in the registry; consumers should not need to change.
+* When a new icon is needed, add its export to the registry first, then import it from the registry in the component.
+* Reuse an existing semantic export when the same icon purpose is already represented. Do not create duplicate aliases for the same purpose without a clear reason.
+* Apply this rule to all new code and whenever existing icon imports are touched during modernization. When auditing or refactoring the frontend, migrate remaining direct icon-library imports to the registry without changing their visual behavior.
+* Keep icon-library dependencies and icon implementation details inside the registry; keep components dependent on semantic icon names.
+
+---
+
 ## 22. UI Architecture
 
 MUI is the primary UI component system.
