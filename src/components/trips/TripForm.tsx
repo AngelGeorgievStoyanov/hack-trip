@@ -16,8 +16,8 @@ import { tripWriteSchema } from '@/validations/trips';
 import { TripSelectField } from './TripSelectField';
 
 /**
- * `Add Trip` (API_CONTRACT.md §8.7): `POST /trips` creates the trip group together with the
- * day being entered, so after success the frontend opens Trip Details on that day.
+ * Creates only the trip group and its first day row.
+ * Images, points and map coordinates are handled separately; coordinates are sent as null for now.
  */
 export function TripForm() {
   const router = useRouter();
@@ -38,40 +38,46 @@ export function TripForm() {
       dayNumber: 1,
       title: '',
       description: '',
-      group: '',
+      price: 0,
       transport: '',
+      countPeoples: 1,
+      typeOfPeople: '',
+      currency: '',
+      destination: '',
     },
   });
 
-  const groupChoices = useSelectChoices(SELECT_TYPE_KEYS.group, watch('group'));
+  const groupChoices = useSelectChoices(SELECT_TYPE_KEYS.group, watch('typeOfPeople'));
   const transportChoices = useSelectChoices(SELECT_TYPE_KEYS.transport, watch('transport'));
+  const currencyChoices = useSelectChoices(SELECT_TYPE_KEYS.currency, watch('currency'));
 
-  // Runtime options arrive only after mount, so a new trip starts on the first active option.
+  // Runtime options arrive after mount; use the first active option where one is available.
   const defaultsApplied = useRef(false);
   useEffect(() => {
     if (defaultsApplied.current) {
       return;
     }
-    if (groupChoices.length === 0 || transportChoices.length === 0) {
+    if (groupChoices.length === 0 && transportChoices.length === 0 && currencyChoices.length === 0) {
       return;
     }
 
     defaultsApplied.current = true;
-    if (!getValues('group')) {
-      setValue('group', firstSelectValue(groupChoices));
+    if (!getValues('typeOfPeople') && groupChoices.length > 0) {
+      setValue('typeOfPeople', firstSelectValue(groupChoices));
     }
-    if (!getValues('transport')) {
+    if (!getValues('transport') && transportChoices.length > 0) {
       setValue('transport', firstSelectValue(transportChoices));
     }
-  }, [groupChoices, transportChoices, getValues, setValue]);
+    if (!getValues('currency') && currencyChoices.length > 0) {
+      setValue('currency', firstSelectValue(currencyChoices));
+    }
+  }, [groupChoices, transportChoices, currencyChoices, getValues, setValue]);
 
   async function onSubmit(values: TripWriteInput): Promise<void> {
     setSubmitting(true);
     setServerError(null);
     try {
       const created = await tripApi.createTrip(values);
-      // The backend creates exactly the day being entered; verify instead of assuming
-      // a position in `days[]`, and open Trip Details on the created day.
       const createdDay =
         created.days.length === 1
           ? created.days[0]
@@ -94,47 +100,69 @@ export function TripForm() {
       <Typography variant="h4" component="h1">
         Create trip
       </Typography>
-       {serverError ? <Alert severity="error">{serverError}</Alert> : null}
-       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-         <TextField
-           label="Day number"
-           type="number"
-           {...register('dayNumber', { valueAsNumber: true })}
-           error={!!errors.dayNumber}
-           helperText={errors.dayNumber?.message ?? 'The starting day number for the trip'}
-           slotProps={{ htmlInput: { min: 1, max: DAY_NUMBER_MAX } }}
-         />
-       </Box>
-       <TextField
-         label="Title"
-         {...register('title')}
-         error={!!errors.title}
-         helperText={errors.title?.message}
-       />
-       <TextField
-         label="Description"
-         multiline
-         minRows={3}
-         {...register('description')}
-         error={!!errors.description}
-         helperText={errors.description?.message}
-       />
-       <Controller
-         control={control}
-         name="group"
+
+      {serverError ? <Alert severity="error">{serverError}</Alert> : null}
+
+      <TextField
+        label="Day number"
+        type="number"
+        {...register('dayNumber', { valueAsNumber: true })}
+        error={!!errors.dayNumber}
+        helperText={errors.dayNumber?.message ?? 'The starting day number for the trip'}
+        slotProps={{ htmlInput: { min: 1, max: DAY_NUMBER_MAX, step: 1 } }}
+      />
+
+      <TextField
+        label="Title"
+        {...register('title')}
+        error={!!errors.title}
+        helperText={errors.title?.message}
+      />
+
+      <TextField
+        label="Description"
+        multiline
+        minRows={3}
+        {...register('description')}
+        error={!!errors.description}
+        helperText={errors.description?.message}
+      />
+
+      <TextField
+        label="Price"
+        type="number"
+        {...register('price', { valueAsNumber: true })}
+        error={!!errors.price}
+        helperText={errors.price?.message}
+        slotProps={{ htmlInput: { min: 0, max: 1000000, step: 'any' } }}
+      />
+
+      <TextField
+        label="Number of people"
+        type="number"
+        {...register('countPeoples', { valueAsNumber: true })}
+        error={!!errors.countPeoples}
+        helperText={errors.countPeoples?.message}
+        slotProps={{ htmlInput: { min: 1, step: 1 } }}
+      />
+
+      <Controller
+        control={control}
+        name="typeOfPeople"
         render={({ field }) => (
           <TripSelectField
             name={field.name}
-            label="Group"
+            label="Type of people"
             value={field.value}
             choices={groupChoices}
-            onChange={(value) => field.onChange(value)}
+            onChange={field.onChange}
             onBlur={field.onBlur}
-            error={!!errors.group}
-            helperText={errors.group?.message}
+            error={!!errors.typeOfPeople}
+            helperText={errors.typeOfPeople?.message}
           />
         )}
       />
+
       <Controller
         control={control}
         name="transport"
@@ -144,13 +172,38 @@ export function TripForm() {
             label="Transport"
             value={field.value}
             choices={transportChoices}
-            onChange={(value) => field.onChange(value)}
+            onChange={field.onChange}
             onBlur={field.onBlur}
             error={!!errors.transport}
             helperText={errors.transport?.message}
           />
         )}
       />
+
+      <Controller
+        control={control}
+        name="currency"
+        render={({ field }) => (
+          <TripSelectField
+            name={field.name}
+            label="Currency"
+            value={field.value}
+            choices={currencyChoices}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            error={!!errors.currency}
+            helperText={errors.currency?.message}
+          />
+        )}
+      />
+
+      <TextField
+        label="Destination (optional)"
+        {...register('destination')}
+        error={!!errors.destination}
+        helperText={errors.destination?.message}
+      />
+
       <Button
         type="submit"
         variant="contained"
