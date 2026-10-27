@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import {
@@ -12,9 +12,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { tripApi, type TripWriteInput } from '@/api/trips';
 import { SELECT_TYPE_KEYS } from '@/constants/config';
 import { useSelectChoices } from '@/hooks/useSelects';
@@ -30,6 +30,7 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { tripWriteSchema } from '@/validations/trips';
 import { TripSelectField } from './TripSelectField';
+import CustomFileUploadButton from '@/components/CustomFileUploadButton';
 
 function preferredSelectValue(choices: SelectChoice[], preferred: string): string {
   const normalize = (value: string) => value.toLowerCase().replace(/[\\s_-]/g, '');
@@ -50,6 +51,8 @@ export function TripForm() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const isMobileUpload = useMediaQuery('(max-width:599px)');
 
   const {
     control,
@@ -104,6 +107,16 @@ export function TripForm() {
       });
     }
   }, [currencyChoices, getValues, setValue]);
+
+  function handleImageFilesChange(event: ChangeEvent<HTMLInputElement>): void {
+    const incomingFiles = Array.from(event.target.files ?? []);
+    if (incomingFiles.length > 0) {
+      setSelectedFiles((currentFiles) =>
+        [...currentFiles, ...incomingFiles].slice(0, TRIP_MAX_IMAGES),
+      );
+    }
+    event.target.value = '';
+  }
 
   function changeDayNumber(delta: number): void {
     const current = getValues('dayNumber');
@@ -339,22 +352,15 @@ export function TripForm() {
             gap: 1,
           }}
         >
-          <Button
-            type="button"
-            variant="contained"
-            aria-label="Upload images"
-            sx={{
-              minWidth: { xs: 42, sm: 'auto' },
-              px: { xs: 1, sm: 2 },
-            }}
-          >
-            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
-              UPLOAD
-            </Box>
-            <PhotoCameraIcon sx={{ display: { xs: 'inline-flex', sm: 'none' } }} />
-          </Button>
+          <CustomFileUploadButton
+            handleFilesChange={handleImageFilesChange}
+            images={[]}
+            fileSelected={selectedFiles}
+            iconFotoCamera={isMobileUpload}
+            maxImages={TRIP_MAX_IMAGES}
+          />
           <Typography variant="overline" sx={{ mr: 1 }}>
-            0/{TRIP_MAX_IMAGES} uploaded images
+            {selectedFiles.length}/{TRIP_MAX_IMAGES} uploaded images
           </Typography>
         </Box>
         <Typography variant="caption" color="text.secondary">
