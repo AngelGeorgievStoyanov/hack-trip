@@ -1,13 +1,21 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  ButtonGroup,
+  CircularProgress,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { tripApi, type TripWriteInput } from '@/api/trips';
 import { SELECT_TYPE_KEYS } from '@/constants/config';
 import { useSelectChoices } from '@/hooks/useSelects';
-import { firstSelectValue } from '@/lib/selects';
+import { firstSelectValue, type SelectChoice } from '@/lib/selects';
 import {
   DAY_NUMBER_MAX,
   TRIP_DESCRIPTION_MAX_LENGTH,
@@ -18,6 +26,17 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { tripWriteSchema } from '@/validations/trips';
 import { TripSelectField } from './TripSelectField';
+
+function preferredSelectValue(choices: SelectChoice[], preferred: string): string {
+  const normalize = (value: string) => value.toLowerCase().replace(/[\\s_-]/g, '');
+  const expected = normalize(preferred);
+  return (
+    choices.find(
+      (choice) =>
+        normalize(choice.value) === expected || normalize(choice.label) === expected,
+    )?.value ?? firstSelectValue(choices)
+  );
+}
 
 /**
  * Creates only the trip group and its first day row.
@@ -56,27 +75,37 @@ export function TripForm() {
   const transportChoices = useSelectChoices(SELECT_TYPE_KEYS.transport, watch('transport'));
   const currencyChoices = useSelectChoices(SELECT_TYPE_KEYS.currency, watch('currency'));
 
-  // Runtime options arrive after mount; use the first active option where one is available.
-  const defaultsApplied = useRef(false);
+  // Prefer the requested defaults only when the active backend config contains them.
+  // Otherwise, fall back to the first active backend option and submit its canonical key.
   useEffect(() => {
-    if (defaultsApplied.current) {
-      return;
-    }
-    if (groupChoices.length === 0 && transportChoices.length === 0 && currencyChoices.length === 0) {
-      return;
-    }
-
-    defaultsApplied.current = true;
     if (!getValues('typeOfPeople') && groupChoices.length > 0) {
-      setValue('typeOfPeople', firstSelectValue(groupChoices), { shouldValidate: true });
+      setValue('typeOfPeople', preferredSelectValue(groupChoices, 'Another type'), {
+        shouldValidate: true,
+      });
     }
+  }, [groupChoices, getValues, setValue]);
+
+  useEffect(() => {
     if (!getValues('transport') && transportChoices.length > 0) {
-      setValue('transport', firstSelectValue(transportChoices), { shouldValidate: true });
+      setValue('transport', preferredSelectValue(transportChoices, 'Another type'), {
+        shouldValidate: true,
+      });
     }
+  }, [transportChoices, getValues, setValue]);
+
+  useEffect(() => {
     if (!getValues('currency') && currencyChoices.length > 0) {
-      setValue('currency', firstSelectValue(currencyChoices), { shouldValidate: true });
+      setValue('currency', preferredSelectValue(currencyChoices, 'EUR'), {
+        shouldValidate: true,
+      });
     }
-  }, [groupChoices, transportChoices, currencyChoices, getValues, setValue]);
+  }, [currencyChoices, getValues, setValue]);
+
+  function changeDayNumber(delta: number): void {
+    const current = getValues('dayNumber');
+    const next = Math.min(DAY_NUMBER_MAX, Math.max(1, current + delta));
+    setValue('dayNumber', next, { shouldDirty: true, shouldValidate: true });
+  }
 
   async function onSubmit(values: TripWriteInput): Promise<void> {
     setSubmitting(true);
@@ -100,22 +129,79 @@ export function TripForm() {
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
-      sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 560 }}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        boxSizing: 'border-box',
+        width: 'min(100%, 620px)',
+        height: 'fit-content',
+        p: { xs: 2, sm: '30px' },
+        mb: '5px',
+        backgroundColor: '#eee7e79e',
+        boxShadow: '3px 2px 5px black',
+        border: 'solid 1px',
+        borderRadius: 0,
+        gap: 1,
+        '& .MuiFormControl-root': {
+          m: '4px',
+          width: 'calc(100% - 8px)',
+        },
+        '& .MuiButton-root': {
+          m: 1,
+        },
+        '@media (max-width: 600px)': {
+          p: 2,
+        },
+      }}
     >
-      <Typography variant="h4" component="h1">
+      <Typography
+        variant="h5"
+        component="h1"
+        sx={{ m: '10px auto', textTransform: 'uppercase', textAlign: 'center' }}
+      >
         Create trip
       </Typography>
 
       {serverError ? <Alert severity="error">{serverError}</Alert> : null}
 
-      <TextField
-        label="Day number"
-        type="number"
-        {...register('dayNumber', { valueAsNumber: true })}
-        error={!!errors.dayNumber}
-        helperText={errors.dayNumber?.message ?? 'The starting day number for the trip'}
-        slotProps={{ htmlInput: { min: 1, max: DAY_NUMBER_MAX, step: 1 } }}
-      />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', m: '4px' }}>
+        <TextField
+          label="Day"
+          type="number"
+          size="small"
+          {...register('dayNumber', { valueAsNumber: true })}
+          error={!!errors.dayNumber}
+          helperText={errors.dayNumber?.message}
+          slotProps={{ htmlInput: { min: 1, max: DAY_NUMBER_MAX, step: 1, style: { textAlign: 'center' } } }}
+          sx={{ width: '76px !important', '& .MuiInputBase-root': { pointerEvents: 'none' } }}
+        />
+        <ButtonGroup
+          size="small"
+          aria-label="Change day number"
+          sx={{
+            m: 1,
+            '& .MuiButton-root': { minWidth: 50, width: 50, height: 30, p: 0, m: 0 },
+          }}
+        >
+          <Button
+            type="button"
+            aria-label="Decrease day number"
+            disabled={watch('dayNumber') <= 1}
+            onClick={() => changeDayNumber(-1)}
+          >
+            −
+          </Button>
+          <Button
+            type="button"
+            aria-label="Increase day number"
+            disabled={watch('dayNumber') >= DAY_NUMBER_MAX}
+            onClick={() => changeDayNumber(1)}
+          >
+            +
+          </Button>
+        </ButtonGroup>
+      </Box>
 
       <TextField
         label="Title"
@@ -135,14 +221,44 @@ export function TripForm() {
         helperText={errors.description?.message}
       />
 
-      <TextField
-        label="Price"
-        type="number"
-        {...register('price', { valueAsNumber: true })}
-        error={!!errors.price}
-        helperText={errors.price?.message}
-        slotProps={{ htmlInput: { min: 0, max: 1000000, step: 'any' } }}
-      />
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 1,
+          '& > *': { minWidth: 0 },
+          '@media (max-width: 480px)': { flexDirection: 'column' },
+        }}
+      >
+        <TextField
+          label="Price"
+          type="number"
+          {...register('price', { valueAsNumber: true })}
+          error={!!errors.price}
+          helperText={errors.price?.message}
+          slotProps={{ htmlInput: { min: 0, max: 1000000, step: 'any' } }}
+          sx={{ flex: 1 }}
+        />
+
+        <Controller
+          control={control}
+          name="currency"
+          render={({ field }) => (
+            <Box sx={{ flex: { xs: '1 1 auto', sm: '0 0 150px' }, width: { xs: '100%', sm: '150px' } }}>
+              <TripSelectField
+                name={field.name}
+                label="Currency"
+                value={field.value}
+                choices={currencyChoices}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={!!errors.currency}
+                helperText={errors.currency?.message}
+              />
+            </Box>
+          )}
+        />
+      </Box>
 
       <TextField
         label="Number of people"
@@ -187,23 +303,6 @@ export function TripForm() {
         )}
       />
 
-      <Controller
-        control={control}
-        name="currency"
-        render={({ field }) => (
-          <TripSelectField
-            name={field.name}
-            label="Currency"
-            value={field.value}
-            choices={currencyChoices}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={!!errors.currency}
-            helperText={errors.currency?.message}
-          />
-        )}
-      />
-
       <TextField
         label="Destination (optional)"
         {...register('destination')}
@@ -217,6 +316,14 @@ export function TripForm() {
         variant="contained"
         disabled={submitting || !isValid}
         startIcon={submitting ? <CircularProgress size={18} /> : undefined}
+        sx={{
+          alignSelf: 'center',
+          minWidth: 180,
+          px: 5,
+          py: 1.25,
+          textTransform: 'uppercase',
+          '&:hover': { backgroundColor: '#4daf30' },
+        }}
       >
         Create
       </Button>
