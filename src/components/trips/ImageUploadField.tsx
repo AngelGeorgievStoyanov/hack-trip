@@ -120,14 +120,14 @@ export default function ImageUploadField({ files, setFiles }: ImageUploadFieldPr
       const currentCount = files.length;
       const remainingSlots = TRIP_MAX_IMAGES - currentCount;
       if (remainingSlots <= 0) {
-        setErrorMessage(`Maximum ${TRIP_MAX_IMAGES} images allowed.`);
+        setErrorMessage(`${TRIP_MAX_IMAGES} images are the maximum number to upload.`);
         return;
       }
 
       const candidates = incomingFiles.slice(0, remainingSlots);
       const messages: string[] = [];
       if (incomingFiles.length > remainingSlots) {
-        messages.push(`Only ${remainingSlots} more image(s) can be selected.`);
+        messages.push(`${TRIP_MAX_IMAGES} images are the maximum number to upload.`);
       }
 
       const accepted = candidates.filter((file) => {
@@ -201,10 +201,6 @@ export default function ImageUploadField({ files, setFiles }: ImageUploadFieldPr
           ) : null}
         </Box>
       </Box>
-
-      <Typography variant="caption" color="text.secondary">
-        Up to {TRIP_MAX_IMAGES} images. Each original file must be 25 MB or smaller; images are compressed to 2 MB or less.
-      </Typography>
 
       {errorMessage ? <Alert severity="warning" onClose={() => setErrorMessage(null)}>{errorMessage}</Alert> : null}
 
