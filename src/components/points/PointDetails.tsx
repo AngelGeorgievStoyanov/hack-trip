@@ -1,6 +1,7 @@
 'use client';
 
 import { SocialImageGallery } from '@/components/images/SocialImageGallery';
+import { GoogleMapView } from '@/components/maps/GoogleMapView';
 import { ExpandableText } from '@/components/common/ExpandableText';
 import { PointActions } from './PointActions';
 import { CommentsSection } from '@/components/comments/CommentsSection';
@@ -18,9 +19,17 @@ export function PointDetails({ point }: { point: TripPoint }) {
       <h1>{current.name}</h1>
       {current.description ? <ExpandableText text={current.description} /> : null}
       {current.lat != null && current.lng != null ? (
-        <p>
-          Coordinates: {current.lat.toFixed(6)}, {current.lng.toFixed(6)}
-        </p>
+        <>
+          <p>
+            Coordinates: {current.lat.toFixed(6)}, {current.lng.toFixed(6)}
+          </p>
+          <GoogleMapView
+            markers={[{ id: current.id, title: current.name, position: { lat: current.lat, lng: current.lng } }]}
+            center={{ lat: current.lat, lng: current.lng }}
+            height={250}
+            maxWidth={600}
+          />
+        </>
       ) : null}
       <PointActions point={current} />
 
