@@ -43,7 +43,7 @@ function preferredSelectValue(choices: SelectChoice[], preferred: string): strin
 
 /**
  * Creates only the trip group and its first day row.
- * Images, points and map coordinates are handled separately; coordinates are sent as null for now.
+ * Creates the trip and first day; selected map coordinates are included in the create request.
  */
 export function TripForm() {
   const router = useRouter();
@@ -148,8 +148,8 @@ export function TripForm() {
         />
       </Box>
       <Box
-      component="form"
-      onSubmit={handleSubmit(onSubmit)}
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
       sx={{
         display: 'flex',
         flexDirection: 'column',
