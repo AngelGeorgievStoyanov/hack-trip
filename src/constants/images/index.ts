@@ -1,5 +1,7 @@
 export const MAX_IMAGES_PER_ENTITY = 9;
 
+export const MAX_CONCURRENT_IMAGE_UPLOADS = 3;
+
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
 export const ACCEPTED_IMAGE_MIME_TYPES = [
