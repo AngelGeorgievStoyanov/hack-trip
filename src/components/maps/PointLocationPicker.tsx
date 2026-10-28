@@ -16,9 +16,9 @@ import { useGoogleMapsLoader } from '@/hooks/useGoogleMapsLoader';
 import {
   GEOLOCATION_OPTIONS,
   MAP_DEFAULT_CENTER,
-  MAP_DEFAULT_ZOOM,
   MAP_GEOCODED_ZOOM,
   MAP_POINT_PICKER_HEIGHT,
+  MAP_POINT_PICKER_ZOOM,
   MAP_SEARCH_MIN_LENGTH,
 } from '@/constants/maps';
 import {
