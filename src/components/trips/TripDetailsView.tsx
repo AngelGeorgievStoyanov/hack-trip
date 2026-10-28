@@ -45,7 +45,7 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
   // viewer's own like / favorite / report state after a reload.
   const { data: tripGroup } = useTripGroup(trip);
   const [activeDayNumber, setActiveDayNumber] = useState(initialDayNumber);
-  const [selectedPointIndex, setSelectedPointIndex] = useState(0);
+  const [selectedPointIndex, setSelectedPointIndex] = useState(-1);
   const [tripCommentTarget, setTripCommentTarget] = useState<CommentTarget | null>(null);
   const [pointCommentTarget, setPointCommentTarget] = useState<CommentTarget | null>(null);
   const [tripGroupCommentsOpen, setTripGroupCommentsOpen] = useState(false);
@@ -56,7 +56,7 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
   // `activeDayNumber`, so the global Trip Group social state is never remounted.
   useEffect(() => {
     setActiveDayNumber(initialDayNumber);
-    setSelectedPointIndex(0);
+    setSelectedPointIndex(-1);
   }, [initialDayNumber]);
 
   const group = tripGroup ?? trip;
