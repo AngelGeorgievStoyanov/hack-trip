@@ -30,6 +30,7 @@ import { tripWriteSchema } from '@/validations/trips';
 import { TripSelectField } from './TripSelectField';
 import ImageUploadField from './ImageUploadField';
 import { TripLocationPicker } from '@/components/maps/TripLocationPicker';
+import { MAX_CONCURRENT_IMAGE_UPLOADS } from '@/constants/images';
 
 function preferredSelectValue(choices: SelectChoice[], preferred: string): string {
   const normalize = (value: string) => value.toLowerCase().replace(/[\\s_-]/g, '');
@@ -142,13 +143,28 @@ export function TripForm() {
     const failedFiles: File[] = [];
 
     try {
-      for (const file of files) {
-        try {
-          await tripApi.uploadDayImage(created.id, createdDay.id, file);
-        } catch {
-          failedFiles.push(file);
+      const failedByIndex = files.map(() => false);
+      let nextFileIndex = 0;
+
+      const uploadWorker = async (): Promise<void> => {
+        while (nextFileIndex < files.length) {
+          const fileIndex = nextFileIndex;
+          nextFileIndex += 1;
+
+          try {
+            await tripApi.uploadDayImage(created.id, createdDay.id, files[fileIndex]);
+          } catch {
+            failedByIndex[fileIndex] = true;
+          }
         }
-      }
+      };
+
+      const workerCount = Math.min(MAX_CONCURRENT_IMAGE_UPLOADS, files.length);
+      await Promise.all(
+        Array.from({ length: workerCount }, () => uploadWorker()),
+      );
+
+      failedFiles.push(...files.filter((_, index) => failedByIndex[index]));
 
       setSelectedFiles(failedFiles);
       if (failedFiles.length > 0) {
