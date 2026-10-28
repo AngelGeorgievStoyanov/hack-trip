@@ -104,7 +104,9 @@ export function TripMapSection({ points, selectedPointIndex, onPointChange }: Tr
           height={MAP_TRIP_HEIGHT}
           maxWidth={MAP_TRIP_WIDTH}
           options={MAP_TRIP_OPTIONS as google.maps.MapOptions}
-          fitBounds
+          // Fit the full route only in overview mode. When a point is selected,
+          // keep the camera focused on that point instead of running fitBounds too.
+          fitBounds={isOverview}
           fitBoundsTrigger={isOverview ? 'overview' : selectedPointIndex}
           focusMarkerId={focusPointId}
           focusZoom={MAP_DEFAULT_ZOOM}
