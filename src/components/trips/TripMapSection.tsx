@@ -38,6 +38,10 @@ export function TripMapSection({ points, selectedPointIndex, onPointChange }: Tr
   const hasNext = isOverview ? points.length > 0 : selectedPointIndex < points.length - 1;
   const hasPrev = !isOverview;
 
+  useEffect(() => {
+    if (isOverview) setSelectedMarker(null);
+  }, [isOverview]);
+
   const handleMarkerSelect = useCallback((marker: GoogleMapMarker | null) => {
     setSelectedMarker(marker);
     if (marker) {
