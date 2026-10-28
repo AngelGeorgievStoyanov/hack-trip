@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Autocomplete, GoogleMap, MarkerF } from '@react-google-maps/api';
+import { Autocomplete } from '@react-google-maps/api';
+import { GoogleMapView } from '@/components/maps/GoogleMapView';
 import {
   Alert,
   Box,
@@ -208,40 +209,21 @@ export function PointLocationPicker({
           overflow: 'hidden',
         }}
       >
-        {isLoaded ? (
-          <GoogleMap
-            mapContainerStyle={{ width: '100%', height: '100%' }}
-            center={center}
-            zoom={MAP_DEFAULT_ZOOM}
-            onLoad={(map) => {
-              mapRef.current = map;
-            }}
-            onUnmount={() => {
-              mapRef.current = null;
-            }}
-            onClick={(event) => {
-              if (event.latLng) {
-                emitPosition({ lat: event.latLng.lat(), lng: event.latLng.lng() });
-              }
-            }}
-          >
-            {position ? (
-              <MarkerF
-                position={position}
-                draggable
-                onDragEnd={(event) => {
-                  if (event.latLng) {
-                    emitPosition({ lat: event.latLng.lat(), lng: event.latLng.lng() });
-                  }
-                }}
-              />
-            ) : null}
-          </GoogleMap>
-        ) : (
-          <Box sx={{ display: 'grid', placeItems: 'center', width: '100%', height: '100%' }}>
-            <CircularProgress size={28} />
-          </Box>
-        )}
+        <GoogleMapView
+          center={center}
+          zoom={MAP_DEFAULT_ZOOM}
+          height="100%"
+          maxWidth="100%"
+          markers={position ? [{ id: 'selected-position', position, draggable: true }] : []}
+          onLoad={(map) => {
+            mapRef.current = map;
+          }}
+          onUnmount={() => {
+            mapRef.current = null;
+          }}
+          onMapClick={emitPosition}
+          onMarkerDragEnd={(nextPosition) => emitPosition(nextPosition)}
+        />
         {!position ? (
           <Typography
             variant="caption"
