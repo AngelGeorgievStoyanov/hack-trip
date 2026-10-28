@@ -26,6 +26,8 @@ interface GoogleMapViewProps {
   options?: google.maps.MapOptions;
   fitBounds?: boolean;
   selectedMarkerId?: string | number | null;
+  focusMarkerId?: string | number | null;
+  focusZoom?: number;
   onMarkerSelect?: (marker: GoogleMapMarker | null) => void;
   onMarkerDragEnd?: (position: MapPosition, marker: GoogleMapMarker) => void;
   onMapClick?: (position: MapPosition) => void;
@@ -47,6 +49,8 @@ export function GoogleMapView({
   options = MAP_TRIP_OPTIONS as google.maps.MapOptions,
   fitBounds = false,
   selectedMarkerId = null,
+  focusMarkerId = null,
+  focusZoom,
   onMarkerSelect,
   onMarkerDragEnd,
   onMapClick,
@@ -78,6 +82,14 @@ export function GoogleMapView({
     mapRef.current.setCenter(center);
   }, [center.lat, center.lng, fitBounds]);
 
+  useEffect(() => {
+    if (!mapRef.current || focusMarkerId == null) return;
+    const marker = markers.find((item) => item.id === focusMarkerId);
+    if (!marker) return;
+    mapRef.current.panTo(marker.position);
+    mapRef.current.setZoom(focusZoom ?? zoom);
+  }, [focusMarkerId, focusZoom, markers, zoom]);
+
   if (!isLoaded) {
     return showLoading ? (
       <Box sx={{ display: 'grid', placeItems: 'center', width: '100%', maxWidth, height }}>
@@ -107,6 +119,13 @@ export function GoogleMapView({
               const bounds = new google.maps.LatLngBounds();
               markers.forEach((marker) => bounds.extend(marker.position));
               map.fitBounds(bounds);
+            }
+          }
+          if (focusMarkerId != null) {
+            const marker = markers.find((item) => item.id === focusMarkerId);
+            if (marker) {
+              map.panTo(marker.position);
+              map.setZoom(focusZoom ?? zoom);
             }
           }
         }}
