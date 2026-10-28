@@ -25,7 +25,7 @@ interface GoogleMapViewProps {
   options?: google.maps.MapOptions;
   fitBounds?: boolean;
   selectedMarkerId?: string | number | null;
-  onMarkerSelect?: (marker: GoogleMapMarker) => void;
+  onMarkerSelect?: (marker: GoogleMapMarker | null) => void;
   onMarkerDragEnd?: (position: MapPosition, marker: GoogleMapMarker) => void;
   onMapClick?: (position: MapPosition) => void;
   onLoad?: (map: google.maps.Map) => void;
@@ -34,10 +34,8 @@ interface GoogleMapViewProps {
   showLoading?: boolean;
 }
 
-/**
- * Shared Google Maps renderer. Feature-specific components own their controls and
- * state; this component owns SDK loading, map layout, markers, paths and map events.
- */
+/** Shared renderer. Feature-specific components own controls and state; this component
+ * owns SDK loading, map layout, markers, paths and map events. */
 export function GoogleMapView({
   markers = [],
   path = [],
@@ -131,10 +129,7 @@ export function GoogleMapView({
             onClick={() => onMarkerSelect?.(marker)}
             onDragEnd={(event) => {
               if (event.latLng) {
-                onMarkerDragEnd?.(
-                  { lat: event.latLng.lat(), lng: event.latLng.lng() },
-                  marker,
-                );
+                onMarkerDragEnd?.({ lat: event.latLng.lat(), lng: event.latLng.lng() }, marker);
               }
             }}
           />
@@ -142,7 +137,7 @@ export function GoogleMapView({
         {selectedMarker && renderInfoWindow ? (
           <InfoWindowF
             position={selectedMarker.position}
-            onCloseClick={() => onMarkerSelect?.(selectedMarker)}
+            onCloseClick={() => onMarkerSelect?.(null)}
           >
             {renderInfoWindow(selectedMarker)}
           </InfoWindowF>
