@@ -5,65 +5,47 @@ import Link from 'next/link';
 import { Box, Button, MobileStepper, useMediaQuery, useTheme } from '@mui/material';
 import { GoogleMapView, type GoogleMapMarker } from '@/components/maps/GoogleMapView';
 import { toMapPosition, type MapPosition } from '@/lib/maps';
-import {
-  MAP_DEFAULT_ZOOM,
-  MAP_TRIP_HEIGHT,
-  MAP_TRIP_OPTIONS,
-  MAP_TRIP_WIDTH,
-} from '@/constants/maps';
+import { MAP_DEFAULT_ZOOM, MAP_TRIP_HEIGHT, MAP_TRIP_OPTIONS, MAP_TRIP_WIDTH } from '@/constants/maps';
 import { BREAKPOINTS, CARD_BORDER, CARD_SHADOW, maxWidthQuery, mediaDown } from '@/constants/ui';
 import type { TripPoint } from '@/types';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 interface TripMapSectionProps {
   points: TripPoint[];
-  /** Index of the currently selected point in `points` (0..n-1). */
+  /** -1 means all-points overview; 0..n-1 select an individual point. */
   selectedPointIndex: number;
   onPointChange: (index: number) => void;
 }
 
-/**
- * Keeps the trip-specific stepper and selection behavior together while using the shared
- * GoogleMapView for all actual map rendering.
- */
 export function TripMapSection({ points, selectedPointIndex, onPointChange }: TripMapSectionProps) {
   const theme = useTheme();
-  const focusPointId = points[selectedPointIndex]?.id ?? null;
+  const focusPointId = selectedPointIndex >= 0 ? points[selectedPointIndex]?.id ?? null : null;
   const stepperRef = useRef<HTMLDivElement | null>(null);
   const previousPointIndex = useRef(selectedPointIndex);
   const isSmallScreen = useMediaQuery(maxWidthQuery(BREAKPOINTS.tripDetails));
   const [selectedMarker, setSelectedMarker] = useState<GoogleMapMarker | null>(null);
 
   const markers = useMemo<GoogleMapMarker[]>(
-    () =>
-      points.flatMap((point, index) => {
-        const position = toMapPosition(point);
-        return position
-          ? [{ id: point.id, title: point.name, label: String(index + 1), position }]
-          : [];
-      }),
+    () => points.flatMap((point, index) => {
+      const position = toMapPosition(point);
+      return position ? [{ id: point.id, title: point.name, label: String(index + 1), position }] : [];
+    }),
     [points],
   );
   const path = useMemo<MapPosition[]>(() => markers.map((marker) => marker.position), [markers]);
+  const isOverview = selectedPointIndex < 0;
+  const hasNext = isOverview ? points.length > 0 : selectedPointIndex < points.length - 1;
+  const hasPrev = !isOverview;
 
-  const hasNext = selectedPointIndex < points.length - 1;
-  const hasPrev = selectedPointIndex > 0;
+  const handleMarkerSelect = useCallback((marker: GoogleMapMarker | null) => {
+    setSelectedMarker(marker);
+    if (marker) {
+      const index = points.findIndex((point) => point.id === Number(marker.id));
+      if (index >= 0) onPointChange(index);
+    }
+  }, [points, onPointChange]);
 
-  const handleMarkerSelect = useCallback(
-    (marker: GoogleMapMarker | null) => {
-      setSelectedMarker(marker);
-      if (marker) {
-        const index = points.findIndex((point) => point.id === Number(marker.id));
-        if (index >= 0) onPointChange(index);
-      }
-    },
-    [points, onPointChange],
-  );
-
-  // Legacy positioned the stepper just below the sticky nav on small screens when the
-  // selected point changed. Scroll only when the stepper is actually out of place, so
-  // repeated Next/Back at the right position does not move the page.
   useEffect(() => {
     const previous = previousPointIndex.current;
     previousPointIndex.current = selectedPointIndex;
@@ -80,46 +62,32 @@ export function TripMapSection({ points, selectedPointIndex, onPointChange }: Tr
   }, [isSmallScreen, selectedPointIndex]);
 
   return (
-    <Box
-      sx={{
-        boxSizing: 'content-box',
-        height: 'fit-content',
-        width: '100%',
-        maxWidth: 600,
-        border: CARD_BORDER,
-        boxShadow: CARD_SHADOW,
-        [mediaDown(BREAKPOINTS.smallPhone)]: {
-          display: 'flex',
-          flexDirection: 'column',
-          width: '94vw',
-        },
-      }}
-    >
-      {points.length > 1 ? (
+    <Box sx={{
+      boxSizing: 'content-box',
+      height: 'fit-content',
+      width: '100%',
+      maxWidth: 600,
+      border: CARD_BORDER,
+      boxShadow: CARD_SHADOW,
+      [mediaDown(BREAKPOINTS.smallPhone)]: { display: 'flex', flexDirection: 'column', width: '94vw' },
+    }}>
+      {points.length > 0 ? (
         <MobileStepper
           ref={stepperRef}
           variant="progress"
           steps={points.length}
           position="static"
-          activeStep={selectedPointIndex}
+          activeStep={isOverview ? 0 : selectedPointIndex + 1}
           sx={{ maxWidth: 600, flexGrow: 1, maxHeight: '25px' }}
           nextButton={
-            <Button
-              size="small"
-              onClick={() => onPointChange(selectedPointIndex + 1)}
-              disabled={!hasNext}
-            >
+            <Button size="small" onClick={() => onPointChange(isOverview ? 0 : selectedPointIndex + 1)} disabled={!hasNext}>
               Next
-              {theme.direction === 'rtl' ? <ChevronLeftIcon fontSize="inherit" /> : <ChevronRightIcon fontSize="inherit" />}
+              {theme.direction === 'rtl' ? <KeyboardArrowLeftIcon fontSize="inherit" /> : <KeyboardArrowRightIcon fontSize="inherit" />}
             </Button>
           }
           backButton={
-            <Button
-              size="small"
-              onClick={() => onPointChange(selectedPointIndex - 1)}
-              disabled={!hasPrev}
-            >
-              {theme.direction === 'rtl' ? <ChevronRightIcon fontSize="inherit" /> : <ChevronLeftIcon fontSize="inherit" />}
+            <Button size="small" onClick={() => onPointChange(selectedPointIndex <= 0 ? -1 : selectedPointIndex - 1)} disabled={!hasPrev}>
+              {theme.direction === 'rtl' ? <KeyboardArrowRightIcon fontSize="inherit" /> : <KeyboardArrowLeftIcon fontSize="inherit" />}
               Back
             </Button>
           }
@@ -133,6 +101,7 @@ export function TripMapSection({ points, selectedPointIndex, onPointChange }: Tr
           maxWidth={MAP_TRIP_WIDTH}
           options={MAP_TRIP_OPTIONS as google.maps.MapOptions}
           fitBounds
+          fitBoundsTrigger={isOverview ? 'overview' : selectedPointIndex}
           focusMarkerId={focusPointId}
           focusZoom={MAP_DEFAULT_ZOOM}
           selectedMarkerId={selectedMarker?.id ?? null}
