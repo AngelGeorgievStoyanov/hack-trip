@@ -28,6 +28,7 @@ import { buildTripUrl } from '@/lib/tripUrl';
 import { tripWriteSchema } from '@/validations/trips';
 import { TripSelectField } from './TripSelectField';
 import ImageUploadField from './ImageUploadField';
+import { TripLocationPicker } from '@/components/maps/TripLocationPicker';
 
 function preferredSelectValue(choices: SelectChoice[], preferred: string): string {
   const normalize = (value: string) => value.toLowerCase().replace(/[\\s_-]/g, '');
@@ -49,6 +50,8 @@ export function TripForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
 
   const {
     control,
@@ -115,7 +118,10 @@ export function TripForm() {
     setSubmitting(true);
     setServerError(null);
     try {
-      const created = await tripApi.createTrip(values);
+      const created = await tripApi.createTrip(values, {
+        lat: latitude === '' ? null : Number(latitude),
+        lng: longitude === '' ? null : Number(longitude),
+      });
       const createdDay =
         created.days.length === 1
           ? created.days[0]
@@ -162,6 +168,17 @@ export function TripForm() {
         },
       }}
     >
+      <Box sx={{ mx: '4px', mb: 1, minWidth: 0 }}>
+        <TripLocationPicker
+          latitude={latitude}
+          longitude={longitude}
+          onChange={(nextLatitude, nextLongitude) => {
+            setLatitude(nextLatitude);
+            setLongitude(nextLongitude);
+          }}
+        />
+      </Box>
+
       <Typography
         variant="h5"
         component="h1"
