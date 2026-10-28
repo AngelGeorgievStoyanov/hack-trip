@@ -89,7 +89,7 @@ export function GoogleMapView({
     selectedMarkerId == null ? undefined : markers.find((marker) => marker.id === selectedMarkerId);
 
   return (
-    <Box sx={{ display: 'flex', width: '100%', maxWidth, minWidth: 0 }}>
+    <Box sx={{ display: 'flex', width: '100%', maxWidth, minWidth: 0, height }}>
       <GoogleMap
         mapContainerStyle={{ width: '100%', height: typeof height === 'number' ? `${height}px` : height }}
         center={center}
