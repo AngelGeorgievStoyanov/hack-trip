@@ -13,6 +13,7 @@ export interface GoogleMapMarker {
   title?: string;
   label?: string;
   draggable?: boolean;
+  visible?: boolean;
 }
 
 interface GoogleMapViewProps {
@@ -125,6 +126,7 @@ export function GoogleMapView({
             title={marker.title}
             label={marker.label}
             draggable={marker.draggable}
+            visible={marker.visible}
             animation={google.maps.Animation.DROP}
             onClick={() => onMarkerSelect?.(marker)}
             onDragEnd={(event) => {
