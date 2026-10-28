@@ -153,7 +153,7 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
         ) : null}
       </Box>
 
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={1}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           {supportsAutocomplete ? (
             <Autocomplete
