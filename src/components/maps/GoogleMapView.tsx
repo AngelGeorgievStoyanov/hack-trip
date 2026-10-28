@@ -25,6 +25,7 @@ interface GoogleMapViewProps {
   maxWidth?: number | string;
   options?: google.maps.MapOptions;
   fitBounds?: boolean;
+  fitBoundsTrigger?: string | number;
   selectedMarkerId?: string | number | null;
   focusMarkerId?: string | number | null;
   focusZoom?: number;
@@ -48,6 +49,7 @@ export function GoogleMapView({
   maxWidth = 600,
   options = MAP_TRIP_OPTIONS as google.maps.MapOptions,
   fitBounds = false,
+  fitBoundsTrigger,
   selectedMarkerId = null,
   focusMarkerId = null,
   focusZoom,
@@ -65,17 +67,15 @@ export function GoogleMapView({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !fitBounds || markers.length === 0) return;
-
     if (markers.length === 1) {
       map.setCenter(markers[0].position);
       map.setZoom(zoom);
       return;
     }
-
     const bounds = new google.maps.LatLngBounds();
     markers.forEach((marker) => bounds.extend(marker.position));
     map.fitBounds(bounds);
-  }, [fitBounds, markers, zoom]);
+  }, [fitBounds, fitBoundsTrigger, markers, zoom]);
 
   useEffect(() => {
     if (!mapRef.current || fitBounds) return;
@@ -98,8 +98,7 @@ export function GoogleMapView({
     ) : null;
   }
 
-  const selectedMarker =
-    selectedMarkerId == null ? undefined : markers.find((marker) => marker.id === selectedMarkerId);
+  const selectedMarker = selectedMarkerId == null ? undefined : markers.find((marker) => marker.id === selectedMarkerId);
 
   return (
     <Box sx={{ display: 'flex', width: '100%', maxWidth, minWidth: 0, height }}>
@@ -149,17 +148,12 @@ export function GoogleMapView({
             animation={google.maps.Animation.DROP}
             onClick={() => onMarkerSelect?.(marker)}
             onDragEnd={(event) => {
-              if (event.latLng) {
-                onMarkerDragEnd?.({ lat: event.latLng.lat(), lng: event.latLng.lng() }, marker);
-              }
+              if (event.latLng) onMarkerDragEnd?.({ lat: event.latLng.lat(), lng: event.latLng.lng() }, marker);
             }}
           />
         ))}
         {selectedMarker && renderInfoWindow ? (
-          <InfoWindowF
-            position={selectedMarker.position}
-            onCloseClick={() => onMarkerSelect?.(null)}
-          >
+          <InfoWindowF position={selectedMarker.position} onCloseClick={() => onMarkerSelect?.(null)}>
             {renderInfoWindow(selectedMarker)}
           </InfoWindowF>
         ) : null}
