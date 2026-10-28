@@ -202,6 +202,11 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
           sx={{
             m: '2px',
             whiteSpace: 'nowrap',
+            '&.Mui-disabled': {
+              backgroundColor: 'primary.main',
+              color: '#fff',
+              opacity: 1,
+            },
             ':hover': { background: '#4daf30' },
           }}
         >
@@ -217,6 +222,11 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
             whiteSpace: 'nowrap',
             background: 'rgb(194, 194, 224)',
             color: 'black',
+            '&.Mui-disabled': {
+              backgroundColor: 'rgb(194, 194, 224)',
+              color: 'black',
+              opacity: 1,
+            },
             ':hover': {
               color: 'rgb(248, 245, 245)',
             },
