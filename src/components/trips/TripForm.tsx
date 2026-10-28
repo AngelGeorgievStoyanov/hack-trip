@@ -136,7 +136,18 @@ export function TripForm() {
   }
 
   return (
-    <Box
+    <>
+      <Box sx={{ width: 'min(100%, 620px)', mx: 'auto', px: { xs: 2, sm: 0 }, mb: 1 }}>
+        <TripLocationPicker
+          latitude={latitude}
+          longitude={longitude}
+          onChange={(nextLatitude, nextLongitude) => {
+            setLatitude(nextLatitude);
+            setLongitude(nextLongitude);
+          }}
+        />
+      </Box>
+      <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
       sx={{
@@ -168,17 +179,6 @@ export function TripForm() {
         },
       }}
     >
-      <Box sx={{ mx: '4px', mb: 1, minWidth: 0 }}>
-        <TripLocationPicker
-          latitude={latitude}
-          longitude={longitude}
-          onChange={(nextLatitude, nextLongitude) => {
-            setLatitude(nextLatitude);
-            setLongitude(nextLongitude);
-          }}
-        />
-      </Box>
-
       <Typography
         variant="h5"
         component="h1"
@@ -407,6 +407,7 @@ export function TripForm() {
           Back
         </Button>
       </Box>
-    </Box>
+      </Box>
+    </>
   );
 }
