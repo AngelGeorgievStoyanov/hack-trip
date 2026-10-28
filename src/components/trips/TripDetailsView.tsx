@@ -111,7 +111,7 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
 
   function handleSelectDay(dayNumber: number): void {
     setActiveDayNumber(dayNumber);
-    setSelectedPointIndex(0);
+    setSelectedPointIndex(-1);
     setTripCommentTarget(null);
     setPointCommentTarget(null);
     setTripGroupCommentsOpen(false);
