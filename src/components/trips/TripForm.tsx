@@ -137,7 +137,7 @@ export function TripForm() {
 
   return (
     <>
-      <Box sx={{ width: 'min(100%, 620px)', mx: 'auto', px: { xs: 2, sm: 0 }, mb: 1 }}>
+      <Box sx={{ width: 'min(100%, 600px)', mx: 'auto', px: { xs: 2, sm: 0 }, mb: 1 }}>
         <TripLocationPicker
           latitude={latitude}
           longitude={longitude}
