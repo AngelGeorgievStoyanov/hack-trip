@@ -15,6 +15,7 @@ interface TripMapProps {
 
 export function TripMap({ points, focusPointId, onMarkerSelect }: TripMapProps) {
   const [selected, setSelected] = useState<GoogleMapMarker | null>(null);
+  const [mapReady, setMapReady] = useState(false);
   const mapRef = useRef<google.maps.Map | null>(null);
 
   const markers = useMemo<GoogleMapMarker[]>(
@@ -30,13 +31,13 @@ export function TripMap({ points, focusPointId, onMarkerSelect }: TripMapProps) 
   const path = useMemo<MapPosition[]>(() => markers.map((marker) => marker.position), [markers]);
 
   useEffect(() => {
-    if (focusPointId == null || !mapRef.current) return;
+    if (focusPointId == null || !mapReady || !mapRef.current) return;
     const marker = markers.find((item) => item.id === focusPointId);
     if (marker) {
       mapRef.current.panTo(marker.position);
       mapRef.current.setZoom(MAP_DEFAULT_ZOOM);
     }
-  }, [focusPointId, markers]);
+  }, [focusPointId, mapReady, markers]);
 
   if (markers.length === 0) return null;
 
@@ -55,9 +56,11 @@ export function TripMap({ points, focusPointId, onMarkerSelect }: TripMapProps) 
       }}
       onLoad={(map) => {
         mapRef.current = map;
+        setMapReady(true);
       }}
       onUnmount={() => {
         mapRef.current = null;
+        setMapReady(false);
       }}
       renderInfoWindow={(marker) => <Link href={`/points/${marker.id}`}>{marker.title}</Link>}
     />
