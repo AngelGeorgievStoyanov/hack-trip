@@ -82,14 +82,17 @@ export const tripApi = {
     return data;
   },
 
-  createTrip: async (input: TripWriteInput): Promise<TripGroupResponse> => {
+  createTrip: async (
+    input: TripWriteInput,
+    coordinates: { lat: number | null; lng: number | null } = { lat: null, lng: null },
+  ): Promise<TripGroupResponse> => {
     const parsed = tripWriteSchema.parse(input);
     const { destination, ...fields } = parsed;
     const body = {
       ...fields,
       ...(destination ? { destination } : {}),
-      lat: null,
-      lng: null,
+      lat: coordinates.lat,
+      lng: coordinates.lng,
     };
     const { data } = await apiClient.post<TripGroupResponse>(TRIPS, body);
     return data;
