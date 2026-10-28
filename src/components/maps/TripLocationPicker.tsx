@@ -96,9 +96,9 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
 
   const addressField = (
     <TextField
-      size="small"
       fullWidth
-      label="Search location"
+      label="Search field"
+      type="search"
       value={address}
       onChange={(event) => setAddress(event.target.value)}
       onKeyDown={(event) => {
@@ -106,6 +106,29 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
           event.preventDefault();
           void handleSearch();
         }
+      }}
+      sx={{
+        backgroundColor: '#f2f1e58f',
+        borderRadius: '5px',
+        m: '2px',
+        '& .MuiInputBase-root': {
+          color: '#222',
+        },
+        '& .MuiInputLabel-root': {
+          color: '#333',
+        },
+        '& .MuiInputLabel-root.Mui-focused': {
+          color: 'primary.main',
+        },
+        '& .MuiOutlinedInput-notchedOutline': {
+          borderColor: 'rgba(0, 0, 0, 0.35)',
+        },
+        '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+          borderColor: 'rgba(0, 0, 0, 0.7)',
+        },
+        '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderColor: 'primary.main',
+        },
       }}
     />
   );
@@ -172,15 +195,34 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
         </Box>
         <Button
           type="button"
-          variant="outlined"
+          variant="contained"
           onClick={() => void handleSearch()}
           disabled={searching || !isLoaded || address.trim().length < MAP_SEARCH_MIN_LENGTH}
           startIcon={searching ? <CircularProgress size={14} /> : undefined}
+          sx={{
+            m: '2px',
+            whiteSpace: 'nowrap',
+            ':hover': { background: '#4daf30' },
+          }}
         >
           Search
         </Button>
-        <Button type="button" variant="outlined" onClick={handleClearMarker} disabled={!position}>
-          Remove marker
+        <Button
+          type="button"
+          variant="contained"
+          onClick={handleClearMarker}
+          disabled={!position}
+          sx={{
+            m: '2px',
+            whiteSpace: 'nowrap',
+            background: 'rgb(194, 194, 224)',
+            color: 'black',
+            ':hover': {
+              color: 'rgb(248, 245, 245)',
+            },
+          }}
+        >
+          Remove Marker
         </Button>
       </Stack>
 
