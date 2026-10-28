@@ -211,7 +211,7 @@ export function PointLocationPicker({
       >
         <GoogleMapView
           center={center}
-          zoom={MAP_DEFAULT_ZOOM}
+          zoom={MAP_POINT_PICKER_ZOOM}
           height="100%"
           maxWidth="100%"
           markers={position ? [{ id: 'selected-position', position, draggable: true }] : []}
