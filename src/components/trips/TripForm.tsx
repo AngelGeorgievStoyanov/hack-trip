@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { AddIcon, RemoveIcon } from '@/constants/icons';
 import { tripApi, type TripWriteInput } from '@/api/trips';
+import type { TripGroupResponse } from '@/types';
 import { SELECT_TYPE_KEYS } from '@/constants/config';
 import { useSelectChoices } from '@/hooks/useSelects';
 import { firstSelectValue, type SelectChoice } from '@/lib/selects';
@@ -50,6 +51,8 @@ export function TripForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [createdTrip, setCreatedTrip] = useState<TripGroupResponse | null>(null);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
@@ -114,7 +117,59 @@ export function TripForm() {
     setValue('dayNumber', next, { shouldDirty: true, shouldValidate: true });
   }
 
+  function navigateToCreatedTrip(created: TripGroupResponse): void {
+    const createdDay =
+      created.days.length === 1
+        ? created.days[0]
+        : created.days.find((day) => day.title === getValues('title').trim());
+    router.replace(buildTripUrl(created.id, createdDay?.dayNumber));
+    router.refresh();
+  }
+
+  async function uploadPendingImages(created: TripGroupResponse, files: File[]): Promise<void> {
+    const createdDay =
+      created.days.length === 1
+        ? created.days[0]
+        : created.days.find((day) => day.title === getValues('title').trim());
+
+    if (!createdDay) {
+      setServerError('The trip was created, but its day could not be identified for image upload. You can continue to Trip Details.');
+      return;
+    }
+
+    setUploadingImages(true);
+    setServerError(null);
+    const failedFiles: File[] = [];
+
+    try {
+      for (const file of files) {
+        try {
+          await tripApi.uploadDayImage(created.id, createdDay.id, file);
+        } catch {
+          failedFiles.push(file);
+        }
+      }
+
+      setSelectedFiles(failedFiles);
+      if (failedFiles.length > 0) {
+        setServerError(
+          `${failedFiles.length} image upload(s) failed. Retry the failed uploads or continue to Trip Details.`,
+        );
+        return;
+      }
+
+      navigateToCreatedTrip(created);
+    } finally {
+      setUploadingImages(false);
+    }
+  }
+
   async function onSubmit(values: TripWriteInput): Promise<void> {
+    if (createdTrip) {
+      await uploadPendingImages(createdTrip, selectedFiles);
+      return;
+    }
+
     setSubmitting(true);
     setServerError(null);
     try {
@@ -122,12 +177,15 @@ export function TripForm() {
         lat: latitude === '' ? null : Number(latitude),
         lng: longitude === '' ? null : Number(longitude),
       });
-      const createdDay =
-        created.days.length === 1
-          ? created.days[0]
-          : created.days.find((day) => day.title === values.title.trim());
-      router.replace(buildTripUrl(created.id, createdDay?.dayNumber));
-      router.refresh();
+      // Save the created trip before uploading so retries never create a duplicate trip.
+      setCreatedTrip(created);
+
+      if (selectedFiles.length === 0) {
+        navigateToCreatedTrip(created);
+        return;
+      }
+
+      await uploadPendingImages(created, selectedFiles);
     } catch (error) {
       setServerError(getGenericErrorMessage(error));
     } finally {
@@ -188,6 +246,38 @@ export function TripForm() {
       </Typography>
 
       {serverError ? <Alert severity="error">{serverError}</Alert> : null}
+
+      {createdTrip ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mx: '4px' }}>
+          <Alert severity={selectedFiles.length > 0 ? 'warning' : 'success'}>
+            {selectedFiles.length > 0
+              ? `Trip created. ${selectedFiles.length} image(s) still need to be uploaded.`
+              : 'Trip created successfully.'}
+          </Alert>
+          {selectedFiles.length > 0 ? (
+            <>
+              <ImageUploadField files={selectedFiles} setFiles={setSelectedFiles} />
+              <Button
+                type="button"
+                variant="contained"
+                disabled={uploadingImages || selectedFiles.length === 0}
+                startIcon={uploadingImages ? <CircularProgress size={18} /> : undefined}
+                onClick={() => void uploadPendingImages(createdTrip, selectedFiles)}
+              >
+                Retry failed image uploads
+              </Button>
+            </>
+          ) : null}
+          <Button
+            type="button"
+            variant="outlined"
+            disabled={uploadingImages}
+            onClick={() => navigateToCreatedTrip(createdTrip)}
+          >
+            Continue to Trip Details
+          </Button>
+        </Box>
+      ) : (<>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', m: '4px' }}>
         <TextField
@@ -407,6 +497,7 @@ export function TripForm() {
           Back
         </Button>
       </Box>
+      </>)}
       </Box>
     </>
   );
