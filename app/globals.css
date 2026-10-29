@@ -84,3 +84,102 @@ code {
   }
 }
 
+
+
+/*
+ * Trip Details responsive layout.
+ * Keep trip info/images on row one and map/selected point on row two while
+ * both rows fit. When the available content width is insufficient, stack the
+ * entire layout and put trip images before trip information.
+ */
+.trip-details-page-layout {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.trip-details-primary-row,
+.trip-details-map-row {
+  display: grid;
+  align-items: start;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+}
+
+.trip-details-primary-row {
+  grid-template-columns: minmax(320px, 450px) minmax(0, 1fr);
+}
+
+.trip-details-map-row {
+  grid-template-columns: minmax(0, 600px) minmax(0, 500px);
+}
+
+.trip-details-info,
+.trip-details-images,
+.trip-details-map,
+.trip-details-point-info,
+.trip-details-trip-group-comments,
+.trip-details-day-comments,
+.trip-details-point-comments {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+}
+
+.trip-details-info > div {
+  box-sizing: border-box;
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  margin: 20px 0;
+}
+
+.trip-details-map > div {
+  max-width: 100%;
+}
+
+.trip-details-point-info > section {
+  min-width: 0;
+}
+
+@container (max-width: 1120px) {
+  .trip-details-primary-row,
+  .trip-details-map-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .trip-details-primary-row > *,
+  .trip-details-map-row > * {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .trip-details-primary-row .trip-details-images {
+    order: -1;
+  }
+
+  .trip-details-info > div {
+    margin: 20px auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .trip-details-page-layout {
+    gap: 16px;
+  }
+
+  .trip-details-primary-row,
+  .trip-details-map-row {
+    gap: 16px;
+  }
+}
