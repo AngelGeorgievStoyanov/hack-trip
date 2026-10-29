@@ -20,8 +20,6 @@ import { resolveShareImage, shareWithFallback } from '@/lib/share';
 import { SocialConfigStatus } from './SocialConfigStatus';
 import { useLikeAnimation } from '@/components/social/LikeAnimation';
 import { CommentsToggle } from '@/components/comments/CommentsToggle';
-import { CommentsSection } from '@/components/comments/CommentsSection';
-import type { CommentTarget } from '@/api/comments';
 import type { SocialState } from '@/types';
 
 interface TripGroupSocialActionsProps {
@@ -85,7 +83,6 @@ export function TripGroupSocialActions({
     'tripGroup',
     'create',
   );
-  const tripGroupCommentTarget: CommentTarget = { type: 'tripGroup', tripGroupId };
 
   const isTripGroupCommentsOpen = open !== undefined ? open : internalTripGroupCommentsOpen;
 
@@ -209,15 +206,6 @@ export function TripGroupSocialActions({
         <span role="alert" style={{ color: 'red', fontSize: '0.75rem' }}>
           {reportActions.error}
         </span>
-      ) : null}
-      {isTripGroupCommentsOpen ? (
-        <Box sx={{ width: '100%', mt: 1 }}>
-          <CommentsSection
-            target={tripGroupCommentTarget}
-            initialCommentsCount={social.comments.count}
-            defaultFormOpen={social.comments.count === 0}
-          />
-        </Box>
       ) : null}
     </Box>
   );
