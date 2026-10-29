@@ -7,7 +7,6 @@ import type {
   ImageDto,
 } from '../../types';
 import {
-  dayCreateSchema,
   dayReorderSchema,
   dayUpdateSchema,
   tripListQuerySchema,
@@ -33,12 +32,6 @@ export interface TripListQuery {
   group?: string;
   transport?: string;
   sort?: TripSort;
-}
-
-export interface DayCreateInput {
-  dayNumber: number;
-  title?: string | null;
-  description?: string | null;
 }
 
 export interface DayUpdateInput {
@@ -104,8 +97,19 @@ export const tripApi = {
     await apiClient.delete(`${TRIPS}/${tripGroupId}`);
   },
 
-  createDay: async (tripGroupId: number, input: DayCreateInput): Promise<TripGroupResponse> => {
-    const body = dayCreateSchema.parse(input);
+  createDay: async (
+    tripGroupId: number,
+    input: TripWriteInput,
+    coordinates: { lat: number | null; lng: number | null } = { lat: null, lng: null },
+  ): Promise<TripGroupResponse> => {
+    const parsed = tripWriteSchema.parse(input);
+    const { destination, ...fields } = parsed;
+    const body = {
+      ...fields,
+      ...(destination ? { destination } : {}),
+      lat: coordinates.lat,
+      lng: coordinates.lng,
+    };
     const { data } = await apiClient.post<TripGroupResponse>(`${TRIPS}/${tripGroupId}/days`, body);
     return data;
   },
