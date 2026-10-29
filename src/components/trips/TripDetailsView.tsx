@@ -9,7 +9,6 @@ import { PointsSection } from '@/components/trips/PointsSection';
 import { DayImagesGallery } from '@/components/trips/DayImagesGallery';
 import { CommentsSection } from '@/components/comments/CommentsSection';
 import { Box, useMediaQuery } from '@mui/material';
-import { hasCoordinates } from '@/lib/maps';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import { useTripGroup } from '@/hooks/useTripGroup';
@@ -61,7 +60,6 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
 
   const group = tripGroup ?? trip;
   const day = group.days.find((current) => current.dayNumber === activeDayNumber) ?? group.days[0];
-  const pointsHaveCoords = day.points.some(hasCoordinates);
 
   const dayTarget: CommentTarget = { type: 'day', tripGroupId: group.id, tripId: day.id };
 
@@ -212,73 +210,45 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
         </Box>
       ) : null}
 
-      {pointsHaveCoords ? (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            width: '100%',
-            maxWidth: 1200,
-            padding: '50px 50px',
-            boxSizing: 'border-box',
-            gap: '24px',
-            [mediaDown(BREAKPOINTS.tripDetails)]: {
-              flexDirection: 'column',
-              alignItems: 'center',
-              padding: '0px',
-              gap: 0,
-            },
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          width: '100%',
+          maxWidth: 1200,
+          padding: '50px 50px',
+          boxSizing: 'border-box',
+          gap: '24px',
+          [mediaDown(BREAKPOINTS.tripDetails)]: {
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '0px',
+            gap: 0,
+          },
+        }}
+      >
+        <TripMapSection
+          key={`day-map-${day.id}`}
+          points={day.points}
+          dayPosition={day.lat != null && day.lng != null ? { lat: day.lat, lng: day.lng } : null}
+          selectedPointIndex={selectedPointIndex}
+          onPointChange={(index) => {
+            setSelectedPointIndex(index);
+            setPointCommentTarget(null);
           }}
-        >
-          <TripMapSection
-            key={`day-map-${day.id}`}
+        />
+
+        {day.points.length > 0 ? (
+          <PointsSection
             points={day.points}
             selectedPointIndex={selectedPointIndex}
-            onPointChange={(index) => {
-              setSelectedPointIndex(index);
-              setPointCommentTarget(null);
-            }}
+            pointCommentTarget={pointCommentTarget}
+            togglePointComments={togglePointComments}
           />
-
-          {day.points.length > 0 ? (
-            <PointsSection
-              points={day.points}
-              selectedPointIndex={selectedPointIndex}
-              pointCommentTarget={pointCommentTarget}
-              togglePointComments={togglePointComments}
-            />
-          ) : null}
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            width: '100%',
-            maxWidth: 1200,
-            padding: '50px 50px',
-            boxSizing: 'border-box',
-            [mediaDown(BREAKPOINTS.tripDetails)]: {
-              flexDirection: 'column',
-              alignItems: 'center',
-              padding: '0px',
-            },
-          }}
-        >
-          {day.points.length > 0 ? (
-            <PointsSection
-              points={day.points}
-              selectedPointIndex={selectedPointIndex}
-              pointCommentTarget={pointCommentTarget}
-              togglePointComments={togglePointComments}
-            />
-          ) : null}
-        </Box>
-      )}
+        ) : null}
+      </Box>
 
       {/* Point comment section: point and its images share one stable display location. */}
       {pointCommentTarget ? (
