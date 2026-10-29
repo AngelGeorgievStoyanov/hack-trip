@@ -805,7 +805,7 @@ The Frontend displays `code` and may use `name` as the hover/tooltip text. Curre
 The complete TripGroupDay response includes all public day-level data stored on the `trips` row that is part of the API contract: `id`, `dayNumber`, `permissions`, `title`, `description`, `countPeoples`, `destination`, `lat`, `lng`, `price`, `currency`, `transport`, `group`, `images`, `social`, `points`, `createdAt`, and `updatedAt`. `countEdited`, `tripGroupId`, and `ownerId` are not part of the public day response.
 
 Field semantics:
-* `countPeoples`: integer number of people for this day/trip row.
+* `countPeoples`: integer number of people for this day/trip row, constrained to `1..1000` on create and full edit.
 * `destination`: destination text stored on the day/trip row; nullable.
 * `lat`: day/trip-level latitude; nullable.
 * `lng`: day/trip-level longitude; nullable.
@@ -989,7 +989,7 @@ Creates a trip group and its first day row. All trip/day metadata in this reques
 * `description`: string or `null`; omitted, blank, or `null` is stored as `null`.
 * `price`: required JSON number in the range 0..1,000,000.
 * `transport`: required string resolving to a configured transport select option.
-* `countPeoples`: required positive JSON integer.
+* `countPeoples`: required true JSON integer in the range `1..1000`. Missing, `null`, string, boolean, fractional, zero, negative, or greater than `1000` -> `400 VALIDATION_ERROR`.
 * `typeOfPeople`: required string resolving to a configured group/type-of-people select option. The request field is `typeOfPeople`; the read response exposes the corresponding value under `group`.
 * `currency`: required string (1..3 characters) resolving to a configured currency select option.
 * `destination`: optional non-empty string; omitted means `null`. If supplied, surrounding whitespace is trimmed.
@@ -1019,10 +1019,15 @@ Comment and reply DTOs include `parentCommentId` (`null` for a regular comment) 
 
 ### 8.9 POST `/trips/:tripGroupId/days`
 
-* Auth: `requireAuthentication` + owner/moderator.
+Adds a complete day row to an existing trip group. The body uses the same full Trip write contract as `POST /trips`; only the group-creation behavior differs.
+
+* Auth: `requireAuthentication` + owner/moderator authorization for the existing trip group.
 * Path params (strict): `{ tripGroupId }` — the `trip_groups.id` of the trip the day is added to.
-* Body (strict): `{ dayNumber, title?, description? }`.
-* `dayNumber` is REQUIRED: the user-selected ordinal of the new day row (true JSON integer, 1..500). A missing, null, boolean, string, zero, negative, fractional or out-of-range value -> `400 VALIDATION_ERROR`. The server never assigns `max(dayNumber)+1` or any other default.
+* Body: the same strict JSON object and field rules as `POST /trips`: required `dayNumber`, `title`, `price`, `transport`, `countPeoples`, `typeOfPeople`, `currency`; optional `description`, `destination`, `lat`, `lng`. All validation limits, nullable/omitted-field behavior, and Dynamic Config select validation are identical to section 8.7.
+* `dayNumber` is the user-selected ordinal of the new day row (true JSON integer, 1..500). The server never assigns `max(dayNumber)+1` or any other default.
+* `tripGroupId` comes from the URL and the new row's `ownerId` comes from the authenticated actor; neither is accepted from the body.
+* The full Trip metadata is saved on the new day row. `transport`, `typeOfPeople`, price, people count, currency, destination, and coordinates are taken from this request and are not inherited from another day.
+* Image upload is separate; use `POST /trips/:tripGroupId/days/:tripId/images` after creation when uploading day images.
 * Response `201`: `TripGroupResponse` (same complete trip-group response structure as `GET /trips/:tripGroupId`).
 * Duplicate `dayNumber` within the same trip group -> `409 CONFLICT` ("Day N already exists in this trip."); the same number in a different trip group is allowed.
 
@@ -1048,7 +1053,7 @@ This is the full edit operation for one specific day row, not a partial patch.
 * `description`: required string or `null`; an empty string is normalized to `null`.
 * `price`: required JSON number in the range 0..1,000,000.
 * `transport`: required string resolving to a configured transport select option.
-* `countPeoples`: required positive JSON integer.
+* `countPeoples`: required true JSON integer in the range `1..1000`. Missing, `null`, string, boolean, fractional, zero, negative, or greater than `1000` -> `400 VALIDATION_ERROR`.
 * `typeOfPeople`: required string resolving to a configured group/type-of-people select option. The request field is `typeOfPeople`; the read response exposes the corresponding value under `group`.
 * `currency`: required string (1..3 characters) resolving to a configured currency select option.
 * `destination`: required string or `null`; an empty string is normalized to `null`.
@@ -1707,7 +1712,7 @@ All schemas are `.strict()` unless noted. Numeric fields in a JSON body must use
 
 | Schema                | Fields                                                                                         | Notes                                                                                                      |
 | --------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `tripWriteSchema`     | `dayNumber` (1..500), `title` (1..60), `description?` (nullable, <=2000), `price` (0..1,000,000), `transport`, `countPeoples` (positive integer), `typeOfPeople`, `currency` (1..3), `destination?`, `lat?` (-90..90 or null), `lng?` (-180..180 or null) | Strict full create body. `dayNumber`, `title`, `price`, `transport`, `countPeoples`, `typeOfPeople`, and `currency` are required; `description`, `destination`, `lat`, and `lng` are optional. Select values are resolved against active Dynamic Config options. |
+| `tripWriteSchema`     | `dayNumber` (1..500), `title` (1..60), `description?` (nullable, <=2000), `price` (0..1,000,000), `transport`, `countPeoples` (integer, 1..1000), `typeOfPeople`, `currency` (1..3), `destination?`, `lat?` (-90..90 or null), `lng?` (-180..180 or null) | Strict full create body. `dayNumber`, `title`, `price`, `transport`, `countPeoples`, `typeOfPeople`, and `currency` are required; `description`, `destination`, `lat`, and `lng` are optional. Select values are resolved against active Dynamic Config options. |
 | `tripEditSchema`      | `dayNumber`, `title`, `description`, `price`, `transport`, `countPeoples`, `typeOfPeople`, `currency`, `destination`, `lat`, `lng` | Strict full edit body: all 11 fields required; `description`/`destination` and coordinates may be null as documented in §8.11. Select values are resolved against active Dynamic Config options. |
 | `tripListQuerySchema` | `page?`, `limit?`, `search?`, `group?`, `transport?`, `sort?`                                  | `page` 1..10000; `limit` 1..100; `search` 1..200; `group`/`transport` 1..45; `sort` enum `newest`/`oldest` |
 | `dayCreateSchema`     | `dayNumber` (1..500, required), `title?` (optional/null, 1..60), `description?` (optional/null, <=2000) | `dayNumber` is required and persisted unchanged; the server never assigns `max(dayNumber)+1` |
