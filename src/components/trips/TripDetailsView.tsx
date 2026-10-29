@@ -165,101 +165,91 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
         </Box>
       </Box>
 
-      {/* Legacy trip row: the info panel sits beside the day image gallery
-          (space-around), stacked with the gallery above the panel below 900px,
-          exactly like the master `TripDetails` container. */}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: isMobile ? 'column-reverse' : 'row',
-          gap: isMobile ? 0 : 3,
-          width: '100%',
-          maxWidth: 1200,
-          justifyContent: 'space-around',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          mb: 3,
-        }}
-      >
-        {/* Trip Group social stays mounted here so Like/Favorite survive day switches. */}
-        <TripDetails
-          tripGroup={group}
-          day={day}
-          tripCommentTarget={tripCommentTarget}
-          toggleTripComments={toggleTripComments}
-        />
+      <Box className="trip-details-page-layout">
+        {/* First row: trip information and images. Container queries stack all sections
+            when the available content width cannot comfortably fit both rows. */}
+        <Box className="trip-details-primary-row">
+          <Box className="trip-details-info">
+            <TripDetails
+              tripGroup={group}
+              day={day}
+              tripCommentTarget={tripCommentTarget}
+              toggleTripComments={toggleTripComments}
+            />
+          </Box>
 
-        {/* Remounted per day so the lightbox index resets with the day content below. */}
-        <DayImagesGallery
-          key={day.dayNumber}
-          day={day}
-          tripCommentTarget={tripCommentTarget}
-          toggleTripComments={toggleTripComments}
-          tripCoverImage={tripRepresentativeImage(group)}
-        />
-      </Box>
-
-      {/* Trip comment section: day and its images share one stable display location. */}
-      {tripCommentTarget ? (
-        <Box sx={{ width: '100%' }}>
-          <CommentsSection
-            target={tripCommentTarget}
-            initialCommentsCount={commentCountForTarget(tripCommentTarget)}
-            defaultFormOpen={commentCountForTarget(tripCommentTarget) === 0}
-          />
+          <Box className="trip-details-images">
+            <DayImagesGallery
+              key={day.dayNumber}
+              day={day}
+              tripCommentTarget={tripCommentTarget}
+              toggleTripComments={toggleTripComments}
+              tripCoverImage={tripRepresentativeImage(group)}
+            />
+          </Box>
         </Box>
-      ) : null}
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          width: '100%',
-          maxWidth: 1200,
-          padding: '50px 50px',
-          boxSizing: 'border-box',
-          gap: '24px',
-          [mediaDown(BREAKPOINTS.tripDetails)]: {
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '0px',
-            gap: 0,
-          },
-        }}
-      >
-        <TripMapSection
-          key={`day-map-${day.id}`}
-          points={day.points}
-          dayPosition={day.lat != null && day.lng != null ? { lat: day.lat, lng: day.lng } : null}
-          selectedPointIndex={selectedPointIndex}
-          onPointChange={(index) => {
-            setSelectedPointIndex(index);
-            setPointCommentTarget(null);
-          }}
-        />
+        {/* Trip Group and day/image comments stay after the first row. */}
+        {tripGroupCommentsOpen ? (
+          <Box className="trip-details-trip-group-comments">
+            <CommentsSection
+              target={{ type: 'tripGroup', tripGroupId: group.id }}
+              initialCommentsCount={group.social.comments.count}
+              defaultFormOpen={group.social.comments.count === 0}
+            />
+          </Box>
+        ) : null}
 
-        {day.points.length > 0 ? (
-          <PointsSection
-            points={day.points}
-            selectedPointIndex={selectedPointIndex}
-            pointCommentTarget={pointCommentTarget}
-            togglePointComments={togglePointComments}
-          />
+        {tripCommentTarget ? (
+          <Box className="trip-details-day-comments">
+            <CommentsSection
+              target={tripCommentTarget}
+              initialCommentsCount={commentCountForTarget(tripCommentTarget)}
+              defaultFormOpen={commentCountForTarget(tripCommentTarget) === 0}
+            />
+          </Box>
+        ) : null}
+
+        {/* Second row: map and selected point details. */}
+        <Box className="trip-details-map-row">
+          <Box className="trip-details-map">
+            <TripMapSection
+              key={`day-map-${day.id}`}
+              points={day.points}
+              dayPosition={day.lat != null && day.lng != null ? { lat: day.lat, lng: day.lng } : null}
+              selectedPointIndex={selectedPointIndex}
+              onPointChange={(index) => {
+                setSelectedPointIndex(index);
+                setPointCommentTarget(null);
+              }}
+            />
+          </Box>
+
+          {day.points.length > 0 ? (
+            <Box className="trip-details-point-info">
+              <PointsSection
+                points={day.points}
+                selectedPointIndex={selectedPointIndex}
+                pointCommentTarget={pointCommentTarget}
+                togglePointComments={togglePointComments}
+              />
+            </Box>
+          ) : null}
+        </Box>
+
+        {/* Point comments remain at the bottom, after the point information. */}
+        {pointCommentTarget ? (
+          <Box className="trip-details-point-comments">
+            <CommentsSection
+              target={pointCommentTarget}
+              initialCommentsCount={commentCountForTarget(pointCommentTarget)}
+              defaultFormOpen={commentCountForTarget(pointCommentTarget) === 0}
+            />
+          </Box>
         ) : null}
       </Box>
 
-      {/* Point comment section: point and its images share one stable display location. */}
-      {pointCommentTarget ? (
-        <Box sx={{ width: '100%' }}>
-          <CommentsSection
-            target={pointCommentTarget}
-            initialCommentsCount={commentCountForTarget(pointCommentTarget)}
-            defaultFormOpen={commentCountForTarget(pointCommentTarget) === 0}
-          />
-        </Box>
-      ) : null}
+
 
 
     </>
