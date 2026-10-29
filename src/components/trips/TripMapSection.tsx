@@ -95,7 +95,7 @@ export function TripMapSection({ points, dayPosition, selectedPointIndex, onPoin
         <MobileStepper
           ref={stepperRef}
           variant="progress"
-          steps={navigablePointIndexes.length}
+          steps={navigablePointIndexes.length + 1}
           position="static"
           activeStep={isOverview ? 0 : currentNavigableIndex + 1}
           sx={{ maxWidth: 600, flexGrow: 1, maxHeight: '25px' }}
