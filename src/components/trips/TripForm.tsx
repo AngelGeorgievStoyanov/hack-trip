@@ -165,7 +165,7 @@ export function TripForm() {
     router.refresh();
   }
 
-  async function uploadPendingImages(created: TripGroupResponse, files: File[]): Promise<void> {
+  async function uploadPendingImages(created: TripGroupResponse, files: File[], stayOnForm = false): Promise<boolean> {
     const createdDay =
       created.days.length === 1
         ? created.days[0]
@@ -173,7 +173,7 @@ export function TripForm() {
 
     if (!createdDay) {
       setServerError('The trip was created, but its day could not be identified for image upload. You can continue to Trip Details.');
-      return;
+      return false;
     }
 
     setUploadingImages(true);
@@ -209,10 +209,12 @@ export function TripForm() {
         setServerError(
           `${failedFiles.length} image upload(s) failed. Retry the failed uploads or continue to Trip Details.`,
         );
-        return;
+        return false;
       }
 
+      if (stayOnForm) return true;
       navigateToCreatedTrip(created);
+      return true;
     } finally {
       setUploadingImages(false);
     }
@@ -245,8 +247,11 @@ export function TripForm() {
         setExistingTrip(created);
         const createdDay = created.days.find((day) => day.dayNumber === values.dayNumber);
         if (createdDay && selectedFiles.length > 0) {
-          await uploadPendingImages(created, selectedFiles);
-          if (selectedFiles.length > 0) return;
+          const uploadsSucceeded = await uploadPendingImages(created, selectedFiles, true);
+          if (!uploadsSucceeded) {
+            setCreatedTrip(created);
+            return;
+          }
         }
         const latestDay = [...created.days].sort((a, b) => b.dayNumber - a.dayNumber)[0];
         const nextDayNumber = latestDay ? latestDay.dayNumber + 1 : values.dayNumber + 1;
@@ -255,6 +260,11 @@ export function TripForm() {
         setValue('description', '');
         setValue('price', 0);
         setValue('countPeoples', latestDay?.countPeoples ?? values.countPeoples);
+        if (latestDay) {
+          setValue('transport', latestDay.transport.key, { shouldValidate: true });
+          setValue('typeOfPeople', latestDay.group.key, { shouldValidate: true });
+          setValue('currency', latestDay.currency?.code ?? '', { shouldValidate: true });
+        }
         setValue('destination', '');
         setLatitude('');
         setLongitude('');
