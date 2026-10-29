@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Alert,
   Box,
@@ -11,6 +11,7 @@ import {
   CircularProgress,
   TextField,
   Typography,
+  Snackbar,
 } from '@mui/material';
 import { AddIcon, RemoveIcon } from '@/constants/icons';
 import { tripApi, type TripWriteInput } from '@/api/trips';
@@ -49,7 +50,12 @@ function preferredSelectValue(choices: SelectChoice[], preferred: string): strin
  */
 export function TripForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlTripGroupId = Number(searchParams.get('tripGroupId')) || null;
   const [serverError, setServerError] = useState<string | null>(null);
+  const [dayNumberNotice, setDayNumberNotice] = useState<string | null>(null);
+  const [existingTrip, setExistingTrip] = useState<TripGroupResponse | null>(null);
+  const [submitIntent, setSubmitIntent] = useState<'add-trip' | 'add-next-day'>('add-trip');
   const [submitting, setSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [createdTrip, setCreatedTrip] = useState<TripGroupResponse | null>(null);
@@ -82,6 +88,38 @@ export function TripForm() {
   });
 
   const groupChoices = useSelectChoices(SELECT_TYPE_KEYS.group, watch('typeOfPeople'));
+  const currentDayNumber = watch('dayNumber');
+  const isDayNumberOccupied = Boolean(
+    existingTrip?.days.some((day) => day.dayNumber === currentDayNumber),
+  );
+
+  useEffect(() => {
+    if (!urlTripGroupId || !Number.isInteger(urlTripGroupId) || urlTripGroupId < 1) return;
+    let cancelled = false;
+    tripApi.getTrip(urlTripGroupId)
+      .then((trip) => {
+        if (cancelled) return;
+        setExistingTrip(trip);
+        const latestDay = [...trip.days].sort((a, b) => b.dayNumber - a.dayNumber)[0];
+        if (latestDay) {
+          setValue('transport', latestDay.transport.key, { shouldValidate: true });
+          setValue('typeOfPeople', latestDay.group.key, { shouldValidate: true });
+          setValue('currency', latestDay.currency?.code ?? '', { shouldValidate: true });
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) setServerError(getGenericErrorMessage(error));
+      });
+    return () => { cancelled = true; };
+  }, [urlTripGroupId, setValue]);
+
+  useEffect(() => {
+    if (isDayNumberOccupied) {
+      setDayNumberNotice(`Day ${currentDayNumber} already exists!`);
+    } else {
+      setDayNumberNotice(null);
+    }
+  }, [currentDayNumber, isDayNumberOccupied]);
   const transportChoices = useSelectChoices(SELECT_TYPE_KEYS.transport, watch('transport'));
   const currencyChoices = useSelectChoices(SELECT_TYPE_KEYS.currency, watch('currency'));
 
@@ -181,6 +219,11 @@ export function TripForm() {
   }
 
   async function onSubmit(values: TripWriteInput): Promise<void> {
+    if (isDayNumberOccupied) {
+      setDayNumberNotice(`Day ${values.dayNumber} already exists!`);
+      return;
+    }
+
     if (createdTrip) {
       await uploadPendingImages(createdTrip, selectedFiles);
       return;
@@ -189,18 +232,47 @@ export function TripForm() {
     setSubmitting(true);
     setServerError(null);
     try {
-      const created = await tripApi.createTrip(values, {
+      const tripGroupId = urlTripGroupId ?? existingTrip?.id ?? null;
+      const coordinates = {
         lat: latitude === '' ? null : Number(latitude),
         lng: longitude === '' ? null : Number(longitude),
-      });
-      // Save the created trip before uploading so retries never create a duplicate trip.
-      setCreatedTrip(created);
+      };
+      const created = tripGroupId
+        ? await tripApi.createDay(tripGroupId, values, coordinates)
+        : await tripApi.createTrip(values, coordinates);
 
+      if (submitIntent === 'add-next-day') {
+        setExistingTrip(created);
+        const createdDay = created.days.find((day) => day.dayNumber === values.dayNumber);
+        if (createdDay && selectedFiles.length > 0) {
+          await uploadPendingImages(created, selectedFiles);
+          if (selectedFiles.length > 0) return;
+        }
+        const latestDay = [...created.days].sort((a, b) => b.dayNumber - a.dayNumber)[0];
+        const nextDayNumber = latestDay ? latestDay.dayNumber + 1 : values.dayNumber + 1;
+        setValue('dayNumber', nextDayNumber, { shouldValidate: true });
+        setValue('title', '');
+        setValue('description', '');
+        setValue('price', 0);
+        setValue('countPeoples', latestDay?.countPeoples ?? values.countPeoples);
+        setValue('destination', '');
+        setLatitude('');
+        setLongitude('');
+        setSelectedFiles([]);
+        setCreatedTrip(null);
+        setServerError(null);
+        if (!urlTripGroupId) router.replace(`/trips/create?tripGroupId=${created.id}`);
+        setSubmitIntent('add-trip');
+        setExistingTrip(created);
+        return;
+      }
+
+      // Keep the created response for safe image retry; navigate only after uploads finish.
+      setCreatedTrip(created);
       if (selectedFiles.length === 0) {
         navigateToCreatedTrip(created);
         return;
       }
-
       await uploadPendingImages(created, selectedFiles);
     } catch (error) {
       setServerError(getGenericErrorMessage(error));
@@ -262,6 +334,12 @@ export function TripForm() {
       </Typography>
 
       {serverError ? <Alert severity="error">{serverError}</Alert> : null}
+      <Snackbar
+        open={Boolean(dayNumberNotice)}
+        autoHideDuration={5000}
+        onClose={() => setDayNumberNotice(null)}
+        message={dayNumberNotice ?? ''}
+      />
 
       {createdTrip ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mx: '4px' }}>
@@ -481,7 +559,7 @@ export function TripForm() {
         <Button
           type="submit"
           variant="contained"
-          disabled={submitting || !isValid}
+          disabled={submitting || !isValid || isDayNumberOccupied}
           startIcon={submitting ? <CircularProgress size={18} /> : undefined}
           sx={{ '&:hover': { backgroundColor: '#4daf30' } }}
         >
@@ -490,6 +568,11 @@ export function TripForm() {
         <Button
           type="button"
           variant="contained"
+          disabled={submitting || !isValid || isDayNumberOccupied}
+          onClick={() => {
+            setSubmitIntent('add-next-day');
+            void handleSubmit(onSubmit)();
+          }}
           sx={{ '&:hover': { backgroundColor: '#4daf30' } }}
         >
           Add next day trip
