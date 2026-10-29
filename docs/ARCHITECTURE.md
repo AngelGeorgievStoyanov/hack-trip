@@ -2186,3 +2186,14 @@ Viewer-specific trip, point, comment, and reply query keys include an opaque aut
 Replies use the dedicated /comments/:commentId/replies collection and /replies/:replyId update/delete routes. They retain the parent comment's target and are displayed one level deep. Like, favorite and report mutations on comments or replies use the comment target id. A user's report is withdrawn with DELETE /reports?targetType=comment&targetId=...; report ids are only used by administrative report removal.
 
 Feature API modules validate query/body inputs and preserve backend DTO field names. The shared Axios error normalizer retains the backend error code and HTTP status so feature UI can display contract-specific outcomes.
+
+
+## 10.3 Trip creation form implementation rules
+
+The Trip creation form reads an optional `tripGroupId` from the `/trips/create?tripGroupId=<id>` query parameter. The form loads that complete group through `tripApi.getTrip` and uses the returned `days[]` as the source of truth for occupied day numbers and the latest saved select values.
+
+- `Add Trip`: submit the current day with `POST /trips` when no group ID exists, or `POST /trips/:tripGroupId/days` when one exists. After successful image handling, navigate to Trip Details and select the created day.
+- `Add Next Day Trip`: use the same endpoint decision, keep the user on the create form, retain the group ID in the URL, and prepare the next number as the highest returned `dayNumber + 1`. Reset day-specific text, price, destination, coordinates and image selections; retain the latest saved count and select values where the corresponding backend options still exist.
+- Before submission, compare the selected `dayNumber` against the group's actual `days[]`. If occupied, show the legacy-style error Snackbar (for example, `Day 3 already exists!`) and disable both submit actions. A free number re-enables submission. The backend unique constraint remains authoritative for concurrent requests.
+- Both create operations use the full `tripWriteSchema` payload. Coordinates are included as `lat` and `lng`; day images are uploaded through the separate day-image endpoint after the day exists.
+- Do not infer missing days from the highest number except when calculating the next day for the form. Existing groups may legitimately contain gaps.
