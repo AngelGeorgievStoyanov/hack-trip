@@ -160,7 +160,7 @@ export function TripForm() {
     const createdDay =
       created.days.length === 1
         ? created.days[0]
-        : created.days.find((day) => day.title === getValues('title').trim());
+        : created.days.find((day) => day.dayNumber === getValues('dayNumber'));
     router.replace(buildTripUrl(created.id, createdDay?.dayNumber));
     router.refresh();
   }
@@ -169,7 +169,7 @@ export function TripForm() {
     const createdDay =
       created.days.length === 1
         ? created.days[0]
-        : created.days.find((day) => day.title === getValues('title').trim());
+        : created.days.find((day) => day.dayNumber === getValues('dayNumber'));
 
     if (!createdDay) {
       setServerError('The trip was created, but its day could not be identified for image upload. You can continue to Trip Details.');
