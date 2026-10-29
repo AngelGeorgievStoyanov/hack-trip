@@ -89,6 +89,7 @@ export function TripForm() {
 
   const groupChoices = useSelectChoices(SELECT_TYPE_KEYS.group, watch('typeOfPeople'));
   const currentDayNumber = watch('dayNumber');
+  const isLoadingExistingTrip = Boolean(urlTripGroupId && !existingTrip);
   const isDayNumberOccupied = Boolean(
     existingTrip?.days.some((day) => day.dayNumber === currentDayNumber),
   );
@@ -221,6 +222,7 @@ export function TripForm() {
   }
 
   async function onSubmit(values: TripWriteInput): Promise<void> {
+    if (isLoadingExistingTrip) return;
     if (isDayNumberOccupied) {
       setDayNumberNotice(`Day ${values.dayNumber} already exists!`);
       return;
@@ -569,7 +571,7 @@ export function TripForm() {
         <Button
           type="submit"
           variant="contained"
-          disabled={submitting || !isValid || isDayNumberOccupied}
+          disabled={submitting || isLoadingExistingTrip || !isValid || isDayNumberOccupied}
           startIcon={submitting ? <CircularProgress size={18} /> : undefined}
           sx={{ '&:hover': { backgroundColor: '#4daf30' } }}
         >
@@ -578,7 +580,7 @@ export function TripForm() {
         <Button
           type="button"
           variant="contained"
-          disabled={submitting || !isValid || isDayNumberOccupied}
+          disabled={submitting || isLoadingExistingTrip || !isValid || isDayNumberOccupied}
           onClick={() => {
             setSubmitIntent('add-next-day');
             void handleSubmit(onSubmit)();
