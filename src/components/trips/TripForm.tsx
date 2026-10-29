@@ -55,7 +55,6 @@ export function TripForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [dayNumberNotice, setDayNumberNotice] = useState<string | null>(null);
   const [existingTrip, setExistingTrip] = useState<TripGroupResponse | null>(null);
-  const [submitIntent, setSubmitIntent] = useState<'add-trip' | 'add-next-day'>('add-trip');
   const [submitting, setSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [createdTrip, setCreatedTrip] = useState<TripGroupResponse | null>(null);
@@ -221,7 +220,10 @@ export function TripForm() {
     }
   }
 
-  async function onSubmit(values: TripWriteInput): Promise<void> {
+  async function onSubmit(
+    values: TripWriteInput,
+    intent: 'add-trip' | 'add-next-day' = 'add-trip',
+  ): Promise<void> {
     if (isLoadingExistingTrip) return;
     if (isDayNumberOccupied) {
       setDayNumberNotice(`Day ${values.dayNumber} already exists!`);
@@ -245,7 +247,7 @@ export function TripForm() {
         ? await tripApi.createDay(tripGroupId, values, coordinates)
         : await tripApi.createTrip(values, coordinates);
 
-      if (submitIntent === 'add-next-day') {
+      if (intent === 'add-next-day') {
         setExistingTrip(created);
         const createdDay = created.days.find((day) => day.dayNumber === values.dayNumber);
         if (createdDay && selectedFiles.length > 0) {
@@ -274,7 +276,6 @@ export function TripForm() {
         setCreatedTrip(null);
         setServerError(null);
         if (!urlTripGroupId) router.replace(`/trips/create?tripGroupId=${created.id}`);
-        setSubmitIntent('add-trip');
         setExistingTrip(created);
         return;
       }
@@ -307,7 +308,7 @@ export function TripForm() {
       </Box>
       <Box
         component="form"
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit((values) => onSubmit(values, 'add-trip'))}
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -582,8 +583,7 @@ export function TripForm() {
           variant="contained"
           disabled={submitting || isLoadingExistingTrip || !isValid || isDayNumberOccupied}
           onClick={() => {
-            setSubmitIntent('add-next-day');
-            void handleSubmit(onSubmit)();
+            void handleSubmit((values) => onSubmit(values, 'add-next-day'))();
           }}
           sx={{ '&:hover': { backgroundColor: '#4daf30' } }}
         >
