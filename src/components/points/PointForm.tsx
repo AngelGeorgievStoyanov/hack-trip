@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import {
@@ -14,7 +14,6 @@ import {
 import { pointApi } from '@/api/points';
 import { AppImage } from '@/components/images/AppImage';
 import ImageUploadField from '@/components/images/ImageUploadField';
-import { PointLocationPicker } from '@/components/maps/PointLocationPicker';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
@@ -26,6 +25,11 @@ interface PointFormProps {
   tripGroupId: number;
   tripId: number;
   point?: TripPoint;
+  latitude: string;
+  longitude: string;
+  onLocationChange: (latitude: string, longitude: string) => void;
+  onFindInMap: () => void;
+  onBack: () => void;
   onDone: () => void;
 }
 
@@ -52,7 +56,7 @@ const legacyButtonSx = {
   '&:hover': { backgroundColor: '#4daf30' },
 };
 
-export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps) {
+export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onLocationChange, onFindInMap, onBack, onDone }: PointFormProps) {
   const queryClient = useQueryClient();
   const { confirm } = useConfirm();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -61,7 +65,6 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
   const [createdPointId, setCreatedPointId] = useState<number | null>(null);
   const [existingImages, setExistingImages] = useState(point?.images ?? []);
   const [uploadedImageCount, setUploadedImageCount] = useState(0);
-  const [findInMapTrigger, setFindInMapTrigger] = useState(0);
   const isEdit = point !== undefined;
 
   const {
@@ -84,6 +87,11 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
 
   const lat = watch('lat');
   const lng = watch('lng');
+
+  useEffect(() => {
+    setValue('lat', latitude, { shouldValidate: true });
+    setValue('lng', longitude, { shouldValidate: true });
+  }, [latitude, longitude, setValue]);
 
   function updateTripCache(updatedPoints: TripPoint[]): void {
     queryClient.setQueryData<TripGroupResponse>(['trip', tripGroupId], (current) =>
@@ -159,6 +167,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         setUploadedImageCount(0);
         setFiles([]);
         reset({ name: '', description: '', lat: '', lng: '' });
+        onLocationChange('', '');
       }
       onDone();
     } catch (error) {
@@ -196,20 +205,8 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
       }}
     >
-      <Box sx={{ width: '100%' }}>
-        <PointLocationPicker
-          latitude={lat}
-          longitude={lng}
-          findInMapTrigger={findInMapTrigger}
-          onChange={(nextLatitude, nextLongitude) => {
-            setValue('lat', nextLatitude, { shouldValidate: true });
-            setValue('lng', nextLongitude, { shouldValidate: true });
-          }}
-        />
-      </Box>
-
-      <Typography variant="h5" component="h2" sx={{ my: 1.25, textTransform: 'uppercase' }}>
-        {isEdit ? 'Edit point' : 'Add point'}
+      <Typography gutterBottom variant="h5" sx={{ margin: '10px auto' }}>
+        {isEdit ? 'EDIT POINT' : 'ADD POINT'}
       </Typography>
       {serverError ? <Alert severity="error" sx={{ width: '100%' }}>{serverError}</Alert> : null}
 
@@ -287,41 +284,56 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
           justifyContent: 'center',
           width: '100%',
           mt: 1,
-          '@media (max-width:610px)': { flexDirection: 'column' },
+          '@media (max-width:610px)': { flexDirection: 'column', alignItems: 'center' },
         }}
       >
         <Button
           type="submit"
           variant="contained"
-          disabled={submitting || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
+          disabled={submitting || !latitude || !longitude || (!isEdit && (!watch('name') || !watch('name').trim())) || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
           startIcon={submitting ? <CircularProgress size={16} /> : undefined}
           sx={legacyButtonSx}
         >
           {isEdit ? 'SAVE POINT' : createdPointId ? 'RETRY IMAGE UPLOAD' : 'ADD POINT'}
         </Button>
-        <Button
-          type="button"
-          variant="contained"
-          onClick={() => {
-            if (!isEdit) {
-              setCreatedPointId(null);
-              setUploadedImageCount(0);
-              setFiles([]);
-              reset({ name: '', description: '', lat: '', lng: '' });
-            }
-            onDone();
-          }}
-          disabled={submitting}
-          sx={{
-            ...legacyButtonSx,
-            backgroundColor: 'rgb(194, 194, 224)',
-            color: 'black',
-            '&:hover': { backgroundColor: 'rgb(170, 170, 210)', color: 'black' },
-          }}
-        >
-          {isEdit ? 'CANCEL' : 'BACK'}
-        </Button>
+        {!isEdit ? (
+          <Button
+            type="button"
+            variant="contained"
+            onClick={() => {
+              window.location.assign(`/trips/create?tripGroupId=${tripGroupId}`);
+            }}
+            disabled={submitting}
+            sx={legacyButtonSx}
+          >
+            ADD NEXT DAY TRIP
+          </Button>
+        ) : null}
       </Box>
+      <Button
+        type="button"
+        variant="contained"
+        onClick={() => {
+          if (!isEdit) {
+            setCreatedPointId(null);
+            setUploadedImageCount(0);
+            setFiles([]);
+            reset({ name: '', description: '', lat: '', lng: '' });
+            onLocationChange('', '');
+          }
+          if (isEdit) onDone();
+          else onBack();
+        }}
+        disabled={submitting}
+        sx={{
+          ...legacyButtonSx,
+          backgroundColor: 'rgb(194, 194, 224)',
+          color: 'black',
+          '&:hover': { backgroundColor: 'rgb(170, 170, 210)', color: 'black' },
+        }}
+      >
+        {isEdit ? 'CANCEL' : 'BACK'}
+      </Button>
     </Box>
   );
 }
