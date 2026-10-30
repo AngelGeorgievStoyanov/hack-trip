@@ -195,6 +195,17 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
       }}
     >
+      <Box sx={{ width: '100%' }}>
+        <PointLocationPicker
+          latitude={lat}
+          longitude={lng}
+          onChange={(nextLatitude, nextLongitude) => {
+            setValue('lat', nextLatitude, { shouldValidate: true });
+            setValue('lng', nextLongitude, { shouldValidate: true });
+          }}
+        />
+      </Box>
+
       <Typography variant="h5" component="h2" sx={{ my: 1.25, textTransform: 'uppercase' }}>
         {isEdit ? 'Edit point' : 'Add point'}
       </Typography>
@@ -210,17 +221,6 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         error={!!errors.name}
         helperText={errors.name?.message}
       />
-
-      <Box sx={{ width: '100%' }}>
-        <PointLocationPicker
-          latitude={lat}
-          longitude={lng}
-          onChange={(nextLatitude, nextLongitude) => {
-            setValue('lat', nextLatitude, { shouldValidate: true });
-            setValue('lng', nextLongitude, { shouldValidate: true });
-          }}
-        />
-      </Box>
 
       <TextField
         label="DESCRIPTION"
