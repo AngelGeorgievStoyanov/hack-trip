@@ -198,6 +198,14 @@ export function PointLocationPicker({
         <Button
           type="button"
           variant="outlined"
+          onClick={handleFindInMap}
+          disabled={!position || !isLoaded}
+        >
+          Find in Map
+        </Button>
+        <Button
+          type="button"
+          variant="outlined"
           onClick={handleUseMyLocation}
           disabled={locating}
           startIcon={locating ? <CircularProgress size={14} /> : undefined}
