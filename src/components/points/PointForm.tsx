@@ -247,7 +247,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
 
       <Box>
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
-          Add images ({existingImages.length + files.length}/{MAX_IMAGES_PER_ENTITY})
+          Add images ({existingImages.length + uploadedImageCount + files.length}/{MAX_IMAGES_PER_ENTITY})
         </Typography>
         <ImageUploadField
           files={files}
