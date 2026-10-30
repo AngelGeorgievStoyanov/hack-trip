@@ -83,7 +83,7 @@ async function compressImage(file: File): Promise<File> {
       throw new Error('Image could not be reduced below 2 MB');
     }
 
-    const nameWithoutExtension = file.name.replace(/\\.[^/.]+$/, '');
+    const nameWithoutExtension = file.name.replace(/\.[^/.]+$/, '');
     return new File([blob], `${nameWithoutExtension}.jpg`, {
       type: 'image/jpeg',
       lastModified: file.lastModified,
