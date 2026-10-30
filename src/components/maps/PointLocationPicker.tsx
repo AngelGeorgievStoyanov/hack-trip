@@ -195,4 +195,7 @@ export function PointLocationPicker({
       <Typography variant="caption">
         Click the map or drag the marker to set the coordinates, or type latitude and longitude
         directly in the fields above.
-      </Typography>}
+      </Typography>
+    </Stack>
+  );
+}
