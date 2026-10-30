@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Alert,
   Box,
-  Button,
   CircularProgress,
   Paper,
 } from '@mui/material';
@@ -140,17 +139,19 @@ export function CreatePointPage() {
 
     if (currentIndex < 0 || targetIndex < 0 || targetIndex >= orderedPoints.length) return;
 
-    const nextPoints = [...orderedPoints];
-    [nextPoints[currentIndex], nextPoints[targetIndex]] = [
-      nextPoints[targetIndex],
-      nextPoints[currentIndex],
-    ];
+    const pointIds = orderedPoints.map((item) => item.id);
+    const currentPointId = pointIds[currentIndex];
+    const targetPointId = pointIds[targetIndex];
+    if (currentPointId === undefined || targetPointId === undefined) return;
+
+    pointIds[currentIndex] = targetPointId;
+    pointIds[targetIndex] = currentPointId;
 
     setSaving(true);
     setError(null);
     try {
       await pointApi.reorderPoints(tripId, {
-        pointIds: nextPoints.map((item) => item.id),
+        pointIds,
       });
       await refreshTrip();
     } catch (requestError) {
