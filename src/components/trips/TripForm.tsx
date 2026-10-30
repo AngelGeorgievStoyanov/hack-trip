@@ -29,7 +29,7 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { tripWriteSchema } from '@/validations/trips';
 import { TripSelectField } from './TripSelectField';
-import ImageUploadField from './ImageUploadField';
+import ImageUploadField from '@/components/images/ImageUploadField';
 import { TripLocationPicker } from '@/components/maps/TripLocationPicker';
 import { MAX_CONCURRENT_IMAGE_UPLOADS } from '@/constants/images';
 
