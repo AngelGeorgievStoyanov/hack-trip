@@ -10,7 +10,6 @@ import {
   CircularProgress,
   Snackbar,
   Stack,
-  TextField,
 } from '@mui/material';
 import { useGoogleMapsLoader } from '@/hooks/useGoogleMapsLoader';
 import {
@@ -26,11 +25,13 @@ import {
   sameMapPosition,
   type MapPosition,
 } from '@/lib/maps';
+import { getPointNameFromMapAddress } from '@/lib/pointName';
 
 interface PointLocationPickerProps {
   latitude: string;
   longitude: string;
   onChange: (latitude: string, longitude: string) => void;
+  onAddressSelect?: (name: string) => void;
   findInMapTrigger?: number;
 }
 
@@ -38,6 +39,7 @@ export function PointLocationPicker({
   latitude,
   longitude,
   onChange,
+  onAddressSelect,
   findInMapTrigger = 0,
 }: PointLocationPickerProps) {
   const { isLoaded } = useGoogleMapsLoader();
@@ -76,8 +78,9 @@ export function PointLocationPicker({
     onChange(formatCoordinate(next.lat), formatCoordinate(next.lng));
   }
 
-  function handleAddressSelected(nextPosition: MapPosition): void {
+  function handleAddressSelected(nextPosition: MapPosition, selectedAddress: string): void {
     emitPosition(nextPosition);
+    onAddressSelect?.(getPointNameFromMapAddress(selectedAddress));
     setNotice(null);
     mapRef.current?.setZoom(MAP_GEOCODED_ZOOM);
   }
@@ -158,6 +161,12 @@ export function PointLocationPicker({
           onChange={setAddress}
           onLocationSelect={handleAddressSelected}
           label="Search field"
+          inputSx={{
+            backgroundColor: '#f2f1e58f',
+            borderRadius: '5px',
+            m: '2px',
+            maxWidth: '190px',
+          }}
           size="small"
           buttonVariant="outlined"
           containerSx={{ flex: '1 1 190px', minWidth: 0, maxWidth: 190 }}
