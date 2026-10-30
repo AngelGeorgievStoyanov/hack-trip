@@ -10,7 +10,6 @@ import {
   CircularProgress,
   Stack,
   TextField,
-  Typography,
 } from '@mui/material';
 import { useGoogleMapsLoader } from '@/hooks/useGoogleMapsLoader';
 import {
@@ -136,25 +135,22 @@ export function PointLocationPicker({
           onMapClick={emitPosition}
           onMarkerDragEnd={(nextPosition) => emitPosition(nextPosition)}
         />
-        {!position ? (
-          <Typography
-            variant="caption"
-            sx={{
-              position: 'absolute',
-              bottom: 8,
-              left: 8,
-              bgcolor: 'rgba(255, 255, 255, 0.92)',
-              px: 1,
-              py: 0.5,
-              borderRadius: 1,
-            }}
-          >
-            Click the map to place the point.
-          </Typography>
-        ) : null}
       </Box>
 
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+          m: '10px',
+          '@media (max-width:900px)': {
+            flexDirection: 'column',
+            alignItems: 'center',
+          },
+        }}
+      >
         <AddressAutocomplete
           value={address}
           isLoaded={isLoaded}
@@ -163,7 +159,7 @@ export function PointLocationPicker({
           label="Search field"
           size="small"
           buttonVariant="outlined"
-          containerSx={{ flex: '1 1 220px', minWidth: 0 }}
+          containerSx={{ flex: '1 1 190px', minWidth: 0, maxWidth: 190 }}
         />
         <Button
           type="button"
@@ -180,7 +176,7 @@ export function PointLocationPicker({
           disabled={locating}
           startIcon={locating ? <CircularProgress size={14} /> : undefined}
         >
-          GPS position
+          Gps position
         </Button>
 
         {notice ? (
@@ -190,10 +186,6 @@ export function PointLocationPicker({
         ) : null}
       </Stack>
 
-      <Typography variant="caption">
-        Click the map or drag the marker to set the coordinates, or type latitude and longitude
-        directly in the fields above.
-      </Typography>
     </Stack>
   );
 }
