@@ -25,7 +25,7 @@ interface AddressAutocompleteProps {
   textFieldProps?: Omit<TextFieldProps, 'value' | 'onChange' | 'type'>;
 }
 
-const PLACE_FIELDS = ['geometry.location', 'formatted_address'];
+const PLACE_FIELDS = ['geometry.location', 'formatted_address', 'name'];
 
 export function AddressAutocomplete({
   value,
@@ -89,11 +89,11 @@ export function AddressAutocomplete({
       return;
     }
 
-    const formattedAddress = place.formatted_address ?? value;
-    onChange(formattedAddress);
+    const selectedName = place.name ?? place.formatted_address ?? value;
+    onChange(selectedName);
     onLocationSelect(
       { lat: location.lat(), lng: location.lng() },
-      formattedAddress,
+      selectedName,
     );
     setNotice(null);
   }
