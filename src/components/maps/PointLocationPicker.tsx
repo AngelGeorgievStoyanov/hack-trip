@@ -112,6 +112,19 @@ export function PointLocationPicker({
     void handleSearch();
   }
 
+  function handleFindInMap(): void {
+    if (!position) return;
+    setCenter(position);
+    mapRef.current?.panTo(position);
+    mapRef.current?.setZoom(MAP_GEOCODED_ZOOM);
+  }
+
+  function handleClearLocation(): void {
+    emittedRef.current = null;
+    setCenter(MAP_DEFAULT_CENTER);
+    onChange('', '');
+  }
+
   function handleUseMyLocation(): void {
     setNotice(null);
     if (!('geolocation' in navigator)) {
@@ -197,6 +210,14 @@ export function PointLocationPicker({
         <Alert severity="info" onClose={() => setNotice(null)}>
           {notice}
         </Alert>
+      ) : null}
+
+      {position ? (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button type="button" size="small" color="error" onClick={handleClearLocation}>
+            Remove marker
+          </Button>
+        </Box>
       ) : null}
 
       <Box
