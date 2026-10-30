@@ -15,6 +15,7 @@ import {
 import { tripApi } from '@/api/trips';
 import { pointApi } from '@/api/points';
 import { PointForm } from '@/components/points/PointForm';
+import { PointLocationPicker } from '@/components/maps/PointLocationPicker';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
@@ -32,6 +33,9 @@ export function CreatePointPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [pointLatitude, setPointLatitude] = useState('');
+  const [pointLongitude, setPointLongitude] = useState('');
+  const [findInMapTrigger, setFindInMapTrigger] = useState(0);
 
   const selectedDay = useMemo(
     () => tripGroup?.days.find((day) => day.id === tripId) ?? null,
@@ -91,12 +95,18 @@ export function CreatePointPage() {
     router.replace('/trips');
   }
 
+  function selectPoint(point?: TripPoint): void {
+    setSelectedPoint(point);
+    setPointLatitude(point?.lat != null ? String(point.lat) : '');
+    setPointLongitude(point?.lng != null ? String(point.lng) : '');
+  }
+
   async function handlePointSaved(): Promise<void> {
     setSaving(true);
     setError(null);
     try {
       await refreshTrip();
-      setSelectedPoint(undefined);
+      selectPoint();
     } catch (requestError) {
       setError(getGenericErrorMessage(requestError));
     } finally {
@@ -115,7 +125,7 @@ export function CreatePointPage() {
     try {
       await pointApi.deletePoint(point.id);
       await refreshTrip();
-      if (selectedPoint?.id === point.id) setSelectedPoint(undefined);
+      if (selectedPoint?.id === point.id) selectPoint();
     } catch (requestError) {
       setError(getGenericErrorMessage(requestError));
     }
@@ -169,7 +179,7 @@ export function CreatePointPage() {
             <Button
               size="small"
               variant="contained"
-              onClick={() => setSelectedPoint(undefined)}
+              onClick={() => selectPoint()}
               disabled={saving}
             >
               Add point
@@ -207,7 +217,7 @@ export function CreatePointPage() {
                     </Typography>
                   ) : null}
                   <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                    <Button size="small" onClick={() => setSelectedPoint(point)}>Edit</Button>
+                    <Button size="small" onClick={() => selectPoint(point)}>Edit</Button>
                     <Button size="small" color="error" onClick={() => void handleDeletePoint(point)}>
                       Delete
                     </Button>
@@ -222,25 +232,50 @@ export function CreatePointPage() {
           </Button>
         </Paper>
 
-        <Paper
-          variant="outlined"
-          sx={{
-            p: { xs: 1.5, sm: 3 },
-            minWidth: 0,
-            backgroundColor: '#eee7e79e',
-            border: '1px solid black',
-            borderRadius: 0,
-            boxShadow: '3px 2px 5px black',
-          }}
-        >
-          <PointForm
-            key={selectedPoint?.id ?? 'new-point'}
-            tripGroupId={tripGroup.id}
-            tripId={tripId}
-            point={selectedPoint}
-            onDone={() => void handlePointSaved()}
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', minWidth: 0 }}>
+          <PointLocationPicker
+            latitude={pointLatitude}
+            longitude={pointLongitude}
+            findInMapTrigger={findInMapTrigger}
+            onChange={(latitude, longitude) => {
+              setPointLatitude(latitude);
+              setPointLongitude(longitude);
+            }}
           />
-        </Paper>
+
+          <Paper
+            variant="outlined"
+            sx={{
+              mt: 2.5,
+              p: '30px',
+              width: 'fit-content',
+              maxWidth: '100%',
+              minWidth: 0,
+              backgroundColor: '#eee7e79e',
+              border: '1px solid black',
+              borderRadius: 0,
+              boxShadow: '3px 2px 5px black',
+              '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+              '& .MuiButton-root': { m: 1, width: '32ch', maxWidth: 'calc(100% - 16px)' },
+            }}
+          >
+            <PointForm
+              key={selectedPoint?.id ?? 'new-point'}
+              tripGroupId={tripGroup.id}
+              tripId={tripId}
+              point={selectedPoint}
+              latitude={pointLatitude}
+              longitude={pointLongitude}
+              onLocationChange={(latitude, longitude) => {
+                setPointLatitude(latitude);
+                setPointLongitude(longitude);
+              }}
+              onFindInMap={() => setFindInMapTrigger((current) => current + 1)}
+              onBack={handleBack}
+              onDone={() => void handlePointSaved()}
+            />
+          </Paper>
+        </Box>
       </Box>
     </Box>
   );
