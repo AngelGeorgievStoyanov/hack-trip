@@ -21,6 +21,7 @@ const JPEG_QUALITY = 0.88;
 interface ImageUploadFieldProps {
   files: File[];
   setFiles: Dispatch<SetStateAction<File[]>>;
+  existingCount?: number;
 }
 
 function loadImage(file: File): Promise<{ image: CanvasImageSource; width: number; height: number; cleanup: () => void }> {
@@ -93,7 +94,7 @@ async function compressImage(file: File): Promise<File> {
   }
 }
 
-export default function ImageUploadField({ files, setFiles }: ImageUploadFieldProps) {
+export default function ImageUploadField({ files, setFiles, existingCount = 0 }: ImageUploadFieldProps) {
   const isMobileUpload = useMediaQuery('(max-width:599px)');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -116,7 +117,7 @@ export default function ImageUploadField({ files, setFiles }: ImageUploadFieldPr
     setProcessing(true);
     setErrorMessage(null);
     try {
-      const remainingSlots = MAX_IMAGES_PER_ENTITY - files.length;
+      const remainingSlots = MAX_IMAGES_PER_ENTITY - existingCount - files.length;
       if (remainingSlots <= 0) {
         setErrorMessage(`${MAX_IMAGES_PER_ENTITY} images are the maximum number to upload.`);
         return;
@@ -176,13 +177,13 @@ export default function ImageUploadField({ files, setFiles }: ImageUploadFieldPr
           images={[]}
           fileSelected={files}
           iconFotoCamera={isMobileUpload}
-          maxImages={MAX_IMAGES_PER_ENTITY}
+          maxImages={Math.max(0, MAX_IMAGES_PER_ENTITY - existingCount)}
           disabled={processing}
         />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {processing ? <CircularProgress size={18} aria-label="Processing images" /> : null}
           <Typography variant="overline" sx={{ mr: 1 }}>
-            {files.length}/{MAX_IMAGES_PER_ENTITY} uploaded images
+            {existingCount + files.length}/{MAX_IMAGES_PER_ENTITY} uploaded images
           </Typography>
           {files.length > 0 ? (
             isMobileUpload ? (
