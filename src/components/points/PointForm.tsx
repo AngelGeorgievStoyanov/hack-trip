@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import {
@@ -190,7 +191,15 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         alignItems: 'center',
         gap: 1,
         minWidth: 0,
-        width: '100%',
+        width: { xs: '100%', sm: 'fit-content' },
+        maxWidth: { xs: '100%', sm: 'calc(100% - 60px)' },
+        m: { xs: 0, sm: '30px' },
+        p: { xs: 2, sm: '30px' },
+        backgroundColor: '#eee7e79e',
+        boxShadow: '3px 2px 5px black',
+        border: '1px solid black',
+        borderRadius: 0,
+        alignItems: 'stretch',
         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
       }}
     >
@@ -263,7 +272,38 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         />
       </Box>
 
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', justifyContent: 'center', width: '100%', mt: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          mt: 1,
+          '@media (max-width:610px)': { flexDirection: 'column' },
+        }}
+      >
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={submitting || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
+          startIcon={submitting ? <CircularProgress size={16} /> : undefined}
+          sx={legacyButtonSx}
+        >
+          {isEdit ? 'SAVE POINT' : createdPointId ? 'RETRY IMAGE UPLOAD' : 'ADD POINT'}
+        </Button>
+        {!isEdit ? (
+          <Button
+            component={Link}
+            href={`/create-trip/${tripGroupId}`}
+            variant="contained"
+            disabled={submitting}
+            sx={legacyButtonSx}
+          >
+            ADD NEXT DAY TRIP
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="contained"
@@ -284,16 +324,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
             '&:hover': { backgroundColor: 'rgb(170, 170, 210)', color: 'black' },
           }}
         >
-          {isEdit ? 'Cancel' : 'Back'}
-        </Button>
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={submitting || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
-          startIcon={submitting ? <CircularProgress size={16} /> : undefined}
-          sx={legacyButtonSx}
-        >
-          {isEdit ? 'Save point' : createdPointId ? 'Retry image upload' : 'Add point'}
+          {isEdit ? 'CANCEL' : 'BACK'}
         </Button>
       </Box>
     </Box>
