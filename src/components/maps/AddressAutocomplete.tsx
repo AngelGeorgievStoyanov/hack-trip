@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { Autocomplete } from '@react-google-maps/api';
 import { Alert, Box, Button, CircularProgress, Stack, TextField } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material/styles';
+import type { StackProps } from '@mui/material/Stack';
 import { MAP_SEARCH_MIN_LENGTH } from '@/constants/maps';
 import type { MapPosition } from '@/lib/maps';
 
@@ -18,6 +19,7 @@ interface AddressAutocompleteProps {
   inputSx?: SxProps<Theme>;
   buttonSx?: SxProps<Theme>;
   containerSx?: SxProps<Theme>;
+  direction?: StackProps['direction'];
 }
 
 const PLACE_FIELDS = ['geometry.location', 'formatted_address'];
@@ -33,6 +35,7 @@ export function AddressAutocomplete({
   inputSx,
   buttonSx,
   containerSx,
+  direction = { xs: 'column', sm: 'row' },
 }: AddressAutocompleteProps) {
   const [searching, setSearching] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -114,7 +117,7 @@ export function AddressAutocomplete({
 
   return (
     <Stack spacing={1} sx={containerSx}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="stretch">
+      <Stack direction={direction} spacing={1} alignItems="stretch">
         <Box sx={{ flex: '1 1 220px', minWidth: 0 }}>
           {supportsAutocomplete ? (
             <Autocomplete
@@ -139,7 +142,7 @@ export function AddressAutocomplete({
           onClick={() => void handleSearch()}
           disabled={searching || !isLoaded || value.trim().length < MAP_SEARCH_MIN_LENGTH}
           startIcon={searching ? <CircularProgress size={14} /> : undefined}
-          sx={{ whiteSpace: 'nowrap', ...((buttonSx ?? {}) as object) }}
+          sx={buttonSx ?? { whiteSpace: 'nowrap' }}
         >
           Search
         </Button>
