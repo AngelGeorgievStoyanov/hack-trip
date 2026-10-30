@@ -19,7 +19,6 @@ import { useConfirm } from '@/components/common/ConfirmDialog';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { pointCreateSchema } from '@/validations/points';
-import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
 import type { TripGroupResponse, TripPoint } from '@/types';
 
 interface PointFormProps {
@@ -256,16 +255,11 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
       ) : null}
 
       <Box sx={{ width: '100%' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap' }}>
-          <ImageUploadField
-            files={files}
-            setFiles={setFiles}
-            existingCount={existingImages.length + uploadedImageCount}
-          />
-          <Typography variant="overline" sx={{ mr: 1, whiteSpace: 'nowrap' }}>
-            {existingImages.length + uploadedImageCount + files.length}/{MAX_IMAGES_PER_ENTITY} uploaded images
-          </Typography>
-        </Box>
+        <ImageUploadField
+          files={files}
+          setFiles={setFiles}
+          existingCount={existingImages.length + uploadedImageCount}
+        />
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', justifyContent: 'center', width: '100%', mt: 1 }}>
