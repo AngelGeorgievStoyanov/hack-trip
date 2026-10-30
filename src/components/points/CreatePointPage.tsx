@@ -33,7 +33,7 @@ export function CreatePointPage() {
   const [pointLatitude, setPointLatitude] = useState('');
   const [pointLongitude, setPointLongitude] = useState('');
   const [findInMapTrigger, setFindInMapTrigger] = useState(0);
-  const [mapSearchName, setMapSearchName] = useState('');
+  const [mapSearchSelection, setMapSearchSelection] = useState<{ name: string; revision: number } | null>(null);
 
   const selectedDay = useMemo(
     () => tripGroup?.days.find((day) => day.id === tripId) ?? null,
@@ -95,7 +95,7 @@ export function CreatePointPage() {
 
   function selectPoint(point?: TripPoint): void {
     setSelectedPoint(point);
-    setMapSearchName('');
+    setMapSearchSelection(null);
     setPointLatitude(point?.lat != null ? String(point.lat) : '');
     setPointLongitude(point?.lng != null ? String(point.lng) : '');
   }
@@ -211,7 +211,7 @@ export function CreatePointPage() {
               setPointLatitude(latitude);
               setPointLongitude(longitude);
             }}
-            onAddressSelect={setMapSearchName}
+            onAddressSelect={(name) => setMapSearchSelection((current) => ({ name, revision: (current?.revision ?? 0) + 1 }))}
           />
 
           <Paper
@@ -237,7 +237,7 @@ export function CreatePointPage() {
               point={selectedPoint}
               latitude={pointLatitude}
               longitude={pointLongitude}
-              mapSearchName={mapSearchName}
+              mapSearchSelection={mapSearchSelection}
               onLocationChange={(latitude, longitude) => {
                 setPointLatitude(latitude);
                 setPointLongitude(longitude);
