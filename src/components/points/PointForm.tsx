@@ -38,6 +38,20 @@ interface PointFormValues {
 
 const formSchema = pointCreateSchema.omit({ tripId: true });
 
+const legacyFieldSx = {
+  '& .MuiOutlinedInput-root': {
+    backgroundColor: 'rgba(242, 241, 229, 0.56)',
+    borderRadius: '5px',
+  },
+};
+
+const legacyButtonSx = {
+  width: '32ch',
+  maxWidth: '100%',
+  m: 1,
+  '&:hover': { backgroundColor: '#4daf30' },
+};
+
 export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps) {
   const queryClient = useQueryClient();
   const { confirm } = useConfirm();
@@ -173,63 +187,54 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 2,
+        alignItems: 'center',
+        gap: 1,
         minWidth: 0,
         width: '100%',
+        '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
       }}
     >
-      <Typography variant="h6" component="h2">
+      <Typography variant="h5" component="h2" sx={{ my: 1.25, textTransform: 'uppercase' }}>
         {isEdit ? 'Edit point' : 'Add point'}
       </Typography>
-      {serverError ? <Alert severity="error">{serverError}</Alert> : null}
+      {serverError ? <Alert severity="error" sx={{ width: '100%' }}>{serverError}</Alert> : null}
 
       <TextField
-        label="Name"
+        label="NAME OF CITY, PLACE, LANDMARK OR ANOTHER"
         fullWidth
+        type="search"
+        InputLabelProps={{ shrink: true }}
+        sx={legacyFieldSx}
         {...register('name')}
         error={!!errors.name}
         helperText={errors.name?.message}
       />
+
+      <Box sx={{ width: '100%' }}>
+        <PointLocationPicker
+          latitude={lat}
+          longitude={lng}
+          onChange={(nextLatitude, nextLongitude) => {
+            setValue('lat', nextLatitude, { shouldValidate: true });
+            setValue('lng', nextLongitude, { shouldValidate: true });
+          }}
+        />
+      </Box>
+
       <TextField
-        label="Description"
+        label="DESCRIPTION"
         fullWidth
         multiline
-        minRows={3}
+        rows={4}
+        InputLabelProps={{ shrink: true }}
+        sx={legacyFieldSx}
         {...register('description')}
         error={!!errors.description}
         helperText={errors.description?.message}
       />
 
-      <Box sx={{ display: 'flex', gap: 1, minWidth: 0, flexWrap: 'wrap' }}>
-        <TextField
-          label="Latitude"
-          fullWidth
-          sx={{ flex: '1 1 150px' }}
-          {...register('lat')}
-          error={!!errors.lat}
-          helperText={errors.lat?.message}
-        />
-        <TextField
-          label="Longitude"
-          fullWidth
-          sx={{ flex: '1 1 150px' }}
-          {...register('lng')}
-          error={!!errors.lng}
-          helperText={errors.lng?.message}
-        />
-      </Box>
-
-      <PointLocationPicker
-        latitude={lat}
-        longitude={lng}
-        onChange={(nextLatitude, nextLongitude) => {
-          setValue('lat', nextLatitude, { shouldValidate: true });
-          setValue('lng', nextLongitude, { shouldValidate: true });
-        }}
-      />
-
       {existingImages.length > 0 ? (
-        <Box>
+        <Box sx={{ width: '100%' }}>
           <Typography variant="subtitle2" sx={{ mb: 1 }}>Current images</Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {existingImages.map((image) => (
@@ -250,20 +255,23 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         </Box>
       ) : null}
 
-      <Box>
-        <Typography variant="subtitle2" sx={{ mb: 1 }}>
-          Add images ({existingImages.length + uploadedImageCount + files.length}/{MAX_IMAGES_PER_ENTITY})
-        </Typography>
-        <ImageUploadField
-          files={files}
-          setFiles={setFiles}
-          existingCount={existingImages.length + uploadedImageCount}
-        />
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap' }}>
+          <ImageUploadField
+            files={files}
+            setFiles={setFiles}
+            existingCount={existingImages.length + uploadedImageCount}
+          />
+          <Typography variant="overline" sx={{ mr: 1, whiteSpace: 'nowrap' }}>
+            {existingImages.length + uploadedImageCount + files.length}/{MAX_IMAGES_PER_ENTITY} uploaded images
+          </Typography>
+        </Box>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', justifyContent: 'center', width: '100%', mt: 1 }}>
         <Button
           type="button"
+          variant="contained"
           onClick={() => {
             if (!isEdit) {
               setCreatedPointId(null);
@@ -274,14 +282,21 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
             onDone();
           }}
           disabled={submitting}
+          sx={{
+            ...legacyButtonSx,
+            backgroundColor: 'rgb(194, 194, 224)',
+            color: 'black',
+            '&:hover': { backgroundColor: 'rgb(170, 170, 210)', color: 'black' },
+          }}
         >
-          Cancel
+          {isEdit ? 'Cancel' : 'Back'}
         </Button>
         <Button
           type="submit"
           variant="contained"
           disabled={submitting || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
           startIcon={submitting ? <CircularProgress size={16} /> : undefined}
+          sx={legacyButtonSx}
         >
           {isEdit ? 'Save point' : createdPointId ? 'Retry image upload' : 'Add point'}
         </Button>
