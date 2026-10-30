@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import {
@@ -191,14 +190,8 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         alignItems: 'center',
         gap: 1,
         minWidth: 0,
-        width: { xs: '100%', sm: 'fit-content' },
-        maxWidth: { xs: '100%', sm: 'calc(100% - 60px)' },
-        m: { xs: 0, sm: '30px' },
-        p: { xs: 2, sm: '30px' },
-        backgroundColor: '#eee7e79e',
-        boxShadow: '3px 2px 5px black',
-        border: '1px solid black',
-        borderRadius: 0,
+        width: '100%',
+        maxWidth: '100%',
         alignItems: 'stretch',
         '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
       }}
@@ -293,17 +286,6 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         >
           {isEdit ? 'SAVE POINT' : createdPointId ? 'RETRY IMAGE UPLOAD' : 'ADD POINT'}
         </Button>
-        {!isEdit ? (
-          <Button
-            component={Link}
-            href={`/create-trip/${tripGroupId}`}
-            variant="contained"
-            disabled={submitting}
-            sx={legacyButtonSx}
-          >
-            ADD NEXT DAY TRIP
-          </Button>
-        ) : null}
         <Button
           type="button"
           variant="contained"
