@@ -127,6 +127,7 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
           ':hover': { background: '#4daf30' },
         }}
         containerSx={{ width: '100%' }}
+        direction={{ xs: 'column', md: 'row' }}
       />
 
       {notice ? <Alert severity="info" onClose={() => setNotice(null)}>{notice}</Alert> : null}
