@@ -31,7 +31,7 @@ interface PointFormProps {
   latitude: string;
   longitude: string;
   onLocationChange: (latitude: string, longitude: string) => void;
-  mapSearchName?: string;
+  mapSearchSelection?: { name: string; revision: number } | null;
   onFindInMap: () => void;
   onAddNextDay: () => void;
   onBack: () => void;
@@ -54,7 +54,7 @@ const legacyButtonSx = {
   '&:hover': { backgroundColor: '#4daf30' },
 };
 
-export function PointForm({ tripGroupId, tripId, point, latitude, longitude, mapSearchName, onLocationChange, onFindInMap, onAddNextDay, onBack, onDone }: PointFormProps) {
+export function PointForm({ tripGroupId, tripId, point, latitude, longitude, mapSearchSelection, onLocationChange, onFindInMap, onAddNextDay, onBack, onDone }: PointFormProps) {
   const queryClient = useQueryClient();
   const { isLoaded } = useGoogleMapsLoader();
   const { confirm } = useConfirm();
@@ -92,13 +92,13 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, map
   }, [latitude, longitude, setValue]);
 
   useEffect(() => {
-    if (mapSearchName) {
-      setValue('name', truncatePointName(mapSearchName), {
+    if (mapSearchSelection?.name) {
+      setValue('name', truncatePointName(mapSearchSelection.name), {
         shouldValidate: true,
         shouldDirty: true,
       });
     }
-  }, [mapSearchName, setValue]);
+  }, [mapSearchSelection?.revision, setValue]);
 
   async function handleFindInMap(): Promise<void> {
     const query = watch('name').trim();
