@@ -10,7 +10,10 @@ export function truncatePointName(value: string): string {
 }
 
 export function getPointNameFromMapAddress(value: string): string {
-  const commaPart = value.split(',')[0] ?? value;
-  const legacyName = commaPart.split('-')[0] ?? commaPart;
-  return truncatePointName(legacyName);
+  const commaParts = value.split(',');
+  const legacyName = commaParts.length > 1
+    ? commaParts[0]
+    : value.split('-')[0];
+
+  return truncatePointName(legacyName ?? value);
 }
