@@ -192,15 +192,13 @@ export function TripForm() {
     const createdDay = created.days.find((day) => day.dayNumber === getValues('dayNumber'));
 
     if (!createdDay) {
-      setServerError('The trip was created, but its day could not be identified for image upload. You can continue to Trip Details.');
+      setServerError('The trip was created, but its day could not be identified.');
       return false;
     }
 
     setServerError(null);
     const failedFiles: File[] = [];
-
-    try {
-      const failedByIndex = files.map(() => false);
+    const failedByIndex = files.map(() => false);
       let nextFileIndex = 0;
 
       const uploadWorker = async (): Promise<void> => {
@@ -237,8 +235,7 @@ export function TripForm() {
       } else {
         navigateToCreatedTrip(created);
       }
-      return true;
-    }
+    return true;
   }
 
   async function onSubmit(
