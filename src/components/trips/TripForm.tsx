@@ -60,7 +60,6 @@ export function TripForm() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [createdTrip, setCreatedTrip] = useState<TripGroupResponse | null>(null);
   const [createdPointTripId, setCreatedPointTripId] = useState<number | null>(null);
-  const [uploadingImages, setUploadingImages] = useState(false);
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
@@ -197,7 +196,6 @@ export function TripForm() {
       return false;
     }
 
-    setUploadingImages(true);
     setServerError(null);
     const failedFiles: File[] = [];
 
@@ -228,7 +226,7 @@ export function TripForm() {
       setSelectedFiles(failedFiles);
       if (failedFiles.length > 0) {
         setServerError(
-          `${failedFiles.length} image upload(s) failed. Retry the failed uploads or continue to Trip Details.`,
+          `${failedFiles.length} image upload(s) failed. Select the same action again to retry.`,
         );
         return false;
       }
@@ -240,8 +238,6 @@ export function TripForm() {
         navigateToCreatedTrip(created);
       }
       return true;
-    } finally {
-      setUploadingImages(false);
     }
   }
 
@@ -250,12 +246,13 @@ export function TripForm() {
     intent: 'add-trip' | 'add-next-day' | 'add-point' = 'add-trip',
   ): Promise<void> {
     if (isLoadingExistingTrip) return;
-    if (!validateDayNumber(values.dayNumber)) return;
 
     if (createdTrip) {
       await uploadPendingImages(createdTrip, selectedFiles, false, createdPointTripId);
       return;
     }
+
+    if (!validateDayNumber(values.dayNumber)) return;
 
     setSubmitting(true);
     setServerError(null);
