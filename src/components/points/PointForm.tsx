@@ -135,6 +135,10 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         }
       }
 
+      if (files.length > 0) {
+        await queryClient.invalidateQueries({ queryKey: ['trip', tripGroupId] });
+      }
+
       if (!isEdit) {
         setCreatedPointId(null);
         setUploadedImageCount(0);
