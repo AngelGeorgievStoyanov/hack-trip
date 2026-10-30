@@ -19,6 +19,7 @@ import { useConfirm } from '@/components/common/ConfirmDialog';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { pointCreateSchema } from '@/validations/points';
+import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
 import type { TripGroupResponse, TripPoint } from '@/types';
 
 interface PointFormProps {
