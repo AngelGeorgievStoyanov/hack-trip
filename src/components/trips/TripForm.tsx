@@ -58,6 +58,7 @@ export function TripForm() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [createdTrip, setCreatedTrip] = useState<TripGroupResponse | null>(null);
+  const [createdPointTripId, setCreatedPointTripId] = useState<number | null>(null);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
@@ -157,19 +158,23 @@ export function TripForm() {
   }
 
   function navigateToCreatedTrip(created: TripGroupResponse): void {
-    const createdDay =
-      created.days.length === 1
-        ? created.days[0]
-        : created.days.find((day) => day.dayNumber === getValues('dayNumber'));
+    const createdDay = created.days.find((day) => day.dayNumber === getValues('dayNumber'));
     router.replace(buildTripUrl(created.id, createdDay?.dayNumber));
     router.refresh();
   }
 
-  async function uploadPendingImages(created: TripGroupResponse, files: File[], stayOnForm = false): Promise<boolean> {
-    const createdDay =
-      created.days.length === 1
-        ? created.days[0]
-        : created.days.find((day) => day.dayNumber === getValues('dayNumber'));
+  function navigateToCreatedPoint(created: TripGroupResponse, tripId: number): void {
+    router.replace(`/trips/create/points?tripGroupId=${created.id}&tripId=${tripId}`);
+    router.refresh();
+  }
+
+  async function uploadPendingImages(
+    created: TripGroupResponse,
+    files: File[],
+    stayOnForm = false,
+    destinationTripId: number | null = createdPointTripId,
+  ): Promise<boolean> {
+    const createdDay = created.days.find((day) => day.dayNumber === getValues('dayNumber'));
 
     if (!createdDay) {
       setServerError('The trip was created, but its day could not be identified for image upload. You can continue to Trip Details.');
@@ -213,7 +218,11 @@ export function TripForm() {
       }
 
       if (stayOnForm) return true;
-      navigateToCreatedTrip(created);
+      if (destinationTripId !== null) {
+        navigateToCreatedPoint(created, destinationTripId);
+      } else {
+        navigateToCreatedTrip(created);
+      }
       return true;
     } finally {
       setUploadingImages(false);
@@ -222,7 +231,7 @@ export function TripForm() {
 
   async function onSubmit(
     values: TripWriteInput,
-    intent: 'add-trip' | 'add-next-day' = 'add-trip',
+    intent: 'add-trip' | 'add-next-day' | 'add-point' = 'add-trip',
   ): Promise<void> {
     if (isLoadingExistingTrip) return;
     if (isDayNumberOccupied) {
@@ -274,13 +283,33 @@ export function TripForm() {
         setLongitude('');
         setSelectedFiles([]);
         setCreatedTrip(null);
+        setCreatedPointTripId(null);
         setServerError(null);
         if (!urlTripGroupId) router.replace(`/trips/create?tripGroupId=${created.id}`);
         setExistingTrip(created);
         return;
       }
 
+      const createdDay = created.days.find((day) => day.dayNumber === values.dayNumber);
+      if (intent === 'add-point') {
+        if (!createdDay) {
+          setServerError('The trip was created, but its new Trip ID could not be identified.');
+          setCreatedTrip(created);
+          return;
+        }
+
+        setCreatedTrip(created);
+        setCreatedPointTripId(createdDay.id);
+        if (selectedFiles.length === 0) {
+          navigateToCreatedPoint(created, createdDay.id);
+          return;
+        }
+        await uploadPendingImages(created, selectedFiles, false, createdDay.id);
+        return;
+      }
+
       // Keep the created response for safe image retry; navigate only after uploads finish.
+      setCreatedPointTripId(null);
       setCreatedTrip(created);
       if (selectedFiles.length === 0) {
         navigateToCreatedTrip(created);
@@ -369,7 +398,7 @@ export function TripForm() {
                 variant="contained"
                 disabled={uploadingImages || selectedFiles.length === 0}
                 startIcon={uploadingImages ? <CircularProgress size={18} /> : undefined}
-                onClick={() => void uploadPendingImages(createdTrip, selectedFiles)}
+                onClick={() => void uploadPendingImages(createdTrip, selectedFiles, false, createdPointTripId)}
               >
                 Retry failed image uploads
               </Button>
@@ -379,7 +408,13 @@ export function TripForm() {
             type="button"
             variant="outlined"
             disabled={uploadingImages}
-            onClick={() => navigateToCreatedTrip(createdTrip)}
+            onClick={() => {
+              if (createdPointTripId !== null) {
+                navigateToCreatedPoint(createdTrip, createdPointTripId);
+              } else {
+                navigateToCreatedTrip(createdTrip);
+              }
+            }}
           >
             Continue to Trip Details
           </Button>
@@ -592,6 +627,10 @@ export function TripForm() {
         <Button
           type="button"
           variant="contained"
+          disabled={submitting || isLoadingExistingTrip || !isValid || isDayNumberOccupied}
+          onClick={() => {
+            void handleSubmit((values) => onSubmit(values, 'add-point'))();
+          }}
           sx={{
             color: 'black',
             backgroundColor: 'rgb(194 194 224)',
