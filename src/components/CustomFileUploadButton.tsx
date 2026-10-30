@@ -3,6 +3,7 @@
 import { type ChangeEvent, type FC } from 'react';
 import { Box, Button, IconButton, Tooltip } from '@mui/material';
 import { UploadIcon } from '@/constants/icons';
+import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
 
 interface CustomFileUploadButtonProps {
   handleFilesChange: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -19,7 +20,7 @@ const CustomFileUploadButton: FC<CustomFileUploadButtonProps> = ({
   fileSelected,
   iconFotoCamera,
   disabled = false,
-  maxImages = 9,
+  maxImages = MAX_IMAGES_PER_ENTITY,
 }) => {
   const isDisabled = images.length + fileSelected.length >= maxImages || disabled;
 
