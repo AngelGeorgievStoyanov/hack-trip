@@ -13,7 +13,7 @@ import type { TripGroupResponse, TripPoint } from '@/types';
 
 interface PointFormProps {
   tripGroupId: number;
-  dayId: number;
+  tripId: number;
   point?: TripPoint;
   onDone: () => void;
 }
@@ -27,7 +27,7 @@ interface PointFormValues {
 
 const formSchema = pointCreateSchema.omit({ tripId: true });
 
-export function PointForm({ tripGroupId, dayId, point, onDone }: PointFormProps) {
+export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps) {
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -67,14 +67,14 @@ export function PointForm({ tripGroupId, dayId, point, onDone }: PointFormProps)
       // points array with the returned array.
       const updatedPoints = isEdit && point
         ? await pointApi.updatePoint(point.id, input)
-        : await pointApi.createPoint({ tripId: dayId, ...input });
+        : await pointApi.createPoint({ tripId, ...input });
       queryClient.setQueryData<TripGroupResponse>(['trip', tripGroupId], (current) =>
         current === undefined
           ? current
           : {
               ...current,
               days: current.days.map((day) =>
-                day.id === dayId ? { ...day, points: updatedPoints } : day,
+                day.id === tripId ? { ...day, points: updatedPoints } : day,
               ),
             },
       );
