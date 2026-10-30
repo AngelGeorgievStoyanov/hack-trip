@@ -53,6 +53,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<PointFormValues>({
     resolver: zodResolver(formSchema),
@@ -129,6 +130,11 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         }
       }
 
+      if (!isEdit) {
+        setCreatedPointId(null);
+        setFiles([]);
+        reset({ name: '', description: '', lat: '', lng: '' });
+      }
       onDone();
     } catch (error) {
       setServerError(getGenericErrorMessage(error));
@@ -237,7 +243,11 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
           Add images ({existingImages.length + files.length}/{MAX_IMAGES_PER_ENTITY})
         </Typography>
-        <ImageUploadField files={files} setFiles={setFiles} />
+        <ImageUploadField
+          files={files}
+          setFiles={setFiles}
+          existingCount={existingImages.length}
+        />
       </Box>
 
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
