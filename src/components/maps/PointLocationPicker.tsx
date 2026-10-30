@@ -31,12 +31,14 @@ interface PointLocationPickerProps {
   latitude: string;
   longitude: string;
   onChange: (latitude: string, longitude: string) => void;
+  findInMapTrigger?: number;
 }
 
 export function PointLocationPicker({
   latitude,
   longitude,
   onChange,
+  findInMapTrigger = 0,
 }: PointLocationPickerProps) {
   const { isLoaded } = useGoogleMapsLoader();
   const [center, setCenter] = useState<MapPosition>(
@@ -61,6 +63,13 @@ export function PointLocationPicker({
     setCenter(external);
   }, [latitude, longitude]);
 
+  useEffect(() => {
+    if (findInMapTrigger === 0 || !position) return;
+    setCenter(position);
+    mapRef.current?.panTo(position);
+    mapRef.current?.setZoom(MAP_GEOCODED_ZOOM);
+  }, [findInMapTrigger, latitude, longitude]);
+
   function emitPosition(next: MapPosition): void {
     emittedRef.current = next;
     setCenter(next);
@@ -70,13 +79,6 @@ export function PointLocationPicker({
   function handleAddressSelected(nextPosition: MapPosition): void {
     emitPosition(nextPosition);
     setNotice(null);
-    mapRef.current?.setZoom(MAP_GEOCODED_ZOOM);
-  }
-
-  function handleFindInMap(): void {
-    if (!position) return;
-    setCenter(position);
-    mapRef.current?.panTo(position);
     mapRef.current?.setZoom(MAP_GEOCODED_ZOOM);
   }
 
@@ -163,14 +165,6 @@ export function PointLocationPicker({
           buttonVariant="outlined"
           containerSx={{ flex: '1 1 220px', minWidth: 0 }}
         />
-        <Button
-          type="button"
-          variant="outlined"
-          onClick={handleFindInMap}
-          disabled={!position || !isLoaded}
-        >
-          Find in Map
-        </Button>
         <Button
           type="button"
           variant="outlined"
