@@ -153,7 +153,17 @@ export function CreatePointPage() {
           gap: { xs: 2, md: 3 },
         }}
       >
-        <Paper variant="outlined" sx={{ p: { xs: 1.5, sm: 2 }, minWidth: 0 }}>
+        <Paper
+          variant="outlined"
+          sx={{
+            p: { xs: 1.5, sm: 2 },
+            minWidth: 0,
+            backgroundColor: '#eee7e79e',
+            border: '1px solid black',
+            borderRadius: 0,
+            boxShadow: '3px 2px 5px black',
+          }}
+        >
           <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
             <Typography variant="h6">Points ({selectedDay.points.length})</Typography>
             <Button
@@ -212,7 +222,17 @@ export function CreatePointPage() {
           </Button>
         </Paper>
 
-        <Paper variant="outlined" sx={{ p: { xs: 1.5, sm: 3 }, minWidth: 0 }}>
+        <Paper
+          variant="outlined"
+          sx={{
+            p: { xs: 1.5, sm: 3 },
+            minWidth: 0,
+            backgroundColor: '#eee7e79e',
+            border: '1px solid black',
+            borderRadius: 0,
+            boxShadow: '3px 2px 5px black',
+          }}
+        >
           <PointForm
             key={selectedPoint?.id ?? 'new-point'}
             tripGroupId={tripGroup.id}
