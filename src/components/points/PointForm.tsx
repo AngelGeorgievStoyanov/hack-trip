@@ -61,6 +61,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
   const [createdPointId, setCreatedPointId] = useState<number | null>(null);
   const [existingImages, setExistingImages] = useState(point?.images ?? []);
   const [uploadedImageCount, setUploadedImageCount] = useState(0);
+  const [findInMapTrigger, setFindInMapTrigger] = useState(0);
   const isEdit = point !== undefined;
 
   const {
@@ -199,6 +200,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         <PointLocationPicker
           latitude={lat}
           longitude={lng}
+          findInMapTrigger={findInMapTrigger}
           onChange={(nextLatitude, nextLongitude) => {
             setValue('lat', nextLatitude, { shouldValidate: true });
             setValue('lng', nextLongitude, { shouldValidate: true });
@@ -221,6 +223,18 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         error={!!errors.name}
         helperText={errors.name?.message}
       />
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={() => setFindInMapTrigger((current) => current + 1)}
+          disabled={!lat || !lng}
+          sx={{ m: 1 }}
+        >
+          FIND IN MAP
+        </Button>
+      </Box>
 
       <TextField
         label="DESCRIPTION"
