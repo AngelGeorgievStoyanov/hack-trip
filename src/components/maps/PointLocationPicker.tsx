@@ -43,7 +43,6 @@ export function PointLocationPicker({
     () => coordinatePairToMapPosition(latitude, longitude) ?? MAP_DEFAULT_CENTER,
   );
   const [address, setAddress] = useState('');
-  const [searching, setSearching] = useState(false);
   const [locating, setLocating] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const emittedRef = useRef<MapPosition | null>(
