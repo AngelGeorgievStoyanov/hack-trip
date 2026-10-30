@@ -121,6 +121,7 @@ export function PointLocationPicker({
 
   function handleClearLocation(): void {
     emittedRef.current = null;
+    setAddress('');
     setCenter(MAP_DEFAULT_CENTER);
     onChange('', '');
   }
@@ -167,8 +168,8 @@ export function PointLocationPicker({
 
   return (
     <Stack spacing={1}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ flexWrap: 'wrap' }}>
+        <Box sx={{ flex: '1 1 220px', minWidth: 0 }}>
           {supportsAutocomplete ? (
             <Autocomplete
               fields={PLACE_FIELDS}
