@@ -149,10 +149,6 @@ export function CreatePointPage() {
 
   return (
     <Box sx={{ width: '100%', maxWidth: 1440, mx: 'auto', px: { xs: 1, sm: 2 }, py: 2 }}>
-      <Typography variant="h5" component="h1" sx={{ mb: 2, textAlign: 'center', textTransform: 'uppercase' }}>
-        Add points — Day {dayNumber}
-      </Typography>
-
       {error ? <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert> : null}
 
       <Box
