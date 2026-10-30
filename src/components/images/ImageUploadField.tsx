@@ -182,32 +182,17 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
           maxImages={Math.max(0, MAX_IMAGES_PER_ENTITY - existingCount)}
           disabled={processing}
         />
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {processing ? <CircularProgress size={18} aria-label="Processing images" /> : null}
           <Typography variant="body2" sx={{ mr: 1 }}>
             {existingCount + files.length}/{MAX_IMAGES_PER_ENTITY} uploaded images
           </Typography>
-          {files.length > 0 ? (
-            isMobileUpload ? (
-              <Tooltip title="REMOVE ALL IMAGES" arrow>
-                <IconButton aria-label="Remove all images" color="primary" onClick={removeAllFiles} disabled={processing} size="large">
-                  <DeleteAllImagesIcon fontSize="large" />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Button variant="contained" onClick={removeAllFiles} disabled={processing}>
-                Remove all images
-              </Button>
-            )
-          ) : null}
         </Box>
       </Box>
 
-      {isAtImageLimit ? (
-        <Typography variant="body2" color="error">
-          9 images are the maximum number to upload.
-        </Typography>
-      ) : null}
+      <Typography variant="body2" color={isAtImageLimit ? 'error' : 'text.secondary'}>
+        9 images are the maximum number to upload.
+      </Typography>
       {errorMessage ? <Alert severity="warning" onClose={() => setErrorMessage(null)}>{errorMessage}</Alert> : null}
 
       {previews.length > 0 ? (
@@ -246,6 +231,20 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
             </Box>
           ))}
         </Box>
+      ) : null}
+
+      {files.length > 0 ? (
+        isMobileUpload ? (
+          <Tooltip title="REMOVE ALL IMAGES" arrow>
+            <IconButton aria-label="Remove all images" color="primary" onClick={removeAllFiles} disabled={processing} size="large" sx={{ alignSelf: 'flex-start' }}>
+              <DeleteAllImagesIcon fontSize="large" />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Button variant="contained" onClick={removeAllFiles} disabled={processing} sx={{ alignSelf: 'flex-start' }}>
+            Remove all images
+          </Button>
+        )
       ) : null}
     </Box>
   );
