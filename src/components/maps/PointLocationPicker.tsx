@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   CircularProgress,
+  Snackbar,
   Stack,
   TextField,
 } from '@mui/material';
@@ -179,13 +180,18 @@ export function PointLocationPicker({
           Gps position
         </Button>
 
-        {notice ? (
-          <Alert severity="info" onClose={() => setNotice(null)} sx={{ flexBasis: '100%' }}>
-            {notice}
-          </Alert>
-        ) : null}
       </Stack>
 
+      <Snackbar
+        open={Boolean(notice)}
+        autoHideDuration={10000}
+        onClose={() => setNotice(null)}
+        sx={{ position: 'relative', left: 0, right: 0 }}
+      >
+        <Alert onClose={() => setNotice(null)} severity="error">
+          {notice}
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }
