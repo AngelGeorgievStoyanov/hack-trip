@@ -168,7 +168,8 @@ export function PointLocationPicker({
             maxWidth: '190px',
           }}
           size="small"
-          buttonVariant="outlined"
+          buttonVariant="contained"
+          buttonSx={{ m: "2px", "&:hover": { backgroundColor: "#4daf30" } }}
           containerSx={{ flex: '1 1 190px', minWidth: 0, maxWidth: 190 }}
         />
         <Button
