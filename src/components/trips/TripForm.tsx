@@ -198,42 +198,42 @@ export function TripForm() {
     setServerError(null);
     const failedFiles: File[] = [];
     const failedByIndex = files.map(() => false);
-      let nextFileIndex = 0;
+    let nextFileIndex = 0;
 
-      const uploadWorker = async (): Promise<void> => {
-        while (nextFileIndex < files.length) {
-          const fileIndex = nextFileIndex;
-          nextFileIndex += 1;
+    const uploadWorker = async (): Promise<void> => {
+      while (nextFileIndex < files.length) {
+        const fileIndex = nextFileIndex;
+        nextFileIndex += 1;
 
-          try {
-            await tripApi.uploadDayImage(created.id, createdDay.id, files[fileIndex]);
-          } catch {
-            failedByIndex[fileIndex] = true;
-          }
+        try {
+          await tripApi.uploadDayImage(created.id, createdDay.id, files[fileIndex]);
+        } catch {
+          failedByIndex[fileIndex] = true;
         }
-      };
+      }
+    };
 
-      const workerCount = Math.min(MAX_CONCURRENT_IMAGE_UPLOADS, files.length);
-      await Promise.all(
-        Array.from({ length: workerCount }, () => uploadWorker()),
+    const workerCount = Math.min(MAX_CONCURRENT_IMAGE_UPLOADS, files.length);
+    await Promise.all(
+      Array.from({ length: workerCount }, () => uploadWorker()),
+    );
+
+    failedFiles.push(...files.filter((_, index) => failedByIndex[index]));
+
+    setSelectedFiles(failedFiles);
+    if (failedFiles.length > 0) {
+      setServerError(
+        `${failedFiles.length} image upload(s) failed. Select the same action again to retry.`,
       );
+      return false;
+    }
 
-      failedFiles.push(...files.filter((_, index) => failedByIndex[index]));
-
-      setSelectedFiles(failedFiles);
-      if (failedFiles.length > 0) {
-        setServerError(
-          `${failedFiles.length} image upload(s) failed. Select the same action again to retry.`,
-        );
-        return false;
-      }
-
-      if (stayOnForm) return true;
-      if (destinationTripId !== null) {
-        navigateToCreatedPoint(created, destinationTripId);
-      } else {
-        navigateToCreatedTrip(created);
-      }
+    if (stayOnForm) return true;
+    if (destinationTripId !== null) {
+      navigateToCreatedPoint(created, destinationTripId);
+    } else {
+      navigateToCreatedTrip(created);
+    }
     return true;
   }
 
