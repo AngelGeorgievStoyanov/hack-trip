@@ -152,10 +152,17 @@ export function CreatePointPage() {
     setSaving(true);
     setError(null);
     try {
-      await pointApi.reorderPoints(tripId, {
-        pointIds,
+      const reorderedPoints = await pointApi.reorderPoints(tripId, { pointIds });
+      setTripGroup((current) => {
+        if (!current) return current;
+
+        return {
+          ...current,
+          days: current.days.map((day) =>
+            day.id === tripId ? { ...day, points: reorderedPoints } : day,
+          ),
+        };
       });
-      await refreshTrip();
     } catch (requestError) {
       setError(getGenericErrorMessage(requestError));
     } finally {
