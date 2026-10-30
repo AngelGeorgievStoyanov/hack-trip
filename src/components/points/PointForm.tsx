@@ -14,6 +14,8 @@ import {
 import { pointApi } from '@/api/points';
 import { AppImage } from '@/components/images/AppImage';
 import ImageUploadField from '@/components/images/ImageUploadField';
+import { AddressAutocomplete } from '@/components/maps/AddressAutocomplete';
+import { useGoogleMapsLoader } from '@/hooks/useGoogleMapsLoader';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
@@ -59,6 +61,7 @@ const legacyButtonSx = {
 
 export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onLocationChange, onFindInMap, onAddNextDay, onBack, onDone }: PointFormProps) {
   const queryClient = useQueryClient();
+  const { isLoaded } = useGoogleMapsLoader();
   const { confirm } = useConfirm();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -208,15 +211,23 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onL
       </Typography>
       {serverError ? <Alert severity="error" sx={{ width: '100%' }}>{serverError}</Alert> : null}
 
-      <TextField
+      <AddressAutocomplete
+        value={watch('name')}
+        isLoaded={isLoaded}
+        onChange={(value) => setValue('name', value, { shouldDirty: true, shouldValidate: true })}
+        onLocationSelect={(position, address) => {
+          setValue('name', address, { shouldDirty: true, shouldValidate: true });
+          onLocationChange(String(position.lat), String(position.lng));
+        }}
         label="NAME OF CITY, PLACE, LANDMARK OR ANOTHER"
-        fullWidth
-        type="search"
-        InputLabelProps={{ shrink: true }}
-        sx={legacyFieldSx}
-        {...register('name')}
-        error={!!errors.name}
-        helperText={errors.name?.message}
+        size="medium"
+        showSearchButton={false}
+        inputSx={legacyFieldSx}
+        textFieldProps={{
+          InputLabelProps: { shrink: true },
+          error: !!errors.name,
+          helperText: errors.name?.message,
+        }}
       />
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
