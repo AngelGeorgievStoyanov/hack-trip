@@ -190,9 +190,11 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
         </Box>
       </Box>
 
-      <Typography variant="body2" color={isAtImageLimit ? 'error' : 'text.secondary'}>
-        9 images are the maximum number to upload.
-      </Typography>
+      {isAtImageLimit ? (
+        <Typography variant="body2" color="error">
+          9 images are the maximum number to upload.
+        </Typography>
+      ) : null}
       {errorMessage ? <Alert severity="warning" onClose={() => setErrorMessage(null)}>{errorMessage}</Alert> : null}
 
       {previews.length > 0 ? (
