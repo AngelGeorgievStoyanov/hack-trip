@@ -109,50 +109,6 @@ export function PointLocationPicker({
 
   return (
     <Stack spacing={1}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ flexWrap: 'wrap' }}>
-        <AddressAutocomplete
-          value={address}
-          isLoaded={isLoaded}
-          onChange={setAddress}
-          onLocationSelect={handleAddressSelected}
-          label="Search address"
-          size="small"
-          buttonVariant="outlined"
-          containerSx={{ flex: '1 1 220px', minWidth: 0 }}
-        />
-        <Button
-          type="button"
-          variant="outlined"
-          onClick={handleFindInMap}
-          disabled={!position || !isLoaded}
-        >
-          Find in Map
-        </Button>
-        <Button
-          type="button"
-          variant="outlined"
-          onClick={handleUseMyLocation}
-          disabled={locating}
-          startIcon={locating ? <CircularProgress size={14} /> : undefined}
-        >
-          My location
-        </Button>
-      </Stack>
-
-      {notice ? (
-        <Alert severity="info" onClose={() => setNotice(null)}>
-          {notice}
-        </Alert>
-      ) : null}
-
-      {position ? (
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button type="button" size="small" color="error" onClick={handleClearLocation}>
-            Remove marker
-          </Button>
-        </Box>
-      ) : null}
-
       <Box
         sx={{
           position: 'relative',
@@ -196,10 +152,47 @@ export function PointLocationPicker({
         ) : null}
       </Box>
 
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <AddressAutocomplete
+          value={address}
+          isLoaded={isLoaded}
+          onChange={setAddress}
+          onLocationSelect={handleAddressSelected}
+          label="Search"
+          size="small"
+          buttonVariant="outlined"
+          containerSx={{ flex: '1 1 220px', minWidth: 0 }}
+        />
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={handleFindInMap}
+          disabled={!position || !isLoaded}
+        >
+          Find in Map
+        </Button>
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={handleUseMyLocation}
+          disabled={locating}
+          startIcon={locating ? <CircularProgress size={14} /> : undefined}
+        >
+          GPS position
+        </Button>
+        {position ? (
+          <Button type="button" variant="outlined" color="error" onClick={handleClearLocation}>
+            Remove Marker
+          </Button>
+        ) : null}
+        {notice ? (
+          <Alert severity="info" onClose={() => setNotice(null)} sx={{ flexBasis: '100%' }}>
+            {notice}
+          </Alert>
+        ) : null}
+      </Stack>
+
       <Typography variant="caption">
         Click the map or drag the marker to set the coordinates, or type latitude and longitude
         directly in the fields above.
-      </Typography>
-    </Stack>
-  );
-}
+      </Typography>}
