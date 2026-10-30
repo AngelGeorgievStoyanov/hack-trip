@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Autocomplete } from '@react-google-maps/api';
+import { AddressAutocomplete } from '@/components/maps/AddressAutocomplete';
 import { GoogleMapView } from '@/components/maps/GoogleMapView';
 import {
   Alert,
@@ -19,7 +19,6 @@ import {
   MAP_GEOCODED_ZOOM,
   MAP_POINT_PICKER_HEIGHT,
   MAP_POINT_PICKER_ZOOM,
-  MAP_SEARCH_MIN_LENGTH,
 } from '@/constants/maps';
 import {
   coordinatePairToMapPosition,
@@ -33,8 +32,6 @@ interface PointLocationPickerProps {
   longitude: string;
   onChange: (latitude: string, longitude: string) => void;
 }
-
-const PLACE_FIELDS = ['geometry.location', 'formatted_address'];
 
 export function PointLocationPicker({
   latitude,
@@ -53,11 +50,8 @@ export function PointLocationPicker({
     coordinatePairToMapPosition(latitude, longitude),
   );
   const mapRef = useRef<google.maps.Map | null>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
   const position = coordinatePairToMapPosition(latitude, longitude);
-  const supportsAutocomplete =
-    isLoaded && typeof google.maps.places?.Autocomplete === 'function';
 
   useEffect(() => {
     const external = coordinatePairToMapPosition(latitude, longitude);
@@ -74,42 +68,10 @@ export function PointLocationPicker({
     onChange(formatCoordinate(next.lat), formatCoordinate(next.lng));
   }
 
-  async function handleSearch(): Promise<void> {
-    const query = address.trim();
-    if (query.length < MAP_SEARCH_MIN_LENGTH) {
-      return;
-    }
-    setSearching(true);
+  function handleAddressSelected(nextPosition: MapPosition): void {
+    emitPosition(nextPosition);
     setNotice(null);
-    try {
-      const geocoder = new google.maps.Geocoder();
-      const response = await geocoder.geocode({ address: query });
-      const match = response.results[0];
-      if (!match) {
-        setNotice('No address matched that search.');
-        return;
-      }
-      const location = match.geometry.location;
-      emitPosition({ lat: location.lat(), lng: location.lng() });
-      setAddress(match.formatted_address);
-      mapRef.current?.setZoom(MAP_GEOCODED_ZOOM);
-    } catch {
-      setNotice('Address search is unavailable right now.');
-    } finally {
-      setSearching(false);
-    }
-  }
-
-  function handlePlaceChanged(): void {
-    const location = autocompleteRef.current?.getPlace()?.geometry?.location;
-    if (location) {
-      emitPosition({ lat: location.lat(), lng: location.lng() });
-      setAddress(autocompleteRef.current?.getPlace()?.formatted_address ?? address);
-      mapRef.current?.setZoom(MAP_GEOCODED_ZOOM);
-      return;
-    }
-    // The user pressed Enter without picking a suggestion, so fall back to geocoding.
-    void handleSearch();
+    mapRef.current?.setZoom(MAP_GEOCODED_ZOOM);
   }
 
   function handleFindInMap(): void {
@@ -146,56 +108,19 @@ export function PointLocationPicker({
     );
   }
 
-  const addressField = (
-    <TextField
-      size="small"
-      fullWidth
-      label="Search address"
-      value={address}
-      onChange={(event) => setAddress(event.target.value)}
-      onKeyDown={
-        supportsAutocomplete
-          ? undefined
-          : (event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                void handleSearch();
-              }
-            }
-      }
-    />
-  );
-
   return (
     <Stack spacing={1}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ flexWrap: 'wrap' }}>
-        <Box sx={{ flex: '1 1 220px', minWidth: 0 }}>
-          {supportsAutocomplete ? (
-            <Autocomplete
-              fields={PLACE_FIELDS}
-              onLoad={(autocomplete) => {
-                autocompleteRef.current = autocomplete;
-              }}
-              onUnmount={() => {
-                autocompleteRef.current = null;
-              }}
-              onPlaceChanged={handlePlaceChanged}
-            >
-              {addressField}
-            </Autocomplete>
-          ) : (
-            addressField
-          )}
-        </Box>
-        <Button
-          type="button"
-          variant="outlined"
-          onClick={() => void handleSearch()}
-          disabled={searching || !isLoaded || address.trim().length < MAP_SEARCH_MIN_LENGTH}
-          startIcon={searching ? <CircularProgress size={14} /> : undefined}
-        >
-          Search
-        </Button>
+        <AddressAutocomplete
+          value={address}
+          isLoaded={isLoaded}
+          onChange={setAddress}
+          onLocationSelect={handleAddressSelected}
+          label="Search address"
+          size="small"
+          buttonVariant="outlined"
+          containerSx={{ flex: '1 1 220px', minWidth: 0 }}
+        />
         <Button
           type="button"
           variant="outlined"
