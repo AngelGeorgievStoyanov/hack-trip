@@ -29,6 +29,7 @@ interface PointFormProps {
   longitude: string;
   onLocationChange: (latitude: string, longitude: string) => void;
   onFindInMap: () => void;
+  onAddNextDay: () => void;
   onBack: () => void;
   onDone: () => void;
 }
@@ -56,7 +57,7 @@ const legacyButtonSx = {
   '&:hover': { backgroundColor: '#4daf30' },
 };
 
-export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onLocationChange, onFindInMap, onBack, onDone }: PointFormProps) {
+export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onLocationChange, onFindInMap, onAddNextDay, onBack, onDone }: PointFormProps) {
   const queryClient = useQueryClient();
   const { confirm } = useConfirm();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -73,7 +74,7 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onL
     watch,
     setValue,
     reset,
-    formState: { errors },
+    formState: { errors, isDirty, isValid },
   } = useForm<PointFormValues>({
     resolver: zodResolver(formSchema),
     mode: 'onChange',
@@ -85,12 +86,9 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onL
     },
   });
 
-  const lat = watch('lat');
-  const lng = watch('lng');
-
   useEffect(() => {
-    setValue('lat', latitude, { shouldValidate: true });
-    setValue('lng', longitude, { shouldValidate: true });
+    setValue('lat', latitude, { shouldValidate: true, shouldDirty: true });
+    setValue('lng', longitude, { shouldValidate: true, shouldDirty: true });
   }, [latitude, longitude, setValue]);
 
   function updateTripCache(updatedPoints: TripPoint[]): void {
@@ -225,9 +223,9 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onL
         <Button
           type="button"
           variant="outlined"
-          onClick={() => setFindInMapTrigger((current) => current + 1)}
-          disabled={!lat || !lng}
-          sx={{ m: 1 }}
+          onClick={onFindInMap}
+          disabled={!latitude || !longitude}
+          sx={{ m: 1, '&:hover': { backgroundColor: '#4daf30' } }}
         >
           FIND IN MAP
         </Button>
@@ -290,7 +288,7 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onL
         <Button
           type="submit"
           variant="contained"
-          disabled={submitting || !latitude || !longitude || (!isEdit && (!watch('name') || !watch('name').trim())) || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
+          disabled={submitting || !latitude || !longitude || (!isEdit && (!isDirty || !isValid)) || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
           startIcon={submitting ? <CircularProgress size={16} /> : undefined}
           sx={legacyButtonSx}
         >
@@ -300,9 +298,7 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onL
           <Button
             type="button"
             variant="contained"
-            onClick={() => {
-              window.location.assign(`/trips/create?tripGroupId=${tripGroupId}`);
-            }}
+            onClick={onAddNextDay}
             disabled={submitting}
             sx={legacyButtonSx}
           >
