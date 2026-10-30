@@ -158,7 +158,8 @@ export function CreatePointPage() {
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'minmax(250px, 0.75fr) minmax(0, 1.6fr)' },
+          gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'minmax(0, 1fr)' },
+          '@media (min-width:1021px)': { gridTemplateColumns: 'minmax(250px, 0.75fr) minmax(0, 1.6fr)' },
           alignItems: 'start',
           gap: { xs: 2, md: 3 },
         }}
