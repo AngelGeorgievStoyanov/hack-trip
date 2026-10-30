@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { Autocomplete } from '@react-google-maps/api';
 import { Alert, Box, Button, CircularProgress, Stack, TextField } from '@mui/material';
+import type { TextFieldProps } from '@mui/material/TextField';
 import type { SxProps, Theme } from '@mui/material/styles';
 import type { StackProps } from '@mui/material/Stack';
 import { MAP_SEARCH_MIN_LENGTH } from '@/constants/maps';
@@ -20,6 +21,8 @@ interface AddressAutocompleteProps {
   buttonSx?: SxProps<Theme>;
   containerSx?: SxProps<Theme>;
   direction?: StackProps['direction'];
+  showSearchButton?: boolean;
+  textFieldProps?: Omit<TextFieldProps, 'value' | 'onChange' | 'type'>;
 }
 
 const PLACE_FIELDS = ['geometry.location', 'formatted_address'];
@@ -36,6 +39,8 @@ export function AddressAutocomplete({
   buttonSx,
   containerSx,
   direction = { xs: 'column', sm: 'row' },
+  showSearchButton = true,
+  textFieldProps,
 }: AddressAutocompleteProps) {
   const [searching, setSearching] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -95,6 +100,7 @@ export function AddressAutocomplete({
 
   const addressField = (
     <TextField
+      {...textFieldProps}
       size={size}
       fullWidth
       label={label}
@@ -136,16 +142,18 @@ export function AddressAutocomplete({
             addressField
           )}
         </Box>
-        <Button
-          type="button"
-          variant={buttonVariant}
-          onClick={() => void handleSearch()}
-          disabled={searching || !isLoaded || value.trim().length < MAP_SEARCH_MIN_LENGTH}
-          startIcon={searching ? <CircularProgress size={14} /> : undefined}
-          sx={buttonSx ?? { whiteSpace: 'nowrap' }}
-        >
-          Search
-        </Button>
+        {showSearchButton ? (
+          <Button
+            type="button"
+            variant={buttonVariant}
+            onClick={() => void handleSearch()}
+            disabled={searching || !isLoaded || value.trim().length < MAP_SEARCH_MIN_LENGTH}
+            startIcon={searching ? <CircularProgress size={14} /> : undefined}
+            sx={buttonSx ?? { whiteSpace: 'nowrap' }}
+          >
+            Search
+          </Button>
+        ) : null}
       </Stack>
       {notice ? (
         <Alert severity="info" onClose={() => setNotice(null)}>
