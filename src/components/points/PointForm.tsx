@@ -46,6 +46,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
   const [files, setFiles] = useState<File[]>([]);
   const [createdPointId, setCreatedPointId] = useState<number | null>(null);
   const [existingImages, setExistingImages] = useState(point?.images ?? []);
+  const [uploadedImageCount, setUploadedImageCount] = useState(0);
   const isEdit = point !== undefined;
 
   const {
@@ -109,6 +110,9 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         }
         pointId = createdPoint.id;
         setCreatedPointId(pointId);
+      } else if (!isEdit && pointId !== null) {
+        const updatedPoints = await pointApi.updatePoint(pointId, input);
+        updateTripCache(updatedPoints);
       }
 
       if (pointId !== null && files.length > 0) {
@@ -116,6 +120,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         for (const file of files) {
           try {
             await pointApi.uploadPointImage(pointId, file);
+            setUploadedImageCount((current) => current + 1);
           } catch {
             failedFiles.push(file);
           }
@@ -132,6 +137,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
 
       if (!isEdit) {
         setCreatedPointId(null);
+        setUploadedImageCount(0);
         setFiles([]);
         reset({ name: '', description: '', lat: '', lng: '' });
       }
@@ -246,7 +252,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         <ImageUploadField
           files={files}
           setFiles={setFiles}
-          existingCount={existingImages.length}
+          existingCount={existingImages.length + uploadedImageCount}
         />
       </Box>
 
@@ -257,7 +263,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         <Button
           type="submit"
           variant="contained"
-          disabled={submitting || existingImages.length + files.length > MAX_IMAGES_PER_ENTITY}
+          disabled={submitting || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
           startIcon={submitting ? <CircularProgress size={16} /> : undefined}
         >
           {isEdit ? 'Save point' : createdPointId ? 'Retry image upload' : 'Add point'}
