@@ -149,7 +149,7 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
         {day.points.map((point, index) => (
           <Box key={point.id} sx={{ border: '1px solid #eee', p: 1, my: 1 }}>
             {editingPointId === point.id ? (
-              <PointForm tripGroupId={tripGroupId} dayId={day.id} point={point} onDone={() => setEditingPointId(null)} />
+              <PointForm tripGroupId={tripGroupId} tripId={day.id} point={point} onDone={() => setEditingPointId(null)} />
             ) : (
               <>
                 <Typography variant="subtitle2">{point.name}</Typography>
@@ -207,7 +207,7 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
           </Box>
         ))}
         {addingPoint ? (
-          <PointForm tripGroupId={tripGroupId} dayId={day.id} onDone={() => setAddingPoint(false)} />
+          <PointForm tripGroupId={tripGroupId} tripId={day.id} onDone={() => setAddingPoint(false)} />
         ) : (
           <Button size="small" variant="outlined" onClick={() => setAddingPoint(true)}>Add point</Button>
         )}
