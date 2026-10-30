@@ -53,7 +53,6 @@ export function TripForm() {
   const searchParams = useSearchParams();
   const urlTripGroupId = Number(searchParams.get('tripGroupId')) || null;
   const [serverError, setServerError] = useState<string | null>(null);
-  const [dayNumberNotice, setDayNumberNotice] = useState<string | null>(null);
   const [missingDays, setMissingDays] = useState<number[]>([]);
   const [existingTrip, setExistingTrip] = useState<TripGroupResponse | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -161,7 +160,7 @@ export function TripForm() {
     const occupied = Boolean(
       existingTrip?.days.some((day) => day.dayNumber === dayNumber),
     );
-    setDayNumberNotice(occupied ? `Day ${dayNumber} already exists!` : null);
+    setServerError(occupied ? `Day ${dayNumber} already exists!` : null);
     return !occupied;
   }
 
@@ -384,16 +383,6 @@ export function TripForm() {
 
       <Snackbar
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        open={Boolean(dayNumberNotice)}
-        autoHideDuration={5000}
-        onClose={() => setDayNumberNotice(null)}
-      >
-        <Alert severity="error" onClose={() => setDayNumberNotice(null)}>
-          {dayNumberNotice}
-        </Alert>
-      </Snackbar>
-      <Snackbar
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         open={Boolean(serverError)}
         autoHideDuration={5000}
         onClose={() => setServerError(null)}
@@ -425,7 +414,7 @@ export function TripForm() {
             if (Number.isInteger(nextDayNumber) && nextDayNumber > 0) {
               validateDayNumber(nextDayNumber);
             } else {
-              setDayNumberNotice(null);
+              setServerError(null);
             }
           }}
           error={!!errors.dayNumber}
