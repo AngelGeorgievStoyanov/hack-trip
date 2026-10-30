@@ -575,18 +575,20 @@ export function TripForm() {
 
       <Box
         sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', sm: 'repeat(4, minmax(0, 1fr))' },
-          gap: 1,
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          alignItems: 'center',
           width: '100%',
           mt: 1,
           '& .MuiButton-root': {
-            m: 0,
-            minWidth: 0,
+            m: 1,
+            minWidth: { xs: 'calc(50% - 16px)', sm: '150px' },
+            maxWidth: '220px',
             minHeight: 36,
-            px: 1,
+            px: 1.5,
             py: 0.75,
-            fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' },
+            fontSize: { xs: '0.7rem', sm: '0.75rem' },
             lineHeight: 1.2,
             whiteSpace: 'normal',
             overflowWrap: 'anywhere',
@@ -632,6 +634,7 @@ export function TripForm() {
         <Button
           type="button"
           variant="contained"
+          onClick={() => router.back()}
           sx={{ '&:hover': { backgroundColor: '#4daf30' } }}
         >
           Back
