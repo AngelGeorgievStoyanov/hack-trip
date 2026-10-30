@@ -32,7 +32,7 @@ export function PointCard({
       <IconButton
         aria-label={`Move point ${point.pointNumber} up`}
         onClick={() => onMove(point, 'up')}
-        disabled={disabled || point.pointNumber <= 1}
+        disabled={disabled || !point.permissions.canEdit || point.pointNumber <= 1}
         sx={{ visibility: point.pointNumber > 1 ? 'visible' : 'hidden', p: 0.25 }}
       >
         <ArrowCircleUpIcon />
@@ -106,7 +106,7 @@ export function PointCard({
       <IconButton
         aria-label={`Move point ${point.pointNumber} down`}
         onClick={() => onMove(point, 'down')}
-        disabled={disabled || point.pointNumber >= length}
+        disabled={disabled || !point.permissions.canEdit || point.pointNumber >= length}
         sx={{ visibility: point.pointNumber < length ? 'visible' : 'hidden', p: 0.25 }}
       >
         <ArrowCircleDownIcon />
