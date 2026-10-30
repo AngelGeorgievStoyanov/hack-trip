@@ -160,11 +160,19 @@ export function PointLocationPicker({
           isLoaded={isLoaded}
           onChange={setAddress}
           onLocationSelect={handleAddressSelected}
-          label="Search"
+          label="Search field"
           size="small"
           buttonVariant="outlined"
           containerSx={{ flex: '1 1 220px', minWidth: 0 }}
         />
+        <Button
+          type="button"
+          variant="contained"
+          onClick={handleClearLocation}
+          sx={{ backgroundColor: 'rgb(194, 194, 224)', color: 'black', '&:hover': { color: 'rgb(248 245 245)' } }}
+        >
+          Remove Marker
+        </Button>
         <Button
           type="button"
           variant="outlined"
@@ -174,11 +182,7 @@ export function PointLocationPicker({
         >
           GPS position
         </Button>
-        {position ? (
-          <Button type="button" variant="outlined" color="error" onClick={handleClearLocation}>
-            Remove Marker
-          </Button>
-        ) : null}
+
         {notice ? (
           <Alert severity="info" onClose={() => setNotice(null)} sx={{ flexBasis: '100%' }}>
             {notice}
