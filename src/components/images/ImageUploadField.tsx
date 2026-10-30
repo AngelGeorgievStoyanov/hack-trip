@@ -169,6 +169,8 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
     setErrorMessage(null);
   }
 
+  const isAtImageLimit = existingCount + files.length >= MAX_IMAGES_PER_ENTITY;
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, width: '100%' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
@@ -182,7 +184,7 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
         />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {processing ? <CircularProgress size={18} aria-label="Processing images" /> : null}
-          <Typography variant="overline" sx={{ mr: 1 }}>
+          <Typography variant="body2" sx={{ mr: 1 }}>
             {existingCount + files.length}/{MAX_IMAGES_PER_ENTITY} uploaded images
           </Typography>
           {files.length > 0 ? (
@@ -201,10 +203,27 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
         </Box>
       </Box>
 
+      {isAtImageLimit ? (
+        <Typography variant="body2" color="error">
+          9 images are the maximum number to upload.
+        </Typography>
+      ) : null}
       {errorMessage ? <Alert severity="warning" onClose={() => setErrorMessage(null)}>{errorMessage}</Alert> : null}
 
       {previews.length > 0 ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
+            maxHeight: 200,
+            overflowY: 'auto',
+            border: '1px solid black',
+            borderRadius: '5px',
+            p: '6px',
+            m: '6px',
+          }}
+        >
           {previews.map(({ file, url }, index) => (
             <Box
               key={`${file.name}-${file.lastModified}-${index}`}
@@ -214,7 +233,7 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
                 component="img"
                 src={url}
                 alt={file.name}
-                sx={{ width: 48, height: 56, objectFit: 'cover', flexShrink: 0, borderRadius: 0.5 }}
+                sx={{ width: 55, height: 45, objectFit: 'cover', flexShrink: 0 }}
               />
               <Typography variant="body2" title={file.name} sx={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
                 {file.name}
