@@ -54,6 +54,7 @@ export function TripForm() {
   const urlTripGroupId = Number(searchParams.get('tripGroupId')) || null;
   const [serverError, setServerError] = useState<string | null>(null);
   const [dayNumberNotice, setDayNumberNotice] = useState<string | null>(null);
+  const [missingDays, setMissingDays] = useState<number[]>([]);
   const [existingTrip, setExistingTrip] = useState<TripGroupResponse | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -101,8 +102,21 @@ export function TripForm() {
       .then((trip) => {
         if (cancelled) return;
         setExistingTrip(trip);
-        const latestDay = [...trip.days].sort((a, b) => b.dayNumber - a.dayNumber)[0];
+        const sortedDays = [...trip.days].sort((a, b) => a.dayNumber - b.dayNumber);
+        const latestDay = sortedDays[sortedDays.length - 1];
+        const missingDayNumbers: number[] = [];
+        for (let index = 1; index < sortedDays.length; index += 1) {
+          for (
+            let dayNumber = sortedDays[index - 1].dayNumber + 1;
+            dayNumber < sortedDays[index].dayNumber;
+            dayNumber += 1
+          ) {
+            missingDayNumbers.push(dayNumber);
+          }
+        }
+        setMissingDays(missingDayNumbers);
         if (latestDay) {
+          setValue('dayNumber', latestDay.dayNumber + 1, { shouldValidate: true });
           setValue('transport', latestDay.transport.key, { shouldValidate: true });
           setValue('typeOfPeople', latestDay.group.key, { shouldValidate: true });
           setValue('currency', latestDay.currency?.code ?? '', { shouldValidate: true });
@@ -114,13 +128,6 @@ export function TripForm() {
     return () => { cancelled = true; };
   }, [urlTripGroupId, setValue]);
 
-  useEffect(() => {
-    if (isDayNumberOccupied) {
-      setDayNumberNotice(`Day ${currentDayNumber} already exists!`);
-    } else {
-      setDayNumberNotice(null);
-    }
-  }, [currentDayNumber, isDayNumberOccupied]);
   const transportChoices = useSelectChoices(SELECT_TYPE_KEYS.transport, watch('transport'));
   const currencyChoices = useSelectChoices(SELECT_TYPE_KEYS.currency, watch('currency'));
 
@@ -151,10 +158,19 @@ export function TripForm() {
   }, [currencyChoices, getValues, setValue]);
 
 
+  function validateDayNumber(dayNumber: number): boolean {
+    const occupied = Boolean(
+      existingTrip?.days.some((day) => day.dayNumber === dayNumber),
+    );
+    setDayNumberNotice(occupied ? `Day ${dayNumber} already exists!` : null);
+    return !occupied;
+  }
+
   function changeDayNumber(delta: number): void {
     const current = getValues('dayNumber');
     const next = Math.min(DAY_NUMBER_MAX, Math.max(1, current + delta));
     setValue('dayNumber', next, { shouldDirty: true, shouldValidate: true });
+    validateDayNumber(next);
   }
 
   function navigateToCreatedTrip(created: TripGroupResponse): void {
@@ -234,13 +250,10 @@ export function TripForm() {
     intent: 'add-trip' | 'add-next-day' | 'add-point' = 'add-trip',
   ): Promise<void> {
     if (isLoadingExistingTrip) return;
-    if (isDayNumberOccupied) {
-      setDayNumberNotice(`Day ${values.dayNumber} already exists!`);
-      return;
-    }
+    if (!validateDayNumber(values.dayNumber)) return;
 
     if (createdTrip) {
-      await uploadPendingImages(createdTrip, selectedFiles);
+      await uploadPendingImages(createdTrip, selectedFiles, false, createdPointTripId);
       return;
     }
 
@@ -375,51 +388,36 @@ export function TripForm() {
         Create trip
       </Typography>
 
-      {serverError ? <Alert severity="error">{serverError}</Alert> : null}
       <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         open={Boolean(dayNumberNotice)}
         autoHideDuration={5000}
         onClose={() => setDayNumberNotice(null)}
-        message={dayNumberNotice ?? ''}
-      />
-
-      {createdTrip ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mx: '4px' }}>
-          <Alert severity={selectedFiles.length > 0 ? 'warning' : 'success'}>
-            {selectedFiles.length > 0
-              ? `Trip created. ${selectedFiles.length} image(s) still need to be uploaded.`
-              : 'Trip created successfully.'}
-          </Alert>
-          {selectedFiles.length > 0 ? (
-            <>
-              <ImageUploadField files={selectedFiles} setFiles={setSelectedFiles} />
-              <Button
-                type="button"
-                variant="contained"
-                disabled={uploadingImages || selectedFiles.length === 0}
-                startIcon={uploadingImages ? <CircularProgress size={18} /> : undefined}
-                onClick={() => void uploadPendingImages(createdTrip, selectedFiles, false, createdPointTripId)}
-              >
-                Retry failed image uploads
-              </Button>
-            </>
-          ) : null}
-          <Button
-            type="button"
-            variant="outlined"
-            disabled={uploadingImages}
-            onClick={() => {
-              if (createdPointTripId !== null) {
-                navigateToCreatedPoint(createdTrip, createdPointTripId);
-              } else {
-                navigateToCreatedTrip(createdTrip);
-              }
-            }}
-          >
-            Continue to Trip Details
-          </Button>
-        </Box>
-      ) : (<>
+      >
+        <Alert severity="error" onClose={() => setDayNumberNotice(null)}>
+          {dayNumberNotice}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        open={Boolean(serverError)}
+        autoHideDuration={5000}
+        onClose={() => setServerError(null)}
+      >
+        <Alert severity="error" onClose={() => setServerError(null)}>
+          {serverError}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        open={missingDays.length > 0}
+        autoHideDuration={10000}
+        onClose={() => setMissingDays([])}
+      >
+        <Alert severity="info" onClose={() => setMissingDays([])}>
+          Missing day(s): {missingDays.join(', ')}
+        </Alert>
+      </Snackbar>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', m: '4px' }}>
         <TextField
@@ -427,6 +425,15 @@ export function TripForm() {
           type="number"
           size="small"
           {...register('dayNumber', { valueAsNumber: true })}
+          onChange={(event) => {
+            register('dayNumber', { valueAsNumber: true }).onChange(event);
+            const nextDayNumber = Number(event.target.value);
+            if (Number.isInteger(nextDayNumber) && nextDayNumber > 0) {
+              validateDayNumber(nextDayNumber);
+            } else {
+              setDayNumberNotice(null);
+            }
+          }}
           error={!!errors.dayNumber}
           helperText={errors.dayNumber?.message}
           slotProps={{ htmlInput: { min: 1, max: DAY_NUMBER_MAX, step: 1, style: { textAlign: 'center' } } }}
@@ -647,7 +654,6 @@ export function TripForm() {
           Back
         </Button>
       </Box>
-      </>)}
       </Box>
     </>
   );
