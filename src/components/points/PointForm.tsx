@@ -232,6 +232,7 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
               <Box key={image.id} sx={{ width: 112, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                 <AppImage image={image} alt={point?.name ?? 'Point image'} preset="editorPointThumb" />
                 <Button
+                  type="button"
                   size="small"
                   color="error"
                   disabled={submitting}
@@ -257,7 +258,19 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
       </Box>
 
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-        <Button type="button" onClick={onDone} disabled={submitting}>
+        <Button
+          type="button"
+          onClick={() => {
+            if (!isEdit) {
+              setCreatedPointId(null);
+              setUploadedImageCount(0);
+              setFiles([]);
+              reset({ name: '', description: '', lat: '', lng: '' });
+            }
+            onDone();
+          }}
+          disabled={submitting}
+        >
           Cancel
         </Button>
         <Button
