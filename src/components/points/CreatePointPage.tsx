@@ -7,14 +7,12 @@ import {
   Box,
   Button,
   CircularProgress,
-  Divider,
   Paper,
-  Stack,
-  Typography,
 } from '@mui/material';
 import { tripApi } from '@/api/trips';
 import { pointApi } from '@/api/points';
 import { PointForm } from '@/components/points/PointForm';
+import { PointList } from '@/components/points/PointList';
 import { PointLocationPicker } from '@/components/maps/PointLocationPicker';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
@@ -131,6 +129,37 @@ export function CreatePointPage() {
     }
   }
 
+  async function handleMovePoint(point: TripPoint, direction: 'up' | 'down'): Promise<void> {
+    if (!selectedDay || saving || !point.permissions.canEdit) return;
+
+    const orderedPoints = [...selectedDay.points].sort(
+      (first, second) => first.pointNumber - second.pointNumber,
+    );
+    const currentIndex = orderedPoints.findIndex((item) => item.id === point.id);
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= orderedPoints.length) return;
+
+    const nextPoints = [...orderedPoints];
+    [nextPoints[currentIndex], nextPoints[targetIndex]] = [
+      nextPoints[targetIndex],
+      nextPoints[currentIndex],
+    ];
+
+    setSaving(true);
+    setError(null);
+    try {
+      await pointApi.reorderPoints(tripId, {
+        pointIds: nextPoints.map((item) => item.id),
+      });
+      await refreshTrip();
+    } catch (requestError) {
+      setError(getGenericErrorMessage(requestError));
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
@@ -160,74 +189,15 @@ export function CreatePointPage() {
           gap: { xs: 2, md: 3 },
         }}
       >
-        <Paper
-          variant="outlined"
-          sx={{
-            p: { xs: 1.5, sm: 2 },
-            minWidth: 0,
-            backgroundColor: '#eee7e79e',
-            border: '1px solid black',
-            borderRadius: 0,
-            boxShadow: '3px 2px 5px black',
-          }}
-        >
-          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-            <Typography variant="h6">Points ({selectedDay.points.length})</Typography>
-            <Button
-              size="small"
-              variant="contained"
-              onClick={() => selectPoint()}
-              disabled={saving}
-            >
-              Add point
-            </Button>
-          </Stack>
-          <Divider sx={{ my: 1.5 }} />
-
-          {selectedDay.points.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              No points added to this day yet.
-            </Typography>
-          ) : (
-            <Stack spacing={1}>
-              {selectedDay.points.map((point) => (
-                <Paper
-                  key={point.id}
-                  variant="outlined"
-                  sx={{
-                    p: 1.5,
-                    borderColor: selectedPoint?.id === point.id ? 'primary.main' : 'divider',
-                    backgroundColor: selectedPoint?.id === point.id ? 'action.selected' : 'background.paper',
-                  }}
-                >
-                  <Typography variant="subtitle1" sx={{ overflowWrap: 'anywhere' }}>
-                    {point.pointNumber}. {point.name}
-                  </Typography>
-                  {point.description ? (
-                    <Typography variant="body2" color="text.secondary" sx={{ my: 0.5 }}>
-                      {point.description}
-                    </Typography>
-                  ) : null}
-                  {point.lat != null && point.lng != null ? (
-                    <Typography variant="caption" color="text.secondary">
-                      {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
-                    </Typography>
-                  ) : null}
-                  <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                    <Button size="small" onClick={() => selectPoint(point)}>Edit</Button>
-                    <Button size="small" color="error" onClick={() => void handleDeletePoint(point)}>
-                      Delete
-                    </Button>
-                  </Stack>
-                </Paper>
-              ))}
-            </Stack>
-          )}
-
-          <Button fullWidth sx={{ mt: 2 }} onClick={handleBack}>
-            Back to trip
-          </Button>
-        </Paper>
+        <Box sx={{ minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <PointList
+            points={selectedDay.points}
+            onEdit={selectPoint}
+            onDelete={(point) => void handleDeletePoint(point)}
+            onMove={(point, direction) => void handleMovePoint(point, direction)}
+            disabled={saving}
+          />
+        </Box>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', minWidth: 0 }}>
           <PointLocationPicker
