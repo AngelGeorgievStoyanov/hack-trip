@@ -21,6 +21,7 @@ import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { pointCreateSchema } from '@/validations/points';
 import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
+import { truncatePointName } from '@/lib/pointName';
 import type { TripGroupResponse, TripPoint } from '@/types';
 
 interface PointFormProps {
@@ -30,6 +31,7 @@ interface PointFormProps {
   latitude: string;
   longitude: string;
   onLocationChange: (latitude: string, longitude: string) => void;
+  mapSearchName?: string;
   onFindInMap: () => void;
   onAddNextDay: () => void;
   onBack: () => void;
@@ -45,13 +47,6 @@ interface PointFormValues {
 
 const formSchema = pointCreateSchema.omit({ tripId: true });
 
-const legacyFieldSx = {
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: 'rgba(242, 241, 229, 0.56)',
-    borderRadius: '5px',
-  },
-};
-
 const legacyButtonSx = {
   width: '32ch',
   maxWidth: '100%',
@@ -59,7 +54,7 @@ const legacyButtonSx = {
   '&:hover': { backgroundColor: '#4daf30' },
 };
 
-export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onLocationChange, onFindInMap, onAddNextDay, onBack, onDone }: PointFormProps) {
+export function PointForm({ tripGroupId, tripId, point, latitude, longitude, mapSearchName, onLocationChange, onFindInMap, onAddNextDay, onBack, onDone }: PointFormProps) {
   const queryClient = useQueryClient();
   const { isLoaded } = useGoogleMapsLoader();
   const { confirm } = useConfirm();
@@ -69,6 +64,8 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onL
   const [createdPointId, setCreatedPointId] = useState<number | null>(null);
   const [existingImages, setExistingImages] = useState(point?.images ?? []);
   const [uploadedImageCount, setUploadedImageCount] = useState(0);
+  const [findingLocation, setFindingLocation] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const isEdit = point !== undefined;
 
   const {
@@ -93,6 +90,49 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onL
     setValue('lat', latitude, { shouldValidate: true, shouldDirty: true });
     setValue('lng', longitude, { shouldValidate: true, shouldDirty: true });
   }, [latitude, longitude, setValue]);
+
+  useEffect(() => {
+    if (mapSearchName) {
+      setValue('name', truncatePointName(mapSearchName), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [mapSearchName, setValue]);
+
+  async function handleFindInMap(): Promise<void> {
+    const query = watch('name').trim();
+    if (!query) {
+      setLocationError('Enter a place name first.');
+      return;
+    }
+    if (!isLoaded) {
+      setLocationError('Google Maps is not ready yet.');
+      return;
+    }
+
+    setFindingLocation(true);
+    setLocationError(null);
+    try {
+      const response = await new google.maps.Geocoder().geocode({ address: query });
+      const match = response.results[0];
+      if (!match) {
+        setLocationError('No location matched that name.');
+        return;
+      }
+
+      const nextLatitude = String(match.geometry.location.lat());
+      const nextLongitude = String(match.geometry.location.lng());
+      setValue('lat', nextLatitude, { shouldValidate: true, shouldDirty: true });
+      setValue('lng', nextLongitude, { shouldValidate: true, shouldDirty: true });
+      onLocationChange(nextLatitude, nextLongitude);
+      onFindInMap();
+    } catch {
+      setLocationError('Could not find this location. Check the name and try again.');
+    } finally {
+      setFindingLocation(false);
+    }
+  }
 
   function updateTripCache(updatedPoints: TripPoint[]): void {
     queryClient.setQueryData<TripGroupResponse>(['trip', tripGroupId], (current) =>
@@ -216,13 +256,12 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onL
         isLoaded={isLoaded}
         onChange={(value) => setValue('name', value, { shouldDirty: true, shouldValidate: true })}
         onLocationSelect={(position, address) => {
-          setValue('name', address, { shouldDirty: true, shouldValidate: true });
+          setValue('name', truncatePointName(address), { shouldDirty: true, shouldValidate: true });
           onLocationChange(String(position.lat), String(position.lng));
         }}
         label="NAME OF CITY, PLACE, LANDMARK OR ANOTHER"
         size="medium"
         showSearchButton={false}
-        inputSx={legacyFieldSx}
         textFieldProps={{
           InputLabelProps: { shrink: true },
           error: !!errors.name,
@@ -234,13 +273,16 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onL
         <Button
           type="button"
           variant="outlined"
-          onClick={onFindInMap}
-          disabled={!latitude || !longitude}
+          onClick={() => void handleFindInMap()}
+          disabled={findingLocation || !isLoaded || !watch('name').trim()}
+          startIcon={findingLocation ? <CircularProgress size={16} /> : undefined}
           sx={{ m: 1, '&:hover': { backgroundColor: '#4daf30' } }}
         >
           FIND IN MAP
         </Button>
       </Box>
+
+      {locationError ? <Alert severity="error" sx={{ width: '100%' }}>{locationError}</Alert> : null}
 
       <TextField
         label="DESCRIPTION"
@@ -248,7 +290,6 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, onL
         multiline
         rows={4}
         InputLabelProps={{ shrink: true }}
-        sx={legacyFieldSx}
         {...register('description')}
         error={!!errors.description}
         helperText={errors.description?.message}
