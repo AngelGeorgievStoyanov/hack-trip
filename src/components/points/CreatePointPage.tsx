@@ -271,6 +271,7 @@ export function CreatePointPage() {
                 setPointLongitude(longitude);
               }}
               onFindInMap={() => setFindInMapTrigger((current) => current + 1)}
+              onAddNextDay={() => router.push(`/trips/create?tripGroupId=${tripGroup.id}`)}
               onBack={handleBack}
               onDone={() => void handlePointSaved()}
             />
