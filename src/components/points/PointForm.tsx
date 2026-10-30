@@ -63,8 +63,8 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
         lng: Number(values.lng),
       };
       // POST /points and PUT /points/:id both return the updated TripPoint[]
-      // for the day. The cached trip response is updated by replacing the day's
-      // points array with the returned array.
+      // for the trip. The cached trip-group response is updated by replacing
+      // the selected trip's points array with the returned array.
       const updatedPoints = isEdit && point
         ? await pointApi.updatePoint(point.id, input)
         : await pointApi.createPoint({ tripId, ...input });
