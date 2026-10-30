@@ -187,7 +187,6 @@ export function PointForm({ tripGroupId, tripId, point, onDone }: PointFormProps
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
         gap: 1,
         minWidth: 0,
         width: '100%',
