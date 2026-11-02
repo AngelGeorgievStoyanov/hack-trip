@@ -28,8 +28,11 @@ export function TripDaysManager({ tripGroupId, initialTrip, initialEditingDayId 
   });
 
   const reorderDaysMutation = useMutation({
-    mutationFn: (dayIds: number[]) => tripApi.reorderDays(tripGroupId, { tripIds: dayIds }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['trip', tripGroupId] }),
+    mutationFn: (days: { tripId: number; dayNumber: number }[]) =>
+      tripApi.reorderDays(tripGroupId, { days }),
+    onSuccess: (updatedTripGroup) => {
+      queryClient.setQueryData(['trip', tripGroupId], updatedTripGroup);
+    },
     onError: (e) => setError(getGenericErrorMessage(e)),
   });
 
@@ -43,9 +46,14 @@ export function TripDaysManager({ tripGroupId, initialTrip, initialEditingDayId 
     if (target < 0 || target >= days.length) {
       return;
     }
-    const next = [...days];
-    [next[index], next[target]] = [next[target], next[index]];
-    reorderDaysMutation.mutate(next.map((d) => d.id));
+    const currentDay = days[index];
+    const targetDay = days[target];
+    const next = days.map((day) => {
+      if (day.id === currentDay.id) return { tripId: day.id, dayNumber: targetDay.dayNumber };
+      if (day.id === targetDay.id) return { tripId: day.id, dayNumber: currentDay.dayNumber };
+      return { tripId: day.id, dayNumber: day.dayNumber };
+    });
+    reorderDaysMutation.mutate(next);
   }
 
   return (
