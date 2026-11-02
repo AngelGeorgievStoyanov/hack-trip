@@ -13,8 +13,14 @@ import type { TripGroupResponse } from '@/types';
 
 const LEGACY_BUTTON_SX = {
   ':hover': { background: '#4daf30' },
-  padding: '10px 10px',
-  margin: '5px',
+  padding: '10px',
+  width: '100%',
+  minHeight: '48px',
+  boxSizing: 'border-box',
+};
+
+const ACTION_BUTTON_BOX_SX = {
+  display: 'contents',
 };
 
 /** Owner-only navigation and management actions for the selected trip group. */
@@ -58,7 +64,7 @@ export function TripActions({
     if (!isOwner) return null;
 
     return (
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+      <Box sx={ACTION_BUTTON_BOX_SX}>
         <Button
           component={Link}
           href={`/trips/create?tripGroupId=${tripGroup.id}`}
@@ -105,7 +111,10 @@ export function TripActions({
             disabled={deleteMutation.isPending}
             sx={{
               ':hover': { background: '#ef0a0a' },
-              margin: '5px',
+              padding: '10px',
+              width: '100%',
+              minHeight: '48px',
+              boxSizing: 'border-box',
             }}
           >
             DELETE TRIP
