@@ -57,6 +57,39 @@ export const dayCreateSchema = z
   })
   .strict();
 
+/** Full Edit Trip contract, aligned with the backend tripEditSchema. */
+export const tripEditSchema = z
+  .object({
+    dayNumber: requiredInt({ min: 1, max: DAY_NUMBER_MAX }),
+    title: trimmedString({
+      min: 1,
+      max: TRIP_TITLE_MAX_LENGTH,
+      minMessage: 'Title cannot be empty.',
+    }),
+    description: z.preprocess(
+      (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
+      z.union([
+        trimmedString({ max: TRIP_DESCRIPTION_MAX_LENGTH }),
+        z.null(),
+      ]),
+    ),
+    price: requiredNumber({ min: 0, max: 1000000 }),
+    transport: trimmedString({ min: 1, max: TRIP_TRANSPORT_MAX_LENGTH }),
+    countPeoples: requiredInt({ min: 1, max: 1000 }),
+    typeOfPeople: trimmedString({ min: 1, max: TRIP_GROUP_MAX_LENGTH }),
+    currency: trimmedString({ min: 1, max: 3 }),
+    destination: z.preprocess(
+      (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
+      z.union([
+        trimmedString({ min: 1, max: TRIP_TITLE_MAX_LENGTH }),
+        z.null(),
+      ]),
+    ),
+    lat: z.union([z.number().min(-90).max(90), z.null()]),
+    lng: z.union([z.number().min(-180).max(180), z.null()]),
+  })
+  .strict();
+
 export const dayUpdateSchema = z
   .object({
     title: patchText({ min: 1, max: DAY_TITLE_MAX_LENGTH }),
