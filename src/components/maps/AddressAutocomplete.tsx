@@ -124,14 +124,13 @@ export function AddressAutocomplete({
   );
 
   return (
-    <Stack spacing={1} sx={containerSx}>
+    <Stack spacing={0.5} sx={containerSx}>
       <Stack
         direction={direction}
-        spacing={1}
+        spacing={0.5}
         alignItems="stretch"
-        flexWrap="wrap"
       >
-        <Box sx={{ flex: '1 1 180px', minWidth: 0, '& .MuiFormControl-root': { width: '100%' } }}>
+        <Box sx={{ flex: '1 1 0', width: '100%', minWidth: 0, '& .MuiFormControl-root': { width: '100%' } }}>
           {supportsAutocomplete ? (
             <Autocomplete
               fields={PLACE_FIELDS}
@@ -156,13 +155,13 @@ export function AddressAutocomplete({
             onClick={() => void handleSearch()}
             disabled={searching || !isLoaded || value.trim().length < MAP_SEARCH_MIN_LENGTH}
             startIcon={searching ? <CircularProgress size={14} /> : undefined}
-            sx={{ flex: '1 1 180px', minWidth: 0, whiteSpace: 'nowrap', ...((buttonSx ?? {}) as object) }}
+            sx={{ flex: '1 1 0', width: '100%', minWidth: 0, whiteSpace: 'nowrap', ...((buttonSx ?? {}) as object) }}
           >
             Search
           </Button>
         ) : null}
         {extraAction ? (
-          <Box sx={{ flex: '1 1 180px', minWidth: 0, display: 'flex', '& > *': { width: '100%' } }}>
+          <Box sx={{ flex: '1 1 0', width: '100%', minWidth: 0, display: 'flex', '& > *': { width: '100%' } }}>
             {extraAction}
           </Box>
         ) : null}
