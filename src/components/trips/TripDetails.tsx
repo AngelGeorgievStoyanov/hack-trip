@@ -24,6 +24,7 @@ interface TripDetailsProps {
   tripCommentTarget: CommentTarget | null;
   /** Toggles the comments panel for a given target within the Trip section. */
   toggleTripComments: (target: CommentTarget) => void;
+  onDayDeleted: (updatedTripGroup: TripGroupResponse) => void;
 }
 
 const NAME_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1.5rem', fontWeight: 500 };
@@ -36,7 +37,7 @@ const LINE_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1rem', font
  * Trip Group actions use `tripGroup.social`; Like/Favorite/Report for the selected day
  * use that day's `social` state. Comments remain day-level.
  */
-export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComments }: TripDetailsProps) {
+export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComments, onDayDeleted }: TripDetailsProps) {
   const totalPoints = tripGroup.days.reduce((sum, current) => sum + current.points.length, 0);
   const dayCommentCount = day.social.comments.count;
   const [expanded, setExpanded] = useState(false);
@@ -143,7 +144,7 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
 
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1, mt: 1, width: '100%' }}>
             <TripActions tripGroup={tripGroup} tripId={day.id} section="navigation" />
-            <TripActions tripGroup={tripGroup} tripId={day.id} section="management" />
+            <TripActions tripGroup={tripGroup} tripId={day.id} section="management" onDayDeleted={onDayDeleted} />
             <Link
               href="/trips"
               style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}
