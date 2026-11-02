@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Box, Button, Typography } from '@mui/material';
-import { tripApi } from '@/api/trips';
+import { tripApi, type DayReorderInput } from '@/api/trips';
 import { DayForm } from './DayForm';
 import { DayEditor } from './DayEditor';
 import { getGenericErrorMessage } from '@/lib/errors';
@@ -28,8 +28,7 @@ export function TripDaysManager({ tripGroupId, initialTrip, initialEditingDayId 
   });
 
   const reorderDaysMutation = useMutation({
-    mutationFn: (days: { tripId: number; dayNumber: number }[]) =>
-      tripApi.reorderDays(tripGroupId, { days }),
+    mutationFn: (input: DayReorderInput) => tripApi.reorderDays(tripGroupId, input),
     onSuccess: (updatedTripGroup) => {
       queryClient.setQueryData(['trip', tripGroupId], updatedTripGroup);
     },
@@ -43,7 +42,7 @@ export function TripDaysManager({ tripGroupId, initialTrip, initialEditingDayId 
 
   function moveDay(index: number, direction: -1 | 1): void {
     const target = index + direction;
-    if (target < 0 || target >= days.length) {
+    if (reorderDaysMutation.isPending || target < 0 || target >= days.length) {
       return;
     }
     const currentDay = days[index];
@@ -53,7 +52,7 @@ export function TripDaysManager({ tripGroupId, initialTrip, initialEditingDayId 
       if (day.id === targetDay.id) return { tripId: day.id, dayNumber: currentDay.dayNumber };
       return { tripId: day.id, dayNumber: day.dayNumber };
     });
-    reorderDaysMutation.mutate(next);
+    reorderDaysMutation.mutate({ days: next });
   }
 
   return (
