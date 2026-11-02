@@ -3,6 +3,7 @@ import { NOINDEX } from '@/constants/seo';
 import { notFound } from 'next/navigation';
 import { RequireTripOwner } from '@/components/auth';
 import { TripDaysManager } from '@/components/trips/TripDaysManager';
+import { EditTripLayout } from '@/components/trips/EditTripLayout';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
 import { positiveIdParam } from '@/validations';
 import type { TripGroupResponse } from '@/types';
@@ -47,18 +48,15 @@ export default async function EditTripPage({ params, searchParams }: EditTripPag
     notFound();
   }
 
-  // Trip metadata is day-scoped and uses PUT /trips/:tripGroupId/days/:dayId.
-
   return (
     <RequireTripOwner tripGroupId={trip.id}>
-      <div style={{ maxWidth: 720, display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+      <EditTripLayout trip={trip}>
         <TripDaysManager
           tripGroupId={trip.id}
           initialTrip={trip}
           initialEditingDayId={initialEditingDayId}
         />
-      </div>
+      </EditTripLayout>
     </RequireTripOwner>
   );
 }
-
