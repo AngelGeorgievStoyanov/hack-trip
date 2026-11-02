@@ -142,17 +142,28 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
               : 'FOR THIS TRIP DONT HAVE POINTS'}
           </Typography>
 
-          <TripActions tripGroup={tripGroup} tripId={day.id} section="navigation" />
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'stretch', gap: 1, mt: 1 }}>
+            <TripActions tripGroup={tripGroup} tripId={day.id} section="navigation" />
+            <TripActions tripGroup={tripGroup} tripId={day.id} section="management" />
+            <Link
+              href="/trips"
+              style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flex: '1 1 220px', maxWidth: '280px' }}
+            >
+              <Button
+                variant="contained"
+                sx={{
+                  ':hover': { background: '#4daf30' },
+                  padding: '10px',
+                  width: '100%',
+                  minHeight: '48px',
+                }}
+              >
+                BACK
+              </Button>
+            </Link>
+          </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mt: 1 }}>
-            <EngagementBar
-              targetType="trip"
-              targetId={day.id}
-              social={day.social}
-              commentTarget={dayTarget}
-              showComments={false}
-              showFavorite={false}
-            />
+          <Box sx={{ mt: 1 }}>
             <CommentsToggle
               count={dayCommentCount}
               open={isDayOpen}
@@ -161,15 +172,16 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
             />
           </Box>
 
-          <TripActions tripGroup={tripGroup} tripId={day.id} section="management" />
-
-          <div style={BACK_ROW_STYLE}>
-            <Link href="/trips" style={{ textDecoration: 'none', color: 'inherit' }}>
-              <Button variant="contained" sx={{ ':hover': { background: '#4daf30' }, padding: '10px 10px' }}>
-                BACK
-              </Button>
-            </Link>
-          </div>
+          <Box sx={{ display: 'flex', mt: 1 }}>
+            <EngagementBar
+              targetType="trip"
+              targetId={day.id}
+              social={day.social}
+              commentTarget={dayTarget}
+              showComments={false}
+              showFavorite={false}
+            />
+          </Box>
 
     </div>
   );
