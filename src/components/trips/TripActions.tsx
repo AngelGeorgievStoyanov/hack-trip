@@ -15,6 +15,8 @@ const LEGACY_BUTTON_SX = {
   ':hover': { background: '#4daf30' },
   padding: '10px',
   width: '100%',
+  flex: '1 1 220px',
+  maxWidth: '280px',
   minHeight: '48px',
   boxSizing: 'border-box',
 };
@@ -86,7 +88,7 @@ export function TripActions({
   }
 
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+    <Box sx={ACTION_BUTTON_BOX_SX}>
       {isOwner ? (
         <>
           <Button
