@@ -12,6 +12,7 @@ import type { TripGroupResponse } from '@/types';
 interface TripDaysManagerProps {
   tripGroupId: number;
   initialTrip: TripGroupResponse;
+  initialEditingDayId?: number;
 }
 
 export function TripDaysManager({ tripGroupId, initialTrip, initialEditingDayId }: TripDaysManagerProps) {
