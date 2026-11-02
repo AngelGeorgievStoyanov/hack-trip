@@ -1,6 +1,6 @@
 import { apiClient } from '../client';
 import { IMAGES, ME, TRIPS } from '../../constants/api';
-import type { TripGroupResponse, TripDay } from '../../types';
+import type { TripGroupResponse } from '../../types';
 import type { TripSort } from '../../constants/trips';
 import type {
   BackgroundImageResponse,
@@ -49,7 +49,7 @@ export interface TripEditInput {
 }
 
 export interface DayReorderInput {
-  tripIds: number[];
+  days: { tripId: number; dayNumber: number }[];
 }
 
 export const tripApi = {
@@ -123,9 +123,9 @@ export const tripApi = {
     return data;
   },
 
-  reorderDays: async (tripGroupId: number, input: DayReorderInput): Promise<TripDay[]> => {
+  reorderDays: async (tripGroupId: number, input: DayReorderInput): Promise<TripGroupResponse> => {
     const body = dayReorderSchema.parse(input);
-    const { data } = await apiClient.put<TripDay[]>(`${TRIPS}/${tripGroupId}/days/reorder`, body);
+    const { data } = await apiClient.put<TripGroupResponse>(`${TRIPS}/${tripGroupId}/days/reorder`, body);
     return data;
   },
 
