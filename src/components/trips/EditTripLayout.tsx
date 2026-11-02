@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
@@ -20,7 +20,6 @@ import type { TripGroupResponse } from '@/types';
 
 interface EditTripLayoutProps {
   trip: TripGroupResponse;
-  children: ReactNode;
   selectedDayId?: number;
 }
 
@@ -28,7 +27,7 @@ interface EditTripLayoutProps {
  * Edits one concrete Trip row using PUT /trips/:tripGroupId/days/:tripId.
  * All fields required by the backend are submitted together.
  */
-export function EditTripLayout({ trip, children, selectedDayId }: EditTripLayoutProps) {
+export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -356,9 +355,6 @@ export function EditTripLayout({ trip, children, selectedDayId }: EditTripLayout
         </Box>
       </Box>
 
-      <Box sx={{ width: '100%', maxWidth: 1100 }}>
-        {children}
-      </Box>
     </Box>
   );
 }
