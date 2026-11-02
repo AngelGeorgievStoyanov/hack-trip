@@ -103,11 +103,25 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
     setServerError(null);
   }
 
-  function setSelectedDayNumber(): void {
+  async function setSelectedDayNumber(): Promise<void> {
     if (!selectedDay || dayNumber === selectedDay.dayNumber) {
       return;
     }
-    setDayNumberLocked((current) => !current);
+
+    if (dayNumberLocked) {
+      setDayNumberLocked(false);
+      return;
+    }
+
+    if (conflictingDay) {
+      const confirmed = await confirm(
+        `Day ${dayNumber} already exists! Do you want to change it with day ${selectedDay.dayNumber}?`,
+        'Change Day Confirmation',
+      );
+      if (!confirmed) return;
+    }
+
+    setDayNumberLocked(true);
   }
 
   async function deleteExistingImage(imageId: number): Promise<void> {
@@ -302,10 +316,7 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
                   value={dayNumber}
                   size="small"
                   error={!!errors.dayNumber || hasDayNumberConflict}
-                  helperText={
-                    errors.dayNumber?.message ??
-                    (hasDayNumberConflict ? 'This day number is occupied. The two days will swap numbers when saved.' : undefined)
-                  }
+                  helperText={errors.dayNumber?.message}
                   slotProps={{
                     htmlInput: {
                       readOnly: true,
