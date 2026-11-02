@@ -15,7 +15,7 @@ import { firstSelectValue } from '@/lib/selects';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
-import { dayCreateSchema, dayUpdateSchema } from '@/validations/trips';
+import { dayCreateSchema } from '@/validations/trips';
 import type { TripGroupDay } from '@/types';
 
 interface DayFormProps {
@@ -57,7 +57,7 @@ export function DayForm({
     watch,
     formState: { errors },
   } = useForm<DayFormValues>({
-    resolver: zodResolver(isEdit ? dayUpdateSchema : dayCreateSchema),
+    resolver: zodResolver(dayCreateSchema),
     defaultValues: {
       dayNumber: isEdit
         ? String(day.dayNumber)
@@ -96,7 +96,7 @@ export function DayForm({
         const response = await tripApi.updateDay(tripGroupId, day.id, {
           dayNumber: day.dayNumber,
           title: values.title.trim(),
-          description: values.description.trim() || null,
+          description: typeof values.description === 'string' ? values.description.trim() || null : null,
           price: day.price ?? 0,
           transport: day.transport.key || firstSelectValue(transportChoices),
           countPeoples: day.countPeoples,
@@ -118,7 +118,7 @@ export function DayForm({
         {
           dayNumber: Number(values.dayNumber),
           title: values.title.trim(),
-          description: values.description.trim() || null,
+          description: typeof values.description === 'string' ? values.description.trim() || null : null,
           price: sourceDay?.price ?? 0,
           transport: sourceDay?.transport.key || firstSelectValue(transportChoices),
           countPeoples: sourceDay?.countPeoples ?? 1,
