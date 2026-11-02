@@ -14,10 +14,10 @@ interface TripDaysManagerProps {
   initialTrip: TripGroupResponse;
 }
 
-export function TripDaysManager({ tripGroupId, initialTrip }: TripDaysManagerProps) {
+export function TripDaysManager({ tripGroupId, initialTrip, initialEditingDayId }: TripDaysManagerProps) {
   const queryClient = useQueryClient();
   const [addingDay, setAddingDay] = useState<{ dayNumber: number } | null>(null);
-  const [editingDayId, setEditingDayId] = useState<number | null>(null);
+  const [editingDayId, setEditingDayId] = useState<number | null>(initialEditingDayId ?? null);
   const [error, setError] = useState<string | null>(null);
 
   const { data: trip } = useQuery({
