@@ -106,9 +106,34 @@ export const dayUpdateSchema = z
 
 export const dayReorderSchema = z
   .object({
-    tripIds: idList({ min: 1, max: 500 }),
+    days: z
+      .array(
+        z
+          .object({
+            tripId: requiredInt({ min: 1 }),
+            dayNumber: requiredInt({ min: 1, max: DAY_NUMBER_MAX }),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(500),
   })
-  .strict();
+  .strict()
+  .superRefine(({ days }, ctx) => {
+    const tripIds = new Set<number>();
+    const dayNumbers = new Set<number>();
+
+    days.forEach((day, index) => {
+      if (tripIds.has(day.tripId)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['days', index, 'tripId'], message: 'Trip IDs must be unique.' });
+      }
+      if (dayNumbers.has(day.dayNumber)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['days', index, 'dayNumber'], message: 'Day numbers must be unique.' });
+      }
+      tripIds.add(day.tripId);
+      dayNumbers.add(day.dayNumber);
+    });
+  });
 
 export const pointReorderSchema = z
   .object({
