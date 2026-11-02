@@ -126,8 +126,9 @@ export const tripApi = {
     return data;
   },
 
-  deleteDay: async (tripGroupId: number, dayId: number): Promise<void> => {
-    await apiClient.delete(`${TRIPS}/${tripGroupId}/days/${dayId}`);
+  deleteDay: async (tripGroupId: number, dayId: number): Promise<TripGroupResponse> => {
+    const { data } = await apiClient.delete<TripGroupResponse>(`${TRIPS}/${tripGroupId}/days/${dayId}`);
+    return data;
   },
 
   uploadDayImage: async (tripGroupId: number, dayId: number, file: File): Promise<ImageDto> => {
