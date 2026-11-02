@@ -27,7 +27,6 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { tripEditSchema } from '@/validations/trips';
 import { DAY_NUMBER_MAX } from '@/constants/trips';
-import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
 import { AddIcon, RemoveIcon, RemoveImageIcon } from '@/constants/icons';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import type { TripGroupResponse } from '@/types';
