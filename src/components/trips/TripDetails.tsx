@@ -28,7 +28,6 @@ interface TripDetailsProps {
 
 const NAME_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1.5rem', fontWeight: 500 };
 const LINE_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1rem', fontWeight: 400 };
-const BACK_ROW_STYLE: CSSProperties = { display: 'flex', marginTop: '10px', gap: '10px', flexWrap: 'wrap', alignItems: 'center' };
 
 /**
  * Trip Information Panel — standalone visual section matching legacy UI.
@@ -155,6 +154,8 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
                   ':hover': { background: '#4daf30' },
                   padding: '10px',
                   width: '100%',
+                  flex: '1 1 220px',
+                  maxWidth: '280px',
                   minHeight: '48px',
                 }}
               >
