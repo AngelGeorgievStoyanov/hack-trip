@@ -64,7 +64,11 @@ export function TripSelectField({
         value={selectedChoice}
         inputValue={inputValue}
         onInputChange={(_, nextInputValue, reason) => {
-          setInputValue(nextInputValue);
+          // MUI emits "reset" when the selected value is cleared. Do not let that
+          // event overwrite the text the user is currently typing.
+          if (reason === 'input' || reason === 'clear') {
+            setInputValue(nextInputValue);
+          }
           if (reason === 'input' || reason === 'clear') {
             onChange('');
           }
