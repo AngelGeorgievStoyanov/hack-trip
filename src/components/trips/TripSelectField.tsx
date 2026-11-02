@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Autocomplete, MenuItem, TextField } from '@mui/material';
 import type { SelectChoice } from '@/lib/selects';
 
@@ -47,13 +48,25 @@ export function TripSelectField({
     );
   }
 
-  if (searchable) {
-    const selectedChoice = choices.find((choice) => choice.value === value) ?? null;
+  const selectedChoice = choices.find((choice) => choice.value === value) ?? null;
+  const [inputValue, setInputValue] = useState(selectedChoice?.label ?? '');
 
+  useEffect(() => {
+    setInputValue(selectedChoice?.label ?? '');
+  }, [selectedChoice?.value, selectedChoice?.label]);
+
+  if (searchable) {
     return (
       <Autocomplete
         options={choices}
         value={selectedChoice}
+        inputValue={inputValue}
+        onInputChange={(_, nextInputValue, reason) => {
+          setInputValue(nextInputValue);
+          if (reason === 'input' || reason === 'clear') {
+            onChange('');
+          }
+        }}
         getOptionLabel={(choice) => choice.label}
         isOptionEqualToValue={(option, selected) => option.value === selected.value}
         filterOptions={(options, state) => {
@@ -63,7 +76,10 @@ export function TripSelectField({
             `${choice.label} ${choice.value}`.toLowerCase().includes(query),
           );
         }}
-        onChange={(_, choice) => onChange(choice?.value ?? '')}
+        onChange={(_, choice) => {
+          onChange(choice?.value ?? '');
+          setInputValue(choice?.label ?? '');
+        }}
         onBlur={onBlur}
         autoHighlight
         openOnFocus
