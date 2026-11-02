@@ -307,11 +307,11 @@ export function PointForm({ tripGroupId, tripId, point, existingImages: provided
         <Button
           type="submit"
           variant="contained"
-          disabled={submitting || !latitude || !longitude || (!isEdit && (!isDirty || !isValid)) || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
+          disabled={submitting || !latitude || !longitude || (isEdit ? ((!isDirty || !isValid) && files.length === 0) : (!isDirty || !isValid)) || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
           startIcon={submitting ? <CircularProgress size={16} /> : undefined}
           sx={stackedActionButtonSx}
         >
-          {isEdit ? 'SAVE POINT' : createdPointId ? 'RETRY IMAGE UPLOAD' : 'ADD POINT'}
+          {isEdit ? 'EDIT POINT' : createdPointId ? 'RETRY IMAGE UPLOAD' : 'ADD POINT'}
         </Button>
         {!isEdit ? (
           <Button
@@ -346,7 +346,7 @@ export function PointForm({ tripGroupId, tripId, point, existingImages: provided
             '&:hover': { backgroundColor: 'rgb(170, 170, 210)', color: 'black' },
           }}
         >
-          {isEdit ? 'CANCEL' : 'BACK'}
+          BACK
         </Button>
       </Box>
     </Box>
