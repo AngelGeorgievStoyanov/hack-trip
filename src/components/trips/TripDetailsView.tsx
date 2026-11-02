@@ -175,6 +175,12 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
               day={day}
               tripCommentTarget={tripCommentTarget}
               toggleTripComments={toggleTripComments}
+              onDayDeleted={(updatedTripGroup) => {
+                const nextDay = updatedTripGroup.days[0];
+                if (nextDay) {
+                  handleSelectDay(nextDay.dayNumber);
+                }
+              }}
             />
           </Box>
 
