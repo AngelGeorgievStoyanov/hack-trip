@@ -9,6 +9,9 @@ import { tripApi } from '@/api/trips';
 import { normalizeApiError } from '@/api/client';
 import { API_ERROR_CODES } from '@/constants/api';
 import { DAY_NUMBER_MAX } from '@/constants/trips';
+import { SELECT_TYPE_KEYS } from '@/constants/config';
+import { useSelectChoices } from '@/hooks/useSelects';
+import { firstSelectValue } from '@/lib/selects';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
@@ -43,6 +46,9 @@ export function DayForm({
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const isEdit = day !== undefined;
+  const transportChoices = useSelectChoices(SELECT_TYPE_KEYS.transport, day?.transport.key);
+  const groupChoices = useSelectChoices(SELECT_TYPE_KEYS.group, day?.group.key);
+  const currencyChoices = useSelectChoices(SELECT_TYPE_KEYS.currency, day?.currency?.code ?? undefined);
 
   const {
     register,
@@ -88,8 +94,17 @@ export function DayForm({
     try {
       if (isEdit && day) {
         const response = await tripApi.updateDay(tripGroupId, day.id, {
-          title: values.title.trim() || null,
+          dayNumber: day.dayNumber,
+          title: values.title.trim(),
           description: values.description.trim() || null,
+          price: day.price ?? 0,
+          transport: day.transport.key || firstSelectValue(transportChoices),
+          countPeoples: day.countPeoples,
+          typeOfPeople: day.group.key || firstSelectValue(groupChoices),
+          currency: day.currency?.code || firstSelectValue(currencyChoices),
+          destination: day.destination,
+          lat: day.lat,
+          lng: day.lng,
         });
         queryClient.setQueryData(['trip', tripGroupId], response);
         const updatedDay = response.days.find((candidate) => candidate.id === day.id);
@@ -97,11 +112,25 @@ export function DayForm({
         onDone();
         return;
       }
-      const response = await tripApi.createDay(tripGroupId, {
-        dayNumber: Number(values.dayNumber),
-        title: values.title.trim() || null,
-        description: values.description.trim() || null,
-      });
+      const sourceDay = [...existingDays].sort((a, b) => b.dayNumber - a.dayNumber)[0];
+      const response = await tripApi.createDay(
+        tripGroupId,
+        {
+          dayNumber: Number(values.dayNumber),
+          title: values.title.trim(),
+          description: values.description.trim() || null,
+          price: sourceDay?.price ?? 0,
+          transport: sourceDay?.transport.key || firstSelectValue(transportChoices),
+          countPeoples: sourceDay?.countPeoples ?? 1,
+          typeOfPeople: sourceDay?.group.key || firstSelectValue(groupChoices),
+          currency: sourceDay?.currency?.code || firstSelectValue(currencyChoices),
+          destination: sourceDay?.destination ?? undefined,
+        },
+        {
+          lat: sourceDay?.lat ?? null,
+          lng: sourceDay?.lng ?? null,
+        },
+      );
       queryClient.setQueryData(['trip', tripGroupId], response);
       onDone();
     } catch (error) {
