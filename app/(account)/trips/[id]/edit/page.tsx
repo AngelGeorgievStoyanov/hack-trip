@@ -50,7 +50,7 @@ export default async function EditTripPage({ params, searchParams }: EditTripPag
 
   return (
     <RequireTripOwner tripGroupId={trip.id}>
-      <EditTripLayout trip={trip}>
+      <EditTripLayout trip={trip} selectedDayId={initialEditingDayId}>
         <TripDaysManager
           tripGroupId={trip.id}
           initialTrip={trip}
