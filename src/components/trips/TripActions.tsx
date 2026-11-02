@@ -115,6 +115,8 @@ export function TripActions({
               ':hover': { background: '#ef0a0a' },
               padding: '10px',
               width: '100%',
+              flex: '1 1 220px',
+              maxWidth: '280px',
               minHeight: '48px',
               boxSizing: 'border-box',
             }}
