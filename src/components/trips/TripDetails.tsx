@@ -141,12 +141,12 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
               : 'FOR THIS TRIP DONT HAVE POINTS'}
           </Typography>
 
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'stretch', gap: 1, mt: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1, mt: 1, width: '100%' }}>
             <TripActions tripGroup={tripGroup} tripId={day.id} section="navigation" />
             <TripActions tripGroup={tripGroup} tripId={day.id} section="management" />
             <Link
               href="/trips"
-              style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flex: '1 1 220px', maxWidth: '280px' }}
+              style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}
             >
               <Button
                 variant="contained"
@@ -154,8 +154,6 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
                   ':hover': { background: '#4daf30' },
                   padding: '10px',
                   width: '100%',
-                  flex: '1 1 220px',
-                  maxWidth: '280px',
                   minHeight: '48px',
                 }}
               >
