@@ -174,7 +174,9 @@ export function PointLocationPicker({
           }}
           size="small"
           buttonVariant="contained"
+          direction={{ xs: 'column', md: 'row' }}
           buttonSx={{
+            width: { xs: '100%', md: 'auto' },
             minHeight: 40,
             m: 0,
             '&:hover': { backgroundColor: '#4daf30' },
