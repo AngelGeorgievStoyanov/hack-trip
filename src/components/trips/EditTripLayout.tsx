@@ -15,17 +15,13 @@ import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { tripEditSchema } from '@/validations/trips';
-import type { TripGroupResponse, TripGroupDay } from '@/types';
+import { DAY_NUMBER_MAX } from '@/constants/trips';
+import type { TripGroupResponse } from '@/types';
 
 interface EditTripLayoutProps {
   trip: TripGroupResponse;
   children: ReactNode;
   selectedDayId?: number;
-}
-
-function formatPrice(day: TripGroupDay): string {
-  if (day.price == null) return '';
-  return day.currency?.code ? `${day.price} ${day.currency.code}` : String(day.price);
 }
 
 /**
@@ -73,6 +69,13 @@ export function EditTripLayout({ trip, children, selectedDayId }: EditTripLayout
 
   async function onSubmit(values: TripEditInput): Promise<void> {
     if (!selectedDay) return;
+    const conflictingDay = trip.days.find(
+      (day) => day.id !== selectedDay.id && day.dayNumber === values.dayNumber,
+    );
+    if (conflictingDay) {
+      setServerError(`Day ${values.dayNumber} already exists.`);
+      return;
+    }
     setSubmitting(true);
     setServerError(null);
 
@@ -173,7 +176,7 @@ export function EditTripLayout({ trip, children, selectedDayId }: EditTripLayout
                 {...register('dayNumber', { valueAsNumber: true })}
                 error={!!errors.dayNumber}
                 helperText={errors.dayNumber?.message}
-                slotProps={{ htmlInput: { min: 1, max: 500, step: 1 } }}
+                slotProps={{ htmlInput: { min: 1, max: DAY_NUMBER_MAX, step: 1 } }}
               />
               <TextField
                 label="TITLE"
