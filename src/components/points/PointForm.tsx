@@ -330,14 +330,14 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, map
       <Box
         sx={{
           display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
+          flexDirection: 'row',
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'center',
           width: '100%',
           minWidth: 0,
           mt: 1,
-          gap: { xs: 0, sm: 0.5 },
+          '@media (max-width:610px)': { flexDirection: 'column' },
         }}
       >
         <Button
