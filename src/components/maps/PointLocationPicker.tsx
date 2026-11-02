@@ -118,7 +118,7 @@ export function PointLocationPicker({
         sx={{
           position: 'relative',
           width: '100%',
-          height: MAP_POINT_PICKER_HEIGHT,
+          height: { xs: 360, sm: 320, md: MAP_POINT_PICKER_HEIGHT },
           border: '1px solid #e0e0e0',
           borderRadius: 1,
           overflow: 'hidden',
@@ -142,16 +142,21 @@ export function PointLocationPicker({
       </Box>
 
       <Stack
-        direction="row"
+        direction={{ xs: 'column', md: 'row' }}
         spacing={1}
+        alignItems={{ xs: 'stretch', md: 'center' }}
         sx={{
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-around',
-          m: '10px',
-          '@media (max-width:900px)': {
-            flexDirection: 'column',
-            alignItems: 'center',
+          width: '100%',
+          minWidth: 0,
+          justifyContent: { xs: 'center', md: 'space-around' },
+          px: { xs: 0, sm: 1 },
+          boxSizing: 'border-box',
+          '& > .MuiButton-root': {
+            width: { xs: '100%', md: 'auto' },
+            minHeight: 40,
+            maxWidth: { xs: 420, md: 'none' },
+            alignSelf: { xs: 'center', md: 'auto' },
+            boxSizing: 'border-box',
           },
         }}
       >
@@ -164,19 +169,33 @@ export function PointLocationPicker({
           inputSx={{
             backgroundColor: '#f2f1e58f',
             borderRadius: '5px',
-            m: '2px',
-            maxWidth: '190px',
+            width: '100%',
+            minWidth: 0,
           }}
           size="small"
           buttonVariant="contained"
-          buttonSx={{ m: "2px", "&:hover": { backgroundColor: "#4daf30" } }}
-          containerSx={{ flex: '1 1 190px', minWidth: 0, maxWidth: 190 }}
+          buttonSx={{
+            minHeight: 40,
+            m: 0,
+            '&:hover': { backgroundColor: '#4daf30' },
+          }}
+          containerSx={{
+            width: { xs: '100%', md: 'auto' },
+            flex: { xs: '0 1 auto', md: '1 1 190px' },
+            minWidth: 0,
+            maxWidth: { xs: 420, md: 420 },
+            alignSelf: { xs: 'center', md: 'stretch' },
+          }}
         />
         <Button
           type="button"
           variant="contained"
           onClick={handleClearLocation}
-          sx={{ backgroundColor: 'rgb(194, 194, 224)', color: 'black', '&:hover': { color: 'rgb(248 245 245)' } }}
+          sx={{
+            backgroundColor: 'rgb(194, 194, 224)',
+            color: 'black',
+            '&:hover': { color: 'rgb(248 245 245)' },
+          }}
         >
           Remove Marker
         </Button>
