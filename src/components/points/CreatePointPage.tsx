@@ -225,16 +225,16 @@ export function CreatePointPage() {
             variant="outlined"
             sx={{
               mt: 2.5,
-              p: '30px',
-              width: 'fit-content',
-              maxWidth: '100%',
+              p: { xs: 2, sm: '30px' },
+              width: '100%',
+              maxWidth: 600,
               minWidth: 0,
+              boxSizing: 'border-box',
               backgroundColor: '#eee7e79e',
               border: '1px solid black',
               borderRadius: 0,
               boxShadow: '3px 2px 5px black',
               '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
-              '& .MuiButton-root': { m: 1, width: '32ch', maxWidth: 'calc(100% - 16px)' },
             }}
           >
             <PointForm
