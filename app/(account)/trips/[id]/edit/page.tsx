@@ -39,7 +39,11 @@ export default async function EditTripPage({ params }: EditTripPageProps) {
   return (
     <RequireTripOwner tripGroupId={trip.id}>
       <div style={{ maxWidth: 720, display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-        <TripDaysManager tripGroupId={trip.id} initialTrip={trip} />
+        <TripDaysManager
+          tripGroupId={trip.id}
+          initialTrip={trip}
+          initialEditingDayId={initialEditingDayId}
+        />
       </div>
     </RequireTripOwner>
   );
