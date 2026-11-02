@@ -436,11 +436,13 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
                 helperText={errors.destination?.message}
               />
 
-              <ImageUploadField
-                files={newImages}
-                setFiles={setNewImages}
-                existingCount={existingImages.length}
-              />
+              <Box sx={{ pointerEvents: submitting ? 'none' : 'auto', opacity: submitting ? 0.7 : 1 }}>
+                <ImageUploadField
+                  files={newImages}
+                  setFiles={setNewImages}
+                  existingCount={existingImages.length}
+                />
+              </Box>
 
               <TextField
                 label="DESCRIPTION"
@@ -533,7 +535,7 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
                         aria-label="Delete image"
                         size="small"
                         color="error"
-                        disabled={deletingImageId === image.id}
+                        disabled={submitting || deletingImageId !== null}
                         onClick={() => void deleteExistingImage(image.id)}
                         sx={{
                           position: 'absolute',
