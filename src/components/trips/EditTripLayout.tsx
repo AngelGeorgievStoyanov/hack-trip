@@ -88,7 +88,6 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
   const conflictingDay = selectedDay
     ? trip.days.find((day) => day.id !== selectedDay.id && day.dayNumber === dayNumber)
     : undefined;
-  const hasDayNumberConflict = Boolean(conflictingDay);
 
   function changeDayNumber(delta: -1 | 1): void {
     const nextDayNumber = Math.min(
@@ -147,6 +146,7 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
         ),
       });
     } catch (error) {
+      console.error('Failed to save trip changes:', error);
       setServerError(getGenericErrorMessage(error));
     } finally {
       setDeletingImageId(null);
@@ -159,10 +159,7 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
     setServerError(null);
 
     try {
-      let response = await tripApi.updateDay(trip.id, selectedDay.id, {
-        ...values,
-        dayNumber: selectedDay.dayNumber,
-      });
+      let response = trip;
 
       if (values.dayNumber !== selectedDay.dayNumber) {
         const nextDays = response.days.map((day) => {
@@ -176,6 +173,8 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
         });
         response = await tripApi.reorderDays(trip.id, { days: nextDays });
       }
+
+      response = await tripApi.updateDay(trip.id, selectedDay.id, values);
 
       queryClient.setQueryData(['trip', trip.id], response);
 
@@ -315,7 +314,7 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
                   label="DAY"
                   value={dayNumber}
                   size="small"
-                  error={!!errors.dayNumber || hasDayNumberConflict}
+                  error={!!errors.dayNumber}
                   helperText={errors.dayNumber?.message}
                   slotProps={{
                     htmlInput: {
