@@ -85,7 +85,7 @@ export function EditPointPage() {
   return (
     <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', px: { xs: 1, sm: 2 }, py: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       {error ? <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert> : null}
-      <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto' }}>
+      <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto', order: { xs: 2, minWidth: 1021 } }}>
         <PointLocationPicker
           latitude={latitude}
           longitude={longitude}
@@ -101,6 +101,7 @@ export function EditPointPage() {
         sx={{
           mt: 2.5,
           width: '100%',
+          order: { xs: 1, minWidth: 1021 },
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'flex-start',
