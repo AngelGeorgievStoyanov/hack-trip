@@ -498,6 +498,7 @@ export function TripForm() {
                 label="Currency"
                 value={field.value}
                 choices={currencyChoices}
+                searchable
                 onChange={field.onChange}
                 onBlur={field.onBlur}
                 error={!!errors.currency}
