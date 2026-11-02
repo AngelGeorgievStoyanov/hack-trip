@@ -49,8 +49,10 @@ const formSchema = pointCreateSchema.omit({ tripId: true });
 
 const legacyButtonSx = {
   width: '32ch',
-  maxWidth: '100%',
+  maxWidth: 'calc(100% - 16px)',
+  minHeight: 40,
   m: 1,
+  boxSizing: 'border-box',
   '&:hover': { backgroundColor: '#4daf30' },
 };
 
@@ -333,8 +335,9 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, map
           alignItems: 'center',
           justifyContent: 'center',
           width: '100%',
+          minWidth: 0,
           mt: 1,
-          '@media (max-width:610px)': { flexDirection: 'column', alignItems: 'center' },
+          gap: { xs: 0, sm: 0.5 },
         }}
       >
         <Button
