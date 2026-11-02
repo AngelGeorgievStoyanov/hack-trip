@@ -106,19 +106,20 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
         size="medium"
         buttonVariant="contained"
         inputSx={{
-      backgroundColor: '#f2f1e58f',
-      borderRadius: '5px',
-      m: { xs: 0, md: '2px' },
-      '& .MuiInputBase-root': { color: '#222' },
-      '& .MuiInputLabel-root': { color: '#333' },
-      '& .MuiInputLabel-root.Mui-focused': { color: 'primary.main' },
-      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0, 0, 0, 0.35)' },
-      '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0, 0, 0, 0.7)' },
-      '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main' },
+          backgroundColor: '#f2f1e58f',
+          borderRadius: '5px',
+          m: 0,
+          '& .MuiInputBase-root': { color: '#222' },
+          '& .MuiInputLabel-root': { color: '#333' },
+          '& .MuiInputLabel-root.Mui-focused': { color: 'primary.main' },
+          '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0, 0, 0, 0.35)' },
+          '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0, 0, 0, 0.7)' },
+          '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main' },
         }}
         buttonSx={{
-          m: { xs: 0, md: '2px' },
-          whiteSpace: 'nowrap',
+          m: 0,
+          minHeight: 56,
+          backgroundColor: 'primary.main',
           '&.Mui-disabled': {
             backgroundColor: 'primary.main',
             color: '#fff',
@@ -127,24 +128,24 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
           ':hover': { background: '#4daf30' },
         }}
         containerSx={{ width: '100%' }}
-        direction={{ xs: 'row', md: 'row' }}
+        direction="row"
+        extraAction={
+          <Button
+            type="button"
+            variant="contained"
+            onClick={handleClearMarker}
+            sx={{
+              minHeight: 56,
+              backgroundColor: 'rgb(194 194 224)',
+              color: 'black',
+              whiteSpace: 'nowrap',
+              ':hover': { color: 'rgb(248 245 245)' },
+            }}
+          >
+            Remove Marker
+          </Button>
+        }
       />
-
-      <Button
-        type="button"
-        variant="contained"
-        onClick={handleClearMarker}
-        sx={{
-          alignSelf: 'flex-start',
-          ml: '2px',
-          backgroundColor: 'rgb(194 194 224)',
-          color: 'black',
-          whiteSpace: 'nowrap',
-          ':hover': { color: 'rgb(248 245 245)' },
-        }}
-      >
-        Remove Marker
-      </Button>
 
       {notice ? <Alert severity="info" onClose={() => setNotice(null)}>{notice}</Alert> : null}
     </Stack>
