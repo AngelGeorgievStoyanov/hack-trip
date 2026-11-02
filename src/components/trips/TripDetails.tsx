@@ -142,7 +142,7 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
               : 'FOR THIS TRIP DONT HAVE POINTS'}
           </Typography>
 
-          <TripActions tripGroup={tripGroup} />
+          <TripActions tripGroup={tripGroup} tripId={day.id} section="navigation" />
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mt: 1 }}>
             <EngagementBar
@@ -160,6 +160,8 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
               emptyLabel="FOR THIS DAY DON'T HAVE COMMENTS"
             />
           </Box>
+
+          <TripActions tripGroup={tripGroup} tripId={day.id} section="management" />
 
           <div style={BACK_ROW_STYLE}>
             <Link href="/trips" style={{ textDecoration: 'none', color: 'inherit' }}>
