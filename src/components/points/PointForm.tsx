@@ -12,22 +12,21 @@ import {
   Typography,
 } from '@mui/material';
 import { pointApi } from '@/api/points';
-import { AppImage } from '@/components/images/AppImage';
 import ImageUploadField from '@/components/images/ImageUploadField';
 import { AddressAutocomplete } from '@/components/maps/AddressAutocomplete';
 import { useGoogleMapsLoader } from '@/hooks/useGoogleMapsLoader';
-import { useConfirm } from '@/components/common/ConfirmDialog';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { pointCreateSchema } from '@/validations/points';
 import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
 import { truncatePointName } from '@/lib/pointName';
-import type { TripGroupResponse, TripPoint } from '@/types';
+import type { SocialImageDto, TripGroupResponse, TripPoint } from '@/types';
 
 interface PointFormProps {
   tripGroupId: number;
   tripId: number;
   point?: TripPoint;
+  existingImages?: SocialImageDto[];
   latitude: string;
   longitude: string;
   onLocationChange: (latitude: string, longitude: string) => void;
@@ -60,15 +59,14 @@ const stackedActionButtonSx = {
   },
 };
 
-export function PointForm({ tripGroupId, tripId, point, latitude, longitude, mapSearchSelection, onLocationChange, onFindInMap, onAddNextDay, onBack, onDone }: PointFormProps) {
+export function PointForm({ tripGroupId, tripId, point, existingImages: providedExistingImages, latitude, longitude, mapSearchSelection, onLocationChange, onFindInMap, onAddNextDay, onBack, onDone }: PointFormProps) {
   const queryClient = useQueryClient();
   const { isLoaded } = useGoogleMapsLoader();
-  const { confirm } = useConfirm();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [createdPointId, setCreatedPointId] = useState<number | null>(null);
-  const [existingImages, setExistingImages] = useState(point?.images ?? []);
+  const existingImages = providedExistingImages ?? point?.images ?? [];
   const [uploadedImageCount, setUploadedImageCount] = useState(0);
   const [findingLocation, setFindingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -224,18 +222,6 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, map
     }
   }
 
-  async function removeExistingImage(imageId: number): Promise<void> {
-    const accepted = await confirm('Are you sure you want to delete this image?', 'Delete Confirmation');
-    if (!accepted || !point) return;
-
-    try {
-      await pointApi.deletePointImage(point.id, imageId);
-      setExistingImages((current) => current.filter((image) => image.id !== imageId));
-      await queryClient.invalidateQueries({ queryKey: ['trip', tripGroupId] });
-    } catch (error) {
-      setServerError(getGenericErrorMessage(error));
-    }
-  }
 
   return (
     <Box
@@ -300,28 +286,6 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, map
         error={!!errors.description}
         helperText={errors.description?.message}
       />
-
-      {existingImages.length > 0 ? (
-        <Box sx={{ width: '100%' }}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Current images</Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {existingImages.map((image) => (
-              <Box key={image.id} sx={{ width: 112, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                <AppImage image={image} alt={point?.name ?? 'Point image'} preset="editorPointThumb" />
-                <Button
-                  type="button"
-                  size="small"
-                  color="error"
-                  disabled={submitting}
-                  onClick={() => void removeExistingImage(image.id)}
-                >
-                  Remove
-                </Button>
-              </Box>
-            ))}
-          </Box>
-        </Box>
-      ) : null}
 
       <Box sx={{ width: '100%' }}>
         <ImageUploadField
