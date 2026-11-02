@@ -87,14 +87,14 @@ export function EditPointPage() {
       {error ? <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert> : null}
       <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto' }}>
         <PointLocationPicker
-        latitude={latitude}
-        longitude={longitude}
-        findInMapTrigger={findInMapTrigger}
-        onChange={(nextLatitude, nextLongitude) => {
-          setLatitude(nextLatitude);
-          setLongitude(nextLongitude);
-        }}
-        onAddressSelect={(name) => setMapSearchSelection((current) => ({ name, revision: (current?.revision ?? 0) + 1 }))}
+          latitude={latitude}
+          longitude={longitude}
+          findInMapTrigger={findInMapTrigger}
+          onChange={(nextLatitude, nextLongitude) => {
+            setLatitude(nextLatitude);
+            setLongitude(nextLongitude);
+          }}
+          onAddressSelect={(name) => setMapSearchSelection((current) => ({ name, revision: (current?.revision ?? 0) + 1 }))}
         />
       </Box>
       <Box
