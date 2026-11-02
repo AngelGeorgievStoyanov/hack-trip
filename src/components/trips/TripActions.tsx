@@ -50,6 +50,7 @@ export function TripActions({
     enabled: status === 'authenticated',
   });
   const isOwner = myTrips?.some((group) => group.id === tripGroup.id) ?? false;
+  const selectedDay = tripGroup.days.find((day) => day.id === tripId);
 
   const deleteMutation = useMutation({
     mutationFn: () => tripApi.deleteTrip(tripGroup.id),
@@ -105,45 +106,22 @@ export function TripActions({
     <Box sx={ACTION_BUTTON_BOX_SX}>
       {isOwner ? (
         <>
-          <Button
-            component={Link}
-            href={`/trips/${tripGroup.id}/edit`}
-            variant="contained"
-            sx={LEGACY_BUTTON_SX}
-          >
-            EDIT TRIP
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() =>
-              void confirm(
-                'Are you sure you want to delete this trip, including all its days, points, photos and social activity?',
-                'Delete Trip Confirmation',
-              ).then(
-                (confirmed) => {
-                  if (confirmed) {
-                    deleteMutation.mutate();
-                  }
-                },
-              )
-            }
-            disabled={deleteMutation.isPending}
-            sx={{
-              ':hover': { background: '#ef0a0a' },
-              padding: '10px',
-              width: '100%',
-              minHeight: '48px',
-              boxSizing: 'border-box',
-            }}
-          >
-            DELETE TRIP
-          </Button>
+          {selectedDay ? (
+            <Button
+              component={Link}
+              href={`/trips/${tripGroup.id}/edit?dayId=${selectedDay.id}`}
+              variant="contained"
+              sx={LEGACY_BUTTON_SX}
+            >
+              EDIT DAY {selectedDay.dayNumber}
+            </Button>
+          ) : null}
           {tripGroup.days.length > 1 ? (
             <Button
               variant="contained"
               onClick={() =>
                 void confirm(
-                  `Are you sure you want to delete Day ${tripGroup.days.find((day) => day.id === tripId)?.dayNumber ?? ''}, including its points, photos, comments, likes, reports and favorites?`,
+                  `Are you sure you want to delete Day ${selectedDay?.dayNumber ?? ''}, including its points, photos, comments, likes, reports and favorites?`,
                   'Delete Day Confirmation',
                 ).then((confirmed) => {
                   if (confirmed) {
@@ -160,9 +138,32 @@ export function TripActions({
                 boxSizing: 'border-box',
               }}
             >
-              DELETE DAY {tripGroup.days.find((day) => day.id === tripId)?.dayNumber}
+              DELETE DAY {selectedDay?.dayNumber}
             </Button>
           ) : null}
+          <Button
+            variant="contained"
+            onClick={() =>
+              void confirm(
+                'Are you sure you want to delete this trip, including all its days, points, photos and social activity?',
+                'Delete Trip Confirmation',
+              ).then((confirmed) => {
+                if (confirmed) {
+                  deleteMutation.mutate();
+                }
+              })
+            }
+            disabled={deleteMutation.isPending}
+            sx={{
+              ':hover': { background: '#ef0a0a' },
+              padding: '10px',
+              width: '100%',
+              minHeight: '48px',
+              boxSizing: 'border-box',
+            }}
+          >
+            DELETE TRIP
+          </Button>
         </>
       ) : null}
       {error ? <Alert severity="error">{error}</Alert> : null}
