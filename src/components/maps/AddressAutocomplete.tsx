@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Autocomplete } from '@react-google-maps/api';
 import { Alert, Box, Button, CircularProgress, Stack, TextField } from '@mui/material';
 import type { TextFieldProps } from '@mui/material/TextField';
@@ -22,6 +22,7 @@ interface AddressAutocompleteProps {
   containerSx?: SxProps<Theme>;
   direction?: StackProps['direction'];
   showSearchButton?: boolean;
+  extraAction?: ReactNode;
   textFieldProps?: Omit<TextFieldProps, 'value' | 'onChange' | 'type'>;
 }
 
@@ -40,6 +41,7 @@ export function AddressAutocomplete({
   containerSx,
   direction = { xs: 'column', sm: 'row' },
   showSearchButton = true,
+  extraAction,
   textFieldProps,
 }: AddressAutocompleteProps) {
   const [searching, setSearching] = useState(false);
@@ -123,8 +125,13 @@ export function AddressAutocomplete({
 
   return (
     <Stack spacing={1} sx={containerSx}>
-      <Stack direction={direction} spacing={1} alignItems="stretch">
-        <Box sx={{ flex: '1 1 220px', minWidth: 0 }}>
+      <Stack
+        direction={direction}
+        spacing={1}
+        alignItems="stretch"
+        flexWrap="wrap"
+      >
+        <Box sx={{ flex: '1 1 180px', minWidth: 0, '& .MuiFormControl-root': { width: '100%' } }}>
           {supportsAutocomplete ? (
             <Autocomplete
               fields={PLACE_FIELDS}
@@ -149,10 +156,15 @@ export function AddressAutocomplete({
             onClick={() => void handleSearch()}
             disabled={searching || !isLoaded || value.trim().length < MAP_SEARCH_MIN_LENGTH}
             startIcon={searching ? <CircularProgress size={14} /> : undefined}
-            sx={buttonSx ?? { whiteSpace: 'nowrap' }}
+            sx={{ flex: '1 1 180px', minWidth: 0, whiteSpace: 'nowrap', ...((buttonSx ?? {}) as object) }}
           >
             Search
           </Button>
+        ) : null}
+        {extraAction ? (
+          <Box sx={{ flex: '1 1 180px', minWidth: 0, display: 'flex', '& > *': { width: '100%' } }}>
+            {extraAction}
+          </Box>
         ) : null}
       </Stack>
       {notice ? (
