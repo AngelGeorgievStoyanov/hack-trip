@@ -233,7 +233,7 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
         gap: 2,
       }}
     >
-      <Box sx={{ width: '100%', maxWidth: 1100 }}>
+      <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto' }}>
         <TripLocationPicker
           latitude={latitude == null ? '' : String(latitude)}
           longitude={longitude == null ? '' : String(longitude)}
