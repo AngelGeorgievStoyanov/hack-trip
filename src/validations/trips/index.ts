@@ -49,7 +49,7 @@ export const tripListQuerySchema = z
 export const dayCreateSchema = z
   .object({
     dayNumber: requiredInt({ min: 1, max: DAY_NUMBER_MAX }),
-    title: optionalText({ min: 1, max: DAY_TITLE_MAX_LENGTH }),
+    title: trimmedString({ min: 1, max: DAY_TITLE_MAX_LENGTH, minMessage: 'Title cannot be empty.' }),
     description: optionalText(
       { max: TRIP_DESCRIPTION_MAX_LENGTH },
       { max: `Description max length is ${TRIP_DESCRIPTION_MAX_LENGTH} chars` },
