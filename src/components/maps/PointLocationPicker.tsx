@@ -113,7 +113,7 @@ export function PointLocationPicker({
   }
 
   return (
-    <Stack spacing={1}>
+    <Stack spacing={1} sx={{ width: '100%', minWidth: 0 }}>
       <Box
         sx={{
           position: 'relative',
