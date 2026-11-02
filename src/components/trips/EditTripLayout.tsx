@@ -212,6 +212,7 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
       router.replace(buildTripUrl(trip.id, updatedDay?.dayNumber ?? values.dayNumber));
       router.refresh();
     } catch (error) {
+      console.error('Edit Trip submission failed:', error);
       setServerError(getGenericErrorMessage(error));
     } finally {
       setSubmitting(false);
