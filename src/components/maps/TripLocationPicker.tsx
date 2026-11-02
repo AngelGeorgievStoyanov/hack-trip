@@ -69,7 +69,7 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
           center={center}
           zoom={MAP_POINT_PICKER_ZOOM}
           height="100%"
-          maxWidth="100%"
+          maxWidth={600}
           markers={position ? [{ id: 'trip-location', position, draggable: true, title: address || 'Trip location' }] : []}
           onLoad={(map) => {
             mapRef.current = map;
