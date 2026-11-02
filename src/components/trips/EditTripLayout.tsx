@@ -2,9 +2,19 @@
 
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { Controller, useForm } from 'react-hook-form';
+import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
+import { tripApi, type TripEditInput } from '@/api/trips';
 import { AppImage } from '@/components/images/AppImage';
 import { TripLocationPicker } from '@/components/maps/TripLocationPicker';
+import { TripSelectField } from './TripSelectField';
+import { SELECT_TYPE_KEYS } from '@/constants/config';
+import { useSelectChoices } from '@/hooks/useSelects';
+import { zodResolver } from '@/lib/zodResolver';
+import { getGenericErrorMessage } from '@/lib/errors';
+import { buildTripUrl } from '@/lib/tripUrl';
+import { tripEditSchema } from '@/validations/trips';
 import type { TripGroupResponse, TripGroupDay } from '@/types';
 
 interface EditTripLayoutProps {
@@ -13,48 +23,71 @@ interface EditTripLayoutProps {
   selectedDayId?: number;
 }
 
-function ReadOnlyField({ label, value, multiline = false }: {
-  label: string;
-  value: string;
-  multiline?: boolean;
-}) {
-  return (
-    <TextField
-      label={label}
-      value={value}
-      multiline={multiline}
-      minRows={multiline ? 4 : undefined}
-      fullWidth
-      InputProps={{ readOnly: true }}
-      InputLabelProps={{ shrink: true }}
-    />
-  );
-}
-
 function formatPrice(day: TripGroupDay): string {
   if (day.price == null) return '';
   return day.currency?.code ? `${day.price} ${day.currency.code}` : String(day.price);
 }
 
 /**
- * Legacy-inspired visual shell for Edit Trip.
- * The current API does not expose a trip-group metadata update endpoint, so the
- * overview fields and map are intentionally presentation-only until that contract exists.
+ * Edits one concrete Trip row using PUT /trips/:tripGroupId/days/:tripId.
+ * All fields required by the backend are submitted together.
  */
 export function EditTripLayout({ trip, children, selectedDayId }: EditTripLayoutProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const selectedDay = trip.days.find((day) => day.id === selectedDayId) ?? trip.days[0];
-  const [latitude, setLatitude] = useState(() => {
-    const value = selectedDay?.lat;
-    return value == null ? '' : String(value);
-  });
-  const [longitude, setLongitude] = useState(() => {
-    const value = selectedDay?.lng;
-    return value == null ? '' : String(value);
+
+  const {
+    control,
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<TripEditInput>({
+    resolver: zodResolver(tripEditSchema),
+    mode: 'onChange',
+    defaultValues: {
+      dayNumber: selectedDay?.dayNumber ?? 1,
+      title: selectedDay?.title ?? '',
+      description: selectedDay?.description ?? '',
+      price: selectedDay?.price ?? 0,
+      transport: selectedDay?.transport.key ?? '',
+      countPeoples: selectedDay?.countPeoples ?? 1,
+      typeOfPeople: selectedDay?.group.key ?? '',
+      currency: selectedDay?.currency?.code ?? '',
+      destination: selectedDay?.destination ?? '',
+      lat: selectedDay?.lat ?? null,
+      lng: selectedDay?.lng ?? null,
+    },
   });
 
-  const firstDay = selectedDay;
-  const images = firstDay?.images ?? [];
+  const transportChoices = useSelectChoices(SELECT_TYPE_KEYS.transport, watch('transport'));
+  const groupChoices = useSelectChoices(SELECT_TYPE_KEYS.group, watch('typeOfPeople'));
+  const currencyChoices = useSelectChoices(SELECT_TYPE_KEYS.currency, watch('currency'));
+  const latitude = watch('lat');
+  const longitude = watch('lng');
+  const images = selectedDay?.images ?? [];
+
+  async function onSubmit(values: TripEditInput): Promise<void> {
+    if (!selectedDay) return;
+    setSubmitting(true);
+    setServerError(null);
+
+    try {
+      const response = await tripApi.updateDay(trip.id, selectedDay.id, values);
+      queryClient.setQueryData(['trip', trip.id], response);
+      const updatedDay = response.days.find((day) => day.id === selectedDay.id);
+      router.replace(buildTripUrl(trip.id, updatedDay?.dayNumber ?? values.dayNumber));
+      router.refresh();
+    } catch (error) {
+      setServerError(getGenericErrorMessage(error));
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <Box
@@ -72,11 +105,17 @@ export function EditTripLayout({ trip, children, selectedDayId }: EditTripLayout
     >
       <Box sx={{ width: '100%', maxWidth: 1100 }}>
         <TripLocationPicker
-          latitude={latitude}
-          longitude={longitude}
+          latitude={latitude == null ? '' : String(latitude)}
+          longitude={longitude == null ? '' : String(longitude)}
           onChange={(nextLatitude, nextLongitude) => {
-            setLatitude(nextLatitude);
-            setLongitude(nextLongitude);
+            setValue('lat', nextLatitude === '' ? null : Number(nextLatitude), {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
+            setValue('lng', nextLongitude === '' ? null : Number(nextLongitude), {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
           }}
         />
       </Box>
@@ -96,7 +135,8 @@ export function EditTripLayout({ trip, children, selectedDayId }: EditTripLayout
         }}
       >
         <Box
-          component="section"
+          component="form"
+          onSubmit={handleSubmit(onSubmit)}
           sx={{
             boxSizing: 'border-box',
             m: { xs: 0, sm: 2 },
@@ -123,33 +163,126 @@ export function EditTripLayout({ trip, children, selectedDayId }: EditTripLayout
             EDIT TRIP
           </Typography>
 
-          {firstDay ? (
+          {serverError ? <Alert severity="error">{serverError}</Alert> : null}
+
+          {selectedDay ? (
             <>
-              <ReadOnlyField label="DAY" value={String(firstDay.dayNumber)} />
-              <ReadOnlyField label="TITLE" value={firstDay.title ?? ''} />
+              <TextField
+                label="DAY"
+                type="number"
+                {...register('dayNumber', { valueAsNumber: true })}
+                error={!!errors.dayNumber}
+                helperText={errors.dayNumber?.message}
+                slotProps={{ htmlInput: { min: 1, max: 500, step: 1 } }}
+              />
+              <TextField
+                label="TITLE"
+                {...register('title')}
+                error={!!errors.title}
+                helperText={errors.title?.message}
+              />
               <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <ReadOnlyField label="PRICE" value={formatPrice(firstDay)} />
+                  <TextField
+                    label="PRICE"
+                    type="number"
+                    {...register('price', { valueAsNumber: true })}
+                    error={!!errors.price}
+                    helperText={errors.price?.message}
+                    slotProps={{ htmlInput: { min: 0, max: 1000000, step: 'any' } }}
+                  />
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <ReadOnlyField label="CURRENCY" value={firstDay.currency?.code ?? ''} />
+                  <Controller
+                    control={control}
+                    name="currency"
+                    render={({ field }) => (
+                      <TripSelectField
+                        name={field.name}
+                        label="CURRENCY"
+                        value={field.value}
+                        choices={currencyChoices}
+                        searchable
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        error={!!errors.currency}
+                        helperText={errors.currency?.message}
+                      />
+                    )}
+                  />
                 </Box>
               </Box>
-              <ReadOnlyField label="TRANSPORT" value={firstDay.transport?.name ?? ''} />
-              <ReadOnlyField label="COUNT OF PEOPLE" value={String(firstDay.countPeoples)} />
-              <ReadOnlyField label="TYPE OF THE GROUP" value={firstDay.group?.name ?? ''} />
-              <ReadOnlyField label="DESTINATION" value={firstDay.destination ?? ''} />
-              <ReadOnlyField label="DESCRIPTION" value={firstDay.description ?? ''} multiline />
+              <Controller
+                control={control}
+                name="transport"
+                render={({ field }) => (
+                  <TripSelectField
+                    name={field.name}
+                    label="TRANSPORT"
+                    value={field.value}
+                    choices={transportChoices}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    error={!!errors.transport}
+                    helperText={errors.transport?.message}
+                  />
+                )}
+              />
+              <TextField
+                label="COUNT OF PEOPLE"
+                type="number"
+                {...register('countPeoples', { valueAsNumber: true })}
+                error={!!errors.countPeoples}
+                helperText={errors.countPeoples?.message}
+                slotProps={{ htmlInput: { min: 1, max: 1000, step: 1 } }}
+              />
+              <Controller
+                control={control}
+                name="typeOfPeople"
+                render={({ field }) => (
+                  <TripSelectField
+                    name={field.name}
+                    label="TYPE OF THE GROUP"
+                    value={field.value}
+                    choices={groupChoices}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    error={!!errors.typeOfPeople}
+                    helperText={errors.typeOfPeople?.message}
+                  />
+                )}
+              />
+              <TextField
+                label="DESTINATION"
+                {...register('destination')}
+                error={!!errors.destination}
+                helperText={errors.destination?.message}
+              />
+              <TextField
+                label="DESCRIPTION"
+                multiline
+                minRows={4}
+                {...register('description')}
+                error={!!errors.description}
+                helperText={errors.description?.message}
+              />
             </>
           ) : (
             <Typography>No trip days found.</Typography>
           )}
 
           <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 1, mt: 1 }}>
-            <Button variant="contained" disabled sx={{ minWidth: 180, ':hover': { background: '#4daf30' } }}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={!selectedDay || submitting}
+              startIcon={submitting ? <CircularProgress size={18} /> : undefined}
+              sx={{ minWidth: 180, ':hover': { background: '#4daf30' } }}
+            >
               EDIT YOUR TRIP
             </Button>
             <Button
+              type="button"
               variant="contained"
               onClick={() => router.back()}
               sx={{
@@ -202,7 +335,7 @@ export function EditTripLayout({ trip, children, selectedDayId }: EditTripLayout
                 >
                   <AppImage
                     image={image}
-                    alt={firstDay?.title ?? 'Trip image'}
+                    alt={selectedDay?.title ?? 'Trip image'}
                     fill
                     sizes="(max-width: 600px) 33vw, 170px"
                   />
