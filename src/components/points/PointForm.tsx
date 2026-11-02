@@ -287,13 +287,15 @@ export function PointForm({ tripGroupId, tripId, point, existingImages: provided
         helperText={errors.description?.message}
       />
 
-      <Box sx={{ width: '100%' }}>
-        <ImageUploadField
-          files={files}
-          setFiles={setFiles}
-          existingCount={existingImages.length + uploadedImageCount}
-        />
-      </Box>
+      {!isEdit ? (
+        <Box sx={{ width: '100%' }}>
+          <ImageUploadField
+            files={files}
+            setFiles={setFiles}
+            existingCount={existingImages.length + uploadedImageCount}
+          />
+        </Box>
+      ) : null}
 
       <Box
         sx={{
