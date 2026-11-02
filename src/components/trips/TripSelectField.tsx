@@ -1,6 +1,6 @@
 'use client';
 
-import { MenuItem, TextField } from '@mui/material';
+import { Autocomplete, MenuItem, TextField } from '@mui/material';
 import type { SelectChoice } from '@/lib/selects';
 
 interface TripSelectFieldProps {
@@ -12,6 +12,7 @@ interface TripSelectFieldProps {
   onBlur?: () => void;
   error?: boolean;
   helperText?: string;
+  searchable?: boolean;
 }
 
 /**
@@ -30,6 +31,7 @@ export function TripSelectField({
   onBlur,
   error,
   helperText,
+  searchable = false,
 }: TripSelectFieldProps) {
   if (choices.length === 0) {
     return (
@@ -41,6 +43,39 @@ export function TripSelectField({
         onBlur={onBlur}
         error={error}
         helperText={helperText}
+      />
+    );
+  }
+
+  if (searchable) {
+    const selectedChoice = choices.find((choice) => choice.value === value) ?? null;
+
+    return (
+      <Autocomplete
+        options={choices}
+        value={selectedChoice}
+        getOptionLabel={(choice) => choice.label}
+        isOptionEqualToValue={(option, selected) => option.value === selected.value}
+        filterOptions={(options, state) => {
+          const query = state.inputValue.trim().toLowerCase();
+          if (!query) return options;
+          return options.filter((choice) =>
+            `${choice.label} ${choice.value}`.toLowerCase().includes(query),
+          );
+        }}
+        onChange={(_, choice) => onChange(choice?.value ?? '')}
+        onBlur={onBlur}
+        autoHighlight
+        openOnFocus
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            name={name}
+            label={label}
+            error={error}
+            helperText={helperText}
+          />
+        )}
       />
     );
   }
