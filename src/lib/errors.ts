@@ -3,6 +3,16 @@ import { API_ERROR_CODES } from '@/constants/api';
 
 const GENERIC_MESSAGE = 'Something went wrong. Please try again.';
 
+function isTechnicalErrorMessage(message: string): boolean {
+  return (
+    /cannot read propert(?:y|ies) of (?:undefined|null)/i.test(message) ||
+    /cannot set propert(?:y|ies) of (?:undefined|null)/i.test(message) ||
+    / is not a function/i.test(message) ||
+    /undefined is not an object/i.test(message) ||
+    /\bTypeError:|\bReferenceError:|\bSyntaxError:/i.test(message)
+  );
+}
+
 export function getAuthErrorMessage(error: unknown): string {
   const apiError = normalizeApiError(error);
 
@@ -32,7 +42,11 @@ export function getGenericErrorMessage(error: unknown): string {
     return 'Something went wrong. Please try again later.';
   }
 
-  return apiError.message || GENERIC_MESSAGE;
+  if (!apiError.message || isTechnicalErrorMessage(apiError.message)) {
+    return GENERIC_MESSAGE;
+  }
+
+  return apiError.message;
 }
 
 /** Message for verification/reset-token failures (backend returns `VALIDATION_ERROR`). */
