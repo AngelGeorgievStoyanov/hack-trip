@@ -128,7 +128,7 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
           ':hover': { background: '#4daf30' },
         }}
         containerSx={{ width: '100%' }}
-        direction="row"
+        direction={{ xs: 'column', sm: 'row' }}
         extraAction={
           <Button
             type="button"
