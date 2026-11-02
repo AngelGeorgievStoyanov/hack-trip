@@ -114,20 +114,11 @@ export function PointLocationPicker({
 
   return (
     <Stack spacing={1} sx={{ width: '100%', maxWidth: 600, minWidth: 0, mx: 'auto' }}>
-      <Box
-        sx={{
-          position: 'relative',
-          width: '100%',
-          maxWidth: 600,
-          height: MAP_POINT_PICKER_HEIGHT,
-          overflow: 'hidden',
-        }}
-      >
-        <GoogleMapView
-          center={center}
-          zoom={MAP_POINT_PICKER_ZOOM}
-          height="100%"
-          maxWidth={600}
+      <GoogleMapView
+        center={center}
+        zoom={MAP_POINT_PICKER_ZOOM}
+        height={MAP_POINT_PICKER_HEIGHT}
+        maxWidth={600}
           markers={position ? [{ id: 'selected-position', position, draggable: true }] : []}
           onLoad={(map) => {
             mapRef.current = map;
@@ -136,9 +127,8 @@ export function PointLocationPicker({
             mapRef.current = null;
           }}
           onMapClick={emitPosition}
-          onMarkerDragEnd={(nextPosition) => emitPosition(nextPosition)}
-        />
-      </Box>
+        onMarkerDragEnd={(nextPosition) => emitPosition(nextPosition)}
+      />
 
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
