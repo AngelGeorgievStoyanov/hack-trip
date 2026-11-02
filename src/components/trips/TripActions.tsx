@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Box, Button } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { tripApi } from '@/api/trips';
 import { getGenericErrorMessage } from '@/lib/errors';
 import type { TripGroupResponse } from '@/types';
-import { buildTripUrl } from '@/lib/tripUrl';
+import { tripGroupKeys } from '@/hooks/useTripGroup';
 
 const LEGACY_BUTTON_SX = {
   ':hover': { background: '#4daf30' },
@@ -29,12 +29,15 @@ export function TripActions({
   tripGroup,
   tripId,
   section,
+  onDayDeleted,
 }: {
   tripGroup: TripGroupResponse;
   tripId: number;
   section: 'navigation' | 'management';
+  onDayDeleted?: (updatedTripGroup: TripGroupResponse) => void;
 }) {
-  const { status } = useAuth();
+  const { status, viewerCacheKey } = useAuth();
+  const queryClient = useQueryClient();
   const { confirm } = useConfirm();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -59,12 +62,12 @@ export function TripActions({
 
   const deleteDayMutation = useMutation({
     mutationFn: () => tripApi.deleteDay(tripGroup.id, tripId),
-    onSuccess: () => {
-      const remainingDay = tripGroup.days.find((day) => day.id !== tripId);
-      if (remainingDay) {
-        router.replace(buildTripUrl(tripGroup.id, remainingDay.dayNumber));
-      }
-      router.refresh();
+    onSuccess: (updatedTripGroup) => {
+      queryClient.setQueryData(
+        tripGroupKeys.detail(tripGroup.id, viewerCacheKey),
+        updatedTripGroup,
+      );
+      onDayDeleted?.(updatedTripGroup);
     },
     onError: (e) => setError(getGenericErrorMessage(e)),
   });
@@ -114,8 +117,8 @@ export function TripActions({
             variant="contained"
             onClick={() =>
               void confirm(
-                'Are you sure you want to delete the entire trip, including all days, points, photos and social activity?',
-                'Delete Entire Trip Confirmation',
+                'Are you sure you want to delete this trip, including all its days, points, photos and social activity?',
+                'Delete Trip Confirmation',
               ).then(
                 (confirmed) => {
                   if (confirmed) {
@@ -133,7 +136,7 @@ export function TripActions({
               boxSizing: 'border-box',
             }}
           >
-            DELETE ALL TRIPS
+            DELETE TRIP
           </Button>
           {tripGroup.days.length > 1 ? (
             <Button
