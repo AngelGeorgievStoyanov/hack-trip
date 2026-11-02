@@ -104,7 +104,7 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
   }
 
   function setSelectedDayNumber(): void {
-    if (!selectedDay || dayNumber === selectedDay.dayNumber || hasDayNumberConflict) {
+    if (!selectedDay || dayNumber === selectedDay.dayNumber) {
       return;
     }
     setDayNumberLocked((current) => !current);
@@ -141,18 +141,28 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
 
   async function onSubmit(values: TripEditInput): Promise<void> {
     if (!selectedDay) return;
-    if (hasDayNumberConflict) {
-      setServerError(
-        'Day ' + values.dayNumber + ' already exists. Choose a free day number.',
-      );
-      return;
-    }
-
     setSubmitting(true);
     setServerError(null);
 
     try {
-      const response = await tripApi.updateDay(trip.id, selectedDay.id, values);
+      let response = await tripApi.updateDay(trip.id, selectedDay.id, {
+        ...values,
+        dayNumber: selectedDay.dayNumber,
+      });
+
+      if (values.dayNumber !== selectedDay.dayNumber) {
+        const nextDays = response.days.map((day) => {
+          if (day.id === selectedDay.id) {
+            return { tripId: day.id, dayNumber: values.dayNumber };
+          }
+          if (day.dayNumber === values.dayNumber) {
+            return { tripId: day.id, dayNumber: selectedDay.dayNumber };
+          }
+          return { tripId: day.id, dayNumber: day.dayNumber };
+        });
+        response = await tripApi.reorderDays(trip.id, { days: nextDays });
+      }
+
       queryClient.setQueryData(['trip', trip.id], response);
 
       if (newImages.length > 0) {
@@ -294,7 +304,7 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
                   error={!!errors.dayNumber || hasDayNumberConflict}
                   helperText={
                     errors.dayNumber?.message ??
-                    (hasDayNumberConflict ? 'This day number is already in use.' : undefined)
+                    (hasDayNumberConflict ? 'This day number is occupied. The two days will swap numbers when saved.' : undefined)
                   }
                   slotProps={{
                     htmlInput: {
@@ -344,8 +354,7 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
                   onClick={setSelectedDayNumber}
                   disabled={
                     submitting ||
-                    dayNumber === selectedDay.dayNumber ||
-                    hasDayNumberConflict
+                    dayNumber === selectedDay.dayNumber
                   }
                 >
                   {dayNumberLocked ? 'CHANGE DAY' : 'SET DAY'}
