@@ -26,7 +26,6 @@ export function CreatePointPage() {
   const tripId = Number(searchParams.get('tripId'));
   const [tripGroup, setTripGroup] = useState<TripGroupResponse | null>(null);
   const [dayNumber, setDayNumber] = useState<number | null>(null);
-  const [selectedPoint, setSelectedPoint] = useState<TripPoint | undefined>();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -93,19 +92,15 @@ export function CreatePointPage() {
     router.replace('/trips');
   }
 
-  function selectPoint(point?: TripPoint): void {
-    setSelectedPoint(point);
-    setMapSearchSelection(null);
-    setPointLatitude(point?.lat != null ? String(point.lat) : '');
-    setPointLongitude(point?.lng != null ? String(point.lng) : '');
-  }
 
   async function handlePointSaved(): Promise<void> {
     setSaving(true);
     setError(null);
     try {
       await refreshTrip();
-      selectPoint();
+      setMapSearchSelection(null);
+      setPointLatitude('');
+      setPointLongitude('');
     } catch (requestError) {
       setError(getGenericErrorMessage(requestError));
     } finally {
@@ -124,7 +119,7 @@ export function CreatePointPage() {
     try {
       await pointApi.deletePoint(point.id);
       await refreshTrip();
-      if (selectedPoint?.id === point.id) selectPoint();
+
     } catch (requestError) {
       setError(getGenericErrorMessage(requestError));
     }
@@ -202,7 +197,7 @@ export function CreatePointPage() {
         <Box sx={{ minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <PointList
             points={selectedDay.points}
-            onEdit={selectPoint}
+            onEdit={(point) => router.push(`/points/edit/${point.id}`)}
             onDelete={(point) => void handleDeletePoint(point)}
             onMove={(point, direction) => void handleMovePoint(point, direction)}
             disabled={saving}
@@ -238,10 +233,8 @@ export function CreatePointPage() {
             }}
           >
             <PointForm
-              key={selectedPoint?.id ?? 'new-point'}
               tripGroupId={tripGroup.id}
               tripId={tripId}
-              point={selectedPoint}
               latitude={pointLatitude}
               longitude={pointLongitude}
               mapSearchSelection={mapSearchSelection}
