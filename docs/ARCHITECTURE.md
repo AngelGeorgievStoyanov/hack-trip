@@ -333,7 +333,7 @@ GET /trips/:id
 POST /trips
 DELETE /trips/:id
 POST /trips/:tripId/days
-PUT /trips/:tripId/days/reorder
+PUT /trips/:tripGroupId/days/reorder
 PUT /trips/:tripId/days/:dayId
 DELETE /trips/:tripId/days/:dayId
 POST /trips/:tripId/days/:dayId/images
