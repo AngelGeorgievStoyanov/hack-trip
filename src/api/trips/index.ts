@@ -8,7 +8,7 @@ import type {
 } from '../../types';
 import {
   dayReorderSchema,
-  dayUpdateSchema,
+  tripEditSchema,
   tripListQuerySchema,
   tripWriteSchema,
 } from '../../validations';
@@ -34,9 +34,18 @@ export interface TripListQuery {
   sort?: TripSort;
 }
 
-export interface DayUpdateInput {
-  title?: string | null;
-  description?: string | null;
+export interface TripEditInput {
+  dayNumber: number;
+  title: string;
+  description: string | null;
+  price: number;
+  transport: string;
+  countPeoples: number;
+  typeOfPeople: string;
+  currency: string;
+  destination: string | null;
+  lat: number | null;
+  lng: number | null;
 }
 
 export interface DayReorderInput {
@@ -120,8 +129,8 @@ export const tripApi = {
     return data;
   },
 
-  updateDay: async (tripGroupId: number, dayId: number, input: DayUpdateInput): Promise<TripGroupResponse> => {
-    const body = dayUpdateSchema.parse(input);
+  updateDay: async (tripGroupId: number, dayId: number, input: TripEditInput): Promise<TripGroupResponse> => {
+    const body = tripEditSchema.parse(input);
     const { data } = await apiClient.put<TripGroupResponse>(`${TRIPS}/${tripGroupId}/days/${dayId}`, body);
     return data;
   },
