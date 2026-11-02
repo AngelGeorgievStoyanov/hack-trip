@@ -129,6 +129,7 @@ export function AddressAutocomplete({
         direction={direction}
         spacing={0.5}
         alignItems="stretch"
+        sx={{ width: '100%', minWidth: 0 }}
       >
         <Box sx={{ flex: '1 1 0', width: '100%', minWidth: 0, '& .MuiFormControl-root': { width: '100%' } }}>
           {supportsAutocomplete ? (
@@ -155,7 +156,13 @@ export function AddressAutocomplete({
             onClick={() => void handleSearch()}
             disabled={searching || !isLoaded || value.trim().length < MAP_SEARCH_MIN_LENGTH}
             startIcon={searching ? <CircularProgress size={14} /> : undefined}
-            sx={{ flex: '1 1 0', width: '100%', minWidth: 0, whiteSpace: 'nowrap', ...((buttonSx ?? {}) as object) }}
+            sx={{
+              flex: '0 1 auto',
+              width: { xs: '100%', sm: 'auto' },
+              minWidth: 0,
+              whiteSpace: 'nowrap',
+              ...((buttonSx ?? {}) as object),
+            }}
           >
             Search
           </Button>
