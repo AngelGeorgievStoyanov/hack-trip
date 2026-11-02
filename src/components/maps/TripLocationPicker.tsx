@@ -61,7 +61,6 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
           position: 'relative',
           width: '100%',
           height: MAP_POINT_PICKER_HEIGHT,
-          border: '1px solid #e0e0e0',
           overflow: 'hidden',
         }}
       >
