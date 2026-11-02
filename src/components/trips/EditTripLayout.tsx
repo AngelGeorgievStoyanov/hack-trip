@@ -25,7 +25,7 @@ function ReadOnlyField({ label, value, multiline = false }: {
       multiline={multiline}
       minRows={multiline ? 4 : undefined}
       fullWidth
-      disabled
+      InputProps={{ readOnly: true }}
       InputLabelProps={{ shrink: true }}
     />
   );
