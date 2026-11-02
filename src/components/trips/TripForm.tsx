@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -61,6 +61,7 @@ export function TripForm() {
   const [createdPointTripId, setCreatedPointTripId] = useState<number | null>(null);
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const currencyWasEdited = useRef(false);
 
   const {
     control,
@@ -148,7 +149,11 @@ export function TripForm() {
   }, [transportChoices, getValues, setValue]);
 
   useEffect(() => {
-    if (!getValues('currency') && currencyChoices.length > 0) {
+    if (
+      !currencyWasEdited.current &&
+      !getValues('currency') &&
+      currencyChoices.length > 0
+    ) {
       setValue('currency', preferredSelectValue(currencyChoices, 'EUR'), {
         shouldValidate: true,
       });
@@ -499,7 +504,10 @@ export function TripForm() {
                 value={field.value}
                 choices={currencyChoices}
                 searchable
-                onChange={field.onChange}
+                onChange={(nextValue) => {
+                  currencyWasEdited.current = true;
+                  field.onChange(nextValue);
+                }}
                 onBlur={field.onBlur}
                 error={!!errors.currency}
                 helperText={errors.currency?.message}
