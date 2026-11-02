@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { NOINDEX } from '@/constants/seo';
 import { notFound } from 'next/navigation';
 import { RequireTripOwner } from '@/components/auth';
-import { TripDaysManager } from '@/components/trips/TripDaysManager';
 import { EditTripLayout } from '@/components/trips/EditTripLayout';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
 import { positiveIdParam } from '@/validations';
@@ -50,13 +49,7 @@ export default async function EditTripPage({ params, searchParams }: EditTripPag
 
   return (
     <RequireTripOwner tripGroupId={trip.id}>
-      <EditTripLayout trip={trip} selectedDayId={initialEditingDayId}>
-        <TripDaysManager
-          tripGroupId={trip.id}
-          initialTrip={trip}
-          initialEditingDayId={initialEditingDayId}
-        />
-      </EditTripLayout>
+      <EditTripLayout trip={trip} selectedDayId={initialEditingDayId} />
     </RequireTripOwner>
   );
 }
