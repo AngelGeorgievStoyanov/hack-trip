@@ -14,10 +14,11 @@ export const metadata: Metadata = {
 
 interface EditTripPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ dayId?: string }>;
 }
 
-export default async function EditTripPage({ params }: EditTripPageProps) {
-  const { id } = await params;
+export default async function EditTripPage({ params, searchParams }: EditTripPageProps) {
+  const [{ id }, { dayId: rawDayId }] = await Promise.all([params, searchParams]);
   const parsed = positiveIdParam.safeParse(id);
   if (!parsed.success) {
     notFound();
@@ -34,8 +35,20 @@ export default async function EditTripPage({ params }: EditTripPageProps) {
     throw error;
   }
 
-  // There is no trip-level update endpoint: trip metadata is day-scoped, so editing the
-  // trip happens through its days (`PUT /trips/:tripGroupId/days/:dayId`).
+  const parsedDayId = rawDayId === undefined ? null : positiveIdParam.safeParse(rawDayId);
+  if (parsedDayId && !parsedDayId.success) {
+    notFound();
+  }
+  const initialEditingDayId = parsedDayId?.success ? Number(parsedDayId.data) : undefined;
+  if (
+    initialEditingDayId !== undefined &&
+    !trip.days.some((day) => day.id === initialEditingDayId)
+  ) {
+    notFound();
+  }
+
+  // Trip metadata is day-scoped and uses PUT /trips/:tripGroupId/days/:dayId.
+
   return (
     <RequireTripOwner tripGroupId={trip.id}>
       <div style={{ maxWidth: 720, display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
