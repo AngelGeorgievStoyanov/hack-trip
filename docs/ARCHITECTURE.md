@@ -664,10 +664,18 @@ Point creation must use the specific `day.id`; points are not attached directly 
 
 ## Editing a Day
 
-To edit a specific day, the frontend uses:
+From Trip Details, the owner action is labelled `EDIT DAY N` for the currently selected day. It navigates to:
 
 ```text
-PUT /trips/:tripId/days/:dayId
+/trips/:tripGroupId/edit?dayId=:dayId
+```
+
+The route loads the Trip Group and opens the matching day editor. The `dayId` is the database ID from the selected `days[].id`; it must not be replaced with the displayed `dayNumber`. If the supplied day ID does not belong to the group, the route returns not found.
+
+Saving that editor uses:
+
+```text
+PUT /trips/:tripGroupId/days/:dayId
 ```
 
 The backend returns the updated `TripGroupResponse`.
