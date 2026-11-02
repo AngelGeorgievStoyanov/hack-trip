@@ -127,8 +127,24 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
           ':hover': { background: '#4daf30' },
         }}
         containerSx={{ width: '100%' }}
-        direction={{ xs: 'column', md: 'row' }}
+        direction={{ xs: 'row', md: 'row' }}
       />
+
+      <Button
+        type="button"
+        variant="contained"
+        onClick={handleClearMarker}
+        sx={{
+          alignSelf: 'flex-start',
+          ml: '2px',
+          backgroundColor: 'rgb(194 194 224)',
+          color: 'black',
+          whiteSpace: 'nowrap',
+          ':hover': { color: 'rgb(248 245 245)' },
+        }}
+      >
+        Remove Marker
+      </Button>
 
       {notice ? <Alert severity="info" onClose={() => setNotice(null)}>{notice}</Alert> : null}
     </Stack>
