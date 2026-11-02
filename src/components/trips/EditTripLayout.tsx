@@ -10,6 +10,7 @@ import type { TripGroupResponse, TripGroupDay } from '@/types';
 interface EditTripLayoutProps {
   trip: TripGroupResponse;
   children: ReactNode;
+  selectedDayId?: number;
 }
 
 function ReadOnlyField({ label, value, multiline = false }: {
@@ -40,18 +41,19 @@ function formatPrice(day: TripGroupDay): string {
  * The current API does not expose a trip-group metadata update endpoint, so the
  * overview fields and map are intentionally presentation-only until that contract exists.
  */
-export function EditTripLayout({ trip, children }: EditTripLayoutProps) {
+export function EditTripLayout({ trip, children, selectedDayId }: EditTripLayoutProps) {
   const router = useRouter();
+  const selectedDay = trip.days.find((day) => day.id === selectedDayId) ?? trip.days[0];
   const [latitude, setLatitude] = useState(() => {
-    const value = trip.days.find((day) => day.lat != null)?.lat;
+    const value = selectedDay?.lat;
     return value == null ? '' : String(value);
   });
   const [longitude, setLongitude] = useState(() => {
-    const value = trip.days.find((day) => day.lng != null)?.lng;
+    const value = selectedDay?.lng;
     return value == null ? '' : String(value);
   });
 
-  const firstDay = trip.days[0];
+  const firstDay = selectedDay;
   const images = firstDay?.images ?? [];
 
   return (
