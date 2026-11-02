@@ -680,6 +680,29 @@ PUT /trips/:tripGroupId/days/:dayId
 
 The backend returns the updated `TripGroupResponse`.
 
+### Day number changes and reordering
+
+The frontend uses `PUT /trips/:tripGroupId/days/reorder` for every change to existing day numbers. The request contains the complete set of days in the group:
+
+```json
+{
+  "days": [
+    { "tripId": 101, "dayNumber": 1 },
+    { "tripId": 412, "dayNumber": 3 },
+    { "tripId": 309, "dayNumber": 7 }
+  ]
+}
+```
+
+- `tripId` is the database ID from `days[].id`; `dayNumber` is the requested logical day number.
+- The frontend sends every existing day, not only the days being changed.
+- When the selected number is already used by another day, the editor swaps the two day numbers.
+- The Days manager's move up/down controls also swap the two selected days' existing numbers. They do not compact gaps or derive numbers from array positions.
+- All other day numbers remain unchanged.
+- The endpoint returns the complete `TripGroupResponse`; the frontend replaces the cached trip group with that response.
+
+When the Edit Trip form also changes day details, it first saves those fields using the current day number, then submits the complete reorder request. If the reorder request fails, the other edited fields may already have been saved; the form displays the error and does not navigate away.
+
 After a successful edit:
 
 1. Keep the `dayId` that was being edited.
