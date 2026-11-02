@@ -113,14 +113,13 @@ export function PointLocationPicker({
   }
 
   return (
-    <Stack spacing={1} sx={{ width: '100%', minWidth: 0 }}>
+    <Stack spacing={1} sx={{ width: '100%', maxWidth: 600, minWidth: 0, mx: 'auto' }}>
       <Box
         sx={{
           position: 'relative',
           width: '100%',
-          height: { xs: 360, sm: 320, md: MAP_POINT_PICKER_HEIGHT },
-          border: '1px solid #e0e0e0',
-          borderRadius: 1,
+          maxWidth: 600,
+          height: MAP_POINT_PICKER_HEIGHT,
           overflow: 'hidden',
         }}
       >
@@ -128,7 +127,7 @@ export function PointLocationPicker({
           center={center}
           zoom={MAP_POINT_PICKER_ZOOM}
           height="100%"
-          maxWidth="100%"
+          maxWidth={600}
           markers={position ? [{ id: 'selected-position', position, draggable: true }] : []}
           onLoad={(map) => {
             mapRef.current = map;
@@ -142,20 +141,21 @@ export function PointLocationPicker({
       </Box>
 
       <Stack
-        direction={{ xs: 'column', md: 'row' }}
+        direction={{ xs: 'column', sm: 'row' }}
         spacing={1}
-        alignItems={{ xs: 'stretch', md: 'center' }}
+        alignItems={{ xs: 'stretch', sm: 'center' }}
         sx={{
           width: '100%',
+          maxWidth: 600,
           minWidth: 0,
-          justifyContent: { xs: 'center', md: 'space-around' },
-          px: { xs: 0, sm: 1 },
+          mx: 'auto',
+          justifyContent: 'space-around',
           boxSizing: 'border-box',
           '& > .MuiButton-root': {
-            width: { xs: '100%', md: 'auto' },
+            width: { xs: '100%', sm: 'auto' },
             minHeight: 40,
-            maxWidth: { xs: 420, md: 'none' },
-            alignSelf: { xs: 'center', md: 'auto' },
+            maxWidth: { xs: 420, sm: 'none' },
+            alignSelf: { xs: 'center', sm: 'auto' },
             boxSizing: 'border-box',
           },
         }}
@@ -174,19 +174,19 @@ export function PointLocationPicker({
           }}
           size="small"
           buttonVariant="contained"
-          direction={{ xs: 'column', md: 'row' }}
+          direction={{ xs: 'column', sm: 'row' }}
           buttonSx={{
-            width: { xs: '100%', md: 'auto' },
+            width: { xs: '100%', sm: 'auto' },
             minHeight: 40,
             m: 0,
             '&:hover': { backgroundColor: '#4daf30' },
           }}
           containerSx={{
-            width: { xs: '100%', md: 'auto' },
-            flex: { xs: '0 1 auto', md: '1 1 190px' },
+            width: { xs: '100%', sm: 'auto' },
+            flex: { xs: '0 1 auto', sm: '1 1 190px' },
             minWidth: 0,
-            maxWidth: { xs: 420, md: 420 },
-            alignSelf: { xs: 'center', md: 'stretch' },
+            maxWidth: { xs: 420, sm: 420 },
+            alignSelf: { xs: 'center', sm: 'stretch' },
           }}
         />
         <Button
