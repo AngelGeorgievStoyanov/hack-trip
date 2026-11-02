@@ -360,31 +360,31 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, map
             ADD NEXT DAY TRIP
           </Button>
         ) : null}
+        <Button
+          type="button"
+          variant="contained"
+          onClick={() => {
+            if (!isEdit) {
+              setCreatedPointId(null);
+              setUploadedImageCount(0);
+              setFiles([]);
+              reset({ name: '', description: '', lat: '', lng: '' });
+              onLocationChange('', '');
+            }
+            if (isEdit) onDone();
+            else onBack();
+          }}
+          disabled={submitting}
+          sx={{
+            ...stackedActionButtonSx,
+            backgroundColor: 'rgb(194, 194, 224)',
+            color: 'black',
+            '&:hover': { backgroundColor: 'rgb(170, 170, 210)', color: 'black' },
+          }}
+        >
+          {isEdit ? 'CANCEL' : 'BACK'}
+        </Button>
       </Box>
-      <Button
-        type="button"
-        variant="contained"
-        onClick={() => {
-          if (!isEdit) {
-            setCreatedPointId(null);
-            setUploadedImageCount(0);
-            setFiles([]);
-            reset({ name: '', description: '', lat: '', lng: '' });
-            onLocationChange('', '');
-          }
-          if (isEdit) onDone();
-          else onBack();
-        }}
-        disabled={submitting}
-        sx={{
-          ...legacyButtonSx,
-          backgroundColor: 'rgb(194, 194, 224)',
-          color: 'black',
-          '&:hover': { backgroundColor: 'rgb(170, 170, 210)', color: 'black' },
-        }}
-      >
-        {isEdit ? 'CANCEL' : 'BACK'}
-      </Button>
     </Box>
   );
 }
