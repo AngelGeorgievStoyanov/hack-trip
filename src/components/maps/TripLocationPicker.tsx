@@ -108,7 +108,7 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
         inputSx={{
       backgroundColor: '#f2f1e58f',
       borderRadius: '5px',
-      m: '2px',
+      m: { xs: 0, md: '2px' },
       '& .MuiInputBase-root': { color: '#222' },
       '& .MuiInputLabel-root': { color: '#333' },
       '& .MuiInputLabel-root.Mui-focused': { color: 'primary.main' },
@@ -117,7 +117,7 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
       '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main' },
         }}
         buttonSx={{
-          m: '2px',
+          m: { xs: 0, md: '2px' },
           whiteSpace: 'nowrap',
           '&.Mui-disabled': {
             backgroundColor: 'primary.main',
