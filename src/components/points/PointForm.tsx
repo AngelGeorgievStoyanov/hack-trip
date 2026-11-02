@@ -53,6 +53,13 @@ const legacyButtonSx = {
   '&:hover': { backgroundColor: '#4daf30' },
 };
 
+const stackedActionButtonSx = {
+  ...legacyButtonSx,
+  '@media (max-width:610px)': {
+    width: 'calc(100% - 16px)',
+  },
+};
+
 export function PointForm({ tripGroupId, tripId, point, latitude, longitude, mapSearchSelection, onLocationChange, onFindInMap, onAddNextDay, onBack, onDone }: PointFormProps) {
   const queryClient = useQueryClient();
   const { isLoaded } = useGoogleMapsLoader();
@@ -338,7 +345,7 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, map
           variant="contained"
           disabled={submitting || !latitude || !longitude || (!isEdit && (!isDirty || !isValid)) || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
           startIcon={submitting ? <CircularProgress size={16} /> : undefined}
-          sx={legacyButtonSx}
+          sx={stackedActionButtonSx}
         >
           {isEdit ? 'SAVE POINT' : createdPointId ? 'RETRY IMAGE UPLOAD' : 'ADD POINT'}
         </Button>
@@ -348,7 +355,7 @@ export function PointForm({ tripGroupId, tripId, point, latitude, longitude, map
             variant="contained"
             onClick={onAddNextDay}
             disabled={submitting}
-            sx={legacyButtonSx}
+            sx={stackedActionButtonSx}
           >
             ADD NEXT DAY TRIP
           </Button>
