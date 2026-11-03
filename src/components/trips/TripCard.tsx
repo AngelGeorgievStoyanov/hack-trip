@@ -174,7 +174,7 @@ export function TripCard({ tripGroup }: TripCardProps) {
   }
 
   return (
-    <Card sx={[cardStyle, { height: isMobile ? 'fit-content' : 'auto' }]}>
+    <Card sx={[cardStyle, { height: '540px', minHeight: '540px', maxHeight: '540px', boxSizing: 'border-box', overflow: 'hidden' }]}>
       <Box sx={[HEAD_BLOCK_SX, { height: isMobile ? 'auto' : '-webkit-fill-available' }]}>
         <Typography gutterBottom variant="h5" sx={{ padding: '0px 15px' }}>
           Title: {title}
@@ -187,79 +187,63 @@ export function TripCard({ tripGroup }: TripCardProps) {
         ) : null}
       </Box>
 
-      {images.length > 0 ? (
-        <>
-          <Box
-            sx={{ display: 'flex', justifyContent: 'center', width: '100%', position: 'relative' }}
-            onTouchStart={(event) => {
-              touchEndX.current = null;
-              touchStartX.current = event.touches[0].clientX;
-            }}
-            onTouchMove={(event) => {
-              touchEndX.current = event.touches[0].clientX;
-            }}
-            onTouchEnd={handleTouchEnd}
-          >
-            <AppImage
-              image={images[activeStep]}
-              useThumbnail
-              alt={title}
-              width={300}
-              height={200}
-              style={IMAGE_STYLE}
-            />
-            <Box
-              aria-label="Trip social counts"
-              sx={{
-                position: 'absolute',
-                top: 10,
-                left: 10,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 0.75,
-                p: 0.75,
-                borderRadius: 2,
-                bgcolor: COLORS.cardBackground,
-                boxShadow: 2,
-                pointerEvents: 'none',
-              }}
-            >
-              <Box component="span" role="img" aria-label={`Trip group likes: ${groupLikes}`} sx={{ display: 'inline-flex' }}>
-                <Badge badgeContent={groupLikes} invisible={groupLikes === 0} max={Number.MAX_SAFE_INTEGER} color="error">
-                  <FavoriteIcon fontSize="small" color="error" />
-                </Badge>
-              </Box>
-              <Box component="span" role="img" aria-label={`Trip likes: ${tripLikes}`} sx={{ display: 'inline-flex' }}>
-                <Badge badgeContent={tripLikes} invisible={tripLikes === 0} max={Number.MAX_SAFE_INTEGER} color="error">
-                  <FavoriteIcon fontSize="small" color="error" />
-                </Badge>
-              </Box>
-            </Box>
-          </Box>
-
-          <MobileStepper
-            variant="dots"
-            steps={maxSteps}
-            position="static"
-            activeStep={activeStep}
-            sx={{ width: '-webkit-fill-available', flexGrow: 1, maxHeight: '20px' }}
-            nextButton={
-              <Button size="small" onClick={handleNext} disabled={activeStep === maxSteps - 1}>
-                Next
-                {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-              </Button>
-            }
-            backButton={
-              <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
-                {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-                Back
-              </Button>
-            }
+      <Box sx={IMAGE_FRAME_SX}
+        onTouchStart={(event) => {
+          touchEndX.current = null;
+          touchStartX.current = event.touches[0].clientX;
+        }}
+        onTouchMove={(event) => {
+          touchEndX.current = event.touches[0].clientX;
+        }}
+        onTouchEnd={handleTouchEnd}
+      >
+        {images.length > 0 ? (
+          <AppImage
+            image={images[activeStep]}
+            useThumbnail
+            alt={title}
+            width={300}
+            height={200}
+            style={IMAGE_STYLE}
           />
-        </>
+        ) : null}
+      </Box>
+
+      {images.length > 0 ? (
+        <MobileStepper
+          variant="dots"
+          steps={maxSteps}
+          position="static"
+          activeStep={activeStep}
+          sx={{ width: '-webkit-fill-available', flexGrow: 1, maxHeight: '20px' }}
+          nextButton={
+            <Button size="small" onClick={handleNext} disabled={activeStep === maxSteps - 1}>
+              Next
+              {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+            </Button>
+          }
+          backButton={
+            <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
+              {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+            </Button>
+          }
+        />
       ) : (
-        noImagesMessage
+        <Box sx={STEPPER_SPACE_SX} />
       )}
+
+      <Box aria-label="Trip and day likes" sx={SOCIAL_COUNTS_SX}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography component="span" variant="body2">Trip:</Typography>
+          <FavoriteIcon fontSize="small" color="error" />
+          <Typography component="span" variant="body2">{groupLikes}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography component="span" variant="body2">Day:</Typography>
+          <FavoriteIcon fontSize="small" color="error" />
+          <Typography component="span" variant="body2">{tripLikes}</Typography>
+        </Box>
+      </Box>
 
       <CardContent sx={CARD_CONTENT_SX}>
         <Button
