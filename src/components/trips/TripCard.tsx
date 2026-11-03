@@ -15,7 +15,8 @@ import {
   useTheme,
 } from '@mui/material';
 import type { PaginationRenderItemParams } from '@mui/material/Pagination';
-import { AppImage, TripImagePlaceholder } from '@/components/images';
+import { AppImage } from '@/components/images';
+import { SocialObjectPlaceholder } from '@/components/placeholders';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
@@ -243,7 +244,7 @@ export function TripCard({ tripGroup }: TripCardProps) {
             style={IMAGE_STYLE}
           />
         ) : (
-          <TripImagePlaceholder />
+          <SocialObjectPlaceholder key={dayNumber} />
         )}
       </Box>
 
