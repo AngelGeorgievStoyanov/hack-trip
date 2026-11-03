@@ -13,7 +13,7 @@ export function SocialObjectPlaceholder() {
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * SOCIAL_OBJECT_PLACEHOLDERS.length);
-    setImageSrc(SOCIAL_OBJECT_PLACEHOLDERS[randomIndex]);
+    setImageSrc(SOCIAL_OBJECT_PLACEHOLDERS[randomIndex] ?? SOCIAL_OBJECT_PLACEHOLDERS[0]);
   }, []);
 
   return (
