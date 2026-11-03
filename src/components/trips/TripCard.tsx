@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   MobileStepper,
-  Badge,
   Pagination,
   PaginationItem,
   Typography,
@@ -22,7 +21,6 @@ import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import {
   BREAKPOINTS,
-  COLORS,
   LIGHTBOX_SWIPE_THRESHOLD_PX,
   cardStyle,
   maxWidthQuery,
@@ -35,24 +33,66 @@ interface TripCardProps {
 }
 
 const IMAGE_STYLE: CSSProperties = {
+  display: 'block',
   width: '300px',
   maxWidth: '100%',
   height: '200px',
   objectFit: 'cover',
 };
 
+const CARD_HEIGHT = '540px';
+
 const HEAD_BLOCK_SX = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  justifyContent: 'space-evenly',
+  justifyContent: 'center',
+  width: '100%',
+  height: '105px',
+  minHeight: '105px',
+  boxSizing: 'border-box',
+  overflow: 'hidden',
+} as const;
+
+const IMAGE_FRAME_SX = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: '100%',
+  height: '200px',
+  minHeight: '200px',
+  overflow: 'hidden',
+  bgcolor: 'action.hover',
+} as const;
+
+const SOCIAL_COUNTS_SX = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  justifyContent: 'center',
+  gap: 0.5,
+  width: '100%',
+  height: '58px',
+  minHeight: '58px',
+  px: 2,
+  boxSizing: 'border-box',
+} as const;
+
+const STEPPER_SPACE_SX = {
+  height: '20px',
+  minHeight: '20px',
+  width: '100%',
 } as const;
 
 const CARD_CONTENT_SX = {
   display: 'flex',
+  flex: 1,
   flexDirection: 'column',
-  justifyContent: 'space-between',
+  justifyContent: 'center',
   alignItems: 'center',
+  minHeight: 0,
+  py: 1,
+  '&:last-child': { pb: 1 },
 } as const;
 
 const DESCRIPTION_SX = {
@@ -64,10 +104,9 @@ const DESCRIPTION_SX = {
 } as const;
 
 /**
- * Client Component: the legacy card kept the selected day and the gallery step in component
- * state. The group response already carries every day, so switching days or images never
- * issues a request (no N+1). One card serves the trips list, top trips, my trips and
- * favorites.
+ * One shared card serves the home, trips, my trips and favorites lists.
+ * The group response already carries every day, so changing days/images stays local
+ * and does not issue additional API requests.
  */
 export function TripCard({ tripGroup }: TripCardProps) {
   const days = tripGroup.days;
@@ -78,33 +117,23 @@ export function TripCard({ tripGroup }: TripCardProps) {
   const isMobile = useMediaQuery(maxWidthQuery(BREAKPOINTS.tripCard));
   const theme = useTheme();
 
-  // `tripGroup.days` already carries every day, so resolving the selected day is pure
-  // local state: switching days or images never issues an API request (no N+1).
   const selectedDay = days.find((day) => day.dayNumber === dayNumber);
-  // Position of the selected day in the positional MUI pagination (0 when missing).
   const selectedPage = days.findIndex((day) => day.dayNumber === dayNumber) + 1;
   const images = selectedDay?.images ?? [];
   const maxSteps = images.length;
 
-  // Likes belong to the whole trip group, so they must not change when the day changes.
+  // Group likes stay unchanged when the selected day changes.
   const groupLikes = tripGroup.social.likes;
-  const tripLikes = selectedDay?.social.likes ?? 0;
+  const dayLikes = selectedDay?.social.likes ?? 0;
 
-  // The DETAILS link keeps the day the visitor is looking at. `:id` is always the
-  // tripGroupId; the day travels as `?day=N` and missing numbers (e.g. Day 1, Day 3,
-  // Day 5) are preserved because we use the real dayNumber.
   const detailsHref = selectedDay
     ? buildTripUrl(tripGroup.id, selectedDay.dayNumber)
     : buildTripUrl(tripGroup.id);
 
-  // The day-level title/description win; the trip group has no separate title/description.
   const title = selectedDay?.title ?? 'Trip';
   const description = selectedDay?.description ?? null;
 
   function handleDayChange(_event: ChangeEvent<unknown>, value: number): void {
-    // `value` is the visible page position (1..days.length); store the real `dayNumber`
-    // so gaps (Day 1, Day 3, Day 5) keep working. The legacy card reset the image step
-    // whenever the day changed.
     setDayNumber(days[value - 1]?.dayNumber ?? value);
     setActiveStep(0);
   }
@@ -133,10 +162,6 @@ export function TripCard({ tripGroup }: TripCardProps) {
     }
   }
 
-  const noImagesMessage = 'No images for this trip group. Please check back later.';
-
-  // MUI pages are positional (1..days.length); the label renders the real `dayNumber`
-  // so groups with gaps (Day 1, Day 3, Day 5) stay selectable.
   function renderPaginationItem(item: PaginationRenderItemParams) {
     return item.type === 'page' ? (
       <PaginationItem {...item} page={days[(item.page ?? 1) - 1]?.dayNumber ?? item.page} />
@@ -145,12 +170,11 @@ export function TripCard({ tripGroup }: TripCardProps) {
     );
   }
 
-  // Legacy behavior for a requested day that does not exist: the card body is replaced by
-  // "No trip on N day". The day is never fetched from the API.
+  // Keep the legacy empty-day state for pagination gaps.
   if (!selectedDay) {
     return (
       <Card sx={[cardStyle, { height: isMobile ? 'fit-content' : 'auto', maxHeight: '500px' }]}>
-        <Box sx={[HEAD_BLOCK_SX, { height: isMobile ? 'auto' : '-webkit-fill-available' }]}>
+        <Box sx={{ ...HEAD_BLOCK_SX, height: isMobile ? 'auto' : '-webkit-fill-available' }}>
           <Typography gutterBottom variant="h5" sx={{ padding: '0px 15px' }}>
             No trip on {dayNumber} day
           </Typography>
@@ -161,7 +185,6 @@ export function TripCard({ tripGroup }: TripCardProps) {
               count={days.length}
               variant="outlined"
               shape="rounded"
-              // A missing day has no position; clamp into the valid page range.
               page={Math.max(selectedPage, 1)}
               onChange={handleDayChange}
               renderItem={renderPaginationItem}
@@ -174,20 +197,31 @@ export function TripCard({ tripGroup }: TripCardProps) {
   }
 
   return (
-    <Card sx={[cardStyle, { height: '540px', minHeight: '540px', maxHeight: '540px', boxSizing: 'border-box', overflow: 'hidden' }]}>
-      <Box sx={[HEAD_BLOCK_SX, { height: isMobile ? 'auto' : '-webkit-fill-available' }]}>
-        <Typography gutterBottom variant="h5" sx={{ padding: '0px 15px' }}>
+    <Card
+      sx={[
+        cardStyle,
+        {
+          height: CARD_HEIGHT,
+          minHeight: CARD_HEIGHT,
+          maxHeight: CARD_HEIGHT,
+          boxSizing: 'border-box',
+          overflow: 'hidden',
+        },
+      ]}
+    >
+      <Box sx={HEAD_BLOCK_SX}>
+        <Typography gutterBottom variant="h5" sx={{ padding: '0px 15px', textAlign: 'center' }}>
           Title: {title}
         </Typography>
-
         {description ? (
           <Typography variant="body2" sx={[DESCRIPTION_SX, { padding: '0px 15px' }]}>
-            Description:  {description}
+            Description: {description}
           </Typography>
         ) : null}
       </Box>
 
-      <Box sx={IMAGE_FRAME_SX}
+      <Box
+        sx={IMAGE_FRAME_SX}
         onTouchStart={(event) => {
           touchEndX.current = null;
           touchStartX.current = event.touches[0].clientX;
@@ -241,7 +275,7 @@ export function TripCard({ tripGroup }: TripCardProps) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography component="span" variant="body2">Day:</Typography>
           <FavoriteIcon fontSize="small" color="error" />
-          <Typography component="span" variant="body2">{tripLikes}</Typography>
+          <Typography component="span" variant="body2">{dayLikes}</Typography>
         </Box>
       </Box>
 
