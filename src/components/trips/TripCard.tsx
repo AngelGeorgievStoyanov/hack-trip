@@ -15,7 +15,7 @@ import {
   useTheme,
 } from '@mui/material';
 import type { PaginationRenderItemParams } from '@mui/material/Pagination';
-import { AppImage } from '@/components/images/AppImage';
+import { AppImage, TripImagePlaceholder } from '@/components/images';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
@@ -242,7 +242,9 @@ export function TripCard({ tripGroup }: TripCardProps) {
             height={200}
             style={IMAGE_STYLE}
           />
-        ) : null}
+        ) : (
+          <TripImagePlaceholder />
+        )}
       </Box>
 
       {images.length > 0 ? (
