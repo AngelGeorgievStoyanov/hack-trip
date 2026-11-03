@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { SOCIAL_OBJECT_PLACEHOLDERS } from './socialObjectPlaceholderAssets';
 
 /**
@@ -19,8 +19,9 @@ export function SocialObjectPlaceholder() {
   return (
     <Box
       role="img"
-      aria-label="Travel scenery placeholder"
+      aria-label="Your next adventure. No photos uploaded yet."
       sx={{
+        position: 'relative',
         display: 'block',
         width: '100%',
         height: '100%',
@@ -42,6 +43,31 @@ export function SocialObjectPlaceholder() {
           }}
         />
       ) : null}
+
+      <Box
+        sx={{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          left: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 0.25,
+          px: 2,
+          py: 1.25,
+          color: '#fff',
+          textAlign: 'center',
+          background: 'linear-gradient(transparent, rgba(15, 35, 45, 0.72))',
+        }}
+      >
+        <Typography component="span" sx={{ fontSize: '0.95rem', fontWeight: 600, lineHeight: 1.3 }}>
+          Your next adventure
+        </Typography>
+        <Typography component="span" sx={{ fontSize: '0.72rem', lineHeight: 1.3, opacity: 0.95 }}>
+          No photos uploaded yet
+        </Typography>
+      </Box>
     </Box>
   );
 }
