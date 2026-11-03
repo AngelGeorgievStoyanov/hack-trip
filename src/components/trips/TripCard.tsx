@@ -35,8 +35,7 @@ interface TripCardProps {
 
 const IMAGE_STYLE: CSSProperties = {
   display: 'block',
-  width: '300px',
-  maxWidth: '100%',
+  width: '100%',
   height: '200px',
   objectFit: 'cover',
 };
