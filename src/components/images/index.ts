@@ -4,4 +4,3 @@ export { default as ImageUploadField } from './ImageUploadField';
 export * from './ImageLightbox';
 export * from './SocialImageGallery';
 export * from './ImageGallery';
-export * from './TripImagePlaceholder';
