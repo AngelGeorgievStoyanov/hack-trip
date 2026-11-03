@@ -201,6 +201,8 @@ export function TripCard({ tripGroup }: TripCardProps) {
       sx={[
         cardStyle,
         {
+          width: '352px',
+          maxWidth: 'calc(100vw - 40px)',
           height: CARD_HEIGHT,
           minHeight: CARD_HEIGHT,
           maxHeight: CARD_HEIGHT,
