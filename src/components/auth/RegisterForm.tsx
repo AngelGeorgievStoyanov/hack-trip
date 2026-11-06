@@ -141,7 +141,10 @@ export function RegisterForm() {
           autoComplete="new-password"
           {...register('password')}
           error={!!errors.password}
-          helperText={errors.password?.message}
+          helperText={
+            errors.password?.message ??
+            'At least 8 characters, including a letter, a number and a symbol. Example: Travel123! (do not use this exact password).'
+          }
         />
         <TextField
           label="Confirm password"
