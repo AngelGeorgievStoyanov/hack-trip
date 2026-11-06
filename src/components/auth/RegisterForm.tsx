@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
+import Script from 'next/script';
 import {
   Alert,
   Box,
@@ -24,6 +25,24 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { registerSchema } from '@/validations/auth';
 import { COLORS, CARD_SHADOW, CARD_BORDER } from '@/constants/ui';
 import { WelcomeHeading } from '@/components/common/WelcomeHeading';
+import { config } from '@/config';
+
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready: (callback: () => void) => void;
+      render: (
+        container: HTMLElement,
+        parameters: {
+          sitekey: string;
+          callback: (token: string) => void;
+          'expired-callback': () => void;
+          'error-callback': () => void;
+        },
+      ) => number;
+    };
+  }
+}
 
 const registerFormSchema = registerSchema
   .extend({
@@ -45,15 +64,19 @@ export function RegisterForm() {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [captchaLoaded, setCaptchaLoaded] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaContainerRef = useRef<HTMLDivElement>(null);
+  const captchaWidgetId = useRef<number | null>(null);
 
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isSubmitted },
+    formState: { errors, isSubmitted, isValid },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver<RegisterFormValues>(registerFormSchema),
-    mode: 'onSubmit',
+    mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
       email: '',
@@ -73,6 +96,31 @@ export function RegisterForm() {
     { label: 'At least one symbol', valid: /[\p{P}\p{S}]/u.test(password) },
     { label: 'No spaces', valid: password.length > 0 && !/\s/.test(password) },
   ];
+
+  useEffect(() => {
+    if (
+      !captchaLoaded ||
+      !config.recaptchaV2SiteKey ||
+      !captchaContainerRef.current ||
+      !window.grecaptcha ||
+      captchaWidgetId.current !== null
+    ) {
+      return;
+    }
+
+    window.grecaptcha.ready(() => {
+      const grecaptcha = window.grecaptcha;
+      const container = captchaContainerRef.current;
+      if (!grecaptcha || !container || captchaWidgetId.current !== null) return;
+
+      captchaWidgetId.current = grecaptcha.render(container, {
+        sitekey: config.recaptchaV2SiteKey,
+        callback: (token) => setCaptchaToken(token),
+        'expired-callback': () => setCaptchaToken(null),
+        'error-callback': () => setCaptchaToken(null),
+      });
+    });
+  }, [captchaLoaded]);
 
   async function onSubmit(values: RegisterFormValues): Promise<void> {
     setSubmitting(true);
@@ -228,10 +276,24 @@ export function RegisterForm() {
             {errors.acceptedTerms.message}
           </Typography>
         ) : null}
+        {config.recaptchaV2SiteKey ? (
+          <>
+            <Script
+              src="https://www.google.com/recaptcha/api.js?render=explicit"
+              strategy="afterInteractive"
+              onLoad={() => setCaptchaLoaded(true)}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'center', minHeight: 78 }}>
+              <Box ref={captchaContainerRef} />
+            </Box>
+          </>
+        ) : (
+          <Alert severity="error">CAPTCHA is not configured. Registration is unavailable.</Alert>
+        )}
         <Button
           type="submit"
           variant="contained"
-          disabled={submitting || !!message}
+          disabled={submitting || !!message || !isValid || !captchaToken}
           startIcon={submitting ? <CircularProgress size={18} /> : undefined}
           sx={{ ':hover': { backgroundColor: '#4daf30' } }}
         >
