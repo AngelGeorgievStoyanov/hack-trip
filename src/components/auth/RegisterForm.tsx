@@ -10,9 +10,12 @@ import {
   Checkbox,
   CircularProgress,
   FormControlLabel,
+  IconButton,
+  InputAdornment,
   TextField,
   Typography,
 } from '@mui/material';
+import { CheckCircleOutline, RadioButtonUnchecked, Visibility, VisibilityOff } from '@mui/icons-material';
 import { z } from 'zod';
 import { authApi } from '@/api/auth';
 import type { RegisterInput } from '@/api/auth';
@@ -40,14 +43,17 @@ export function RegisterForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    watch,
+    formState: { errors, isSubmitted },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
-    mode: 'onChange',
+    mode: 'onSubmit',
     reValidateMode: 'onChange',
     defaultValues: {
       email: '',
@@ -58,6 +64,15 @@ export function RegisterForm() {
       acceptedTerms: false,
     },
   });
+
+  const password = watch('password') ?? '';
+  const passwordRules = [
+    { label: 'At least 8 characters', valid: password.length >= 8 },
+    { label: 'At least one letter', valid: /[a-zA-Z]/.test(password) },
+    { label: 'At least one number', valid: /\d/.test(password) },
+    { label: 'At least one symbol', valid: /\W/.test(password) },
+    { label: 'No spaces', valid: !/\s/.test(password) },
+  ];
 
   async function onSubmit(values: RegisterFormValues): Promise<void> {
     setSubmitting(true);
@@ -71,8 +86,6 @@ export function RegisterForm() {
         lastName: values.lastName,
       };
       const response = await authApi.register(input);
-      // Anti-enumeration: the backend returns a neutral message whether or not the email
-      // is already registered.
       setMessage(response.message);
     } catch (e) {
       setError(getGenericErrorMessage(e));
@@ -92,6 +105,7 @@ export function RegisterForm() {
     <WelcomeHeading>
       <Box
         component="form"
+        noValidate
         onSubmit={handleSubmit(onSubmit)}
         sx={{
           display: 'flex',
@@ -118,41 +132,88 @@ export function RegisterForm() {
           type="email"
           autoComplete="email"
           {...register('email')}
-          error={!!errors.email}
-          helperText={errors.email?.message}
+          error={isSubmitted && !!errors.email}
+          helperText={isSubmitted ? errors.email?.message : ' '}
         />
         <TextField
           label="First name"
           autoComplete="given-name"
           {...register('firstName')}
-          error={!!errors.firstName}
-          helperText={errors.firstName?.message}
+          error={isSubmitted && !!errors.firstName}
+          helperText={isSubmitted ? errors.firstName?.message : ' '}
         />
         <TextField
           label="Last name"
           autoComplete="family-name"
           {...register('lastName')}
-          error={!!errors.lastName}
-          helperText={errors.lastName?.message}
+          error={isSubmitted && !!errors.lastName}
+          helperText={isSubmitted ? errors.lastName?.message : ' '}
         />
         <TextField
           label="Password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           autoComplete="new-password"
           {...register('password')}
-          error={!!errors.password}
+          error={isSubmitted && !!errors.password}
           helperText={
-            errors.password?.message ??
-            'At least 8 characters, including a letter, a number and a symbol. Example: Travel123! (do not use this exact password).'
+            isSubmitted && errors.password?.message
+              ? errors.password.message
+              : 'Create a password that meets all the requirements below.'
           }
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    onMouseDown={(event) => event.preventDefault()}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
         />
+        <Box component="ul" sx={{ listStyle: 'none', p: 0, m: '-8px 0 0 4px', display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 0.75 }}>
+          {passwordRules.map((rule) => (
+            <Box component="li" key={rule.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              {rule.valid ? (
+                <CheckCircleOutline fontSize="small" color="success" />
+              ) : (
+                <RadioButtonUnchecked fontSize="small" sx={{ color: 'text.disabled' }} />
+              )}
+              <Typography variant="caption" color={rule.valid ? 'success.main' : 'text.secondary'}>
+                {rule.label}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
         <TextField
           label="Confirm password"
-          type="password"
+          type={showConfirmPassword ? 'text' : 'password'}
           autoComplete="new-password"
           {...register('confirmPassword')}
-          error={!!errors.confirmPassword}
-          helperText={errors.confirmPassword?.message}
+          error={isSubmitted && !!errors.confirmPassword}
+          helperText={isSubmitted ? errors.confirmPassword?.message : ' '}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    onClick={() => setShowConfirmPassword((visible) => !visible)}
+                    onMouseDown={(event) => event.preventDefault()}
+                    edge="end"
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
         />
         <FormControlLabel
           control={<Checkbox {...register('acceptedTerms')} />}
@@ -162,7 +223,7 @@ export function RegisterForm() {
             </>
           }
         />
-        {errors.acceptedTerms?.message ? (
+        {isSubmitted && errors.acceptedTerms?.message ? (
           <Typography color="error" role="alert">
             {errors.acceptedTerms.message}
           </Typography>
@@ -170,7 +231,7 @@ export function RegisterForm() {
         <Button
           type="submit"
           variant="contained"
-          disabled={!isValid || submitting || !!message}
+          disabled={submitting || !!message}
           startIcon={submitting ? <CircularProgress size={18} /> : undefined}
           sx={{ ':hover': { backgroundColor: '#4daf30' } }}
         >
