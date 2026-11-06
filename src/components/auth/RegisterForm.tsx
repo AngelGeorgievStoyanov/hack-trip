@@ -71,7 +71,7 @@ export function RegisterForm() {
     { label: 'At least one letter', valid: /[a-zA-Z]/.test(password) },
     { label: 'At least one number', valid: /\d/.test(password) },
     { label: 'At least one symbol', valid: /\W/.test(password) },
-    { label: 'No spaces', valid: !/\s/.test(password) },
+    { label: 'No spaces', valid: password.length > 0 && !/\s/.test(password) },
   ];
 
   async function onSubmit(values: RegisterFormValues): Promise<void> {
