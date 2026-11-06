@@ -37,10 +37,10 @@ export function trimmedString({
 export const emailString = (message = 'Invalid email address') =>
   trimmedString({ min: 1, max: 45, pattern: EMAIL_REGEX, patternMessage: message });
 
-/** Password: min/max chars plus a byte-length ceiling. Never trimmed. */
+/** Legacy password policy: length, letter, digit, special character and no spaces. */
 export const passwordString = (
   { min, max }: { min: number; max: number },
-  messages?: { min?: string; max?: string },
+  messages?: { min?: string; max?: string; pattern?: string },
 ) =>
   z
     .string()
@@ -49,6 +49,11 @@ export const passwordString = (
     .refine(
       (value) => new TextEncoder().encode(value).length <= max,
       `Password must be at most ${max} bytes`,
+    )
+    .regex(
+      /^(?=(.*[a-zA-Z]){1,})(?=(.*[\\d]){1,})(?=(.*[\\W]){1,})(?!.*\\s).{8,}$/,
+      messages?.pattern ??
+        'Use at least 8 characters with a letter, a number and a symbol. Example: Travel123! (do not use this exact password).',
     );
 
 /** Optional/nullable text: `undefined`/`null`/`''` -> `null`. Output `string | null`. */
