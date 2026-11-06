@@ -73,7 +73,7 @@ export function RegisterForm() {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isSubmitted, isValid },
+    formState: { errors, isSubmitted, isValid, touchedFields },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver<RegisterFormValues>(registerFormSchema),
     mode: 'onChange',
@@ -180,31 +180,31 @@ export function RegisterForm() {
           type="email"
           autoComplete="email"
           {...register('email')}
-          error={isSubmitted && !!errors.email}
-          helperText={isSubmitted ? errors.email?.message : ' '}
+          error={(isSubmitted || touchedFields.email) && !!errors.email}
+          helperText={isSubmitted || touchedFields.email ? errors.email?.message ?? ' ' : ' '}
         />
         <TextField
           label="First name"
           autoComplete="given-name"
           {...register('firstName')}
-          error={isSubmitted && !!errors.firstName}
-          helperText={isSubmitted ? errors.firstName?.message : ' '}
+          error={(isSubmitted || touchedFields.firstName) && !!errors.firstName}
+          helperText={isSubmitted || touchedFields.firstName ? errors.firstName?.message ?? ' ' : ' '}
         />
         <TextField
           label="Last name"
           autoComplete="family-name"
           {...register('lastName')}
-          error={isSubmitted && !!errors.lastName}
-          helperText={isSubmitted ? errors.lastName?.message : ' '}
+          error={(isSubmitted || touchedFields.lastName) && !!errors.lastName}
+          helperText={isSubmitted || touchedFields.lastName ? errors.lastName?.message ?? ' ' : ' '}
         />
         <TextField
           label="Password"
           type={showPassword ? 'text' : 'password'}
           autoComplete="new-password"
           {...register('password')}
-          error={isSubmitted && !!errors.password}
+          error={(isSubmitted || touchedFields.password) && !!errors.password}
           helperText={
-            isSubmitted && errors.password?.message
+            (isSubmitted || touchedFields.password) && errors.password?.message
               ? errors.password.message
               : 'Create a password that meets all the requirements below.'
           }
@@ -244,8 +244,8 @@ export function RegisterForm() {
           type={showConfirmPassword ? 'text' : 'password'}
           autoComplete="new-password"
           {...register('confirmPassword')}
-          error={isSubmitted && !!errors.confirmPassword}
-          helperText={isSubmitted ? errors.confirmPassword?.message : ' '}
+          error={(isSubmitted || touchedFields.confirmPassword) && !!errors.confirmPassword}
+          helperText={isSubmitted || touchedFields.confirmPassword ? errors.confirmPassword?.message ?? ' ' : ' '}
           slotProps={{
             input: {
               endAdornment: (
@@ -271,7 +271,7 @@ export function RegisterForm() {
             </>
           }
         />
-        {isSubmitted && errors.acceptedTerms?.message ? (
+        {(isSubmitted || touchedFields.acceptedTerms) && errors.acceptedTerms?.message ? (
           <Typography color="error" role="alert">
             {errors.acceptedTerms.message}
           </Typography>
