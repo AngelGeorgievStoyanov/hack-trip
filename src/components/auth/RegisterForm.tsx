@@ -52,7 +52,7 @@ export function RegisterForm() {
     watch,
     formState: { errors, isSubmitted },
   } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerFormSchema),
+    resolver: zodResolver<RegisterFormValues>(registerFormSchema),
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     defaultValues: {
