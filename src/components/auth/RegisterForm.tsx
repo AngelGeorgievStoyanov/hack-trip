@@ -28,9 +28,7 @@ import { WelcomeHeading } from '@/components/common/WelcomeHeading';
 const registerFormSchema = registerSchema
   .extend({
     confirmPassword: z.string().min(1, 'Confirm password is required.'),
-    acceptedTerms: z.literal(true, {
-      error: 'You must accept the terms of use and privacy policy.',
-    }),
+    acceptedTerms: z.boolean().refine(Boolean, {\n      message: 'You must accept the terms of use and privacy policy.',\n    }),
   })
   .refine((values) => values.confirmPassword === values.password, {
     path: ['confirmPassword'],
