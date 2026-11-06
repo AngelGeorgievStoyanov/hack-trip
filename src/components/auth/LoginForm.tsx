@@ -4,7 +4,17 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
 import { zodResolver } from '@/lib/zodResolver';
 import { getAuthErrorMessage } from '@/lib/errors';
@@ -18,12 +28,17 @@ export function LoginForm() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
+    formState: { errors, isSubmitted },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
+  });
 
   async function onSubmit(values: LoginInput): Promise<void> {
     setSubmitting(true);
@@ -49,6 +64,7 @@ export function LoginForm() {
     <WelcomeHeading>
       <Box
         component="form"
+        noValidate
         onSubmit={handleSubmit(onSubmit)}
         sx={{
           display: 'flex',
@@ -74,16 +90,32 @@ export function LoginForm() {
           type="email"
           autoComplete="email"
           {...register('email')}
-          error={!!errors.email}
-          helperText={errors.email?.message}
+          error={isSubmitted && !!errors.email}
+          helperText={isSubmitted ? errors.email?.message : ' '}
         />
         <TextField
           label="Password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           autoComplete="current-password"
           {...register('password')}
-          error={!!errors.password}
-          helperText={errors.password?.message}
+          error={isSubmitted && !!errors.password}
+          helperText={isSubmitted ? errors.password?.message : ' '}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    onMouseDown={(event) => event.preventDefault()}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
         />
         <Button
           type="submit"
