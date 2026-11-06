@@ -168,11 +168,10 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
               count={dayCommentCount}
               open={isDayOpen}
               onToggle={() => toggleTripComments(dayTarget)}
-              emptyLabel="FOR THIS DAY DON'T HAVE COMMENTS"
             />
           </Box>
 
-          <Box sx={{ display: 'flex', mt: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%', mt: 1 }}>
             <EngagementBar
               targetType="trip"
               targetId={day.id}
@@ -180,6 +179,7 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
               commentTarget={dayTarget}
               showComments={false}
               showFavorite={false}
+              actionsJustify="space-around"
             />
           </Box>
 
