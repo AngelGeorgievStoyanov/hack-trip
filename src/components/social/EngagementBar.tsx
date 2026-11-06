@@ -31,6 +31,8 @@ interface EngagementBarProps {
   size?: 'small' | 'medium';
   commentsOpen?: boolean;
   onToggleComments?: () => void;
+  /** Horizontal alignment for the social action icons. */
+  actionsJustify?: 'flex-start' | 'space-around';
 }
 
 export function EngagementBar({
@@ -45,6 +47,7 @@ export function EngagementBar({
   size = 'medium',
   commentsOpen,
   onToggleComments,
+  actionsJustify = 'flex-start',
 }: EngagementBarProps) {
   const { status } = useAuth();
   const socialConfig = useSocialConfig();
@@ -120,7 +123,7 @@ export function EngagementBar({
       {showConfigStatus ? (
         <SocialConfigStatus isLoading={socialConfig.isLoading} error={socialConfig.error} />
       ) : null}
-      <Box sx={{ display: 'flex', gap: 0.25, alignItems: 'center', flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'nowrap', justifyContent: actionsJustify, width: '100%' }}>
         {status === 'authenticated' ? (
           <>
             {canLike ? (
