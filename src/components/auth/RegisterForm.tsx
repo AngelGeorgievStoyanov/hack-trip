@@ -73,7 +73,6 @@ export function RegisterForm() {
     register,
     handleSubmit,
     watch,
-    trigger,
     formState: { errors, isSubmitted, isValid, touchedFields },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver<RegisterFormValues>(registerFormSchema),
@@ -90,14 +89,9 @@ export function RegisterForm() {
   });
 
   const password = watch('password') ?? '';
-  const confirmPasswordField = register('confirmPassword');
-
-  // Re-check confirmation when the original password changes after confirmation was touched.
-  useEffect(() => {
-    if (touchedFields.confirmPassword) {
-      void trigger('confirmPassword');
-    }
-  }, [password, touchedFields.confirmPassword, trigger]);
+  const confirmPassword = watch('confirmPassword') ?? '';
+  const confirmPasswordMismatch =
+    confirmPassword.length > 0 && confirmPassword !== password;
 
   const passwordRules = [
     { label: 'At least 8 characters', valid: password.length >= 8 },
@@ -253,13 +247,18 @@ export function RegisterForm() {
           label="Confirm password"
           type={showConfirmPassword ? 'text' : 'password'}
           autoComplete="new-password"
-          {...confirmPasswordField}
-          onBlur={(event) => {
-            confirmPasswordField.onBlur(event);
-            void trigger('confirmPassword');
-          }}
-          error={(isSubmitted || touchedFields.confirmPassword) && !!errors.confirmPassword}
-          helperText={isSubmitted || touchedFields.confirmPassword ? errors.confirmPassword?.message ?? ' ' : ' '}
+          {...register('confirmPassword')}
+          error={
+            (isSubmitted || touchedFields.confirmPassword) &&
+            (confirmPasswordMismatch || !!errors.confirmPassword)
+          }
+          helperText={
+            isSubmitted || touchedFields.confirmPassword
+              ? confirmPasswordMismatch
+                ? 'Passwords must match'
+                : errors.confirmPassword?.message ?? ' '
+              : ' '
+          }
           slotProps={{
             input: {
               endAdornment: (
