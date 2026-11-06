@@ -10,7 +10,7 @@ interface LengthOptions {
   min?: number;
 }
 
-/** `z.string() -> trim() -> pipe(min/max/regex)` with optional legacy wording. */
+/** \`z.string() -> trim() -> pipe(min/max/regex)\` with optional legacy wording. */
 export function trimmedString({
   max,
   min,
@@ -44,19 +44,19 @@ export const passwordString = (
 ) =>
   z
     .string()
-    .min(min, messages?.min ?? `Password must contain at least ${min} characters.`)
-    .max(max, messages?.max ?? `Password must not exceed ${max} characters.`)
+    .min(min, messages?.min ?? \`Password must contain at least \${min} characters.\`)
+    .max(max, messages?.max ?? \`Password must not exceed \${max} characters.\`)
     .refine(
       (value) => new TextEncoder().encode(value).length <= max,
-      `Password must be at most ${max} bytes`,
+      \`Password must be at most \${max} bytes\`,
     )
     .regex(
-      /^(?=(.*[a-zA-Z]){1,})(?=(.*[\\d]){1,})(?=(.*[\\W]){1,})(?!.*\\s).{8,}$/,
+      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*\W)(?!.*\s).{8,}$/,
       messages?.pattern ??
-        'Use at least 8 characters with a letter, a number and a symbol. Example: Travel123! (do not use this exact password).',
+        'Use at least 8 characters with a letter, a number and a symbol. Do not include spaces.',
     );
 
-/** Optional/nullable text: `undefined`/`null`/`''` -> `null`. Output `string | null`. */
+/** Optional/nullable text: \`undefined\`/\`null\`/\`''\` -> \`null\`. Output \`string | null\`. */
 export const optionalText = ({ max, min }: LengthOptions, messages?: { max?: string }) =>
   z
     .union([
@@ -69,7 +69,7 @@ export const optionalText = ({ max, min }: LengthOptions, messages?: { max?: str
       value === undefined || value === null || value === '' ? null : value,
     );
 
-/** Patch text: keeps `undefined`; `null`/`''` -> `null`. Output `string | null | undefined`. */
+/** Patch text: keeps \`undefined\`; \`null\`/\`''\` -> \`null\`. Output \`string | null | undefined\`. */
 export const patchText = ({ max, min }: LengthOptions, messages?: { max?: string }) =>
   z
     .union([
@@ -86,7 +86,7 @@ export const requiredNumber = ({ min, max }: { min: number; max: number }) =>
     .union([z.number(), z.string().min(1).transform(Number)])
     .pipe(z.number().min(min).max(max));
 
-/** Optional patch number. Output `number | null | undefined`. */
+/** Optional patch number. Output \`number | null | undefined\`. */
 export const patchNumber = ({ min, max }: { min: number; max: number }) =>
   z
     .union([
@@ -96,14 +96,14 @@ export const patchNumber = ({ min, max }: { min: number; max: number }) =>
     ])
     .optional();
 
-/** Optional integer: `''`/`null` -> `undefined`, then coerce int min/max. */
+/** Optional integer: \`''\`/\`null\` -> \`undefined\`, then coerce int min/max. */
 export const optionalInt = ({ min, max }: { min: number; max: number }) =>
   z.preprocess(
     (value) => (value === '' || value === null ? undefined : value),
     z.coerce.number().int().min(min).max(max).optional(),
   );
 
-/** Route-parameter positive integer (as string): 1..2147483647. */
+/** Route-parameter positive integer: 1..2147483647. */
 export const positiveIdParam = z
   .string()
   .regex(/^\d+$/, 'Id must be a positive integer')
