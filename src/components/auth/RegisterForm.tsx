@@ -73,6 +73,7 @@ export function RegisterForm() {
     register,
     handleSubmit,
     watch,
+    trigger,
     formState: { errors, isSubmitted, isValid, touchedFields },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver<RegisterFormValues>(registerFormSchema),
@@ -89,6 +90,15 @@ export function RegisterForm() {
   });
 
   const password = watch('password') ?? '';
+  const confirmPasswordField = register('confirmPassword');
+
+  // Re-check confirmation when the original password changes after confirmation was touched.
+  useEffect(() => {
+    if (touchedFields.confirmPassword) {
+      void trigger('confirmPassword');
+    }
+  }, [password, touchedFields.confirmPassword, trigger]);
+
   const passwordRules = [
     { label: 'At least 8 characters', valid: password.length >= 8 },
     { label: 'At least one letter', valid: /\p{L}/u.test(password) },
@@ -243,7 +253,11 @@ export function RegisterForm() {
           label="Confirm password"
           type={showConfirmPassword ? 'text' : 'password'}
           autoComplete="new-password"
-          {...register('confirmPassword')}
+          {...confirmPasswordField}
+          onBlur={(event) => {
+            confirmPasswordField.onBlur(event);
+            void trigger('confirmPassword');
+          }}
           error={(isSubmitted || touchedFields.confirmPassword) && !!errors.confirmPassword}
           helperText={isSubmitted || touchedFields.confirmPassword ? errors.confirmPassword?.message ?? ' ' : ' '}
           slotProps={{
