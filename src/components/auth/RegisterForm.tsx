@@ -44,8 +44,20 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterFormValues>({ resolver: zodResolver(registerFormSchema) });
+    formState: { errors, isValid },
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerFormSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      email: '',
+      firstName: '',
+      lastName: '',
+      password: '',
+      confirmPassword: '',
+      acceptedTerms: false,
+    },
+  });
 
   async function onSubmit(values: RegisterFormValues): Promise<void> {
     setSubmitting(true);
@@ -155,7 +167,7 @@ export function RegisterForm() {
         <Button
           type="submit"
           variant="contained"
-          disabled={submitting}
+          disabled={!isValid || submitting || !!message}
           startIcon={submitting ? <CircularProgress size={18} /> : undefined}
           sx={{ ':hover': { backgroundColor: '#4daf30' } }}
         >
