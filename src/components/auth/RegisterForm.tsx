@@ -68,9 +68,9 @@ export function RegisterForm() {
   const password = watch('password') ?? '';
   const passwordRules = [
     { label: 'At least 8 characters', valid: password.length >= 8 },
-    { label: 'At least one letter', valid: /[a-zA-Z]/.test(password) },
+    { label: 'At least one letter', valid: /\p{L}/u.test(password) },
     { label: 'At least one number', valid: /\d/.test(password) },
-    { label: 'At least one symbol', valid: /\W/.test(password) },
+    { label: 'At least one symbol', valid: /[\p{P}\p{S}]/u.test(password) },
     { label: 'No spaces', valid: password.length > 0 && !/\s/.test(password) },
   ];
 
