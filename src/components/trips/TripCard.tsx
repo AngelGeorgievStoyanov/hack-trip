@@ -274,12 +274,12 @@ export function TripCard({ tripGroup }: TripCardProps) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography component="span" variant="body2">Trip:</Typography>
           <FavoriteIcon fontSize="small" color="error" />
-          <Typography component="span" variant="body2">{groupLikes}</Typography>
+          {groupLikes > 0 ? <Typography component="span" variant="body2">{groupLikes}</Typography> : null}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography component="span" variant="body2">Day:</Typography>
           <FavoriteIcon fontSize="small" color="error" />
-          <Typography component="span" variant="body2">{dayLikes}</Typography>
+          {dayLikes > 0 ? <Typography component="span" variant="body2">{dayLikes}</Typography> : null}
         </Box>
       </Box>
 
