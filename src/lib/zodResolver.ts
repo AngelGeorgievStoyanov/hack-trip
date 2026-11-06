@@ -1,4 +1,4 @@
-import type { Resolver } from 'react-hook-form';
+import type { FieldValues, Resolver } from 'react-hook-form';
 
 type ZodLikeIssue = {
   path?: unknown[];
@@ -18,14 +18,16 @@ type ZodLikeSchema = {
  * Minimal Zod v4 → react-hook-form resolver adapter.
  *
  * Zod v4 renamed `error.errors` to `error.issues`, so a Zod-v3-era resolver would read the
- * wrong property. This adapter keeps the existing Zod schemas working with React Hook Form.
+ * wrong property. Keep the form value type generic so handleSubmit receives the correct type.
  */
-export function zodResolver(schema: ZodLikeSchema): Resolver<any> {
+export function zodResolver<TFieldValues extends FieldValues>(
+  schema: ZodLikeSchema,
+): Resolver<TFieldValues> {
   return async (values) => {
     const result = await schema.safeParseAsync(values);
 
     if (result.success) {
-      return { values: result.data, errors: {} };
+      return { values: result.data as TFieldValues, errors: {} };
     }
 
     const errors: Record<string, { type: string; message: string }> = {};
