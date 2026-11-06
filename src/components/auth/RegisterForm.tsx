@@ -28,14 +28,16 @@ import { WelcomeHeading } from '@/components/common/WelcomeHeading';
 const registerFormSchema = registerSchema
   .extend({
     confirmPassword: z.string().min(1, 'Confirm password is required.'),
-    acceptedTerms: z.boolean().refine(Boolean, {\n      message: 'You must accept the terms of use and privacy policy.',\n    }),
+    acceptedTerms: z.literal(true, {
+      error: 'You must accept the terms of use and privacy policy.',
+    }),
   })
   .refine((values) => values.confirmPassword === values.password, {
     path: ['confirmPassword'],
     message: 'Passwords must match',
   });
 
-type RegisterFormValues = z.infer<typeof registerFormSchema>;
+type RegisterFormValues = z.input<typeof registerFormSchema>;
 
 export function RegisterForm() {
   const [message, setMessage] = useState<string | null>(null);
