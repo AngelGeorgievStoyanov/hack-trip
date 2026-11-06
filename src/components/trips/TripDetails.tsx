@@ -8,7 +8,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import { TripActions } from './TripActions';
 import { EngagementBar } from '@/components/social/EngagementBar';
 import { FavoriteButton } from '@/components/social/FavoriteButton';
-import { CommentsToggle } from '@/components/comments/CommentsToggle';
 import type { CommentTarget } from '@/api/comments';
 import { infoPanelStyle } from '@/constants/ui';
 import { useAuth } from '@/hooks/useAuth';
@@ -163,21 +162,15 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
             </Link>
           </Box>
 
-          <Box sx={{ mt: 1 }}>
-            <CommentsToggle
-              count={dayCommentCount}
-              open={isDayOpen}
-              onToggle={() => toggleTripComments(dayTarget)}
-            />
-          </Box>
-
           <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%', mt: 1 }}>
             <EngagementBar
               targetType="trip"
               targetId={day.id}
               social={day.social}
               commentTarget={dayTarget}
-              showComments={false}
+              showComments
+              commentsOpen={isDayOpen}
+              onToggleComments={() => toggleTripComments(dayTarget)}
               showFavorite={false}
               actionsJustify="space-around"
             />
