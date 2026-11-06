@@ -51,7 +51,7 @@ export const passwordString = (
       `Password must be at most ${max} bytes`,
     )
     .regex(
-      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*\W)(?!.*\s).{8,}$/,
+      /^(?=.*\p{L})(?=.*[0-9])(?=.*[\p{P}\p{S}])(?!.*\s).{8,}$/u,
       messages?.pattern ??
         'Use at least 8 characters with a letter, a number and a symbol. Do not include spaces.',
     );
