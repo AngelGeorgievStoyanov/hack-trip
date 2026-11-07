@@ -63,6 +63,8 @@ export function GoogleMapView({
 }: GoogleMapViewProps) {
   const { isLoaded } = useGoogleMapsLoader();
   const mapRef = useRef<google.maps.Map | null>(null);
+  const centerLat = center.lat;
+  const centerLng = center.lng;
 
   useEffect(() => {
     const map = mapRef.current;
@@ -79,8 +81,8 @@ export function GoogleMapView({
 
   useEffect(() => {
     if (!mapRef.current || fitBounds) return;
-    mapRef.current.setCenter(center);
-  }, [center.lat, center.lng, fitBounds]);
+    mapRef.current.setCenter({ lat: centerLat, lng: centerLng });
+  }, [centerLat, centerLng, fitBounds]);
 
   useEffect(() => {
     if (!mapRef.current || focusMarkerId == null) return;
