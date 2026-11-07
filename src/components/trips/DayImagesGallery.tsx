@@ -1,9 +1,9 @@
 'use client';
 
-import { Typography } from '@mui/material';
+import { Box } from '@mui/material';
+import { SocialObjectPlaceholder } from '@/components/placeholders';
 import { ImageGallery } from '@/components/images/ImageGallery';
 import type { CommentTarget } from '@/api/comments';
-import { NO_IMAGES_STYLE } from '@/constants/ui';
 import type { TripGroupDay } from '@/types';
 
 interface DayImagesGalleryProps {
@@ -33,8 +33,8 @@ export function DayImagesGallery({
       onToggleComments={toggleTripComments}
     />
   ) : (
-    <Typography variant="h6" style={NO_IMAGES_STYLE}>
-      FOR THIS TRIP DON'T HAVE IMAGES
-    </Typography>
+    <Box sx={{ width: '50%', maxWidth: 280, aspectRatio: '1 / 1', mx: 'auto' }}>
+      <SocialObjectPlaceholder />
+    </Box>
   );
 }
