@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Script from 'next/script';
 import {
   Box,
   Button,
@@ -25,26 +24,9 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { registerSchema } from '@/validations/auth';
 import { COLORS, CARD_SHADOW, CARD_BORDER } from '@/constants/ui';
 import { WelcomeHeading } from '@/components/common/WelcomeHeading';
-import { config } from '@/config';
+import { Captcha } from '@/components/auth/Captcha';
 import { useNotification } from '@/components/common/NotificationProvider';
 import { REGISTRATION_SUCCESS_MESSAGE } from '@/constants/notifications';
-
-declare global {
-  interface Window {
-    grecaptcha?: {
-      ready: (callback: () => void) => void;
-      render: (
-        container: HTMLElement,
-        parameters: {
-          sitekey: string;
-          callback: (token: string) => void;
-          'expired-callback': () => void;
-          'error-callback': () => void;
-        },
-      ) => number;
-    };
-  }
-}
 
 const registerFormSchema = registerSchema
   .extend({
@@ -68,10 +50,7 @@ export function RegisterForm() {
   const isFormLocked = submitting || registrationComplete;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [captchaLoaded, setCaptchaLoaded] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const captchaContainerRef = useRef<HTMLDivElement>(null);
-  const captchaWidgetId = useRef<number | null>(null);
 
   const {
     register,
@@ -124,46 +103,6 @@ export function RegisterForm() {
       valid: password.length > 0 && Array.from(password).every((character) => character.trim().length > 0),
     },
   ];
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.grecaptcha) {
-      setCaptchaLoaded(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (
-      !captchaLoaded ||
-      !config.recaptchaV2SiteKey ||
-      !captchaContainerRef.current ||
-      !window.grecaptcha ||
-      captchaWidgetId.current !== null
-    ) {
-      return;
-    }
-
-    window.grecaptcha.ready(() => {
-      const grecaptcha = window.grecaptcha;
-      const container = captchaContainerRef.current;
-      if (!grecaptcha || !container || captchaWidgetId.current !== null) return;
-
-      captchaWidgetId.current = grecaptcha.render(container, {
-        sitekey: config.recaptchaV2SiteKey,
-        callback: (token) => {
-          setCaptchaToken(token);
-          setValue('captchaToken', token, { shouldValidate: true });
-        },
-        'expired-callback': () => {
-          setCaptchaToken(null);
-          setValue('captchaToken', '', { shouldValidate: true });
-        },
-        'error-callback': () => {
-          setCaptchaToken(null);
-          setValue('captchaToken', '', { shouldValidate: true });
-        },
-      });
-    });
-  }, [captchaLoaded]);
 
   async function onSubmit(values: RegisterFormValues): Promise<void> {
     setSubmitting(true);
@@ -323,7 +262,6 @@ export function RegisterForm() {
             },
           }}
         />
-        <input type="hidden" {...register('captchaToken')} />
         <FormControlLabel
           sx={{ pointerEvents: isFormLocked ? 'none' : 'auto' }}
           control={<Checkbox disabled={isFormLocked} {...register('acceptedTerms')} />}
@@ -338,20 +276,7 @@ export function RegisterForm() {
             {errors.acceptedTerms.message}
           </Typography>
         ) : null}
-        {config.recaptchaV2SiteKey ? (
-          <>
-            <Script
-              src="https://www.google.com/recaptcha/api.js?render=explicit"
-              strategy="afterInteractive"
-              onReady={() => setCaptchaLoaded(true)}
-            />
-            <Box sx={{ display: 'flex', justifyContent: 'center', minHeight: 78, pointerEvents: isFormLocked ? 'none' : 'auto', opacity: isFormLocked ? 0.6 : 1 }}>
-              <Box ref={captchaContainerRef} />
-            </Box>
-          </>
-        ) : (
-          <Typography color="error" role="alert">CAPTCHA is not configured. Registration is unavailable.</Typography>
-        )}
+        <Captcha disabled={isFormLocked} onTokenChange={(token) => { setCaptchaToken(token || null); setValue('captchaToken', token, { shouldValidate: true }); }} />
         <Button
           type="submit"
           variant="contained"
