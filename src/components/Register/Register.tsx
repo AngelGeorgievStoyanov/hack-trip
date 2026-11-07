@@ -129,9 +129,9 @@ const Register: FC = () => {
 
 
             API_CLIENT.register({ ...newUser })
-                .then((message) => {
+                .then((response) => {
                     setErrorApi(undefined);
-                    setRegisterMessage(message)
+                    setRegisterMessage(response.message)
                 }).catch((err) => {
                     if (err.message === 'Failed to fetch') {
                         err.message = 'No internet connection with server.Please try again later.';
