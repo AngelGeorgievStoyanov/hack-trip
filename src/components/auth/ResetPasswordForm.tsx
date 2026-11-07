@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
+import { useNotification } from '@/components/common/NotificationProvider';
 import { authApi } from '@/api/auth';
 import { zodResolver } from '@/lib/zodResolver';
 import { getTokenErrorMessage } from '@/lib/errors';
@@ -37,7 +38,7 @@ const FORM_SX = {
 } as const;
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
-  const [serverError, setServerError] = useState<string | null>(null);
+  const notification = useNotification();
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -57,18 +58,17 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
   async function onSubmit(values: ResetFormValues): Promise<void> {
     if (!token) {
-      setServerError('Missing reset token.');
+      notification.error('Missing reset token.');
       return;
     }
 
     setSubmitting(true);
-    setServerError(null);
 
     try {
       await authApi.resetPassword({ token, password: values.password });
       setSuccess(true);
     } catch (error) {
-      setServerError(getTokenErrorMessage(error));
+      notification.error(getTokenErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
