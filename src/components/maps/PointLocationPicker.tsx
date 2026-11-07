@@ -5,7 +5,6 @@ import { AddressAutocomplete } from '@/components/maps/AddressAutocomplete';
 import { GoogleMapView } from '@/components/maps/GoogleMapView';
 import {
   Alert,
-  Box,
   Button,
   CircularProgress,
   Snackbar,
@@ -66,9 +65,10 @@ export function PointLocationPicker({
   }, [latitude, longitude]);
 
   useEffect(() => {
-    if (findInMapTrigger === 0 || !position) return;
-    setCenter(position);
-    mapRef.current?.panTo(position);
+    const nextPosition = coordinatePairToMapPosition(latitude, longitude);
+    if (findInMapTrigger === 0 || !nextPosition) return;
+    setCenter(nextPosition);
+    mapRef.current?.panTo(nextPosition);
     mapRef.current?.setZoom(MAP_GEOCODED_ZOOM);
   }, [findInMapTrigger, latitude, longitude]);
 
