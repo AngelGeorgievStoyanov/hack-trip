@@ -74,7 +74,7 @@ export async function shareWithFallback({
   url: string;
   title: string;
   text: string;
-  image: string | null;
+  image?: string | null;
 }): Promise<ShareResult> {
   const payload: ShareData = { url, title, text };
 
@@ -90,14 +90,21 @@ export async function shareWithFallback({
             await navigator.share({ ...payload, files: [file] });
             return 'shared';
           }
-        } catch {
+        } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') {
+            return 'failed';
+          }
           // Fall through to URL-only sharing when the image cannot be shared.
         }
       }
       await navigator.share(payload);
       return 'shared';
-    } catch {
-      // Copy the URL if native sharing is cancelled or unavailable.
+    } catch (error) {
+      // A user cancellation is intentional; do not turn it into an unexpected clipboard action.
+      if (error instanceof Error && error.name === 'AbortError') {
+        return 'failed';
+      }
+      // Fall back to copying the URL when native sharing is unavailable.
     }
   }
 
