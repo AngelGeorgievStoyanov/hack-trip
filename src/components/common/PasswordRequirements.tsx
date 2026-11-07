@@ -7,13 +7,15 @@ import { getPasswordRequirements } from '@/validations/shared';
 interface PasswordRequirementsProps {
   password: string;
   minLength?: number;
+  maxLength?: number;
 }
 
 export function PasswordRequirements({
   password,
   minLength = 8,
+  maxLength = 72,
 }: PasswordRequirementsProps) {
-  const requirements = getPasswordRequirements(password, minLength);
+  const requirements = getPasswordRequirements(password, minLength, maxLength);
 
   return (
     <Box
