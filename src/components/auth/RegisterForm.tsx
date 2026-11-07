@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import {
-  Alert,
   Box,
   Button,
   Checkbox,
@@ -26,6 +26,7 @@ import { registerSchema } from '@/validations/auth';
 import { COLORS, CARD_SHADOW, CARD_BORDER } from '@/constants/ui';
 import { WelcomeHeading } from '@/components/common/WelcomeHeading';
 import { config } from '@/config';
+import { useNotification } from '@/components/common/NotificationProvider';
 
 declare global {
   interface Window {
@@ -59,9 +60,11 @@ const registerFormSchema = registerSchema
 type RegisterFormValues = z.input<typeof registerFormSchema>;
 
 export function RegisterForm() {
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const notification = useNotification();
   const [submitting, setSubmitting] = useState(false);
+  const [registrationComplete, setRegistrationComplete] = useState(false);
+  const isFormLocked = submitting || registrationComplete;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [captchaLoaded, setCaptchaLoaded] = useState(false);
@@ -139,8 +142,6 @@ export function RegisterForm() {
 
   async function onSubmit(values: RegisterFormValues): Promise<void> {
     setSubmitting(true);
-    setError(null);
-    setMessage(null);
     try {
       const input: RegisterInput = {
         email: values.email,
@@ -150,9 +151,12 @@ export function RegisterForm() {
         captchaToken: values.captchaToken,
       };
       const response = await authApi.register(input);
-      setMessage(response.message);
+      setRegistrationComplete(true);
+      notification.success(response.message, {
+        onClose: () => router.push('/login'),
+      });
     } catch (e) {
-      setError(getGenericErrorMessage(e));
+      notification.error(getGenericErrorMessage(e));
     } finally {
       setSubmitting(false);
     }
@@ -189,10 +193,9 @@ export function RegisterForm() {
         <Typography variant="h5" component="div" sx={{ margin: '10px auto', textAlign: 'center' }}>
           REGISTER
         </Typography>
-        {message ? <Alert severity="success">{message}</Alert> : null}
-        {error ? <Alert severity="error">{error}</Alert> : null}
         <TextField
           label="Email"
+          disabled={isFormLocked}
           type="email"
           autoComplete="email"
           {...register('email')}
@@ -201,6 +204,7 @@ export function RegisterForm() {
         />
         <TextField
           label="First name"
+          disabled={isFormLocked}
           autoComplete="given-name"
           {...register('firstName')}
           error={(isSubmitted || touchedFields.firstName) && !!errors.firstName}
@@ -208,6 +212,7 @@ export function RegisterForm() {
         />
         <TextField
           label="Last name"
+          disabled={isFormLocked}
           autoComplete="family-name"
           {...register('lastName')}
           error={(isSubmitted || touchedFields.lastName) && !!errors.lastName}
@@ -215,6 +220,7 @@ export function RegisterForm() {
         />
         <TextField
           label="Password"
+          disabled={isFormLocked}
           type={showPassword ? 'text' : 'password'}
           autoComplete="new-password"
           {...register('password')}
@@ -229,6 +235,7 @@ export function RegisterForm() {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
+                    disabled={isFormLocked}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                     onClick={() => setShowPassword((visible) => !visible)}
                     onMouseDown={(event) => event.preventDefault()}
@@ -257,6 +264,7 @@ export function RegisterForm() {
         </Box>
         <TextField
           label="Confirm password"
+          disabled={isFormLocked}
           type={showConfirmPassword ? 'text' : 'password'}
           autoComplete="new-password"
           {...register('confirmPassword')}
@@ -276,6 +284,7 @@ export function RegisterForm() {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
+                    disabled={isFormLocked}
                     aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                     onClick={() => setShowConfirmPassword((visible) => !visible)}
                     onMouseDown={(event) => event.preventDefault()}
@@ -290,7 +299,7 @@ export function RegisterForm() {
         />
         <input type="hidden" {...register('captchaToken')} />
         <FormControlLabel
-          control={<Checkbox {...register('acceptedTerms')} />}
+          control={<Checkbox disabled={isFormLocked} {...register('acceptedTerms')} />}
           label={
             <>
               I accept the <Link href="/privacy-policy">terms of use and privacy policy</Link>
@@ -309,7 +318,7 @@ export function RegisterForm() {
               strategy="afterInteractive"
               onLoad={() => setCaptchaLoaded(true)}
             />
-            <Box sx={{ display: 'flex', justifyContent: 'center', minHeight: 78 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', minHeight: 78, pointerEvents: isFormLocked ? 'none' : 'auto', opacity: isFormLocked ? 0.6 : 1 }}>
               <Box ref={captchaContainerRef} />
             </Box>
           </>
@@ -319,19 +328,20 @@ export function RegisterForm() {
         <Button
           type="submit"
           variant="contained"
-          disabled={submitting || !!message || !isValid || !captchaToken}
+          disabled={isFormLocked || !isValid || !captchaToken}
           startIcon={submitting ? <CircularProgress size={18} /> : undefined}
           sx={{ ':hover': { backgroundColor: '#4daf30' } }}
         >
           Register
         </Button>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mt: 1 }}>
-          <Button component={Link} href="/login" variant="contained" sx={SECONDARY_BUTTON_SX}>
+          <Button component={Link} href="/login" disabled={isFormLocked} variant="contained" sx={SECONDARY_BUTTON_SX}>
             Already have an account? Login
           </Button>
           <Button
             component={Link}
             href="/resend-verification"
+            disabled={isFormLocked}
             variant="contained"
             sx={SECONDARY_BUTTON_SX}
           >
