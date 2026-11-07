@@ -32,7 +32,7 @@ interface PointFormProps {
   onLocationChange: (latitude: string, longitude: string) => void;
   mapSearchSelection?: { name: string; revision: number } | null;
   onFindInMap: () => void;
-  onAddNextDay: () => void;
+  onAddNextDay?: () => void;
   onBack: () => void;
   onDone: () => void;
 }
@@ -315,7 +315,7 @@ export function PointForm({ tripGroupId, tripId, point, existingImages: provided
         >
           {isEdit ? 'EDIT POINT' : createdPointId ? 'RETRY IMAGE UPLOAD' : 'ADD POINT'}
         </Button>
-        {!isEdit ? (
+        {!isEdit && onAddNextDay ? (
           <Button
             type="button"
             variant="contained"
