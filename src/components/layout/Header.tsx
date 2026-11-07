@@ -46,7 +46,6 @@ export function Header() {
         { href: '/trips', label: 'TRIPS' },
         { href: '/trips/create', label: 'CREATE TRIP' },
         { href: '/my-trips', label: 'MY TRIPS' },
-        { href: '/live-tracking', label: 'LIVE TRIP TRACKING' },
         { href: '/favorites', label: 'MY FAVORITES' },
         { href: '/about', label: 'ABOUT US' },
         ...(isModerator ? [{ href: '/admin', label: 'ADMIN' }] : []),
