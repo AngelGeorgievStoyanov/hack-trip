@@ -288,7 +288,7 @@ export function RegisterForm() {
           Register
         </Button>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mt: 1 }}>
-          <Button component={Link} href="/login" disabled={isFormLocked} variant="contained" sx={SECONDARY_BUTTON_SX}>
+          <Button component={Link} href="/login" disabled={submitting} variant="contained" sx={SECONDARY_BUTTON_SX}>
             Already have an account? Login
           </Button>
           <Button
