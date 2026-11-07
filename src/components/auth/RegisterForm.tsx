@@ -52,6 +52,11 @@ export function RegisterForm() {
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const isFormLocked = submitting || registrationComplete;
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
+
   useEffect(() => {
     if (!registrationComplete) return;
 
@@ -62,10 +67,6 @@ export function RegisterForm() {
 
     return () => window.clearTimeout(redirectTimeout);
   }, [registrationComplete, router]);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [captchaResetKey, setCaptchaResetKey] = useState(0);
 
   const {
     register,
