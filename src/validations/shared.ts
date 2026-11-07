@@ -67,25 +67,25 @@ export function isValidPassword(value: string, minLength = 8): boolean {
     return hasLatinLetter && hasNumber && hasSpecialCharacter;
 }
 
-/** Password policy used by registration, reset and password changes. */
-export const passwordString = (
+/** Password policy shared by registration, reset and password changes. */
+export function passwordString(
   { min, max }: { min: number; max: number },
   messages?: { min?: string; max?: string; pattern?: string },
-) =>
-  z
+) {
+  return z
     .string()
     .min(min, messages?.min ?? `Password must contain at least ${min} characters.`)
     .max(max, messages?.max ?? `Password must not exceed ${max} characters.`)
     .refine(
       (value) => new TextEncoder().encode(value).length <= max,
-      `Password must be at most ${max} bytes`,
+      messages?.max ?? `Password must be at most ${max} bytes.`,
     )
     .refine(
       (value) => isValidPassword(value, min),
       messages?.pattern ??
-        'Use at least 8 characters with a Latin letter, a number and a symbol. Do not include spaces.',
+        'Use at least 8 characters with a Latin letter, a number and a special character. Do not include spaces.',
     );
-
+}
 
 /** Optional/nullable text: `undefined`/`null`/`''` -> `null`. Output `string | null`. */
 export const optionalText = ({ max, min }: LengthOptions, messages?: { max?: string }) =>
