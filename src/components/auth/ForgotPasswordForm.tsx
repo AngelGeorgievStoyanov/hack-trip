@@ -14,42 +14,35 @@ import { Captcha } from '@/components/auth/Captcha';
 import { FORGOT_PASSWORD_SUCCESS_MESSAGE } from '@/constants/notifications';
 
 export function ForgotPasswordForm() {
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const notification = useNotification();
+  const [captchaToken, setCaptchaToken] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
-  } = useForm<ForgotPasswordInput>({ resolver: zodResolver(forgotPasswordSchema) });
+  } = useForm<ForgotPasswordInput>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: '', captchaToken: '' },
+  });
 
   async function onSubmit(values: ForgotPasswordInput): Promise<void> {
     setSubmitting(true);
-    setError(null);
-    setMessage(null);
     try {
-      const response = await authApi.forgotPassword(values);
-      // Anti-enumeration: neutral message whether or not the account exists.
-      setMessage(response.message);
-    } catch (e) {
-      notification.error(getGenericErrorMessage(e));
+      await authApi.forgotPassword({ ...values, captchaToken });
+      notification.success(FORGOT_PASSWORD_SUCCESS_MESSAGE);
+    } catch (error) {
+      notification.error(getGenericErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(onSubmit)}
-      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-    >
-      <Typography variant="h4" component="h1">
-        Forgot password
-      </Typography>
-      {message ? <Alert severity="success">{message}</Alert> : null}
-      {error ? <Alert severity="error">{error}</Alert> : null}
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Typography variant="h4" component="h1">Forgot password</Typography>
       <TextField
         label="Email"
         type="email"
@@ -58,12 +51,15 @@ export function ForgotPasswordForm() {
         error={!!errors.email}
         helperText={errors.email?.message}
       />
-      <Button
-        type="submit"
-        variant="contained"
-        disabled={submitting || !captchaToken}
-        startIcon={submitting ? <CircularProgress size={18} /> : undefined}
-      >
+      <input type="hidden" {...register('captchaToken')} />
+      <Captcha
+        disabled={submitting}
+        onTokenChange={(token) => {
+          setCaptchaToken(token);
+          setValue('captchaToken', token, { shouldValidate: true });
+        }}
+      />
+      <Button type="submit" variant="contained" disabled={submitting || !captchaToken} startIcon={submitting ? <CircularProgress size={18} /> : undefined}>
         Send reset link
       </Button>
       <Link href="/login">Back to login</Link>
