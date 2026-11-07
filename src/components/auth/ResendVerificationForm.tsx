@@ -14,42 +14,35 @@ import { Captcha } from '@/components/auth/Captcha';
 import { RESEND_VERIFICATION_SUCCESS_MESSAGE } from '@/constants/notifications';
 
 export function ResendVerificationForm() {
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const notification = useNotification();
+  const [captchaToken, setCaptchaToken] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
-  } = useForm<ResendVerificationInput>({ resolver: zodResolver(resendVerificationSchema) });
+  } = useForm<ResendVerificationInput>({
+    resolver: zodResolver(resendVerificationSchema),
+    defaultValues: { email: '', captchaToken: '' },
+  });
 
   async function onSubmit(values: ResendVerificationInput): Promise<void> {
     setSubmitting(true);
-    setError(null);
-    setMessage(null);
     try {
-      const response = await authApi.resendVerification(values);
-      // Anti-enumeration: neutral message whether or not the account exists/needs it.
-      setMessage(response.message);
-    } catch (e) {
-      notification.error(getGenericErrorMessage(e));
+      await authApi.resendVerification({ ...values, captchaToken });
+      notification.success(RESEND_VERIFICATION_SUCCESS_MESSAGE);
+    } catch (error) {
+      notification.error(getGenericErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(onSubmit)}
-      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-    >
-      <Typography variant="h4" component="h1">
-        Resend verification
-      </Typography>
-      {message ? <Alert severity="success">{message}</Alert> : null}
-      {error ? <Alert severity="error">{error}</Alert> : null}
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Typography variant="h4" component="h1">Resend verification</Typography>
       <TextField
         label="Email"
         type="email"
@@ -58,12 +51,15 @@ export function ResendVerificationForm() {
         error={!!errors.email}
         helperText={errors.email?.message}
       />
-      <Button
-        type="submit"
-        variant="contained"
-        disabled={submitting || !captchaToken}
-        startIcon={submitting ? <CircularProgress size={18} /> : undefined}
-      >
+      <input type="hidden" {...register('captchaToken')} />
+      <Captcha
+        disabled={submitting}
+        onTokenChange={(token) => {
+          setCaptchaToken(token);
+          setValue('captchaToken', token, { shouldValidate: true });
+        }}
+      />
+      <Button type="submit" variant="contained" disabled={submitting || !captchaToken} startIcon={submitting ? <CircularProgress size={18} /> : undefined}>
         Resend
       </Button>
       <Link href="/login">Back to login</Link>
