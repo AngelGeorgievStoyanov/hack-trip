@@ -16,6 +16,7 @@ import { FORGOT_PASSWORD_SUCCESS_MESSAGE } from '@/constants/notifications';
 export function ForgotPasswordForm() {
   const notification = useNotification();
   const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -37,6 +38,9 @@ export function ForgotPasswordForm() {
       notification.error(getGenericErrorMessage(error));
     } finally {
       setSubmitting(false);
+      setCaptchaToken('');
+      setValue('captchaToken', '', { shouldValidate: true });
+      setCaptchaResetKey((key) => key + 1);
     }
   }
 
@@ -53,6 +57,7 @@ export function ForgotPasswordForm() {
       />
       <input type="hidden" {...register('captchaToken')} />
       <Captcha
+        resetKey={captchaResetKey}
         disabled={submitting}
         onTokenChange={(token) => {
           setCaptchaToken(token);
