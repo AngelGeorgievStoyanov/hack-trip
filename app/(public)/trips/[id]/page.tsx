@@ -12,7 +12,6 @@ import type { TripGroupDay, TripGroupResponse } from '@/types';
 
 interface TripPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 const MAIN_STYLE: CSSProperties = {
@@ -38,10 +37,8 @@ function resolveDay(
 
 export async function generateMetadata({
   params,
-  searchParams,
-}: TripPageProps): Promise<Metadata> {
+}: Pick<TripPageProps, 'params'>): Promise<Metadata> {
   const { id } = await params;
-  const query = await searchParams;
   const tripId = parseId(id);
   if (tripId === null) {
     return { title: 'Trip not found' };
@@ -49,10 +46,9 @@ export async function generateMetadata({
 
   try {
     const trip = await getTrip(tripId);
-    const day = resolveDay(trip.days, query.day);
+    const day = trip.days[0];
     const url = absoluteUrl(`/trips/${trip.id}`);
-    const image = tripRepresentativeImage(trip);
-    const title = day?.title ?? 'Trip';
+    const title = day?.title ?? day?.destination ?? 'Trip';
     const description = day?.description ?? undefined;
 
     return {
@@ -65,13 +61,11 @@ export async function generateMetadata({
         url,
         siteName: 'HackTrip',
         type: 'website',
-        ...(image ? { images: [{ url: image }] } : {}),
       },
       twitter: {
         card: 'summary_large_image',
         title,
         description,
-        ...(image ? { images: [image] } : {}),
       },
     };
   } catch (error) {
