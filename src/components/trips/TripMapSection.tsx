@@ -72,12 +72,16 @@ export function TripMapSection({ points, dayPosition, selectedPointIndex, onPoin
     if (previous === selectedPointIndex || !isSmallScreen) return;
     const stepper = stepperRef.current;
     if (!stepper) return;
-    const dayNav = document.querySelector('[data-trip-days-nav="true"]');
-    const stickyHeight = dayNav instanceof HTMLElement ? dayNav.getBoundingClientRect().height : 0;
-    const expectedTop = Math.round(stickyHeight + 10);
+    // The sticky header includes both day navigation and social actions.
+    // Measure its visible bottom edge so the stepper is never scrolled underneath it.
+    const stickyHeader = document.querySelector('[data-trip-sticky-header="true"]');
+    const stickyBottom = stickyHeader instanceof HTMLElement
+      ? stickyHeader.getBoundingClientRect().bottom
+      : 0;
+    const expectedTop = Math.round(stickyBottom + 10);
     const actualTop = Math.round(stepper.getBoundingClientRect().top);
     if (Math.abs(actualTop - expectedTop) <= 2) return;
-    const targetY = window.scrollY + actualTop - stickyHeight - 10;
+    const targetY = window.scrollY + actualTop - expectedTop;
     window.scrollTo({ top: Math.max(targetY, 0), behavior: 'smooth' });
   }, [isSmallScreen, selectedPointIndex]);
 
