@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Box,
@@ -25,7 +26,10 @@ import { COLORS, CARD_SHADOW, CARD_BORDER } from '@/constants/ui';
 import { WelcomeHeading } from '@/components/common/WelcomeHeading';
 import { Captcha } from '@/components/auth/Captcha';
 import { useNotification } from '@/components/common/NotificationProvider';
-import { REGISTRATION_SUCCESS_MESSAGE } from '@/constants/notifications';
+import {
+  AUTH_SUCCESS_REDIRECT_DELAY_MS,
+  REGISTRATION_SUCCESS_MESSAGE,
+} from '@/constants/notifications';
 
 const registerFormSchema = registerSchema
   .extend({
@@ -43,9 +47,21 @@ type RegisterFormValues = z.input<typeof registerFormSchema>;
 
 export function RegisterForm() {
   const notification = useNotification();
+  const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const isFormLocked = submitting || registrationComplete;
+
+  useEffect(() => {
+    if (!registrationComplete) return;
+
+    const redirectTimeout = window.setTimeout(
+      () => router.replace('/login'),
+      AUTH_SUCCESS_REDIRECT_DELAY_MS,
+    );
+
+    return () => window.clearTimeout(redirectTimeout);
+  }, [registrationComplete, router]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -115,7 +131,9 @@ export function RegisterForm() {
       };
       await authApi.register(input);
       setRegistrationComplete(true);
-      notification.success(REGISTRATION_SUCCESS_MESSAGE);
+      notification.success(REGISTRATION_SUCCESS_MESSAGE, {
+        duration: AUTH_SUCCESS_REDIRECT_DELAY_MS,
+      });
     } catch (e) {
       notification.error(getGenericErrorMessage(e));
     } finally {
