@@ -151,9 +151,8 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
           <TripGroupSocialActions
             tripGroupId={group.id}
             social={group.social}
-            shareTitle={day.title ?? group.days[0]?.title ?? 'Trip'}
-            shareText={day.description ?? undefined}
-            shareImage={tripRepresentativeImage(group)}
+            shareTitle={group.days[0]?.title ?? 'Trip'}
+            shareText={group.days[0]?.description ?? undefined}
             open={tripGroupCommentsOpen}
             onToggle={() => setTripGroupCommentsOpen((previous) => !previous)}
           />
