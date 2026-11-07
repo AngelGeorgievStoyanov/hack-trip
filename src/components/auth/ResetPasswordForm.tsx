@@ -104,7 +104,6 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         <Typography variant="h5" component="h1" sx={{ margin: '10px auto', textAlign: 'center' }}>
           RESET PASSWORD
         </Typography>
-        {serverError ? <Alert severity="error">{serverError}</Alert> : null}
         <PasswordField
           label="New password"
           autoComplete="new-password"
