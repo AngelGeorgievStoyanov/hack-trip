@@ -48,14 +48,16 @@ export function PointSection({ point, pointCommentTarget, togglePointComments }:
           </Typography>
 
           {point.images.length > 0 ? (
-            <ImageGallery
-              images={point.images}
-              alt={point.name}
-              preset="tripPointThumb"
-              variant="grid"
-              activeCommentTarget={pointCommentTarget}
-              onToggleComments={togglePointComments}
-            />
+            <Box sx={{ width: 'calc(100% + 32px)', mx: '-16px' }}>
+              <ImageGallery
+                images={point.images}
+                alt={point.name}
+                preset="tripPointThumb"
+                variant="grid"
+                activeCommentTarget={pointCommentTarget}
+                onToggleComments={togglePointComments}
+              />
+            </Box>
           ) : (
             <Typography variant="body2" sx={POINT_NOTE_STYLE}>
               FOR THIS POINT DON&apos;T HAVE IMAGES
