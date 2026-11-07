@@ -9,6 +9,7 @@ import { AppImage } from '@/components/images/AppImage';
 import { ImageUploadButton } from '@/components/images/ImageUploadButton';
 import { DayForm } from './DayForm';
 import { PointForm } from '@/components/points/PointForm';
+import { PointLocationPicker } from '@/components/maps/PointLocationPicker';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
@@ -27,6 +28,10 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
   const { confirm } = useConfirm();
   const [addingPoint, setAddingPoint] = useState(false);
   const [editingPointId, setEditingPointId] = useState<number | null>(null);
+  const [pointLatitude, setPointLatitude] = useState('');
+  const [pointLongitude, setPointLongitude] = useState('');
+  const [findInMapTrigger, setFindInMapTrigger] = useState(0);
+  const [mapSearchSelection, setMapSearchSelection] = useState<{ name: string; revision: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['trip', tripGroupId] });
@@ -145,11 +150,48 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
 
       <Box sx={{ mt: 2 }}>
         <Typography variant="subtitle1">Points</Typography>
+        {addingPoint || editingPointId !== null ? (
+          <PointLocationPicker
+            latitude={pointLatitude}
+            longitude={pointLongitude}
+            findInMapTrigger={findInMapTrigger}
+            onChange={(latitude, longitude) => {
+              setPointLatitude(latitude);
+              setPointLongitude(longitude);
+            }}
+            onAddressSelect={(name) =>
+              setMapSearchSelection((current) => ({
+                name,
+                revision: (current?.revision ?? 0) + 1,
+              }))
+            }
+          />
+        ) : null}
         {day.points.length === 0 ? <Typography variant="body2">No points yet.</Typography> : null}
         {day.points.map((point, index) => (
           <Box key={point.id} sx={{ border: '1px solid #eee', p: 1, my: 1 }}>
             {editingPointId === point.id ? (
-              <PointForm tripGroupId={tripGroupId} tripId={day.id} point={point} onDone={() => setEditingPointId(null)} />
+              <PointForm
+                tripGroupId={tripGroupId}
+                tripId={day.id}
+                point={point}
+                latitude={pointLatitude}
+                longitude={pointLongitude}
+                mapSearchSelection={mapSearchSelection}
+                onLocationChange={(latitude, longitude) => {
+                  setPointLatitude(latitude);
+                  setPointLongitude(longitude);
+                }}
+                onFindInMap={() => setFindInMapTrigger((current) => current + 1)}
+                onBack={() => {
+                  setEditingPointId(null);
+                  setMapSearchSelection(null);
+                }}
+                onDone={() => {
+                  setEditingPointId(null);
+                  setMapSearchSelection(null);
+                }}
+              />
             ) : (
               <>
                 <Typography variant="subtitle2">{point.name}</Typography>
@@ -160,7 +202,17 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', my: 0.5 }}>
                   <Button size="small" onClick={() => reorderPoint(index, -1)}>↑</Button>
                   <Button size="small" onClick={() => reorderPoint(index, 1)}>↓</Button>
-                  <Button size="small" onClick={() => setEditingPointId(point.id)}>Edit</Button>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setPointLatitude(point.lat == null ? '' : String(point.lat));
+                      setPointLongitude(point.lng == null ? '' : String(point.lng));
+                      setMapSearchSelection(null);
+                      setEditingPointId(point.id);
+                    }}
+                  >
+                    Edit
+                  </Button>
                   <Button
                     size="small"
                     color="error"
@@ -207,9 +259,39 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
           </Box>
         ))}
         {addingPoint ? (
-          <PointForm tripGroupId={tripGroupId} tripId={day.id} onDone={() => setAddingPoint(false)} />
+          <PointForm
+            tripGroupId={tripGroupId}
+            tripId={day.id}
+            latitude={pointLatitude}
+            longitude={pointLongitude}
+            mapSearchSelection={mapSearchSelection}
+            onLocationChange={(latitude, longitude) => {
+              setPointLatitude(latitude);
+              setPointLongitude(longitude);
+            }}
+            onFindInMap={() => setFindInMapTrigger((current) => current + 1)}
+            onBack={() => {
+              setAddingPoint(false);
+              setMapSearchSelection(null);
+            }}
+            onDone={() => {
+              setAddingPoint(false);
+              setMapSearchSelection(null);
+            }}
+          />
         ) : (
-          <Button size="small" variant="outlined" onClick={() => setAddingPoint(true)}>Add point</Button>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => {
+              setPointLatitude('');
+              setPointLongitude('');
+              setMapSearchSelection(null);
+              setAddingPoint(true);
+            }}
+          >
+            Add point
+          </Button>
         )}
       </Box>
     </Box>
