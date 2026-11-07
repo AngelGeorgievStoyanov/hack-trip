@@ -42,10 +42,6 @@
     ".next",
     "dist",
     "legacy",
-    "src/components/ForgotPassword/**",
-    "src/components/Register/**",
-    "src/components/ReSendVerifyEmail/**",
-    "src/components/Users/**",
     "src/services/userService.ts"
   ]
 }
