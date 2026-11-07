@@ -42,7 +42,7 @@ export function PointSection({ point, pointCommentTarget, togglePointComments }:
   return (
     <section aria-label="Trip points">
       <Card sx={POINT_CARD_STYLE}>
-        <CardContent>
+        <CardContent sx={{ width: '100%', boxSizing: 'border-box' }}>
           <Typography variant="h5" component="div" sx={POINT_NAME_STYLE}>
             Point name: {point.name}
           </Typography>
