@@ -41,12 +41,6 @@ const Users: FC = () => {
         API_CLIENT.verifyEmail(userId, token)
             .then((isVerified) => {
                 if (isActive) {
-                    if (isVerified && typeof BroadcastChannel !== "undefined") {
-                        const channel = new BroadcastChannel("hack-trip-email-verification");
-                        channel.postMessage({ type: "EMAIL_VERIFIED" });
-                        channel.close();
-                    }
-
                     setStatus(isVerified ? "success" : "error");
                 }
             })
