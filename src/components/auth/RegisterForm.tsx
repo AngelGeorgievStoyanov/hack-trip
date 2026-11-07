@@ -126,6 +126,12 @@ export function RegisterForm() {
   ];
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.grecaptcha) {
+      setCaptchaLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
     if (
       !captchaLoaded ||
       !config.recaptchaV2SiteKey ||
@@ -337,7 +343,7 @@ export function RegisterForm() {
             <Script
               src="https://www.google.com/recaptcha/api.js?render=explicit"
               strategy="afterInteractive"
-              onLoad={() => setCaptchaLoaded(true)}
+              onReady={() => setCaptchaLoaded(true)}
             />
             <Box sx={{ display: 'flex', justifyContent: 'center', minHeight: 78, pointerEvents: isFormLocked ? 'none' : 'auto', opacity: isFormLocked ? 0.6 : 1 }}>
               <Box ref={captchaContainerRef} />
