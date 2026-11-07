@@ -37,7 +37,37 @@ export function trimmedString({
 export const emailString = (message = 'Invalid email address') =>
   trimmedString({ min: 1, max: 45, pattern: EMAIL_REGEX, patternMessage: message });
 
-/** Legacy password policy: length, letter, digit, special character and no spaces. */
+/**
+ * Password policy shared verbatim by the frontend and backend.
+ * Only ASCII Latin letters, digits and printable ASCII punctuation count
+ * toward the required character classes. Any Unicode whitespace is rejected.
+ */
+export function isValidPassword(value: string, minLength = 8): boolean {
+    if (value.length < minLength) return false;
+
+    let hasLatinLetter = false;
+    let hasNumber = false;
+    let hasSpecialCharacter = false;
+
+    for (const character of value) {
+        if (character.trim().length === 0) return false;
+
+        const code = character.charCodeAt(0);
+        const isLatinLetter =
+            (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+        const isNumber = code >= 48 && code <= 57;
+        const isPrintableAsciiSymbol =
+            code >= 33 && code <= 126 && !isLatinLetter && !isNumber;
+
+        if (isLatinLetter) hasLatinLetter = true;
+        if (isNumber) hasNumber = true;
+        if (isPrintableAsciiSymbol) hasSpecialCharacter = true;
+    }
+
+    return hasLatinLetter && hasNumber && hasSpecialCharacter;
+}
+
+/** Password policy used by registration, reset and password changes. */
 export const passwordString = (
   { min, max }: { min: number; max: number },
   messages?: { min?: string; max?: string; pattern?: string },
@@ -50,11 +80,12 @@ export const passwordString = (
       (value) => new TextEncoder().encode(value).length <= max,
       `Password must be at most ${max} bytes`,
     )
-    .regex(
-      /^(?=.*\p{L})(?=.*[0-9])(?=.*[\p{P}\p{S}])(?!.*\s).{8,}$/u,
+    .refine(
+      (value) => isValidPassword(value, min),
       messages?.pattern ??
-        'Use at least 8 characters with a letter, a number and a symbol. Do not include spaces.',
+        'Use at least 8 characters with a Latin letter, a number and a symbol. Do not include spaces.',
     );
+
 
 /** Optional/nullable text: `undefined`/`null`/`''` -> `null`. Output `string | null`. */
 export const optionalText = ({ max, min }: LengthOptions, messages?: { max?: string }) =>
