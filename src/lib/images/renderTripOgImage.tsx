@@ -66,6 +66,7 @@ export async function renderTripOgImage({
         {imageSrc ? (
           <img
             src={imageSrc}
+            alt={title}
             width={1200}
             height={630}
             style={{
