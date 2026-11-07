@@ -38,7 +38,6 @@ const LINE_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1rem', font
  */
 export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComments, onDayDeleted }: TripDetailsProps) {
   const totalPoints = tripGroup.days.reduce((sum, current) => sum + current.points.length, 0);
-  const dayCommentCount = day.social.comments.count;
   const [expanded, setExpanded] = useState(false);
 
   const { status } = useAuth();
