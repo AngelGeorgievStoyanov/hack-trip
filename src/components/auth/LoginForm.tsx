@@ -30,6 +30,7 @@ export function LoginForm() {
   const router = useRouter();
   const notification = useNotification();
   const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
 
   useEffect(() => {
     if (typeof BroadcastChannel === 'undefined') return;
@@ -63,6 +64,9 @@ export function LoginForm() {
       notification.error(getAuthErrorMessage(error));
     } finally {
       setSubmitting(false);
+      setCaptchaToken('');
+      setValue('captchaToken', '', { shouldValidate: true });
+      setCaptchaResetKey((key) => key + 1);
     }
   }
 
@@ -130,7 +134,7 @@ export function LoginForm() {
           }}
         />
         <input type="hidden" {...register('captchaToken')} />
-        <Captcha disabled={submitting} onTokenChange={(token) => { setCaptchaToken(token); setValue('captchaToken', token, { shouldValidate: true }); }} />
+        <Captcha resetKey={captchaResetKey} disabled={submitting} onTokenChange={(token) => { setCaptchaToken(token); setValue('captchaToken', token, { shouldValidate: true }); }} />
         <Button
           type="submit"
           variant="contained"
