@@ -35,12 +35,12 @@ function detectImageType(bytes: Uint8Array): string | null {
   }
 
   const header = new TextDecoder().decode(bytes.slice(0, Math.min(bytes.length, 2048)));
-  if (/^\\s*(<\\?xml[^>]*>\\s*)?<svg[\\s>]/i.test(header)) {
+  if (/^\s*(<\?xml[^>]*>\s*)?<svg[\s>]/i.test(header)) {
     // SVG is rendered as an image by Satori; reject active or externally-loaded content.
     if (
-      /<\\s*(script|foreignObject)\\b/i.test(header) ||
-      /\\son[a-z]+\\s*=/i.test(header) ||
-      /(?:href|xlink:href)\\s*=\\s*["']\\s*(?:https?:|\\/\\/|javascript:|data:)/i.test(header)
+      /<\s*(script|foreignObject)\b/i.test(header) ||
+      /\son[a-z]+\s*=/i.test(header) ||
+      /(?:href|xlink:href)\s*=\s*["']\s*(?:https?:|\/\/|javascript:|data:)/i.test(header)
     ) {
       return null;
     }
