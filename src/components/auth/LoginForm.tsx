@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -27,6 +27,17 @@ export function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [emailVerified, setEmailVerified] = useState(false);
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const channel = new BroadcastChannel('hacktrip-auth-events');
+    const handleMessage = (event: MessageEvent<{ type?: string }>) => {
+      if (event.data?.type === 'email-verified') setEmailVerified(true);
+    };
+    channel.addEventListener('message', handleMessage);
+    return () => { channel.removeEventListener('message', handleMessage); channel.close(); };
+  }, []);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -84,6 +95,7 @@ export function LoginForm() {
         <Typography variant="h5" component="div" sx={{ margin: '10px auto', textAlign: 'center' }}>
           LOGIN
         </Typography>
+        {emailVerified ? <Alert severity="success">Your email has been verified. You can now log in.</Alert> : null}
         {serverError ? <Alert severity="error">{serverError}</Alert> : null}
         <TextField
           label="Email"
