@@ -582,7 +582,6 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
             </Box>
           )}
         </Box>
-      </Box>
     </Box>
   );
 }
