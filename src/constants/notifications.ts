@@ -21,6 +21,8 @@ export interface NotificationOptions {
   onClose?: () => void;
 }
 
+export const AUTH_SUCCESS_REDIRECT_DELAY_MS = 3500;
+
 export const REGISTRATION_SUCCESS_MESSAGE =
   'Registration successful. Please check your email for a verification link.';
 
