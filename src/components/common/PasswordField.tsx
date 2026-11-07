@@ -9,6 +9,7 @@ interface PasswordFieldProps {
   label: string;
   autoComplete?: string;
   disabled?: boolean;
+  maxLength?: number;
   error?: boolean;
   helperText?: ReactNode;
   registration: UseFormRegisterReturn;
@@ -18,6 +19,7 @@ export function PasswordField({
   label,
   autoComplete = 'new-password',
   disabled = false,
+  maxLength = 72,
   error = false,
   helperText = ' ',
   registration,
@@ -34,6 +36,7 @@ export function PasswordField({
       error={error}
       helperText={helperText}
       slotProps={{
+        htmlInput: { maxLength },
         input: {
           endAdornment: (
             <InputAdornment position="end">
