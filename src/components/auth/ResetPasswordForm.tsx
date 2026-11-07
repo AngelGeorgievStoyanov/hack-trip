@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
@@ -13,6 +14,7 @@ import { COLORS, CARD_SHADOW, CARD_BORDER } from '@/constants/ui';
 import { WelcomeHeading } from '@/components/common/WelcomeHeading';
 import { PasswordField } from '@/components/common/PasswordField';
 import { PasswordRequirements } from '@/components/common/PasswordRequirements';
+import { AUTH_SUCCESS_REDIRECT_DELAY_MS } from '@/constants/notifications';
 
 interface ResetPasswordFormProps {
   token?: string;
@@ -38,9 +40,21 @@ const FORM_SX = {
 } as const;
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+  const router = useRouter();
   const notification = useNotification();
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!success) return;
+
+    const redirectTimeout = window.setTimeout(
+      () => router.replace('/login'),
+      AUTH_SUCCESS_REDIRECT_DELAY_MS,
+    );
+
+    return () => window.clearTimeout(redirectTimeout);
+  }, [success, router]);
 
   const {
     register,
@@ -84,7 +98,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           <Alert severity="success">
             Your password has been reset. You can now log in.
           </Alert>
-          <Button component={Link} href="/login" variant="contained">
+          <Button onClick={() => router.replace('/login')} variant="contained">
             Go to login
           </Button>
         </Box>
