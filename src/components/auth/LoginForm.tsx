@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { HidePasswordIcon, ShowPasswordIcon } from '@/constants/icons';
 import { useAuth } from '@/hooks/useAuth';
 import { zodResolver } from '@/lib/zodResolver';
 import { getAuthErrorMessage } from '@/lib/errors';
@@ -126,7 +126,7 @@ export function LoginForm() {
                     onMouseDown={(event) => event.preventDefault()}
                     edge="end"
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <HidePasswordIcon /> : <ShowPasswordIcon />}
                   </IconButton>
                 </InputAdornment>
               ),
