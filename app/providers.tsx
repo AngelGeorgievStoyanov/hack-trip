@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/hooks/useAuth';
 import { BackgroundProvider } from '@/hooks/useBackground';
 import { ConfirmDialogProvider } from '@/components/common/ConfirmDialog';
+import { NotificationProvider } from '@/components/common/NotificationProvider';
 
 const theme = createTheme();
 
@@ -21,7 +22,9 @@ export function Providers({ children }: { children: ReactNode }) {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <BackgroundProvider>
-              <ConfirmDialogProvider>{children}</ConfirmDialogProvider>
+              <NotificationProvider>
+                <ConfirmDialogProvider>{children}</ConfirmDialogProvider>
+              </NotificationProvider>
             </BackgroundProvider>
           </AuthProvider>
         </QueryClientProvider>
