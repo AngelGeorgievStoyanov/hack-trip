@@ -20,3 +20,6 @@ export interface NotificationOptions {
   position?: NotificationPosition;
   onClose?: () => void;
 }
+
+export const REGISTRATION_SUCCESS_MESSAGE =
+  'Registration successful. Please check your email for a verification link.';
