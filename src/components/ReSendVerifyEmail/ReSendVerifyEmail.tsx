@@ -71,10 +71,10 @@ const ReSendVerifyEmail: FC = () => {
         data.email = data.email.trim();
 
 
-        API_CLIENT.resendVerEmail(data.email).then((message) => {
+        API_CLIENT.resendVerEmail(data.email).then((response) => {
 
             setErrorApi(undefined);
-            setRegisterMessage(message)
+            setRegisterMessage(response.message)
         }).catch((err) => {
             setErrorApi(err.message);
             console.log(err.message);
