@@ -48,7 +48,7 @@ export function Captcha({ onTokenChange, disabled = false }: CaptchaProps) {
         'error-callback': () => onTokenChangeRef.current(''),
       });
     });
-  }, [loaded];
+  }, [loaded]);
 
   if (!config.recaptchaV2SiteKey) return <Box role="alert">{CAPTCHA_UNAVAILABLE_MESSAGE}</Box>;
 
