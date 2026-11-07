@@ -42,31 +42,57 @@ export const emailString = (message = 'Invalid email address') =>
  * Only ASCII Latin letters, digits and printable ASCII punctuation count
  * toward the required character classes. Any Unicode whitespace is rejected.
  */
-export function isValidPassword(value: string, minLength = 8): boolean {
-    if (value.length < minLength) return false;
+export interface PasswordRequirement {
+  key: 'minLength' | 'printableAscii' | 'latinLetter' | 'number' | 'specialCharacter' | 'noSpaces';
+  label: string;
+  valid: boolean;
+}
 
-    let hasLatinLetter = false;
-    let hasNumber = false;
-    let hasSpecialCharacter = false;
+/**
+ * Password requirements used by both the Zod validator and the live form feedback.
+ * Keep this as the single frontend source of truth for the password policy.
+ */
+export function getPasswordRequirements(value: string, minLength = 8): PasswordRequirement[] {
+  const characters = Array.from(value);
+  const isPrintableAscii = characters.every((character) => {
+    const code = character.charCodeAt(0);
+    return code >= 33 && code <= 126;
+  });
 
-    for (const character of value) {
+  return [
+    { key: 'minLength', label: `At least ${minLength} characters`, valid: value.length >= minLength },
+    {
+      key: 'printableAscii',
+      label: 'English letters, numbers and symbols only',
+      valid: value.length > 0 && isPrintableAscii,
+    },
+    {
+      key: 'latinLetter',
+      label: 'At least one Latin letter (a–z, A–Z)',
+      valid: /[a-zA-Z]/.test(value),
+    },
+    { key: 'number', label: 'At least one number (0–9)', valid: /[0-9]/.test(value) },
+    {
+      key: 'specialCharacter',
+      label: 'At least one special character (!@#$…)',
+      valid: characters.some((character) => {
         const code = character.charCodeAt(0);
-        // Accept printable ASCII only: Latin letters, digits and standard symbols.
-        // This also rejects spaces, Cyrillic and other Unicode characters.
-        if (code < 33 || code > 126) return false;
-
         const isLatinLetter =
-            (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+          (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
         const isNumber = code >= 48 && code <= 57;
-        const isPrintableAsciiSymbol =
-            !isLatinLetter && !isNumber;
+        return code >= 33 && code <= 126 && !isLatinLetter && !isNumber;
+      }),
+    },
+    {
+      key: 'noSpaces',
+      label: 'No spaces',
+      valid: value.length > 0 && characters.every((character) => !/\s/.test(character)),
+    },
+  ];
+}
 
-        if (isLatinLetter) hasLatinLetter = true;
-        if (isNumber) hasNumber = true;
-        if (isPrintableAsciiSymbol) hasSpecialCharacter = true;
-    }
-
-    return hasLatinLetter && hasNumber && hasSpecialCharacter;
+export function isValidPassword(value: string, minLength = 8): boolean {
+  return getPasswordRequirements(value, minLength).every((requirement) => requirement.valid);
 }
 
 /** Password policy shared by registration, reset and password changes. */
