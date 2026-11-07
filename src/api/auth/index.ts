@@ -30,6 +30,7 @@ export interface RegisterInput {
 export interface LoginInput {
   email: string;
   password: string;
+  captchaToken: string;
 }
 
 export interface VerifyEmailInput {
@@ -38,6 +39,7 @@ export interface VerifyEmailInput {
 
 export interface ResendVerificationInput {
   email: string;
+  captchaToken: string;
 }
 
 export interface UpdateProfileInput {
@@ -56,6 +58,7 @@ export interface ChangePasswordInput {
 
 export interface ForgotPasswordInput {
   email: string;
+  captchaToken: string;
 }
 
 export interface ResetPasswordInput {
