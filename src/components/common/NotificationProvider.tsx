@@ -4,7 +4,8 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState } fro
 import type { ReactNode } from 'react';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
-import type { AlertColor, SnackbarCloseReason } from '@mui/material';
+import type { AlertColor } from '@mui/material/Alert';
+import type { SnackbarCloseReason } from '@mui/material/Snackbar';
 import { NOTIFICATION_DEFAULTS } from '@/constants/notifications';
 import type { NotificationOptions, NotificationPosition } from '@/constants/notifications';
 
@@ -42,15 +43,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const showNotification = useCallback(
     (severity: AlertColor, message: string, options?: NotificationOptions) => {
-      const duration =
-        options?.duration ??
-        (severity === 'success'
+      const defaultDuration =
+        severity === 'success'
           ? NOTIFICATION_DEFAULTS.successDuration
           : severity === 'error'
             ? NOTIFICATION_DEFAULTS.errorDuration
             : severity === 'warning'
               ? NOTIFICATION_DEFAULTS.warningDuration
-              : NOTIFICATION_DEFAULTS.infoDuration);
+              : NOTIFICATION_DEFAULTS.infoDuration;
+      const duration = options?.duration !== undefined ? options.duration : defaultDuration;
 
       const nextNotification: ActiveNotification = {
         id: ++nextId.current,
