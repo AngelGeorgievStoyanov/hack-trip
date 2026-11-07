@@ -9,6 +9,7 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { BackgroundProvider } from '@/hooks/useBackground';
 import { ConfirmDialogProvider } from '@/components/common/ConfirmDialog';
 import { NotificationProvider } from '@/components/common/NotificationProvider';
+import { TabSyncListener } from '@/components/common/TabSyncListener';
 
 const theme = createTheme();
 
@@ -23,7 +24,10 @@ export function Providers({ children }: { children: ReactNode }) {
           <AuthProvider>
             <BackgroundProvider>
               <NotificationProvider>
-                <ConfirmDialogProvider>{children}</ConfirmDialogProvider>
+                <ConfirmDialogProvider>
+                  <TabSyncListener />
+                  {children}
+                </ConfirmDialogProvider>
               </NotificationProvider>
             </BackgroundProvider>
           </AuthProvider>
