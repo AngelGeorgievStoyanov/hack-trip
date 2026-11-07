@@ -324,3 +324,18 @@ code {
 }
 
 .legal-page__back:hover { color: #fff; }
+
+
+/* Legacy About page image entrance animation. */
+@keyframes about-image-rotate {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.about-page__content img {
+  animation: about-image-rotate 1s ease-in-out 3s both;
+}
