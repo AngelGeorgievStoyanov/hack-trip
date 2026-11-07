@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   Box,
   Button,
@@ -43,7 +42,6 @@ const registerFormSchema = registerSchema
 type RegisterFormValues = z.input<typeof registerFormSchema>;
 
 export function RegisterForm() {
-  const router = useRouter();
   const notification = useNotification();
   const [submitting, setSubmitting] = useState(false);
   const [registrationComplete, setRegistrationComplete] = useState(false);
@@ -116,9 +114,7 @@ export function RegisterForm() {
       };
       await authApi.register(input);
       setRegistrationComplete(true);
-      notification.success(REGISTRATION_SUCCESS_MESSAGE, {
-        onClose: () => router.push('/login'),
-      });
+      notification.success(REGISTRATION_SUCCESS_MESSAGE);
     } catch (e) {
       notification.error(getGenericErrorMessage(e));
     } finally {
@@ -276,6 +272,7 @@ export function RegisterForm() {
             {errors.acceptedTerms.message}
           </Typography>
         ) : null}
+        <input type="hidden" {...register('captchaToken')} />
         <Captcha disabled={isFormLocked} onTokenChange={(token) => { setCaptchaToken(token || null); setValue('captchaToken', token, { shouldValidate: true }); }} />
         <Button
           type="submit"
