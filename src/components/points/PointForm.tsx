@@ -102,7 +102,7 @@ export function PointForm({ tripGroupId, tripId, point, existingImages: provided
         shouldDirty: true,
       });
     }
-  }, [mapSearchSelection?.revision, setValue]);
+  }, [mapSearchSelection?.name, mapSearchSelection?.revision, setValue]);
 
   async function handleFindInMap(): Promise<void> {
     const query = watch('name').trim();
