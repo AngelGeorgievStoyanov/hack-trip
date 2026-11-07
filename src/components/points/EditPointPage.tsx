@@ -84,7 +84,7 @@ export function EditPointPage() {
   if (!point) return <Alert severity="error">The point could not be loaded.</Alert>;
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', px: { xs: 1, sm: 2 }, py: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', px: { xs: 1, sm: 2 }, py: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', rowGap: { xs: 2, md: 0 } }}>
       {error ? <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert> : null}
       <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto', order: 0, '@media (max-width:1020px)': { order: 1 } }}>
         <PointLocationPicker
