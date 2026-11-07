@@ -25,6 +25,11 @@ export function VerifyEmailForm({ token }: { token?: string }) {
         if (!cancelled) {
           setStatus('success');
           setMessage('Your email has been verified. You can now log in.');
+          if (typeof BroadcastChannel !== 'undefined') {
+            const channel = new BroadcastChannel('hacktrip-auth-events');
+            channel.postMessage({ type: 'email-verified' });
+            channel.close();
+          }
         }
       })
       .catch((error) => {
