@@ -8,18 +8,15 @@ import { TripMapSection } from '@/components/trips/TripMapSection';
 import { PointsSection } from '@/components/trips/PointsSection';
 import { DayImagesGallery } from '@/components/trips/DayImagesGallery';
 import { CommentsSection } from '@/components/comments/CommentsSection';
-import { Box, useMediaQuery } from '@mui/material';
+import { Box } from '@mui/material';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import { useTripGroup } from '@/hooks/useTripGroup';
 import { TripGroupSocialActions } from '@/components/social/TripGroupSocialActions';
 import {
-  BREAKPOINTS,
   CARD_BORDER,
   CARD_SHADOW,
   COLORS,
-  maxWidthQuery,
-  mediaDown,
   pageBackgroundStyle,
 } from '@/constants/ui';
 import type { TripGroupResponse } from '@/types';
@@ -48,7 +45,6 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
   const [tripCommentTarget, setTripCommentTarget] = useState<CommentTarget | null>(null);
   const [pointCommentTarget, setPointCommentTarget] = useState<CommentTarget | null>(null);
   const [tripGroupCommentsOpen, setTripGroupCommentsOpen] = useState(false);
-  const isMobile = useMediaQuery(maxWidthQuery(BREAKPOINTS.tripDetails));
 
   // The server resolves `?day=N` once per navigation; adopt it so the view opens
   // on the requested day without extra requests. Client day switches below own
@@ -60,8 +56,6 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
 
   const group = tripGroup ?? trip;
   const day = group.days.find((current) => current.dayNumber === activeDayNumber) ?? group.days[0];
-
-  const dayTarget: CommentTarget = { type: 'day', tripGroupId: group.id, tripId: day.id };
 
   const isTargetOpen = (activeTarget: CommentTarget | null, target: CommentTarget): boolean => {
     if (!activeTarget) {
