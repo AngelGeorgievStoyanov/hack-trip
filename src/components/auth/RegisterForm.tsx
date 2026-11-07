@@ -49,6 +49,7 @@ export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
 
   const {
     register,
@@ -119,6 +120,9 @@ export function RegisterForm() {
       notification.error(getGenericErrorMessage(e));
     } finally {
       setSubmitting(false);
+      setCaptchaToken(null);
+      setValue('captchaToken', '', { shouldValidate: true });
+      setCaptchaResetKey((key) => key + 1);
     }
   }
 
@@ -273,7 +277,7 @@ export function RegisterForm() {
           </Typography>
         ) : null}
         <input type="hidden" {...register('captchaToken')} />
-        <Captcha disabled={isFormLocked} onTokenChange={(token) => { setCaptchaToken(token || null); setValue('captchaToken', token, { shouldValidate: true }); }} />
+        <Captcha resetKey={captchaResetKey} disabled={isFormLocked} onTokenChange={(token) => { setCaptchaToken(token || null); setValue('captchaToken', token, { shouldValidate: true }); }} />
         <Button
           type="submit"
           variant="contained"
