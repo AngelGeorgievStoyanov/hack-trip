@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
-import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import { authApi } from '@/api/auth';
 import type { ForgotPasswordInput } from '@/api/auth';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { forgotPasswordSchema } from '@/validations/auth';
+import { useNotification } from '@/components/common/NotificationProvider';
+import { Captcha } from '@/components/auth/Captcha';
+import { FORGOT_PASSWORD_SUCCESS_MESSAGE } from '@/constants/notifications';
 
 export function ForgotPasswordForm() {
   const [message, setMessage] = useState<string | null>(null);
@@ -30,7 +33,7 @@ export function ForgotPasswordForm() {
       // Anti-enumeration: neutral message whether or not the account exists.
       setMessage(response.message);
     } catch (e) {
-      setError(getGenericErrorMessage(e));
+      notification.error(getGenericErrorMessage(e));
     } finally {
       setSubmitting(false);
     }
@@ -58,7 +61,7 @@ export function ForgotPasswordForm() {
       <Button
         type="submit"
         variant="contained"
-        disabled={submitting}
+        disabled={submitting || !captchaToken}
         startIcon={submitting ? <CircularProgress size={18} /> : undefined}
       >
         Send reset link
