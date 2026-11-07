@@ -1,13 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Alert, Box, CircularProgress, Typography } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
 import { authApi } from '@/api/auth';
 import { getTokenErrorMessage } from '@/lib/errors';
 import { publishTabEvent } from '@/lib/tabSync';
+import { WelcomeHeading } from '@/components/common/WelcomeHeading';
+import { useNotification } from '@/components/common/NotificationProvider';
+import {
+  AUTH_SUCCESS_REDIRECT_DELAY_MS,
+  LOGIN_EMAIL_VERIFIED_MESSAGE,
+} from '@/constants/notifications';
+import { COLORS, CARD_SHADOW, CARD_BORDER } from '@/constants/ui';
 
 export function VerifyEmailForm({ token }: { token?: string }) {
+  const router = useRouter();
+  const notification = useNotification();
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState<string | null>(null);
 
@@ -19,15 +28,25 @@ export function VerifyEmailForm({ token }: { token?: string }) {
     }
 
     let cancelled = false;
+    let redirectTimeout: number | undefined;
     setStatus('loading');
+
     authApi
       .verifyEmail({ token })
       .then(() => {
-        if (!cancelled) {
-          setStatus('success');
-          setMessage('Your email has been verified. You can now log in.');
-          publishTabEvent({ type: 'email-verified' });
-        }
+        if (cancelled) return;
+
+        setStatus('success');
+        setMessage(LOGIN_EMAIL_VERIFIED_MESSAGE);
+        notification.success(LOGIN_EMAIL_VERIFIED_MESSAGE, {
+          duration: AUTH_SUCCESS_REDIRECT_DELAY_MS,
+        });
+        publishTabEvent({ type: 'email-verified' });
+
+        redirectTimeout = window.setTimeout(
+          () => router.replace('/login'),
+          AUTH_SUCCESS_REDIRECT_DELAY_MS,
+        );
       })
       .catch((error) => {
         if (!cancelled) {
@@ -38,18 +57,53 @@ export function VerifyEmailForm({ token }: { token?: string }) {
 
     return () => {
       cancelled = true;
+      if (redirectTimeout !== undefined) window.clearTimeout(redirectTimeout);
     };
-  }, [token]);
+  }, [token, notification, router]);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
-      <Typography variant="h4" component="h1">
-        Verify email
-      </Typography>
-      {status === 'loading' ? <CircularProgress /> : null}
-      {status === 'success' ? <Alert severity="success">{message}</Alert> : null}
-      {status === 'error' ? <Alert severity="error">{message}</Alert> : null}
-      {status === 'success' ? <Link href="/login">Go to login</Link> : null}
-    </Box>
+    <WelcomeHeading>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 2,
+          width: '100%',
+          maxWidth: 560,
+          boxSizing: 'border-box',
+          mx: 'auto',
+          p: { xs: 3, sm: 4 },
+          backgroundColor: COLORS.formPanelBackground,
+          boxShadow: CARD_SHADOW,
+          border: CARD_BORDER,
+          color: 'text.primary',
+          textAlign: 'center',
+        }}
+      >
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>
+          Verify email
+        </Typography>
+
+        {status === 'loading' ? <CircularProgress /> : null}
+        {status === 'error' && message ? (
+          <Alert severity="error" sx={{ width: '100%', boxSizing: 'border-box' }}>
+            {message}
+          </Alert>
+        ) : null}
+        {status === 'success' ? (
+          <>
+            <Typography color="text.primary">{message}</Typography>
+            <Button
+              variant="contained"
+              onClick={() => router.replace('/login')}
+              sx={{ ':hover': { backgroundColor: '#4daf30' } }}
+            >
+              Go to login
+            </Button>
+          </>
+        ) : null}
+      </Box>
+    </WelcomeHeading>
   );
 }
