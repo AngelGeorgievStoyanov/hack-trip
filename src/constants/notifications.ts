@@ -29,3 +29,14 @@ export const CAPTCHA_UNAVAILABLE_MESSAGE = 'CAPTCHA is not configured. Please tr
 export const FORGOT_PASSWORD_SUCCESS_MESSAGE = 'If an account exists for this email, a password reset link has been sent.';
 export const RESEND_VERIFICATION_SUCCESS_MESSAGE = 'If an account exists and needs verification, a verification email has been sent.';
 export const LOGIN_EMAIL_VERIFIED_MESSAGE = 'Your email has been verified. You can now log in.';
+
+export const AUTH_NOTIFICATION_MESSAGES = {
+  genericError: 'Something went wrong. Please try again.',
+  genericErrorLater: 'Something went wrong. Please try again later.',
+  invalidCredentials: 'Invalid email or password.',
+  emailNotVerified: 'Your email address is not verified yet. Please check your inbox.',
+  accountSuspended: 'Your account is suspended.',
+  accountDeactivated: 'Your account is deactivated.',
+  actionNotAllowed: 'This action is not allowed.',
+  invalidOrExpiredLink: 'This link is invalid or has expired.',
+} as const;
