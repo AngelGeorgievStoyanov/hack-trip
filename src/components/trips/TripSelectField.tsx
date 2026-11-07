@@ -35,7 +35,6 @@ export function TripSelectField({
   searchable = false,
 }: TripSelectFieldProps) {
   const selectedChoice = choices.find((choice) => choice.value === value) ?? null;
-  const selectedChoiceValue = selectedChoice?.value;
   const selectedChoiceLabel = selectedChoice?.label;
   const [inputValue, setInputValue] = useState(selectedChoiceLabel ?? '');
 
@@ -43,7 +42,7 @@ export function TripSelectField({
     if (selectedChoiceLabel) {
       setInputValue(selectedChoiceLabel);
     }
-  }, [selectedChoiceValue, selectedChoiceLabel]);
+  }, [selectedChoiceLabel]);
 
   if (choices.length === 0) {
     return (
