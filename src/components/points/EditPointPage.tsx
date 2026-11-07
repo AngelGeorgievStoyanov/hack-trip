@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Alert, Box, CircularProgress, IconButton, Paper, Tooltip, Typography } from '@mui/material';
+import { Alert, Box, CircularProgress, IconButton, Paper, Tooltip } from '@mui/material';
 import { pointApi } from '@/api/points';
 import { PointForm } from '@/components/points/PointForm';
 import { AppImage } from '@/components/images/AppImage';
+import { SocialObjectPlaceholder } from '@/components/placeholders';
 import { RemoveImageIcon } from '@/constants/icons';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { PointLocationPicker } from '@/components/maps/PointLocationPicker';
@@ -85,7 +86,7 @@ export function EditPointPage() {
   return (
     <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', px: { xs: 1, sm: 2 }, py: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       {error ? <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert> : null}
-      <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto', order: 0, '@media (max-width:1020px)': { order: 2 } }}>
+      <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto', order: 0, '@media (max-width:1020px)': { order: 1 } }}>
         <PointLocationPicker
           latitude={latitude}
           longitude={longitude}
@@ -101,6 +102,7 @@ export function EditPointPage() {
         sx={{
           mt: 2.5,
           width: '100%',
+          '@media (max-width:1020px)': { mt: 0, display: 'contents' },
           order: 0,
           display: 'flex',
           flexDirection: 'row',
@@ -114,7 +116,7 @@ export function EditPointPage() {
           },
         }}
       >
-        <Paper variant="outlined" sx={{ p: { xs: 2, sm: '30px' }, width: '100%', maxWidth: 600, minWidth: 0, boxSizing: 'border-box', backgroundColor: '#eee7e79e', border: '1px solid black', borderRadius: 0, boxShadow: '3px 2px 5px black', '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' } }}>
+        <Paper variant="outlined" sx={{ p: { xs: 2, sm: '30px' }, width: '100%', maxWidth: 600, minWidth: 0, boxSizing: 'border-box', backgroundColor: '#eee7e79e', border: '1px solid black', borderRadius: 0, boxShadow: '3px 2px 5px black', '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' }, '@media (max-width:1020px)': { order: 2 } }}>
           <PointForm
             key={point.id}
             tripGroupId={0}
@@ -135,7 +137,7 @@ export function EditPointPage() {
           />
         </Paper>
 
-        <Box sx={{ width: { xs: '100%', sm: '100%', lg: 520 }, maxWidth: 520, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', mt: { xs: 0, lg: 1 } }}>
+        <Box sx={{ width: { xs: '100%', sm: '100%', lg: 520 }, maxWidth: 520, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', mt: { xs: 0, lg: 1 }, '@media (max-width:1020px)': { order: 0 } }}>
           {existingImages.length > 0 ? (
             <Box
               sx={{
@@ -173,9 +175,9 @@ export function EditPointPage() {
               ))}
             </Box>
           ) : (
-            <Typography variant="h6" sx={{ m: 1, maxWidth: '95%', textAlign: 'center' }}>
-              FOR THIS POINT DON'T HAVE IMAGES
-            </Typography>
+            <Box sx={{ width: '50%', maxWidth: 280, aspectRatio: '1 / 1', mx: 'auto' }}>
+              <SocialObjectPlaceholder />
+            </Box>
           )}
         </Box>
       </Box>
