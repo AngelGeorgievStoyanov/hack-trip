@@ -18,7 +18,6 @@ export function VerifyEmailForm({ token }: { token?: string }) {
   const router = useRouter();
   const notification = useNotification();
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -37,7 +36,6 @@ export function VerifyEmailForm({ token }: { token?: string }) {
         if (cancelled) return;
 
         setStatus('success');
-        setMessage(LOGIN_EMAIL_VERIFIED_MESSAGE);
         notification.success(LOGIN_EMAIL_VERIFIED_MESSAGE, {
           duration: AUTH_SUCCESS_REDIRECT_DELAY_MS,
         });
@@ -86,7 +84,7 @@ export function VerifyEmailForm({ token }: { token?: string }) {
         </Typography>
 
         {status === 'loading' ? <CircularProgress /> : null}
-        {status === 'success' ? (
+        {status === 'success' || status === 'error' ? (
           <>
             <Button
               variant="contained"
