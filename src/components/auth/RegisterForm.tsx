@@ -174,6 +174,7 @@ export function RegisterForm() {
       <Box
         component="form"
         noValidate
+        aria-busy={submitting}
         onSubmit={handleSubmit(onSubmit)}
         sx={{
           display: 'flex',
@@ -299,6 +300,7 @@ export function RegisterForm() {
         />
         <input type="hidden" {...register('captchaToken')} />
         <FormControlLabel
+          sx={{ pointerEvents: isFormLocked ? 'none' : 'auto' }}
           control={<Checkbox disabled={isFormLocked} {...register('acceptedTerms')} />}
           label={
             <>
@@ -323,7 +325,7 @@ export function RegisterForm() {
             </Box>
           </>
         ) : (
-          <Alert severity="error">CAPTCHA is not configured. Registration is unavailable.</Alert>
+          <Typography color="error" role="alert">CAPTCHA is not configured. Registration is unavailable.</Typography>
         )}
         <Button
           type="submit"
