@@ -30,13 +30,12 @@ export function LoginForm() {
   const router = useRouter();
   const notification = useNotification();
   const [captchaToken, setCaptchaToken] = useState('');
-  const [emailVerified, setEmailVerified] = useState(false);
 
   useEffect(() => {
     if (typeof BroadcastChannel === 'undefined') return;
     const channel = new BroadcastChannel('hacktrip-auth-events');
     const handleMessage = (event: MessageEvent<{ type?: string }>) => {
-      if (event.data?.type === 'email-verified') { setEmailVerified(true); notification.success(LOGIN_EMAIL_VERIFIED_MESSAGE); }
+      if (event.data?.type === 'email-verified') notification.success(LOGIN_EMAIL_VERIFIED_MESSAGE);
     };
     channel.addEventListener('message', handleMessage);
     return () => { channel.removeEventListener('message', handleMessage); channel.close(); };
@@ -130,11 +129,12 @@ export function LoginForm() {
             },
           }}
         />
-        <Captcha disabled={submitting || !captchaToken} onTokenChange={(token) => { setCaptchaToken(token); setValue('captchaToken', token, { shouldValidate: true }); }} />
+        <input type="hidden" {...register('captchaToken')} />
+        <Captcha disabled={submitting} onTokenChange={(token) => { setCaptchaToken(token); setValue('captchaToken', token, { shouldValidate: true }); }} />
         <Button
           type="submit"
           variant="contained"
-          disabled={submitting}
+          disabled={submitting || !captchaToken}
           startIcon={submitting ? <CircularProgress size={18} /> : undefined}
           sx={{ ':hover': { backgroundColor: '#4daf30' } }}
         >
