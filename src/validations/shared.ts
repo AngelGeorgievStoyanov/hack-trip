@@ -43,7 +43,7 @@ export const emailString = (message = 'Invalid email address') =>
  * toward the required character classes. Any Unicode whitespace is rejected.
  */
 export interface PasswordRequirement {
-  key: 'minLength' | 'printableAscii' | 'latinLetter' | 'number' | 'specialCharacter' | 'noSpaces';
+  key: 'minLength' | 'maxLength' | 'printableAscii' | 'latinLetter' | 'number' | 'specialCharacter' | 'noSpaces';
   label: string;
   valid: boolean;
 }
