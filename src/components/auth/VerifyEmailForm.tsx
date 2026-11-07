@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import { authApi } from '@/api/auth';
 import { getTokenErrorMessage } from '@/lib/errors';
 import { publishTabEvent } from '@/lib/tabSync';
@@ -23,7 +23,7 @@ export function VerifyEmailForm({ token }: { token?: string }) {
   useEffect(() => {
     if (!token) {
       setStatus('error');
-      setMessage('Missing verification token.');
+      notification.error('Missing verification token.');
       return;
     }
 
@@ -51,7 +51,7 @@ export function VerifyEmailForm({ token }: { token?: string }) {
       .catch((error) => {
         if (!cancelled) {
           setStatus('error');
-          setMessage(getTokenErrorMessage(error));
+          notification.error(getTokenErrorMessage(error));
         }
       });
 
@@ -86,14 +86,8 @@ export function VerifyEmailForm({ token }: { token?: string }) {
         </Typography>
 
         {status === 'loading' ? <CircularProgress /> : null}
-        {status === 'error' && message ? (
-          <Alert severity="error" sx={{ width: '100%', boxSizing: 'border-box' }}>
-            {message}
-          </Alert>
-        ) : null}
         {status === 'success' ? (
           <>
-            <Typography color="text.primary">{message}</Typography>
             <Button
               variant="contained"
               onClick={() => router.replace('/login')}
