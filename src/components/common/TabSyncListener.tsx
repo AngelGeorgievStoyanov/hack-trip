@@ -1,14 +1,21 @@
 'use client';
 
 import { useEffect } from 'react';
-import { subscribeToTabEvents, type TabSyncEvent } from '@/lib/tabSync';
+import { useRouter } from 'next/navigation';
+import { subscribeToTabEvents } from '@/lib/tabSync';
 
-interface TabSyncListenerProps {
-  onEvent: (event: TabSyncEvent) => void;
-}
+export function TabSyncListener() {
+  const router = useRouter();
 
-export function TabSyncListener({ onEvent }: TabSyncListenerProps) {
-  useEffect(() => subscribeToTabEvents(onEvent), [onEvent]);
+  useEffect(
+    () =>
+      subscribeToTabEvents((event) => {
+        if (event.type === 'email-verified') {
+          router.replace('/login');
+        }
+      }),
+    [router],
+  );
 
   return null;
 }
