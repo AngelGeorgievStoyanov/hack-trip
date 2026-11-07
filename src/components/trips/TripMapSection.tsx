@@ -91,7 +91,7 @@ export function TripMapSection({ points, dayPosition, selectedPointIndex, onPoin
       boxShadow: CARD_SHADOW,
       [mediaDown(BREAKPOINTS.smallPhone)]: { display: 'flex', flexDirection: 'column', width: '94vw' },
     }}>
-      {showingPointMarkers ? (
+      {markers.length > 1 ? (
         <MobileStepper
           ref={stepperRef}
           variant="progress"
