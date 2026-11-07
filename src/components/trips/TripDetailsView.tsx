@@ -113,6 +113,7 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
   return (
     <>
       <Box
+        data-trip-sticky-header="true"
         sx={{
           position: 'sticky',
           top: 0,
