@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { tripApi, type TripEditInput } from '@/api/trips';
 import { AppImage } from '@/components/images/AppImage';
+import { SocialObjectPlaceholder } from '@/components/placeholders';
 import ImageUploadField from '@/components/images/ImageUploadField';
 import { TripLocationPicker } from '@/components/maps/TripLocationPicker';
 import { TripSelectField } from './TripSelectField';
@@ -227,13 +228,24 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
         mx: 'auto',
         px: { xs: 1, sm: 2 },
         py: { xs: 2, sm: 2 },
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+        display: 'grid',
+        gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'repeat(2, minmax(0, 1fr))' },
+        gridTemplateAreas: {
+          xs: '"images" "map" "form"',
+          lg: '"map map" "form images"',
+        },
+        alignItems: 'start',
         gap: 2,
       }}
     >
-      <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto' }}>
+      <Box
+        sx={{
+          gridArea: 'map',
+          width: '100%',
+          maxWidth: 600,
+          mx: 'auto',
+        }}
+      >
         <TripLocationPicker
           latitude={latitude == null ? '' : String(latitude)}
           longitude={longitude == null ? '' : String(longitude)}
@@ -251,24 +263,11 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
       </Box>
 
       <Box
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
         sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'flex-start',
-          gap: 2,
-          width: '100%',
-          '@media (max-width: 1120px)': {
-            flexDirection: 'column-reverse',
-            alignItems: 'center',
-          },
-        }}
-      >
-        <Box
-          component="form"
-          onSubmit={handleSubmit(onSubmit)}
-          sx={{
-            boxSizing: 'border-box',
+          gridArea: 'form',
+          boxSizing: 'border-box',
             m: { xs: 0, sm: 2 },
             p: { xs: 2, sm: '30px' },
             display: 'flex',
@@ -507,10 +506,11 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
           </Box>
         </Box>
 
-        <Box
-          component="section"
-          sx={{
-            boxSizing: 'border-box',
+      <Box
+        component="section"
+        sx={{
+          gridArea: 'images',
+          boxSizing: 'border-box',
             width: 'min(100%, 520px)',
             flex: '0 1 520px',
             minWidth: 0,
@@ -577,12 +577,9 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
               ))}
             </Box>
           ) : (
-            <Typography
-              variant="h6"
-              sx={{ m: 2, maxWidth: '95%', textAlign: 'center', textTransform: 'uppercase' }}
-            >
-              FOR THIS TRIP DON'T HAVE IMAGES
-            </Typography>
+            <Box sx={{ width: '50%', maxWidth: 280, aspectRatio: '1 / 1', mx: 'auto' }}>
+              <SocialObjectPlaceholder />
+            </Box>
           )}
         </Box>
       </Box>
