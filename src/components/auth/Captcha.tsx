@@ -10,6 +10,7 @@ declare global {
   interface Window {
     grecaptcha?: {
       ready: (callback: () => void) => void;
+      reset: (widgetId?: number) => void;
       render: (container: HTMLElement, parameters: {
         sitekey: string;
         callback: (token: string) => void;
@@ -23,9 +24,10 @@ declare global {
 interface CaptchaProps {
   onTokenChange: (token: string) => void;
   disabled?: boolean;
+  resetKey?: number;
 }
 
-export function Captcha({ onTokenChange, disabled = false }: CaptchaProps) {
+export function Captcha({ onTokenChange, disabled = false, resetKey = 0 }: CaptchaProps) {
   const [loaded, setLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<number | null>(null);
@@ -49,6 +51,10 @@ export function Captcha({ onTokenChange, disabled = false }: CaptchaProps) {
       });
     });
   }, [loaded]);
+
+  useEffect(() => {
+    if (widgetIdRef.current !== null) window.grecaptcha?.reset(widgetIdRef.current);
+  }, [resetKey]);
 
   if (!config.recaptchaV2SiteKey) return <Box role="alert">{CAPTCHA_UNAVAILABLE_MESSAGE}</Box>;
 
