@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { NOINDEX } from '@/constants/seo';
 import { RegisterForm } from '@/components/auth/RegisterForm';
+import { GuestOnly } from '@/components/auth/GuestOnly';
 
 export const metadata: Metadata = {
   title: 'Register',
@@ -8,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
-  return <RegisterForm />;
+  return <GuestOnly><RegisterForm /></GuestOnly>;
 }
