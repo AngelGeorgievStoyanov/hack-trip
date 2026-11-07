@@ -27,6 +27,7 @@ import { COLORS, CARD_SHADOW, CARD_BORDER } from '@/constants/ui';
 import { WelcomeHeading } from '@/components/common/WelcomeHeading';
 import { config } from '@/config';
 import { useNotification } from '@/components/common/NotificationProvider';
+import { REGISTRATION_SUCCESS_MESSAGE } from '@/constants/notifications';
 
 declare global {
   interface Window {
@@ -150,9 +151,9 @@ export function RegisterForm() {
         lastName: values.lastName,
         captchaToken: values.captchaToken,
       };
-      const response = await authApi.register(input);
+      await authApi.register(input);
       setRegistrationComplete(true);
-      notification.success(response.message, {
+      notification.success(REGISTRATION_SUCCESS_MESSAGE, {
         onClose: () => router.push('/login'),
       });
     } catch (e) {
