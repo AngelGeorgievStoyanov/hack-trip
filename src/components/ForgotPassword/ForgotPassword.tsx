@@ -71,10 +71,10 @@ const ForgotPassword: FC = () => {
         data.email = data.email.trim();
 
 
-        API_CLIENT.forgotPassword(data.email).then((message) => {
+        API_CLIENT.forgotPassword(data.email).then((response) => {
 
             setErrorApi(undefined);
-            setRegisterMessage(message)
+            setRegisterMessage(response.message)
         }).catch((err) => {
             setErrorApi(err.message);
             console.log(err.message);
