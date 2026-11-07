@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Alert, Box, CircularProgress, Typography } from '@mui/material';
 import { authApi } from '@/api/auth';
 import { getTokenErrorMessage } from '@/lib/errors';
+import { publishTabEvent } from '@/lib/tabSync';
 
 export function VerifyEmailForm({ token }: { token?: string }) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -25,11 +26,7 @@ export function VerifyEmailForm({ token }: { token?: string }) {
         if (!cancelled) {
           setStatus('success');
           setMessage('Your email has been verified. You can now log in.');
-          if (typeof BroadcastChannel !== 'undefined') {
-            const channel = new BroadcastChannel('hacktrip-auth-events');
-            channel.postMessage({ type: 'email-verified' });
-            channel.close();
-          }
+          publishTabEvent({ type: 'email-verified' });
         }
       })
       .catch((error) => {
