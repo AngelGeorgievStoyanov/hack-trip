@@ -104,18 +104,19 @@ export async function renderTripOgImage({
           <div
             style={{
               display: 'flex',
-              width: 46,
+              width: 54,
               height: 46,
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 12,
               background: '#e8ad59',
               color: '#142a22',
-              fontSize: 30,
+              fontSize: 24,
               fontWeight: 800,
+              letterSpacing: -1,
             }}
           >
-            H
+            HT
           </div>
           <div style={{ display: 'flex', fontSize: 28, fontWeight: 800, letterSpacing: 4 }}>
             HACKTRIP
