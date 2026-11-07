@@ -52,7 +52,7 @@ export interface PasswordRequirement {
  * Password requirements used by both the Zod validator and the live form feedback.
  * Keep this as the single frontend source of truth for the password policy.
  */
-export function getPasswordRequirements(value: string, minLength = 8): PasswordRequirement[] {
+export function getPasswordRequirements(value: string, minLength = 8, maxLength = 72): PasswordRequirement[] {
   const characters = Array.from(value);
   const isPrintableAscii = characters.every((character) => {
     const code = character.charCodeAt(0);
@@ -61,6 +61,7 @@ export function getPasswordRequirements(value: string, minLength = 8): PasswordR
 
   return [
     { key: 'minLength', label: `At least ${minLength} characters`, valid: value.length >= minLength },
+    { key: 'maxLength', label: `At most ${maxLength} characters`, valid: value.length <= maxLength },
     {
       key: 'printableAscii',
       label: 'English letters, numbers and symbols only',
@@ -91,8 +92,8 @@ export function getPasswordRequirements(value: string, minLength = 8): PasswordR
   ];
 }
 
-export function isValidPassword(value: string, minLength = 8): boolean {
-  return getPasswordRequirements(value, minLength).every((requirement) => requirement.valid);
+export function isValidPassword(value: string, minLength = 8, maxLength = 72): boolean {
+  return getPasswordRequirements(value, minLength, maxLength).every((requirement) => requirement.valid);
 }
 
 /** Password policy shared by registration, reset and password changes. */
@@ -109,7 +110,7 @@ export function passwordString(
       messages?.max ?? `Password must be at most ${max} bytes.`,
     )
     .refine(
-      (value) => isValidPassword(value, min),
+      (value) => isValidPassword(value, min, max),
       messages?.pattern ??
         'Use at least 8 characters with a Latin letter, a number and a special character. Do not include spaces.',
     );
