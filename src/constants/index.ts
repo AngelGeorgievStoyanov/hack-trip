@@ -7,3 +7,4 @@ export * from './images';
 export * from './maps';
 export * from './ui';
 export * from './seo';
+export * from './notifications';
