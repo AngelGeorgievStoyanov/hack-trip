@@ -101,10 +101,21 @@ export function RegisterForm() {
 
   const passwordRules = [
     { label: 'At least 8 characters', valid: password.length >= 8 },
-    { label: 'At least one letter', valid: /\p{L}/u.test(password) },
-    { label: 'At least one number', valid: /\d/.test(password) },
-    { label: 'At least one symbol', valid: /[\p{P}\p{S}]/u.test(password) },
-    { label: 'No spaces', valid: password.length > 0 && !/\s/.test(password) },
+    { label: 'At least one Latin letter (a–z, A–Z)', valid: /[a-zA-Z]/.test(password) },
+    { label: 'At least one number (0–9)', valid: /[0-9]/.test(password) },
+    {
+      label: 'At least one special character (!@#$…)',
+      valid: Array.from(password).some((character) => {
+        const code = character.charCodeAt(0);
+        const isLatinLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+        const isNumber = code >= 48 && code <= 57;
+        return code >= 33 && code <= 126 && !isLatinLetter && !isNumber;
+      }),
+    },
+    {
+      label: 'No spaces',
+      valid: password.length > 0 && Array.from(password).every((character) => character.trim().length > 0),
+    },
   ];
 
   useEffect(() => {
