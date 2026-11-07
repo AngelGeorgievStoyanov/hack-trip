@@ -73,6 +73,7 @@ export function RegisterForm() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitted, isValid, touchedFields },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver<RegisterFormValues>(registerFormSchema),
@@ -85,6 +86,7 @@ export function RegisterForm() {
       password: '',
       confirmPassword: '',
       acceptedTerms: false,
+      captchaToken: '',
     },
   });
 
@@ -119,9 +121,18 @@ export function RegisterForm() {
 
       captchaWidgetId.current = grecaptcha.render(container, {
         sitekey: config.recaptchaV2SiteKey,
-        callback: (token) => setCaptchaToken(token),
-        'expired-callback': () => setCaptchaToken(null),
-        'error-callback': () => setCaptchaToken(null),
+        callback: (token) => {
+          setCaptchaToken(token);
+          setValue('captchaToken', token, { shouldValidate: true });
+        },
+        'expired-callback': () => {
+          setCaptchaToken(null);
+          setValue('captchaToken', '', { shouldValidate: true });
+        },
+        'error-callback': () => {
+          setCaptchaToken(null);
+          setValue('captchaToken', '', { shouldValidate: true });
+        },
       });
     });
   }, [captchaLoaded]);
@@ -136,6 +147,7 @@ export function RegisterForm() {
         password: values.password,
         firstName: values.firstName,
         lastName: values.lastName,
+        captchaToken: values.captchaToken,
       };
       const response = await authApi.register(input);
       setMessage(response.message);
@@ -276,6 +288,7 @@ export function RegisterForm() {
             },
           }}
         />
+        <input type="hidden" {...register('captchaToken')} />
         <FormControlLabel
           control={<Checkbox {...register('acceptedTerms')} />}
           label={
