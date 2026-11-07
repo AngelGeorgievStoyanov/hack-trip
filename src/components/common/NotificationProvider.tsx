@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { ReactNode, SyntheticEvent } from 'react';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import type { AlertColor } from '@mui/material/Alert';
@@ -78,7 +78,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const handleSnackbarClose = useCallback(
-    (_event: Event | React.SyntheticEvent<unknown>, reason?: SnackbarCloseReason) => {
+    (_event: Event | SyntheticEvent<unknown>, reason?: SnackbarCloseReason) => {
       if (reason === 'clickaway') return;
       dismiss();
     },
