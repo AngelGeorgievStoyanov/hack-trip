@@ -2,6 +2,7 @@
 
 import { Typography, Card, CardContent, Box } from '@mui/material';
 import { ImageGallery } from '@/components/images/ImageGallery';
+import { SocialObjectPlaceholder } from '@/components/placeholders';
 import { PointActions } from '@/components/points/PointActions';
 import { CommentsToggle } from '@/components/comments/CommentsToggle';
 import { ExpandableText } from '@/components/common/ExpandableText';
@@ -59,9 +60,9 @@ export function PointSection({ point, pointCommentTarget, togglePointComments }:
               />
             </Box>
           ) : (
-            <Typography variant="body2" sx={POINT_NOTE_STYLE}>
-              FOR THIS POINT DON&apos;T HAVE IMAGES
-            </Typography>
+            <Box sx={{ width: 'calc(100% + 32px)', mx: '-16px', aspectRatio: '1 / 1' }}>
+              <SocialObjectPlaceholder />
+            </Box>
           )}
 
           {point.lat === null || point.lng === null ? (
