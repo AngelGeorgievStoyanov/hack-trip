@@ -29,6 +29,11 @@ export function Captcha({ onTokenChange, disabled = false }: CaptchaProps) {
   const [loaded, setLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<number | null>(null);
+  const onTokenChangeRef = useRef(onTokenChange);
+
+  useEffect(() => {
+    onTokenChangeRef.current = onTokenChange;
+  }, [onTokenChange]);
 
   useEffect(() => {
     if (!loaded || !config.recaptchaV2SiteKey || !containerRef.current || !window.grecaptcha || widgetIdRef.current !== null) return;
@@ -38,12 +43,12 @@ export function Captcha({ onTokenChange, disabled = false }: CaptchaProps) {
       if (!api || !container || widgetIdRef.current !== null) return;
       widgetIdRef.current = api.render(container, {
         sitekey: config.recaptchaV2SiteKey,
-        callback: onTokenChange,
-        'expired-callback': () => onTokenChange(''),
-        'error-callback': () => onTokenChange(''),
+        callback: (token) => onTokenChangeRef.current(token),
+        'expired-callback': () => onTokenChangeRef.current(''),
+        'error-callback': () => onTokenChangeRef.current(''),
       });
     });
-  }, [loaded, onTokenChange]);
+  }, [loaded];
 
   if (!config.recaptchaV2SiteKey) return <Box role="alert">{CAPTCHA_UNAVAILABLE_MESSAGE}</Box>;
 
