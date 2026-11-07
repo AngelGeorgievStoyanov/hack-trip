@@ -15,6 +15,7 @@ export const registerSchema = z
       max: 15,
       minMessage: 'Last Name cannot be empty string and must contain at least 2 characters .',
     }),
+    captchaToken: z.string().trim().min(1).max(8192),
   })
   .strict();
 
