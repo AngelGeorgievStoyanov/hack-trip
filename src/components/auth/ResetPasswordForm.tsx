@@ -74,60 +74,64 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     }
   }
 
+  if (success) {
+    return (
+      <WelcomeHeading>
+        <Box component="section" sx={FORM_SX}>
+          <Typography variant="h5" component="h1" sx={{ margin: '10px auto', textAlign: 'center' }}>
+            RESET PASSWORD
+          </Typography>
+          <Alert severity="success">
+            Your password has been reset. You can now log in.
+          </Alert>
+          <Button component={Link} href="/login" variant="contained">
+            Go to login
+          </Button>
+        </Box>
+      </WelcomeHeading>
+    );
+  }
+
   return (
     <WelcomeHeading>
       <Box
-        component={success ? 'section' : 'form'}
-        noValidate={!success}
+        component="form"
+        noValidate
         aria-busy={submitting}
-        onSubmit={success ? undefined : handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmit)}
         sx={FORM_SX}
       >
         <Typography variant="h5" component="h1" sx={{ margin: '10px auto', textAlign: 'center' }}>
           RESET PASSWORD
         </Typography>
-
-        {success ? (
-          <>
-            <Alert severity="success">
-              Your password has been reset. You can now log in.
-            </Alert>
-            <Button component={Link} href="/login" variant="contained">
-              Go to login
-            </Button>
-          </>
-        ) : (
-          <>
-            {serverError ? <Alert severity="error">{serverError}</Alert> : null}
-            <PasswordField
-              label="New password"
-              autoComplete="new-password"
-              disabled={submitting}
-              registration={register('password')}
-              error={(isSubmitted || touchedFields.password) && !!errors.password}
-              helperText={
-                (isSubmitted || touchedFields.password) && errors.password?.message
-                  ? errors.password.message
-                  : 'Create a password that meets all the requirements below.'
-              }
-            />
-            <PasswordRequirements password={password} />
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={submitting || !isValid}
-              startIcon={submitting ? <CircularProgress size={18} /> : undefined}
-              sx={{ ':hover': { backgroundColor: '#4daf30' } }}
-            >
-              Reset password
-            </Button>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-              <Button component={Link} href="/login" disabled={submitting} variant="contained">
-                Back to login
-              </Button>
-            </Box>
-          </>
-        )}
+        {serverError ? <Alert severity="error">{serverError}</Alert> : null}
+        <PasswordField
+          label="New password"
+          autoComplete="new-password"
+          disabled={submitting}
+          registration={register('password')}
+          error={(isSubmitted || touchedFields.password) && !!errors.password}
+          helperText={
+            (isSubmitted || touchedFields.password) && errors.password?.message
+              ? errors.password.message
+              : 'Create a password that meets all the requirements below.'
+          }
+        />
+        <PasswordRequirements password={password} />
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={submitting || !isValid}
+          startIcon={submitting ? <CircularProgress size={18} /> : undefined}
+          sx={{ ':hover': { backgroundColor: '#4daf30' } }}
+        >
+          Reset password
+        </Button>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+          <Button component={Link} href="/login" disabled={submitting} variant="contained">
+            Back to login
+          </Button>
+        </Box>
       </Box>
     </WelcomeHeading>
   );
