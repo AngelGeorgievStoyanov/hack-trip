@@ -102,18 +102,13 @@ export function EditPointPage() {
         sx={{
           mt: 2.5,
           width: '100%',
-          '@media (max-width:1020px)': { mt: 0, display: 'contents' },
+          '@media (max-width:1020px)': { mt: 0, display: 'contents', order: 1 },
           order: 0,
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'flex-start',
           justifyContent: 'center',
           gap: 2.5,
-          '@media (max-width:1020px)': {
-            order: 1,
-            flexDirection: 'column-reverse',
-            alignItems: 'center',
-          },
         }}
       >
         <Paper variant="outlined" sx={{ p: { xs: 2, sm: '30px' }, width: '100%', maxWidth: 600, minWidth: 0, boxSizing: 'border-box', backgroundColor: '#eee7e79e', border: '1px solid black', borderRadius: 0, boxShadow: '3px 2px 5px black', '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' }, '@media (max-width:1020px)': { order: 2 } }}>
