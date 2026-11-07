@@ -69,7 +69,6 @@ export function PointCard({
             center={position}
             zoom={14}
             height={150}
-            maxWidth={270}
             markers={[{
               id: point.id,
               position,
