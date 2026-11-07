@@ -10,12 +10,9 @@ import {
   Checkbox,
   CircularProgress,
   FormControlLabel,
-  IconButton,
-  InputAdornment,
   TextField,
   Typography,
 } from '@mui/material';
-import { CheckCircleOutline, RadioButtonUnchecked, Visibility, VisibilityOff } from '@mui/icons-material';
 import { z } from 'zod';
 import { authApi } from '@/api/auth';
 import type { RegisterInput } from '@/api/auth';
@@ -25,6 +22,8 @@ import { registerSchema } from '@/validations/auth';
 import { COLORS, CARD_SHADOW, CARD_BORDER } from '@/constants/ui';
 import { WelcomeHeading } from '@/components/common/WelcomeHeading';
 import { Captcha } from '@/components/auth/Captcha';
+import { PasswordField } from '@/components/common/PasswordField';
+import { PasswordRequirements } from '@/components/common/PasswordRequirements';
 import { useNotification } from '@/components/common/NotificationProvider';
 import {
   AUTH_SUCCESS_REDIRECT_DELAY_MS,
@@ -52,8 +51,6 @@ export function RegisterForm() {
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const isFormLocked = submitting || registrationComplete;
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
 
@@ -93,32 +90,6 @@ export function RegisterForm() {
   const confirmPassword = watch('confirmPassword') ?? '';
   const confirmPasswordMismatch =
     confirmPassword.length > 0 && confirmPassword !== password;
-
-  const passwordRules = [
-    { label: 'At least 8 characters', valid: password.length >= 8 },
-    {
-      label: 'English letters, numbers and symbols only',
-      valid: password.length > 0 && Array.from(password).every((character) => {
-        const code = character.charCodeAt(0);
-        return code >= 33 && code <= 126;
-      }),
-    },
-    { label: 'At least one Latin letter (a–z, A–Z)', valid: /[a-zA-Z]/.test(password) },
-    { label: 'At least one number (0–9)', valid: /[0-9]/.test(password) },
-    {
-      label: 'At least one special character (!@#$…)',
-      valid: Array.from(password).some((character) => {
-        const code = character.charCodeAt(0);
-        const isLatinLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-        const isNumber = code >= 48 && code <= 57;
-        return code >= 33 && code <= 126 && !isLatinLetter && !isNumber;
-      }),
-    },
-    {
-      label: 'No spaces',
-      valid: password.length > 0 && Array.from(password).every((character) => character.trim().length > 0),
-    },
-  ];
 
   async function onSubmit(values: RegisterFormValues): Promise<void> {
     setSubmitting(true);
@@ -202,56 +173,22 @@ export function RegisterForm() {
           error={(isSubmitted || touchedFields.lastName) && !!errors.lastName}
           helperText={isSubmitted || touchedFields.lastName ? errors.lastName?.message ?? ' ' : ' '}
         />
-        <TextField
+        <PasswordField
           label="Password"
           disabled={isFormLocked}
-          type={showPassword ? 'text' : 'password'}
-          autoComplete="new-password"
-          {...register('password')}
+          registration={register('password')}
           error={(isSubmitted || touchedFields.password) && !!errors.password}
           helperText={
             (isSubmitted || touchedFields.password) && errors.password?.message
               ? errors.password.message
               : 'Create a password that meets all the requirements below.'
           }
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    disabled={isFormLocked}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    onClick={() => setShowPassword((visible) => !visible)}
-                    onMouseDown={(event) => event.preventDefault()}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
         />
-        <Box component="ul" sx={{ listStyle: 'none', p: 0, m: '-8px 0 0 4px', display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 0.75 }}>
-          {passwordRules.map((rule) => (
-            <Box component="li" key={rule.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              {rule.valid ? (
-                <CheckCircleOutline fontSize="small" color="success" />
-              ) : (
-                <RadioButtonUnchecked fontSize="small" sx={{ color: 'text.disabled' }} />
-              )}
-              <Typography variant="caption" color={rule.valid ? 'success.main' : 'text.secondary'}>
-                {rule.label}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-        <TextField
+        <PasswordRequirements password={password} />
+        <PasswordField
           label="Confirm password"
           disabled={isFormLocked}
-          type={showConfirmPassword ? 'text' : 'password'}
-          autoComplete="new-password"
-          {...register('confirmPassword')}
+          registration={register('confirmPassword')}
           error={
             (isSubmitted || touchedFields.confirmPassword) &&
             (confirmPasswordMismatch || !!errors.confirmPassword)
@@ -263,23 +200,6 @@ export function RegisterForm() {
                 : errors.confirmPassword?.message ?? ' '
               : ' '
           }
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    disabled={isFormLocked}
-                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-                    onClick={() => setShowConfirmPassword((visible) => !visible)}
-                    onMouseDown={(event) => event.preventDefault()}
-                    edge="end"
-                  >
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
         />
         <FormControlLabel
           sx={{ pointerEvents: isFormLocked ? 'none' : 'auto' }}
