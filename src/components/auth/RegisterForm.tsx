@@ -101,6 +101,13 @@ export function RegisterForm() {
 
   const passwordRules = [
     { label: 'At least 8 characters', valid: password.length >= 8 },
+    {
+      label: 'English letters, numbers and symbols only',
+      valid: password.length > 0 && Array.from(password).every((character) => {
+        const code = character.charCodeAt(0);
+        return code >= 33 && code <= 126;
+      }),
+    },
     { label: 'At least one Latin letter (a–z, A–Z)', valid: /[a-zA-Z]/.test(password) },
     { label: 'At least one number (0–9)', valid: /[0-9]/.test(password) },
     {
