@@ -1417,6 +1417,22 @@ Unexpected errors should not expose internal implementation details.
 
 ---
 
+## 32.1 Backend API Feedback
+
+User-facing feedback for requests to the HackTrip Backend must use the shared `NotificationProvider`.
+
+- API request failures and backend-returned operation errors are displayed through `useNotification().error(...)`.
+- Successful API operations that require user feedback use `useNotification().success(...)`.
+- Do not render backend/API errors in component-local MUI `Alert`, `Snackbar`, or ad-hoc error-message state.
+- Do not duplicate the same API result in both an inline message and a notification.
+- Keep client-side form validation next to its field (for example, React Hook Form helper text). This is not an API error and must not become a notification.
+- Keep local validation and browser/integration errors (for example, invalid file selection or geolocation failure) in the relevant UI when they are not responses to a backend request.
+- Preserve the backend error mapping from `src/lib/errors.ts`; notifications must display the mapped message and must not change API/business logic.
+
+`NotificationProvider` is the single shared presentation mechanism for backend operation feedback. Components should not create their own API-error Snackbar/Alert implementations.
+
+---
+
 # 33. Public Pages and SEO
 
 Public pages should be designed for server rendering and SEO.
