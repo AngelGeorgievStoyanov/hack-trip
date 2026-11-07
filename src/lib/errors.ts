@@ -1,7 +1,8 @@
 import { normalizeApiError } from '@/api/client';
 import { API_ERROR_CODES } from '@/constants/api';
+import { AUTH_NOTIFICATION_MESSAGES } from '@/constants/notifications';
 
-const GENERIC_MESSAGE = 'Something went wrong. Please try again.';
+const GENERIC_MESSAGE = AUTH_NOTIFICATION_MESSAGES.genericError;
 
 function isTechnicalErrorMessage(message: string): boolean {
   return (
@@ -18,15 +19,15 @@ export function getAuthErrorMessage(error: unknown): string {
 
   switch (apiError.code) {
     case API_ERROR_CODES.UNAUTHORIZED:
-      return 'Invalid email or password.';
+      return AUTH_NOTIFICATION_MESSAGES.invalidCredentials;
     case API_ERROR_CODES.EMAIL_NOT_VERIFIED:
-      return 'Your email address is not verified yet. Please check your inbox.';
+      return AUTH_NOTIFICATION_MESSAGES.emailNotVerified;
     case API_ERROR_CODES.ACCOUNT_SUSPENDED:
-      return 'Your account is suspended.';
+      return AUTH_NOTIFICATION_MESSAGES.accountSuspended;
     case API_ERROR_CODES.ACCOUNT_DEACTIVATED:
-      return 'Your account is deactivated.';
+      return AUTH_NOTIFICATION_MESSAGES.accountDeactivated;
     case API_ERROR_CODES.FORBIDDEN:
-      return 'This action is not allowed.';
+      return AUTH_NOTIFICATION_MESSAGES.actionNotAllowed;
     default:
       return getGenericErrorMessage(error);
   }
@@ -39,7 +40,7 @@ export function getGenericErrorMessage(error: unknown): string {
     apiError.code === API_ERROR_CODES.INTERNAL_SERVER_ERROR ||
     apiError.status === 500
   ) {
-    return 'Something went wrong. Please try again later.';
+    return AUTH_NOTIFICATION_MESSAGES.genericErrorLater;
   }
 
   if (!apiError.message || isTechnicalErrorMessage(apiError.message)) {
@@ -53,7 +54,7 @@ export function getGenericErrorMessage(error: unknown): string {
 export function getTokenErrorMessage(error: unknown): string {
   const apiError = normalizeApiError(error);
   if (apiError.code === API_ERROR_CODES.VALIDATION_ERROR) {
-    return 'This link is invalid or has expired.';
+    return AUTH_NOTIFICATION_MESSAGES.invalidOrExpiredLink;
   }
   return getGenericErrorMessage(error);
 }
