@@ -11,12 +11,11 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import { absoluteUrl } from '@/config';
 import { useAuth } from '@/hooks/useAuth';
-import { useBackground } from '@/hooks/useBackground';
 import { useTripGroupSocial } from '@/hooks/useTripGroup';
 import { useSocialConfig } from '@/hooks/useSocialConfig';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { isSocialOperationAllowed } from '@/lib/socialConfig';
-import { resolveShareImage, shareWithFallback } from '@/lib/share';
+import { shareWithFallback } from '@/lib/share';
 import { SocialConfigStatus } from './SocialConfigStatus';
 import { useLikeAnimation } from '@/components/social/LikeAnimation';
 import { CommentsToggle } from '@/components/comments/CommentsToggle';
@@ -27,7 +26,6 @@ interface TripGroupSocialActionsProps {
   social: SocialState;
   shareTitle?: string;
   shareText?: string;
-  shareImage?: string | null;
   /** Whether the Trip Group comment section is open (controlled by TripDetailsView). */
   open?: boolean;
   /** Toggles the Trip Group comment section. */
@@ -41,7 +39,6 @@ export function TripGroupSocialActions({
   social,
   shareTitle,
   shareText,
-  shareImage,
   open,
   onToggle,
 }: TripGroupSocialActionsProps) {
@@ -51,7 +48,6 @@ export function TripGroupSocialActions({
   const { status } = useAuth();
   const isAuthenticated = status === 'authenticated';
   const socialConfig = useSocialConfig();
-  const { currentUrl: backgroundUrl } = useBackground();
 
   const liked = social.likedByMe;
   const likes = social.likes;
@@ -96,12 +92,10 @@ export function TripGroupSocialActions({
 
   async function handleShare(): Promise<void> {
     const title = shareTitle ?? 'Trip';
-    const image = resolveShareImage({ primary: shareImage, fallback: backgroundUrl });
     const result = await shareWithFallback({
       url: absoluteUrl(`/trips/${tripGroupId}`),
       title,
       text: shareText ?? title,
-      image,
     });
     if (result === 'copied') {
       setShareCopied(true);
@@ -144,7 +138,7 @@ export function TripGroupSocialActions({
               disabled={favoriteMutation.isPending}
               aria-label={favorited ? 'Remove trip group from favorites' : 'Add trip group to favorites'}
               aria-pressed={favorited}
-              color={'primary'}
+              color="primary"
             >
               <Badge
                 badgeContent={social.favorites ?? 0}
