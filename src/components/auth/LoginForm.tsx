@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Alert,
   Box,
   Button,
   CircularProgress,
@@ -22,28 +21,33 @@ import { loginSchema } from '@/validations/auth';
 import type { LoginInput } from '@/api/auth';
 import { COLORS, CARD_SHADOW, CARD_BORDER } from '@/constants/ui';
 import { WelcomeHeading } from '@/components/common/WelcomeHeading';
+import { useNotification } from '@/components/common/NotificationProvider';
+import { Captcha } from '@/components/auth/Captcha';
+import { LOGIN_EMAIL_VERIFIED_MESSAGE } from '@/constants/notifications';
 
 export function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
-  const [serverError, setServerError] = useState<string | null>(null);
+  const notification = useNotification();
+  const [captchaToken, setCaptchaToken] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
 
   useEffect(() => {
     if (typeof BroadcastChannel === 'undefined') return;
     const channel = new BroadcastChannel('hacktrip-auth-events');
     const handleMessage = (event: MessageEvent<{ type?: string }>) => {
-      if (event.data?.type === 'email-verified') setEmailVerified(true);
+      if (event.data?.type === 'email-verified') { setEmailVerified(true); notification.success(LOGIN_EMAIL_VERIFIED_MESSAGE); }
     };
     channel.addEventListener('message', handleMessage);
     return () => { channel.removeEventListener('message', handleMessage); channel.close(); };
-  }, []);
+  }, [notification]);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitted },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -53,12 +57,11 @@ export function LoginForm() {
 
   async function onSubmit(values: LoginInput): Promise<void> {
     setSubmitting(true);
-    setServerError(null);
     try {
-      await login(values);
+      await login({ ...values, captchaToken });
       router.replace('/');
     } catch (error) {
-      setServerError(getAuthErrorMessage(error));
+      notification.error(getAuthErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -95,8 +98,6 @@ export function LoginForm() {
         <Typography variant="h5" component="div" sx={{ margin: '10px auto', textAlign: 'center' }}>
           LOGIN
         </Typography>
-        {emailVerified ? <Alert severity="success">Your email has been verified. You can now log in.</Alert> : null}
-        {serverError ? <Alert severity="error">{serverError}</Alert> : null}
         <TextField
           label="Email"
           type="email"
@@ -129,6 +130,7 @@ export function LoginForm() {
             },
           }}
         />
+        <Captcha disabled={submitting || !captchaToken} onTokenChange={(token) => { setCaptchaToken(token); setValue('captchaToken', token, { shouldValidate: true }); }} />
         <Button
           type="submit"
           variant="contained"
