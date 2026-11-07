@@ -2,6 +2,54 @@ import { ImageResponse } from 'next/og';
 
 const IMAGE_SIZE = { width: 1200, height: 630 };
 
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+
+function detectImageType(bytes: Uint8Array): string | null {
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return 'image/jpeg';
+  }
+  if (
+    bytes.length >= 8 &&
+    [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every(
+      (value, index) => bytes[index] === value,
+    )
+  ) {
+    return 'image/png';
+  }
+  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) {
+    return 'image/gif';
+  }
+  if (
+    bytes.length >= 12 &&
+    String.fromCharCode(...bytes.slice(0, 4)) === 'RIFF' &&
+    String.fromCharCode(...bytes.slice(8, 12)) === 'WEBP'
+  ) {
+    return 'image/webp';
+  }
+  if (
+    bytes.length >= 12 &&
+    String.fromCharCode(...bytes.slice(4, 8)) === 'ftyp' &&
+    /^(avif|avis)$/.test(String.fromCharCode(...bytes.slice(8, 12)))
+  ) {
+    return 'image/avif';
+  }
+
+  const header = new TextDecoder().decode(bytes.slice(0, Math.min(bytes.length, 2048)));
+  if (/^\\s*(<\\?xml[^>]*>\\s*)?<svg[\\s>]/i.test(header)) {
+    // SVG is rendered as an image by Satori; reject active or externally-loaded content.
+    if (
+      /<\\s*(script|foreignObject)\\b/i.test(header) ||
+      /\\son[a-z]+\\s*=/i.test(header) ||
+      /(?:href|xlink:href)\\s*=\\s*["']\\s*(?:https?:|\\/\\/|javascript:|data:)/i.test(header)
+    ) {
+      return null;
+    }
+    return 'image/svg+xml';
+  }
+
+  return null;
+}
+
 async function loadImageDataUrl(imageUrl: string | null): Promise<string | null> {
   if (!imageUrl) {
     return null;
@@ -16,18 +64,19 @@ async function loadImageDataUrl(imageUrl: string | null): Promise<string | null>
       return null;
     }
 
-    const contentType = response.headers.get('content-type')?.split(';')[0] ?? '';
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(contentType)) {
-      return null;
-    }
-
     const contentLength = Number(response.headers.get('content-length') ?? 0);
-    if (contentLength > 8 * 1024 * 1024) {
+    if (contentLength > MAX_IMAGE_BYTES) {
       return null;
     }
 
-    const bytes = await response.arrayBuffer();
-    if (bytes.byteLength > 8 * 1024 * 1024) {
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.byteLength === 0 || bytes.byteLength > MAX_IMAGE_BYTES) {
+      return null;
+    }
+
+    // Detect the actual file format instead of trusting a thumbnail's URL or HTTP header.
+    const contentType = detectImageType(bytes);
+    if (!contentType) {
       return null;
     }
 
