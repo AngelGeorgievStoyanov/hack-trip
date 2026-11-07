@@ -46,7 +46,7 @@ export function PointCard({
           width: 'min(300px, calc(100vw - 32px))',
           minWidth: { xs: 0, sm: 290 },
           maxWidth: 300,
-          m: '10px',
+          my: '10px',
           p: '15px 0',
           backgroundColor: '#e5e3e3d9',
           boxShadow: '3px 2px 5px black',
