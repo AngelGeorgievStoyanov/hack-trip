@@ -1,4 +1,4 @@
-import type { FieldValues, Resolver } from 'react-hook-form';
+import type { FieldErrors, FieldValues, Resolver } from 'react-hook-form';
 
 type ZodLikeIssue = {
   path?: unknown[];
@@ -41,6 +41,6 @@ export function zodResolver<TFieldValues extends FieldValues>(
       }
     }
 
-    return { values: {}, errors };
+    return { values: {} as TFieldValues, errors: errors as FieldErrors<TFieldValues> };
   };
 }
