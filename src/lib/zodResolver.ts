@@ -41,6 +41,6 @@ export function zodResolver<TFieldValues extends FieldValues>(
       }
     }
 
-    return { values: {} as TFieldValues, errors: errors as FieldErrors<TFieldValues> };
+    return { values: {} as TFieldValues, errors: errors as unknown as FieldErrors<TFieldValues> };
   };
 }
