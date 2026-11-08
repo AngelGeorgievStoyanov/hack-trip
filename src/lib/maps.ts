@@ -3,10 +3,6 @@ import { GOOGLE_MAPS_LIBRARIES, MAP_COORDINATE_PRECISION } from '@/constants/map
 import type { GoogleMapsLibrary } from '@/constants/maps';
 import { LATITUDE_MAX, LATITUDE_MIN, LONGITUDE_MAX, LONGITUDE_MIN } from '@/constants/points';
 
-export type { GoogleMapsLibrary };
-
-export const googleMapsApiKey: string = config.googleMapsApiKey;
-
 export interface GoogleMapsInitConfig {
   googleMapsApiKey: string;
   libraries: GoogleMapsLibrary[];
@@ -32,15 +28,11 @@ export function toMapPosition(point: {
   return { lat: point.lat, lng: point.lng };
 }
 
-export function hasCoordinates(point: { lat: number | null; lng: number | null }): boolean {
-  return point.lat != null && point.lng != null;
-}
-
 export function formatCoordinate(value: number): string {
   return String(Number(value.toFixed(MAP_COORDINATE_PRECISION)));
 }
 
-export function parseCoordinate(raw: string): number | null {
+function parseCoordinate(raw: string): number | null {
   const trimmed = raw.trim();
   if (!trimmed) {
     return null;
