@@ -19,6 +19,7 @@ import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { pointCreateSchema } from '@/validations/points';
 import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
+import { useNotification } from '@/components/common/NotificationProvider';
 import { truncatePointName } from '@/lib/pointName';
 import type { SocialImageDto, TripGroupResponse, TripPoint } from '@/types';
 
@@ -61,6 +62,7 @@ const stackedActionButtonSx = {
 
 export function PointForm({ tripGroupId, tripId, point, existingImages: providedExistingImages, latitude, longitude, mapSearchSelection, onLocationChange, onFindInMap, onAddNextDay, onBack, onDone }: PointFormProps) {
   const queryClient = useQueryClient();
+  const notification = useNotification();
   const { isLoaded } = useGoogleMapsLoader();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -216,7 +218,7 @@ export function PointForm({ tripGroupId, tripId, point, existingImages: provided
       }
       onDone();
     } catch (error) {
-      setServerError(getGenericErrorMessage(error));
+      notification.error(getGenericErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
