@@ -112,17 +112,14 @@ export function ProfileImage() {
   const busy = loading || uploading || deleting;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-      <Typography variant="h6" component="h2">
-        Profile image
-      </Typography>
-
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, width: '100%' }}>
       {error ? <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert> : null}
 
       <Box
         sx={{
-          width: 160,
-          height: 160,
+          position: 'relative',
+          width: 240,
+          height: 240,
           borderRadius: '50%',
           overflow: 'hidden',
           border: '1px solid',
@@ -147,7 +144,9 @@ export function ProfileImage() {
             image={image}
             alt="Profile image"
             preset="profile"
-            style={{ width: '160px', height: '160px', objectFit: 'cover' }}
+            width={240}
+            height={240}
+            style={{ width: '240px', height: '240px', objectFit: 'cover' }}
           />
         ) : (
           <Typography variant="body2" color="text.secondary" textAlign="center" px={2}>
@@ -162,7 +161,7 @@ export function ProfileImage() {
         </Typography>
       ) : null}
 
-      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
         <CustomFileUploadButton
           handleFilesChange={handleFilesChange}
           images={[]}
@@ -180,20 +179,34 @@ export function ProfileImage() {
               onClick={() => void handleUpload()}
               disabled={busy}
               startIcon={uploading ? <CircularProgress size={18} /> : undefined}
+              sx={{ ':hover': { backgroundColor: '#4daf30' } }}
             >
               Save image
             </Button>
-            <Button variant="outlined" onClick={cancelSelection} disabled={busy}>
+            <Button
+              variant="contained"
+              onClick={cancelSelection}
+              disabled={busy}
+              sx={{
+                backgroundColor: 'rgb(194 194 224)',
+                color: 'black',
+                ':hover': { color: 'rgb(248 245 245)' },
+              }}
+            >
               Cancel
             </Button>
           </>
         ) : image ? (
           <Button
-            variant="outlined"
-            color="error"
+            variant="contained"
             onClick={() => void handleDelete()}
             disabled={busy}
             startIcon={deleting ? <CircularProgress size={18} /> : undefined}
+            sx={{
+              backgroundColor: 'rgb(194 194 224)',
+              color: 'black',
+              ':hover': { color: 'rgb(248 245 245)' },
+            }}
           >
             Remove
           </Button>
