@@ -167,7 +167,7 @@ export function CommentsSection({
       setEditingId(null);
       setEditingComment('');
     },
-    onError: (e) => setFormError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const deleteMutation = useMutation({
@@ -176,7 +176,7 @@ export function CommentsSection({
       void queryClient.invalidateQueries({ queryKey });
       invalidateSocialQueries(queryClient, targetSocialType);
     },
-    onError: (e) => setFormError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const total = data?.total ?? initialCommentsCount;
