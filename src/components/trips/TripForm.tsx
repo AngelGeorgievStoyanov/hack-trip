@@ -18,7 +18,7 @@ import {
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
-import { tripWriteSchema } from '@/validations/trips';
+import { tripWriteFormSchema } from '@/validations/trips';
 import { TripSelectField } from './TripSelectField';
 import ImageUploadField from '@/components/images/ImageUploadField';
 import { TripLocationPicker } from '@/components/maps/TripLocationPicker';
@@ -63,7 +63,7 @@ export function TripForm() {
     setValue,
     formState: { errors, isValid },
   } = useForm<TripWriteInput>({
-    resolver: zodResolver(tripWriteSchema),
+    resolver: zodResolver(tripWriteFormSchema),
     mode: 'onChange',
     defaultValues: {
       dayNumber: 1,
