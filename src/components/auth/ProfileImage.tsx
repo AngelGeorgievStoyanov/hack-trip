@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react';
 import CustomFileUploadButton from '@/components/CustomFileUploadButton';
 import { ACCEPTED_IMAGE_MIME_TYPES, PROFILE_IMAGE_MAX_FILES } from '@/constants/images';
 import { validateImageFile } from '@/lib/images/validate';
@@ -17,7 +17,7 @@ import type { ImageDto } from '@/types';
 
 const ACCEPT_TYPES = (ACCEPTED_IMAGE_MIME_TYPES as readonly string[]).join(',');
 
-export function ProfileImage() {
+export function ProfileImage({ refreshToken = 0 }: { refreshToken?: number }) {
   const { confirm } = useConfirm();
   const notification = useNotification();
   const [image, setImage] = useState<ImageDto | null>(null);
@@ -38,7 +38,7 @@ export function ProfileImage() {
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, refreshToken]);
 
   async function handleDelete(): Promise<void> {
     if (!image) return;
@@ -112,13 +112,13 @@ interface ProfileImageUploadProps {
 
 export function ProfileImageUpload({ selectedFile, onSelectedFileChange }: ProfileImageUploadProps) {
   const notification = useNotification();
-  const previewUrl = selectedFile ? URL.createObjectURL(selectedFile) : null;
+  const previewUrl = useMemo(() => selectedFile ? URL.createObjectURL(selectedFile) : null, [selectedFile]);
 
   useEffect(() => () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
   }, [previewUrl]);
 
-  function handleFilesChange(event: React.ChangeEvent<HTMLInputElement>): void {
+  function handleFilesChange(event: ChangeEvent<HTMLInputElement>): void {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = '';
     if (!file) return;
