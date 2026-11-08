@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
+import Image from 'next/image';
 import { SOCIAL_OBJECT_PLACEHOLDERS } from './socialObjectPlaceholderAssets';
 
 /**
@@ -30,12 +31,13 @@ export function SocialObjectPlaceholder() {
       }}
     >
       {imageSrc ? (
-        <img
+        <Image
           src={imageSrc}
           alt=""
           aria-hidden="true"
           width={1200}
           height={1200}
+          unoptimized
           style={{
             display: 'block',
             width: '100%',
