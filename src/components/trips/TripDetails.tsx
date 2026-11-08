@@ -71,6 +71,10 @@ export function TripDetails({
     tripCommentTarget.tripGroupId === dayTarget.tripGroupId &&
     tripCommentTarget.tripId === dayTarget.tripId;
 
+  const transportName = day.transport.name.trim();
+  const groupName = day.group.name.trim();
+  const destination = day.destination?.trim();
+
   const handleExpandClick = () => setExpanded(!expanded);
 
   return (
@@ -97,32 +101,43 @@ export function TripDetails({
         ) : null}
       </Box>
 
-      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-        <Typography variant="subtitle1" component="h5" style={LINE_STYLE}>
-          PRICE OF THE TRIP:
-        </Typography>
-        <Typography variant="subtitle1" component="h5" style={{ ...LINE_STYLE, margin: 0 }}>
-          {day.price != null ? `${day.price} ${day.currency?.code ?? 'N/A'}` : 'N/A'}
-        </Typography>
-        <Tooltip title={day.currency?.name ?? 'Currency'} arrow>
-          <IconButton size="small" aria-label="Currency info">
-            <InfoIcon fontSize="inherit" />
-          </IconButton>
-        </Tooltip>
-      </Box>
+      {day.price != null ? (
+        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+          <Typography variant="subtitle1" component="h5" style={LINE_STYLE}>
+            PRICE OF THE TRIP:
+          </Typography>
+          <Typography variant="subtitle1" component="h5" style={{ ...LINE_STYLE, margin: 0 }}>
+            {day.price}
+            {day.currency?.code ? ` ${day.currency.code}` : ''}
+          </Typography>
+          {day.currency?.name ? (
+            <Tooltip title={day.currency.name} arrow>
+              <IconButton size="small" aria-label="Currency info">
+                <InfoIcon fontSize="inherit" />
+              </IconButton>
+            </Tooltip>
+          ) : null}
+        </Box>
+      ) : null}
 
-      <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
-        TRANSPORT WITH: {day.transport.name ?? 'N/A'}
-      </Typography>
+      {transportName ? (
+        <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
+          TRANSPORT WITH: {transportName}
+        </Typography>
+      ) : null}
       <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
         COUNT OF PEOPLE: {day.countPeoples}
       </Typography>
-      <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
-        TYPE OF THE GROUP: {day.group.name ?? 'N/A'}
-      </Typography>
-      <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
-        DESTINATION: {day.destination ?? 'N/A'}
-      </Typography>
+      {groupName ? (
+        <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
+          TYPE OF THE GROUP: {groupName}
+        </Typography>
+      ) : null}
+      {destination ? (
+        <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
+          DESTINATION: {destination}
+        </Typography>
+      ) : null}
 
       {day.description ? (
         <>
