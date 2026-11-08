@@ -33,6 +33,7 @@ import { isSocialOperationAllowed, socialConfigTargetKey } from '@/lib/socialCon
 import { useSocialConfig } from '@/hooks/useSocialConfig';
 import { invalidateSocialQueries } from '@/lib/socialQuerySync';
 import { commentCardStyle, commentListStyle, commentsPanelStyle } from '@/constants/ui';
+import { useNotification } from '@/components/common/NotificationProvider';
 
 function commentKey(target: CommentTarget, viewerCacheKey: string): unknown[] {
   switch (target.type) {
@@ -96,12 +97,12 @@ export function CommentsSection({
   const isAuthenticated = status === 'authenticated';
   const { confirm } = useConfirm();
   const queryClient = useQueryClient();
+  const notification = useNotification();
   const socialConfig = useSocialConfig();
   const [comment, setComment] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingComment, setEditingComment] = useState('');
   const [openRepliesId, setOpenRepliesId] = useState<number | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
   // The add-comment form starts closed and is opened from the toggle at the bottom of
   // the section; opening it only changes local state, it never refetches the list.
   // `defaultFormOpen` is honoured on mount (for example the first comment on a target);
@@ -113,7 +114,6 @@ export function CommentsSection({
     setEditingId(null);
     setEditingComment('');
     setComment('');
-    setFormError(null);
   }, [viewerCacheKey]);
 
   // Focus the comment field when the form opens directly (first comment flow).
@@ -155,7 +155,7 @@ export function CommentsSection({
       setComment('');
       setFormOpen(false);
     },
-    onError: (e) => setFormError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const updateMutation = useMutation({
@@ -191,12 +191,6 @@ export function CommentsSection({
         Comments
       </Typography>
       <SocialConfigStatus isLoading={socialConfig.isLoading} error={socialConfig.error} />
-      {formError ? (
-        <Alert severity="error" sx={{ marginBottom: '10px' }}>
-          {formError}
-        </Alert>
-      ) : null}
-
       {isLoading ? <CircularProgress size={24} /> : null}
       {isError ? <Alert severity="error">{getGenericErrorMessage(error)}</Alert> : null}
 
