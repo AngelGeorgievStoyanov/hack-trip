@@ -1,4 +1,4 @@
-import type { TripGroupResponse, TripPoint } from '@/types';
+import type { TripGroupResponse } from '@/types';
 
 export function tripRepresentativeImage(trip: TripGroupResponse): string | null {
   for (const day of trip.days) {
@@ -35,8 +35,4 @@ export function tripOpenGraphImage(trip: TripGroupResponse): string | null {
 
   const seed = Math.imul(trip.id ^ (trip.id >>> 16), 0x45d9f3b) >>> 0;
   return images[seed % images.length] ?? null;
-}
-
-export function pointRepresentativeImage(point: TripPoint): string | null {
-  return point.images[0]?.url ?? null;
 }
