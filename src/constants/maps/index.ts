@@ -13,16 +13,6 @@ export const MAP_TRIP_OPTIONS = {
   gestureHandling: 'greedy',
 } as const;
 
-/** Legacy point-details map options. */
-export const MAP_POINT_OPTIONS = {
-  zoomControl: true,
-  mapTypeControl: false,
-  scaleControl: false,
-  streetViewControl: false,
-  rotateControl: false,
-  fullscreenControl: false,
-} as const;
-
 export const MAP_DEFAULT_ZOOM = 14;
 export const MAP_DEFAULT_CENTER = { lat: 42.697866831005435, lng: 23.321590139866355 };
 export const MAP_POINT_PICKER_HEIGHT = 250;
