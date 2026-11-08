@@ -386,7 +386,11 @@ export function TripForm() {
       >
         Create trip
       </Typography>
-
+      {serverError ? (
+        <Typography role="alert" color="error" variant="body2" sx={{ mx: 1 }}>
+          {serverError}
+        </Typography>
+      ) : null}
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', m: '4px' }}>
         <TextField
