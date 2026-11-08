@@ -85,7 +85,11 @@ export const tripApi = {
     input: TripWriteInput,
     coordinates: { lat: number | null; lng: number | null } = { lat: null, lng: null },
   ): Promise<TripGroupResponse> => {
-    const parsed = tripWriteSchema.parse({ ...input, ...coordinates });
+    const parsed = tripWriteSchema.parse({
+      ...input,
+      destination: input.destination?.trim() || undefined,
+      ...coordinates,
+    });
     const { destination, ...fields } = parsed;
     const body = {
       ...fields,
@@ -106,7 +110,11 @@ export const tripApi = {
     input: TripWriteInput,
     coordinates: { lat: number | null; lng: number | null } = { lat: null, lng: null },
   ): Promise<TripGroupResponse> => {
-    const parsed = tripWriteSchema.parse({ ...input, ...coordinates });
+    const parsed = tripWriteSchema.parse({
+      ...input,
+      destination: input.destination?.trim() || undefined,
+      ...coordinates,
+    });
     const { destination, ...fields } = parsed;
     const body = {
       ...fields,
