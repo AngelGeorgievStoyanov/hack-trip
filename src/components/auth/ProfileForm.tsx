@@ -21,6 +21,7 @@ export function ProfileForm() {
   const [submitting, setSubmitting] = useState(false);
   const [passwordExpanded, setPasswordExpanded] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [profileImageRefreshToken, setProfileImageRefreshToken] = useState(0);
 
   const {
     register,
@@ -41,6 +42,7 @@ export function ProfileForm() {
       if (selectedImage) {
         await authApi.uploadProfileImage(selectedImage);
         setSelectedImage(null);
+        setProfileImageRefreshToken((current) => current + 1);
       }
       const response = await authApi.updateProfile(values);
       updateUser(response.user);
@@ -55,7 +57,7 @@ export function ProfileForm() {
 
   return (
     <>
-      <ProfileImage />
+      <ProfileImage refreshToken={profileImageRefreshToken} />
       <Box
         component="form"
         noValidate
