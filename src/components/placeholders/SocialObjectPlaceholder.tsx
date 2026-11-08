@@ -30,14 +30,13 @@ export function SocialObjectPlaceholder() {
       }}
     >
       {imageSrc ? (
-        <Box
-          component="img"
+        <img
           src={imageSrc}
           alt=""
           aria-hidden="true"
           width={1200}
           height={1200}
-          sx={{
+          style={{
             display: 'block',
             width: '100%',
             height: '100%',
