@@ -20,6 +20,7 @@ import { isSocialOperationAllowed } from '@/lib/socialConfig';
 import { useSocialConfig } from '@/hooks/useSocialConfig';
 import { invalidateSocialQueries } from '@/lib/socialQuerySync';
 import type { CommentDto, SocialConfigTargetKey } from '@/types';
+import { useNotification } from '@/components/common/NotificationProvider';
 
 interface RepliesSectionProps {
   commentId: number;
@@ -34,17 +35,16 @@ export function RepliesSection({
 }: RepliesSectionProps) {
   const { status, viewerCacheKey } = useAuth();
   const { confirm } = useConfirm();
+  const notification = useNotification();
   const queryClient = useQueryClient();
   const socialConfig = useSocialConfig();
   const [reply, setReply] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingReply, setEditingReply] = useState('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   useEffect(() => {
     setReply('');
     setEditingId(null);
     setEditingReply('');
-    setErrorMessage(null);
   }, [viewerCacheKey]);
   const queryKey = ['comments', viewerCacheKey, 'replies', commentId];
   const authenticated = status === 'authenticated';
@@ -74,7 +74,7 @@ export function RepliesSection({
       setErrorMessage(null);
       void refresh();
     },
-    onError: (cause) => setErrorMessage(getGenericErrorMessage(cause)),
+    onError: (cause) => notification.error(getGenericErrorMessage(cause)),
   });
 
   const updateMutation = useMutation({
@@ -239,7 +239,6 @@ export function RepliesSection({
     <Box component="section" aria-label={`Replies, ${data?.total ?? initialRepliesCount} total`} sx={{ mt: 1, pl: 2 }}>
       <Typography variant="subtitle2">Replies</Typography>
       <SocialConfigStatus isLoading={socialConfig.isLoading} error={socialConfig.error} />
-      {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
       {isLoading ? <CircularProgress size={20} /> : null}
       {isError ? <Alert severity="error">{getGenericErrorMessage(error)}</Alert> : null}
       {data?.items.map(renderReply)}
@@ -278,7 +277,6 @@ export function RepliesSection({
               aria-label="Cancel reply"
               onClick={() => {
                 setReply('');
-                setErrorMessage(null);
               }}
               disabled={createMutation.isPending}
             >
