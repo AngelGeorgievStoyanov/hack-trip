@@ -46,14 +46,23 @@ export function ProfileForm() {
   return (
     <Box
       component="form"
+      noValidate
+      aria-busy={submitting}
       onSubmit={handleSubmit(onSubmit)}
       sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
     >
-      <Typography variant="h5" component="h2">
-        Profile
+      <Typography variant="h5" component="h2" sx={{ textAlign: 'center', my: 1 }}>
+        {user?.firstName ? `${user.firstName}'s PROFILE` : 'PROFILE'}
       </Typography>
       {success ? <Alert severity="success">Profile updated.</Alert> : null}
       {serverError ? <Alert severity="error">{serverError}</Alert> : null}
+      <TextField
+        label="Email"
+        type="email"
+        autoComplete="email"
+        value={user?.email ?? ''}
+        slotProps={{ htmlInput: { readOnly: true } }}
+      />
       <TextField
         label="First name"
         autoComplete="given-name"
@@ -73,8 +82,9 @@ export function ProfileForm() {
         variant="contained"
         disabled={submitting}
         startIcon={submitting ? <CircularProgress size={18} /> : undefined}
+        sx={{ alignSelf: 'flex-start', ':hover': { backgroundColor: '#4daf30' } }}
       >
-        Save
+        EDIT PROFILE
       </Button>
     </Box>
   );
