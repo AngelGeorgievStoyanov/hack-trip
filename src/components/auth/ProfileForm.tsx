@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
+import { ProfileImage } from '@/components/auth/ProfileImage';
 import { useAuth } from '@/hooks/useAuth';
 import { authApi } from '@/api/auth';
 import type { UpdateProfileInput } from '@/api/auth';
@@ -19,11 +20,12 @@ export function ProfileForm() {
   const notification = useNotification();
   const [submitting, setSubmitting] = useState(false);
   const [passwordExpanded, setPasswordExpanded] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty, isValid },
   } = useForm<UpdateProfileInput>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
@@ -35,6 +37,10 @@ export function ProfileForm() {
   async function onSubmit(values: UpdateProfileInput): Promise<void> {
     setSubmitting(true);
     try {
+      if (selectedImage) {
+        await authApi.uploadProfileImage(selectedImage);
+        setSelectedImage(null);
+      }
       const response = await authApi.updateProfile(values);
       updateUser(response.user);
       notification.success('Profile updated.');
@@ -85,6 +91,7 @@ export function ProfileForm() {
           error={!!errors.lastName}
           helperText={errors.lastName?.message}
         />
+        <ProfileImage selectedFile={selectedImage} onSelectedFileChange={setSelectedImage} />
         <Box
           sx={{
             display: 'flex',
@@ -100,7 +107,7 @@ export function ProfileForm() {
           <Button
             type="submit"
             variant="contained"
-            disabled={submitting}
+            disabled={submitting || ((!isDirty || !isValid) && !selectedImage)}
             startIcon={submitting ? <CircularProgress size={18} /> : undefined}
             sx={{ ':hover': { backgroundColor: '#4daf30' } }}
           >
