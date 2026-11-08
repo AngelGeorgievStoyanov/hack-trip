@@ -2,7 +2,7 @@ import type { TripPoint, ResourcePermissions } from './points';
 import type { SocialImageDto } from './images';
 import type { SocialState } from './social';
 
-export interface SelectKeyName {
+interface SelectKeyName {
   key: string;
   name: string;
 }
