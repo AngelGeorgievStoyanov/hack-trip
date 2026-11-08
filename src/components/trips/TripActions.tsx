@@ -70,7 +70,7 @@ export function TripActions({
       );
       onDayDeleted?.(updatedTripGroup);
     },
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   if (!isOwner) {
@@ -78,7 +78,6 @@ export function TripActions({
   }
 
   if (section === 'navigation') {
-    if (!isOwner) return null;
 
     return (
       <Box sx={ACTION_BUTTON_BOX_SX}>
