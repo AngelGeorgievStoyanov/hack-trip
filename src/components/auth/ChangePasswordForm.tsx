@@ -16,6 +16,10 @@ const changePasswordFormSchema = changePasswordSchema
   .extend({
     confirmNewPassword: z.string().min(1, 'Please confirm your new password.'),
   })
+  .refine((values) => values.newPassword !== values.currentPassword, {
+    path: ['newPassword'],
+    message: 'New password must be different from your current password.',
+  })
   .refine((values) => values.newPassword === values.confirmNewPassword, {
     path: ['confirmNewPassword'],
     message: 'Passwords must match',
