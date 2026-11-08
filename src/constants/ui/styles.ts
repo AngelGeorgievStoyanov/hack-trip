@@ -134,10 +134,3 @@ export const commentCardStyle: CSSProperties = {
   border: CARD_BORDER,
   borderRadius: '0px',
 };
-
-/** Legacy "no images" placeholder style. */
-export const NO_IMAGES_STYLE: CSSProperties = {
-  margin: '0 0 0.35em',
-  fontSize: '1.2rem',
-  fontWeight: 500,
-};
