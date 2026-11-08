@@ -1,11 +1,11 @@
 import type { SocialState, SocialTargetType } from './social';
 import type { ResourcePermissions } from './points';
 
-export interface CommentAuthor {
+interface CommentAuthor {
   name: string;
 }
 
-export type CommentSocialState = SocialState & {
+type CommentSocialState = SocialState & {
   favorites: number;
   favoritedByMe: boolean;
 };
