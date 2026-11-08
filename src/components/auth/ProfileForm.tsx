@@ -80,7 +80,14 @@ export function ProfileForm() {
           type="email"
           autoComplete="email"
           value={user?.email ?? ''}
-          slotProps={{ htmlInput: { readOnly: true } }}
+          disabled
+          sx={{
+            '& .MuiInputBase-input.Mui-disabled': {
+              WebkitTextFillColor: 'rgba(0, 0, 0, 0.87)',
+              cursor: 'default',
+            },
+            '& .MuiInputLabel-root.Mui-disabled': { color: 'text.secondary' },
+          }}
         />
         <TextField
           label="First Name"
