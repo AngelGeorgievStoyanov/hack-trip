@@ -7,7 +7,7 @@ import { keyframes } from '@emotion/react';
  * Legacy like/unlike animations, restored from the original `TripDetails` component.
  * The keyframes and their timing are part of the legacy look and must not change.
  */
-export const LIKE_KEYFRAMES = {
+const LIKE_KEYFRAMES = {
   shake: keyframes`
     0% { transform: scale(1) translateY(0px) rotate(0deg); }
     10% { transform: scale(1) translateY(-1px) rotate(10deg); }
@@ -38,25 +38,25 @@ export const LIKE_KEYFRAMES = {
   `,
 } as const;
 
-export type LikeEffectName = keyof typeof LIKE_KEYFRAMES;
+type LikeEffectName = keyof typeof LIKE_KEYFRAMES;
 
 /**
  * Legacy effect pools. The filled (liked) thumb uses the "like" pool and the outlined
  * (not liked) thumb uses the "unlike" pool, exactly like the legacy component, which
  * picked one of the two variants of a pool at random.
  */
-export const LIKE_EFFECTS = {
+const LIKE_EFFECTS = {
   like: ['shake', 'growShrink'] as LikeEffectName[],
   unlike: ['rotate', 'rotateX'] as LikeEffectName[],
 } as const;
 
 /** Legacy durations: the liked thumb shakes for 0.5s, the unliked thumb rotates for 1s. */
-export const LIKE_EFFECT_DURATION = {
+const LIKE_EFFECT_DURATION = {
   like: 500,
   unlike: 1000,
 } as const;
 
-export interface ActiveLikeAnimation {
+interface ActiveLikeAnimation {
   effect: LikeEffectName;
   duration: number;
   /** Increments on every replay so the effect can be restarted on demand. */
