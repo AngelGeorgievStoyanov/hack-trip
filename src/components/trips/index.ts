@@ -12,6 +12,3 @@ export * from './PointsSection';
 export * from './DayImagesGallery';
 export * from './TripForm';
 export * from './TripSelectField';
-export * from './DayForm';
-export * from './DayEditor';
-export * from './TripDaysManager';

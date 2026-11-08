@@ -9,7 +9,6 @@ export * from './ForgotPasswordForm';
 export * from './ResetPasswordForm';
 export * from './ProfileForm';
 export * from './ChangePasswordForm';
-export * from './ConfirmPasswordForm';
 export * from './ProfileImage';
 
 export * from './Captcha';
