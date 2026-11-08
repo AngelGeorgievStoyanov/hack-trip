@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Box, Button, CircularProgress } from '@mui/material';
 import { authApi } from '@/api/auth';
+import { normalizeApiError } from '@/api/client';
+import { API_ERROR_CODES } from '@/constants/api';
 import { zodResolver } from '@/lib/zodResolver';
 import { getAuthErrorMessage } from '@/lib/errors';
 import { changePasswordSchema } from '@/validations/auth';
@@ -70,7 +72,12 @@ export function ChangePasswordForm({ expanded }: ChangePasswordFormProps) {
       notification.success('Password changed.');
       reset();
     } catch (error) {
-      notification.error(getAuthErrorMessage(error));
+      const apiError = normalizeApiError(error);
+      notification.error(
+        apiError.code === API_ERROR_CODES.UNAUTHORIZED
+          ? 'Current password is incorrect.'
+          : getAuthErrorMessage(error),
+      );
     } finally {
       setSubmitting(false);
     }
