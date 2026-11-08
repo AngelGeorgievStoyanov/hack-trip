@@ -53,26 +53,27 @@ export interface PasswordRequirement {
  * Keep this as the single frontend source of truth for the password policy.
  */
 export function getPasswordRequirements(value: string, minLength = 8, maxLength = 72): PasswordRequirement[] {
-  const characters = Array.from(value);
+  const normalizedValue = value.trim();
+  const characters = Array.from(normalizedValue);
   const isPrintableAscii = characters.every((character) => {
     const code = character.charCodeAt(0);
     return code >= 33 && code <= 126;
   });
 
   return [
-    { key: 'minLength', label: `At least ${minLength} characters`, valid: value.length >= minLength },
-    { key: 'maxLength', label: `At most ${maxLength} characters`, valid: value.length <= maxLength },
+    { key: 'minLength', label: `At least ${minLength} characters`, valid: normalizedValue.length >= minLength },
+    { key: 'maxLength', label: `At most ${maxLength} characters`, valid: normalizedValue.length <= maxLength },
     {
       key: 'printableAscii',
       label: 'English letters, numbers and symbols only',
-      valid: value.length > 0 && isPrintableAscii,
+      valid: normalizedValue.length > 0 && isPrintableAscii,
     },
     {
       key: 'latinLetter',
       label: 'At least one Latin letter (a–z, A–Z)',
-      valid: /[a-zA-Z]/.test(value),
+      valid: /[a-zA-Z]/.test(normalizedValue),
     },
-    { key: 'number', label: 'At least one number (0–9)', valid: /[0-9]/.test(value) },
+    { key: 'number', label: 'At least one number (0–9)', valid: /[0-9]/.test(normalizedValue) },
     {
       key: 'specialCharacter',
       label: 'At least one special character (!@#$…)',
@@ -87,7 +88,7 @@ export function getPasswordRequirements(value: string, minLength = 8, maxLength 
     {
       key: 'noSpaces',
       label: 'No spaces',
-      valid: value.length > 0 && characters.every((character) => !/\s/.test(character)),
+      valid: normalizedValue.length > 0 && characters.every((character) => !/\s/.test(character)),
     },
   ];
 }
