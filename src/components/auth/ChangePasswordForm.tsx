@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Alert, Box, Button, CircularProgress } from '@mui/material';
@@ -22,8 +22,12 @@ const changePasswordFormSchema = changePasswordSchema
 
 type ChangePasswordFormValues = z.infer<typeof changePasswordFormSchema>;
 
-export function ChangePasswordForm() {
-  const [expanded, setExpanded] = useState(false);
+interface ChangePasswordFormProps {
+  expanded: boolean;
+  onCollapse: () => void;
+}
+
+export function ChangePasswordForm({ expanded, onCollapse }: ChangePasswordFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -47,15 +51,13 @@ export function ChangePasswordForm() {
 
   const newPassword = watch('newPassword') ?? '';
 
-  function toggleExpanded(): void {
-    if (submitting) return;
-    if (expanded) {
+  useEffect(() => {
+    if (!expanded) {
       reset();
       setServerError(null);
       setSuccess(false);
     }
-    setExpanded((current) => !current);
-  }
+  }, [expanded, reset]);
 
   async function onSubmit(values: ChangePasswordFormValues): Promise<void> {
     setSubmitting(true);
@@ -68,6 +70,7 @@ export function ChangePasswordForm() {
       });
       setSuccess(true);
       reset();
+      onCollapse();
     } catch (error) {
       setServerError(getAuthErrorMessage(error));
     } finally {
@@ -75,34 +78,29 @@ export function ChangePasswordForm() {
     }
   }
 
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Button
-        variant="contained"
-        onClick={toggleExpanded}
-        disabled={submitting}
-        sx={{
-          alignSelf: 'flex-start',
-          backgroundColor: 'rgb(194 194 224)',
-          color: 'black',
-          ':hover': { color: 'rgb(248 245 245)' },
-        }}
-      >
-        {expanded ? 'HIDE CHANGE PASSWORD' : 'CHANGE PASSWORD'}
-      </Button>
+  if (!expanded && !success) return null;
 
+  return (
+    <Box
+      component="form"
+      noValidate
+      aria-busy={submitting}
+      onSubmit={handleSubmit(onSubmit)}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.5,
+        width: '100%',
+        mt: 2,
+        '& .MuiTextField-root': { width: 'calc(100% - 10px)', mx: '5px' },
+      }}
+    >
       {success ? <Alert severity="success">Password changed.</Alert> : null}
       {expanded ? (
-        <Box
-          component="form"
-          noValidate
-          aria-busy={submitting}
-          onSubmit={handleSubmit(onSubmit)}
-          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-        >
+        <>
           {serverError ? <Alert severity="error">{serverError}</Alert> : null}
           <PasswordField
-            label="Current password"
+            label="Old Password"
             autoComplete="current-password"
             maxLength={200}
             registration={register('currentPassword')}
@@ -110,7 +108,7 @@ export function ChangePasswordForm() {
             helperText={errors.currentPassword?.message ?? ' '}
           />
           <PasswordField
-            label="New password"
+            label="Password"
             autoComplete="new-password"
             registration={register('newPassword')}
             error={!!errors.newPassword}
@@ -122,7 +120,7 @@ export function ChangePasswordForm() {
           />
           <PasswordRequirements password={newPassword} />
           <PasswordField
-            label="Confirm new password"
+            label="Confirm Password"
             autoComplete="new-password"
             registration={register('confirmNewPassword')}
             error={!!errors.confirmNewPassword}
@@ -133,11 +131,11 @@ export function ChangePasswordForm() {
             variant="contained"
             disabled={submitting || !isValid}
             startIcon={submitting ? <CircularProgress size={18} /> : undefined}
-            sx={{ alignSelf: 'flex-start', ':hover': { backgroundColor: '#4daf30' } }}
+            sx={{ alignSelf: 'flex-start', m: '2px', ':hover': { backgroundColor: '#4daf30' } }}
           >
             Save password
           </Button>
-        </Box>
+        </>
       ) : null}
     </Box>
   );
