@@ -24,10 +24,9 @@ type ChangePasswordFormValues = z.infer<typeof changePasswordFormSchema>;
 
 interface ChangePasswordFormProps {
   expanded: boolean;
-  onCollapse: () => void;
 }
 
-export function ChangePasswordForm({ expanded, onCollapse }: ChangePasswordFormProps) {
+export function ChangePasswordForm({ expanded }: ChangePasswordFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -70,7 +69,6 @@ export function ChangePasswordForm({ expanded, onCollapse }: ChangePasswordFormP
       });
       setSuccess(true);
       reset();
-      onCollapse();
     } catch (error) {
       setServerError(getAuthErrorMessage(error));
     } finally {
