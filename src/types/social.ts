@@ -11,8 +11,8 @@ export interface SocialState {
   likedByMe: boolean;
   comments: { count: number };
   reportedByMe: boolean;
-  favorites?: number;
-  favoritedByMe?: boolean;
+  favorites: number;
+  favoritedByMe: boolean;
 }
 
 export type SocialAction = 'like' | 'favorite' | 'report' | 'comment' | 'replyComment';
