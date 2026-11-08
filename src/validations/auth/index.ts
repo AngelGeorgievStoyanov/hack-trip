@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { emailString, passwordString, trimmedString } from '../shared';
 
-const captchaTokenSchema = z.string().min(1, 'Please complete the CAPTCHA.').max(8192).refine((value) => !/\\s/.test(value));
-const opaqueTokenSchema = z.string().min(1).max(200).refine((value) => !/\\s/.test(value));
+const captchaTokenSchema = z.string().min(1, 'Please complete the CAPTCHA.').max(8192).refine((value) => !/\s/.test(value));
+const opaqueTokenSchema = z.string().min(1).max(200).refine((value) => !/\s/.test(value));
 
 export const registerSchema = z
   .object({
@@ -46,13 +46,13 @@ export const resendVerificationSchema = z
 export const updateProfileSchema = z
   .object({
     firstName: trimmedString({
-      min: 2,
-      max: 15,
+      min: 1,
+      max: 45,
       minMessage: 'First Name cannot be empty string and must contain at least 2 characters .',
     }),
     lastName: trimmedString({
-      min: 2,
-      max: 15,
+      min: 1,
+      max: 45,
       minMessage: 'Last Name cannot be empty string and must contain at least 2 characters .',
     }),
   })
@@ -80,7 +80,7 @@ export const forgotPasswordSchema = z
 
 export const resetPasswordSchema = z
   .object({
-    token: z.string().min(1).max(200),
+    token: opaqueTokenSchema,
     password: passwordString({ min: 8, max: 72 }),
   })
   .strict();
