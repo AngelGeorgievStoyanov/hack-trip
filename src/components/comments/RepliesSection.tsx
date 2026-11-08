@@ -71,7 +71,6 @@ export function RepliesSection({
     mutationFn: (comment: string) => commentApi.createReply(commentId, { comment }),
     onSuccess: () => {
       setReply('');
-      setErrorMessage(null);
       void refresh();
     },
     onError: (cause) => notification.error(getGenericErrorMessage(cause)),
@@ -83,16 +82,15 @@ export function RepliesSection({
     onSuccess: () => {
       setEditingId(null);
       setEditingReply('');
-      setErrorMessage(null);
       void refresh();
     },
-    onError: (cause) => setErrorMessage(getGenericErrorMessage(cause)),
+    onError: (cause) => notification.error(getGenericErrorMessage(cause)),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => commentApi.deleteReply(id),
     onSuccess: () => void refresh(),
-    onError: (cause) => setErrorMessage(getGenericErrorMessage(cause)),
+    onError: (cause) => notification.error(getGenericErrorMessage(cause)),
   });
 
   function renderReply(item: CommentDto) {
