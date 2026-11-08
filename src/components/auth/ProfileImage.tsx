@@ -1,34 +1,32 @@
 'use client';
 
-import { useCallback, useEffect, useState, type ChangeEvent } from 'react';
-import { Alert, Box, Button, CircularProgress, IconButton, Tooltip, Typography } from '@mui/material';
+import { useCallback, useEffect, type ChangeEvent } from 'react';
+import { Box, CircularProgress, IconButton, Tooltip } from '@mui/material';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
-import { authApi } from '@/api/auth';
 import { AppImage } from '@/components/images/AppImage';
 import CustomFileUploadButton from '@/components/CustomFileUploadButton';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { useNotification } from '@/components/common/NotificationProvider';
 import { getGenericErrorMessage } from '@/lib/errors';
-import { validateImageFile } from '@/lib/images/validate';
 import { ACCEPTED_IMAGE_MIME_TYPES, PROFILE_IMAGE_MAX_FILES } from '@/constants/images';
 import type { ImageDto } from '@/types';
 
 const ACCEPT_TYPES = (ACCEPTED_IMAGE_MIME_TYPES as readonly string[]).join(',');
 
-export function ProfileImage() {
+interface ProfileImageProps {
+  selectedFile: File | null;
+  onSelectedFileChange: (file: File | null) => void;
+}
+
+export function ProfileImage({ selectedFile, onSelectedFileChange }: ProfileImageProps) {
   const { confirm } = useConfirm();
   const notification = useNotification();
   const [image, setImage] = useState<ImageDto | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
       setImage(await authApi.getProfileImage());
     } catch (e) {
@@ -43,15 +41,6 @@ export function ProfileImage() {
   }, [load]);
 
   useEffect(() => {
-    if (!selectedFile) {
-      setPreviewUrl(null);
-      return;
-    }
-
-    const objectUrl = URL.createObjectURL(selectedFile);
-    setPreviewUrl(objectUrl);
-
-    return () => URL.revokeObjectURL(objectUrl);
   }, [selectedFile]);
 
   function handleFilesChange(event: ChangeEvent<HTMLInputElement>): void {
@@ -59,37 +48,11 @@ export function ProfileImage() {
     event.currentTarget.value = '';
     if (!file) return;
 
-    const validationError = validateImageFile(file);
-    if (validationError) {
-      setSelectedFile(null);
-      setError(validationError);
-      return;
-    }
-
-    setError(null);
-    setSelectedFile(file);
-  }
-
-  async function handleUpload(): Promise<void> {
-    if (!selectedFile) return;
-
-    setUploading(true);
-    setError(null);
-    try {
-      const uploaded = await authApi.uploadProfileImage(selectedFile);
-      setImage(uploaded);
-      setSelectedFile(null);
-      notification.success('Profile image uploaded.');
-    } catch (e) {
-      notification.error(getGenericErrorMessage(e));
-    } finally {
-      setUploading(false);
-    }
+    onSelectedFileChange(file);
   }
 
   function cancelSelection(): void {
-    setSelectedFile(null);
-    setError(null);
+    onSelectedFileChange(null);
   }
 
   async function handleDelete(): Promise<void> {
@@ -114,16 +77,14 @@ export function ProfileImage() {
     }
   }
 
-  const busy = loading || uploading || deleting;
+  const busy = loading || deleting;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, width: '100%' }}>
-      {error ? <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert> : null}
-
       <Box
         sx={{
           position: 'relative',
-          display: loading || !!previewUrl || !!image ? 'flex' : 'none',
+          display: loading || !!image ? 'flex' : 'none',
           width: 'min(300px, 75vw)',
           height: 'min(300px, 75vw)',
           borderRadius: '50%',
@@ -137,13 +98,6 @@ export function ProfileImage() {
       >
         {loading ? (
           <CircularProgress size={24} />
-        ) : previewUrl ? (
-          <Box
-            component="img"
-            src={previewUrl}
-            alt="Selected profile image preview"
-            sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
         ) : image ? (
           <AppImage
             image={image}
@@ -158,7 +112,7 @@ export function ProfileImage() {
             No profile image
           </Typography>
         )}
-        {!loading && image && !previewUrl ? (
+        {!loading && image ? (
           <Tooltip title="Remove profile image" arrow>
             <IconButton
               aria-label="Remove profile image"
@@ -180,17 +134,11 @@ export function ProfileImage() {
         ) : null}
       </Box>
 
-      {selectedFile ? (
-        <Typography variant="caption" color="text.secondary" sx={{ maxWidth: '100%', overflowWrap: 'anywhere' }}>
-          {selectedFile.name}
-        </Typography>
-      ) : null}
-
-      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%', alignItems: 'center' }}>
         <CustomFileUploadButton
           handleFilesChange={handleFilesChange}
           images={[]}
-          fileSelected={[]}
+          fileSelected={selectedFile ? [selectedFile] : []}
           iconFotoCamera={false}
           maxImages={PROFILE_IMAGE_MAX_FILES}
           accept={ACCEPT_TYPES}
@@ -198,29 +146,15 @@ export function ProfileImage() {
           disabled={busy}
         />
         {selectedFile ? (
-          <>
-            <Button
-              variant="contained"
-              onClick={() => void handleUpload()}
-              disabled={busy}
-              startIcon={uploading ? <CircularProgress size={18} /> : undefined}
-              sx={{ ':hover': { backgroundColor: '#4daf30' } }}
-            >
-              Save image
-            </Button>
-            <Button
-              variant="contained"
-              onClick={cancelSelection}
-              disabled={busy}
-              sx={{
-                backgroundColor: 'rgb(194 194 224)',
-                color: 'black',
-                ':hover': { color: 'rgb(248 245 245)' },
-              }}
-            >
-              Cancel
-            </Button>
-          </>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', maxWidth: 360, p: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+            <Box component="img" src={URL.createObjectURL(selectedFile)} alt="Selected profile image preview" sx={{ width: 55, height: 45, objectFit: 'cover', borderRadius: 1 }} />
+            <Box component="span" sx={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedFile.name}</Box>
+            <Tooltip title="Remove selected image" arrow>
+              <IconButton aria-label="Remove selected image" onClick={cancelSelection} disabled={busy} size="small">
+                <HighlightOffSharpIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
         ) : null}
       </Box>
     </Box>
