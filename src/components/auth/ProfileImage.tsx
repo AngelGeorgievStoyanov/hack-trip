@@ -36,7 +36,7 @@ export function ProfileImage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [notification]);
 
   useEffect(() => {
     void load();
