@@ -30,7 +30,9 @@
     "format:check": "prettier --check .",
     "duplicates": "npx --yes jscpd@5.4.3 src app",
     "knip": "npx --yes knip@6.44.2",
-    "code:audit": "npm run duplicates && npm run knip"
+    "code:audit": "npm run duplicates && npm run knip",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run lint"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
