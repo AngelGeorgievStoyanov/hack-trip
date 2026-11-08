@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, type ChangeEvent } from 'react';
-import { Box, CircularProgress, IconButton, Tooltip } from '@mui/material';
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react';
+import { Box, CircularProgress, IconButton, Tooltip, Typography } from '@mui/material';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import { AppImage } from '@/components/images/AppImage';
+import { authApi } from '@/api/auth';
 import CustomFileUploadButton from '@/components/CustomFileUploadButton';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { useNotification } from '@/components/common/NotificationProvider';
@@ -22,6 +23,11 @@ export function ProfileImage({ selectedFile, onSelectedFileChange }: ProfileImag
   const { confirm } = useConfirm();
   const notification = useNotification();
   const [image, setImage] = useState<ImageDto | null>(null);
+  const previewUrl = useMemo(() => selectedFile ? URL.createObjectURL(selectedFile) : null, [selectedFile]);
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
 
@@ -37,11 +43,8 @@ export function ProfileImage({ selectedFile, onSelectedFileChange }: ProfileImag
   }, [notification]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
-
-  useEffect(() => {
-  }, [selectedFile]);
+    if (!selectedFile) void load();
+  }, [load, selectedFile]);
 
   function handleFilesChange(event: ChangeEvent<HTMLInputElement>): void {
     const file = event.currentTarget.files?.[0];
@@ -65,7 +68,6 @@ export function ProfileImage({ selectedFile, onSelectedFileChange }: ProfileImag
     if (!confirmed) return;
 
     setDeleting(true);
-    setError(null);
     try {
       await authApi.deleteProfileImage();
       setImage(null);
