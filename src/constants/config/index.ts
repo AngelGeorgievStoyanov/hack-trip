@@ -3,9 +3,7 @@
  * backend runtime config and must never be mirrored as frontend constants.
  */
 
-const TRIP_SELECT_FIELDS = ['group', 'transport', 'currency'] as const;
-
-export type TripSelectFieldName = (typeof TRIP_SELECT_FIELDS)[number];
+export type TripSelectFieldName = 'group' | 'transport' | 'currency';
 
 export const SELECT_TYPE_KEYS: Record<TripSelectFieldName, string> = {
   group: 'group_type',
