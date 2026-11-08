@@ -32,7 +32,7 @@ import {
 
 const registerFormSchema = registerSchema
   .extend({
-    confirmPassword: z.string().min(1, 'Confirm password is required.'),
+    confirmPassword: z.string().trim().min(1, 'Confirm password is required.'),
     acceptedTerms: z.boolean().refine(
       (accepted) => accepted,
       { message: 'You must accept the terms of use and privacy policy.' },
@@ -90,7 +90,7 @@ export function RegisterForm() {
   const password = watch('password') ?? '';
   const confirmPassword = watch('confirmPassword') ?? '';
   const confirmPasswordMismatch =
-    confirmPassword.length > 0 && confirmPassword !== password;
+    confirmPassword.length > 0 && confirmPassword.trim() !== password.trim();
 
   async function onSubmit(values: RegisterFormValues): Promise<void> {
     setSubmitting(true);
