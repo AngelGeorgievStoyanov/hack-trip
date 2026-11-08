@@ -7,6 +7,7 @@ import { authApi } from '@/api/auth';
 import { AppImage } from '@/components/images/AppImage';
 import CustomFileUploadButton from '@/components/CustomFileUploadButton';
 import { useConfirm } from '@/components/common/ConfirmDialog';
+import { useNotification } from '@/components/common/NotificationProvider';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { validateImageFile } from '@/lib/images/validate';
 import { ACCEPTED_IMAGE_MIME_TYPES, PROFILE_IMAGE_MAX_FILES } from '@/constants/images';
@@ -16,6 +17,7 @@ const ACCEPT_TYPES = (ACCEPTED_IMAGE_MIME_TYPES as readonly string[]).join(',');
 
 export function ProfileImage() {
   const { confirm } = useConfirm();
+  const notification = useNotification();
   const [image, setImage] = useState<ImageDto | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export function ProfileImage() {
     try {
       setImage(await authApi.getProfileImage());
     } catch (e) {
-      setError(getGenericErrorMessage(e));
+      notification.error(getGenericErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -77,8 +79,9 @@ export function ProfileImage() {
       const uploaded = await authApi.uploadProfileImage(selectedFile);
       setImage(uploaded);
       setSelectedFile(null);
+      notification.success('Profile image uploaded.');
     } catch (e) {
-      setError(getGenericErrorMessage(e));
+      notification.error(getGenericErrorMessage(e));
     } finally {
       setUploading(false);
     }
@@ -103,8 +106,9 @@ export function ProfileImage() {
     try {
       await authApi.deleteProfileImage();
       setImage(null);
+      notification.success('Profile image deleted.');
     } catch (e) {
-      setError(getGenericErrorMessage(e));
+      notification.error(getGenericErrorMessage(e));
     } finally {
       setDeleting(false);
     }
