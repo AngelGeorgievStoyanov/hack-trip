@@ -166,7 +166,7 @@ export function ProfileImage() {
         <CustomFileUploadButton
           handleFilesChange={handleFilesChange}
           images={[]}
-          fileSelected={selectedFile ? [selectedFile] : []}
+          fileSelected={[]}
           iconFotoCamera={false}
           maxImages={PROFILE_IMAGE_MAX_FILES}
           accept={ACCEPT_TYPES}
