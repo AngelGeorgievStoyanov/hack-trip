@@ -7,7 +7,7 @@ export interface ImagePreset {
   useThumbnail?: boolean;
 }
 
-export const IMAGE_SIZES = {
+const IMAGE_SIZES = {
   hero: '100vw',
   card: '(max-width: 600px) 100vw, 33vw',
   gallery: '(max-width: 600px) 50vw, 33vw',
