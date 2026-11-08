@@ -2,16 +2,16 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import { authApi } from '@/api/auth';
 import type { ConfirmPasswordInput } from '@/api/auth';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
+import { useNotification } from '@/components/common/NotificationProvider';
 import { confirmPasswordSchema } from '@/validations/auth';
 
 export function ConfirmPasswordForm() {
-  const [result, setResult] = useState<'idle' | 'valid' | 'invalid'>('idle');
-  const [serverError, setServerError] = useState<string | null>(null);
+  const notification = useNotification();
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -23,14 +23,13 @@ export function ConfirmPasswordForm() {
 
   async function onSubmit(values: ConfirmPasswordInput): Promise<void> {
     setSubmitting(true);
-    setServerError(null);
     try {
       const response = await authApi.confirmPassword(values);
-      setResult(response.valid ? 'valid' : 'invalid');
+      if (response.valid) notification.success('Password confirmed.');
+      else notification.warning('Incorrect password.');
       reset();
     } catch (error) {
-      setServerError(getGenericErrorMessage(error));
-      setResult('idle');
+      notification.error(getGenericErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -45,9 +44,6 @@ export function ConfirmPasswordForm() {
       <Typography variant="h5" component="h2">
         Confirm password
       </Typography>
-      {result === 'valid' ? <Alert severity="success">Password confirmed.</Alert> : null}
-      {result === 'invalid' ? <Alert severity="warning">Incorrect password.</Alert> : null}
-      {serverError ? <Alert severity="error">{serverError}</Alert> : null}
       <TextField
         label="Password"
         type="password"
