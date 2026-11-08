@@ -4,4 +4,4 @@ export * from './NotFound';
 export * from './ExpandableText';
 export * from './ScrambleHeading';
 export * from './WelcomeHeading';
-
+export * from './SingleImageUploadButton';
