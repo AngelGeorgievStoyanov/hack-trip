@@ -106,13 +106,11 @@ export const tripApi = {
     input: TripWriteInput,
     coordinates: { lat: number | null; lng: number | null } = { lat: null, lng: null },
   ): Promise<TripGroupResponse> => {
-    const parsed = tripWriteSchema.parse(input);
+    const parsed = tripWriteSchema.parse({ ...input, ...coordinates });
     const { destination, ...fields } = parsed;
     const body = {
       ...fields,
       ...(destination ? { destination } : {}),
-      lat: coordinates.lat,
-      lng: coordinates.lng,
     };
     const { data } = await apiClient.post<TripGroupResponse>(`${TRIPS}/${tripGroupId}/days`, body);
     return data;
