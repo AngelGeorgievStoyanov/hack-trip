@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
-import { ProfileImage } from '@/components/auth/ProfileImage';
+import { ProfileImage, ProfileImageUpload } from '@/components/auth/ProfileImage';
 import { useAuth } from '@/hooks/useAuth';
 import { authApi } from '@/api/auth';
 import type { UpdateProfileInput } from '@/api/auth';
@@ -25,6 +25,7 @@ export function ProfileForm() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isDirty, isValid },
   } = useForm<UpdateProfileInput>({
     resolver: zodResolver(updateProfileSchema),
@@ -43,6 +44,7 @@ export function ProfileForm() {
       }
       const response = await authApi.updateProfile(values);
       updateUser(response.user);
+      reset({ firstName: response.user.firstName, lastName: response.user.lastName });
       notification.success('Profile updated.');
     } catch (error) {
       notification.error(getGenericErrorMessage(error));
@@ -53,6 +55,7 @@ export function ProfileForm() {
 
   return (
     <>
+      <ProfileImage />
       <Box
         component="form"
         noValidate
@@ -91,7 +94,7 @@ export function ProfileForm() {
           error={!!errors.lastName}
           helperText={errors.lastName?.message}
         />
-        <ProfileImage selectedFile={selectedImage} onSelectedFileChange={setSelectedImage} />
+        <ProfileImageUpload selectedFile={selectedImage} onSelectedFileChange={setSelectedImage} />
         <Box
           sx={{
             display: 'flex',
