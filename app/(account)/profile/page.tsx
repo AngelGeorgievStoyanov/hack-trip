@@ -3,7 +3,6 @@ import { Box } from '@mui/material';
 import { NOINDEX } from '@/constants/seo';
 import { ProfileForm } from '@/components/auth/ProfileForm';
 import { ProfileImage } from '@/components/auth/ProfileImage';
-import { ChangePasswordForm } from '@/components/auth/ChangePasswordForm';
 
 export const metadata: Metadata = {
   title: 'Profile',
@@ -16,20 +15,33 @@ export default function ProfilePage() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 3,
-        maxWidth: 600,
+        alignItems: 'center',
+        justifyContent: 'center',
         width: '100%',
-        mx: 'auto',
-        p: { xs: 2, sm: 4 },
-        backgroundColor: '#eee7e79e',
-        boxShadow: '3px 2px 5px black',
-        border: 'solid 1px',
-        borderRadius: 0,
+        minHeight: 'calc(100vh - 64px)',
+        py: { xs: 2, sm: 3 },
       }}
     >
-      <ProfileImage />
-      <ProfileForm />
-      <ChangePasswordForm />
+      <Box
+        sx={{
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 2,
+          width: '100%',
+          maxWidth: 600,
+          height: 'fit-content',
+          p: { xs: 2, sm: '30px' },
+          backgroundColor: '#eee7e79e',
+          boxShadow: '3px 2px 5px black',
+          border: 'solid 1px',
+          borderRadius: 0,
+        }}
+      >
+        <ProfileImage />
+        <ProfileForm />
+      </Box>
     </Box>
   );
 }
