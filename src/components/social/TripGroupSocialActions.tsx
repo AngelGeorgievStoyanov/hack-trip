@@ -26,6 +26,7 @@ interface TripGroupSocialActionsProps {
   social: SocialState;
   shareTitle?: string;
   shareText?: string;
+  shareDayNumber?: number;
   /** Whether the Trip Group comment section is open (controlled by TripDetailsView). */
   open?: boolean;
   /** Toggles the Trip Group comment section. */
@@ -39,6 +40,7 @@ export function TripGroupSocialActions({
   social,
   shareTitle,
   shareText,
+  shareDayNumber,
   open,
   onToggle,
 }: TripGroupSocialActionsProps) {
@@ -87,8 +89,9 @@ export function TripGroupSocialActions({
 
   async function handleShare(): Promise<void> {
     const title = shareTitle ?? 'Trip';
+    const dayQuery = shareDayNumber === undefined ? '' : `?day=${shareDayNumber}`;
     const result = await shareWithFallback({
-      url: absoluteUrl(`/trips/${tripGroupId}`),
+      url: absoluteUrl(`/trips/${tripGroupId}${dayQuery}`),
       title,
       text: shareText ?? title,
     });
