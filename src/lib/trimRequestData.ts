@@ -23,8 +23,8 @@ export function trimRequestData<T>(data: T): T {
 /** Copies FormData, trimming only text fields and preserving each file/blob unchanged. */
 export function trimFormData(data: FormData): FormData {
   const normalized = new FormData();
-  for (const [key, value] of data.entries()) {
+  data.forEach((value, key) => {
     normalized.append(key, typeof value === 'string' && !OPAQUE_FIELD.test(key) ? value.trim() : value);
-  }
+  });
   return normalized;
 }
