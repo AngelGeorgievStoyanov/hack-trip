@@ -1,14 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ChangeEvent } from 'react';
 import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
 import { authApi } from '@/api/auth';
 import { AppImage } from '@/components/images/AppImage';
-import { SingleImageUploadButton } from '@/components/common/SingleImageUploadButton';
+import CustomFileUploadButton from '@/components/CustomFileUploadButton';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { validateImageFile } from '@/lib/images/validate';
-import { ACCEPTED_IMAGE_MIME_TYPES } from '@/constants/images';
+import { ACCEPTED_IMAGE_MIME_TYPES, PROFILE_IMAGE_MAX_FILES } from '@/constants/images';
 import type { ImageDto } from '@/types';
 
 const ACCEPT_TYPES = (ACCEPTED_IMAGE_MIME_TYPES as readonly string[]).join(',');
@@ -51,7 +51,9 @@ export function ProfileImage() {
     return () => URL.revokeObjectURL(objectUrl);
   }, [selectedFile]);
 
-  function handleFileSelected(file: File | undefined): void {
+  function handleFilesChange(event: ChangeEvent<HTMLInputElement>): void {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
     if (!file) return;
 
     const validationError = validateImageFile(file);
@@ -161,10 +163,15 @@ export function ProfileImage() {
       ) : null}
 
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
-        <SingleImageUploadButton
+        <CustomFileUploadButton
+          handleFilesChange={handleFilesChange}
+          images={[]}
+          fileSelected={selectedFile ? [selectedFile] : []}
+          iconFotoCamera={false}
+          maxImages={PROFILE_IMAGE_MAX_FILES}
           accept={ACCEPT_TYPES}
+          multiple={false}
           disabled={busy}
-          onFileSelected={handleFileSelected}
         />
         {selectedFile ? (
           <>
