@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 const MAX_RESOURCE_ID = 2147483647;
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface LengthOptions {
@@ -142,21 +141,17 @@ export const patchText = ({ max, min }: LengthOptions, messages?: { max?: string
     .optional()
     .transform((value) => (value === null || value === '' ? null : value));
 
-/** Required numeric (accepts number or numeric string), then min/max. */
+/** Required JSON number: strings are rejected, matching the backend body contract. */
 export const requiredNumber = ({ min, max }: { min: number; max: number }) =>
-  z
-    .union([z.number(), z.string().min(1).transform(Number)])
-    .pipe(z.number().min(min).max(max));
+  z.number().min(min).max(max);
 
-/** Optional patch number. Output `number | null | undefined`. */
+/** Form adapter for numeric text inputs; output is still a bounded JSON number. */
+export const requiredNumberInput = ({ min, max }: { min: number; max: number }) =>
+  z.union([z.number(), z.string().min(1).transform(Number)]).pipe(z.number().min(min).max(max));
+
+/** Optional patch number. Output `number | null | undefined`; JSON body values stay numeric. */
 export const patchNumber = ({ min, max }: { min: number; max: number }) =>
-  z
-    .union([
-      z.number().min(min).max(max),
-      z.string().min(1).transform(Number).pipe(z.number().min(min).max(max)),
-      z.null(),
-    ])
-    .optional();
+  z.union([z.number().min(min).max(max), z.null()]).optional();
 
 /** Optional integer: `''`/`null` -> `undefined`, then coerce int min/max. */
 export const optionalInt = ({ min, max }: { min: number; max: number }) =>
@@ -186,12 +181,13 @@ export const positiveId = z.number().int().min(1).max(MAX_RESOURCE_ID);
 /** Positive integer id from a query string; query parameters arrive as strings. */
 export const positiveIdQuery = z.coerce.number().int().min(1).max(MAX_RESOURCE_ID);
 
-/** Required integer (coerces form strings/number; rejects empty/null/undefined). */
+/** Required JSON integer: strings are rejected, matching the backend body contract. */
 export const requiredInt = ({ min, max }: { min: number; max: number }) =>
-  z.preprocess(
-    (value) => (value === '' || value === null ? undefined : value),
-    z.coerce.number().int().min(min).max(max),
-  );
+  z.number().int().min(min).max(max);
+
+/** Form adapter for numeric text inputs; output is still a bounded JSON integer. */
+export const requiredIntInput = ({ min, max }: { min: number; max: number }) =>
+  z.union([z.number(), z.string().min(1).transform(Number)]).pipe(z.number().int().min(min).max(max));
 
 /** Like target type input: trimmed, lowercased, then enumerated. */
 export const targetTypeInput = z
