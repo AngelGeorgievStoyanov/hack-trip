@@ -12,6 +12,8 @@ interface CustomFileUploadButtonProps {
   iconFotoCamera: boolean;
   disabled?: boolean;
   maxImages?: number;
+  accept?: string;
+  multiple?: boolean;
 }
 
 const CustomFileUploadButton: FC<CustomFileUploadButtonProps> = ({
@@ -21,6 +23,8 @@ const CustomFileUploadButton: FC<CustomFileUploadButtonProps> = ({
   iconFotoCamera,
   disabled = false,
   maxImages = MAX_IMAGES_PER_ENTITY,
+  accept = 'image/*',
+  multiple = true,
 }) => {
   const isDisabled = images.length + fileSelected.length >= maxImages || disabled;
 
@@ -36,8 +40,8 @@ const CustomFileUploadButton: FC<CustomFileUploadButtonProps> = ({
           >
             <input
               hidden
-              accept="image/*"
-              multiple
+              accept={accept}
+              multiple={multiple}
               type="file"
               onChange={handleFilesChange}
               disabled={isDisabled}
@@ -56,8 +60,8 @@ const CustomFileUploadButton: FC<CustomFileUploadButtonProps> = ({
         <input
           name="files"
           hidden
-          accept="image/*"
-          multiple
+          accept={accept}
+          multiple={multiple}
           type="file"
           onChange={handleFilesChange}
           disabled={isDisabled}
