@@ -35,6 +35,8 @@ export function SocialObjectPlaceholder() {
           src={imageSrc}
           alt=""
           aria-hidden="true"
+          width={1200}
+          height={1200}
           sx={{
             display: 'block',
             width: '100%',
