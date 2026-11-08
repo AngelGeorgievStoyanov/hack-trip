@@ -181,7 +181,10 @@ export const positiveIdParam = z
 export const userIdParam = z.string().regex(UUID_REGEX, 'Invalid UUID');
 
 /** Positive integer id (coerced, for bodies/query). */
-export const positiveId = z.coerce.number().int().min(1).max(MAX_RESOURCE_ID);
+export const positiveId = z.number().int().min(1).max(MAX_RESOURCE_ID);
+
+/** Positive integer id from a query string; query parameters arrive as strings. */
+export const positiveIdQuery = z.coerce.number().int().min(1).max(MAX_RESOURCE_ID);
 
 /** Required integer (coerces form strings/number; rejects empty/null/undefined). */
 export const requiredInt = ({ min, max }: { min: number; max: number }) =>
