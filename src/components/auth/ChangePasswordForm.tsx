@@ -16,7 +16,7 @@ import { useNotification } from '@/components/common/NotificationProvider';
 
 const changePasswordFormSchema = changePasswordSchema
   .extend({
-    confirmNewPassword: z.string().min(1, 'Please confirm your new password.'),
+    confirmNewPassword: z.string().trim().min(1, 'Please confirm your new password.'),
   })
   .refine((values) => values.newPassword !== values.currentPassword, {
     path: ['newPassword'],
