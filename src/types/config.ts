@@ -15,9 +15,9 @@ export interface SelectConfigDto {
   options: SelectOptionDto[];
 }
 
-export type ServiceConfigValueType = 'string' | 'number' | 'boolean' | 'json';
+type ServiceConfigValueType = 'string' | 'number' | 'boolean' | 'json';
 
-export interface ServiceConfigDto {
+interface ServiceConfigDto {
   id: number;
   serviceTypeId: number;
   key: string;
@@ -26,7 +26,7 @@ export interface ServiceConfigDto {
   isActive: boolean;
 }
 
-export type PublicServiceKey = 'google_maps' | 'mui' | 'ui' | 'visual' | 'routing';
+type PublicServiceKey = 'google_maps' | 'mui' | 'ui' | 'visual' | 'routing';
 
 export interface PublicServiceConfigDto {
   id: number;
