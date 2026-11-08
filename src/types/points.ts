@@ -23,18 +23,3 @@ export interface TripPoint {
   permissions: ResourcePermissions;
   social: SocialState;
 }
-
-/**
- * Day response DTO (`API_CONTRACT.md` §10.8), returned e.g. by
- * `PUT /trips/:tripId/days/reorder`. Note `day` (not `dayNumber`): this is a
- * stripped day shape — full trip days inside `TripGroupResponse` are `TripGroupDay`.
- */
-export interface TripDay {
-  id: number;
-  day: number;
-  title: string | null;
-  images: SocialImageDto[];
-  points: TripPoint[];
-  permissions: ResourcePermissions;
-  social: SocialState;
-}
