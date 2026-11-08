@@ -17,6 +17,7 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { buildTripUrl } from '@/lib/tripUrl';
 import { dayCreateSchema } from '@/validations/trips';
 import type { TripGroupDay } from '@/types';
+import { useNotification } from '@/components/common/NotificationProvider';
 
 interface DayFormProps {
   tripGroupId: number;
@@ -42,6 +43,7 @@ export function DayForm({
   onDone,
 }: DayFormProps) {
   const queryClient = useQueryClient();
+  const notification = useNotification();
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -138,7 +140,7 @@ export function DayForm({
       if (!isEdit && apiError.code === API_ERROR_CODES.CONFLICT) {
         setServerError(takenMessage ?? 'This day already exists.');
       } else {
-        setServerError(getGenericErrorMessage(error));
+        notification.error(getGenericErrorMessage(error));
       }
     } finally {
       setSubmitting(false);
