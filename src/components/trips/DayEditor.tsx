@@ -46,39 +46,39 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
   const reorderPointsMutation = useMutation({
     mutationFn: (pointIds: number[]) => pointApi.reorderPoints(day.id, { pointIds }),
     onSuccess: () => void invalidate(),
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const deletePointMutation = useMutation({
     mutationFn: (pointId: number) => pointApi.deletePoint(pointId),
     onSuccess: () => void invalidate(),
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const uploadDayImageMutation = useMutation({
     mutationFn: (file: File) => tripApi.uploadDayImage(tripGroupId, day.id, file),
     onSuccess: () => void invalidate(),
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const deleteImageMutation = useMutation({
     mutationFn: (imageId: number) => tripApi.deleteImage(imageId),
     onSuccess: () => void invalidate(),
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const uploadPointImageMutation = useMutation({
     mutationFn: ({ pointId, file }: { pointId: number; file: File }) =>
       pointApi.uploadPointImage(pointId, file),
     onSuccess: () => void invalidate(),
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const deletePointImageMutation = useMutation({
     mutationFn: ({ pointId, imageId }: { pointId: number; imageId: number }) =>
       pointApi.deletePointImage(pointId, imageId),
     onSuccess: () => void invalidate(),
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   function reorderPoint(index: number, direction: -1 | 1): void {
