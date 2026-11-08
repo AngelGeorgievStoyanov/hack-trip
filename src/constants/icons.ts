@@ -7,6 +7,7 @@ import Add from '@mui/icons-material/Add';
 import Remove from '@mui/icons-material/Remove';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import HighlightOffSharp from '@mui/icons-material/HighlightOffSharp';
 
 export {
   FileUpload as UploadIcon,
@@ -18,4 +19,5 @@ export {
   Remove as RemoveIcon,
   Visibility as ShowPasswordIcon,
   VisibilityOff as HidePasswordIcon,
+  HighlightOffSharp as RemoveProfileImageIcon,
 };
