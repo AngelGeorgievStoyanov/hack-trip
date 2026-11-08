@@ -31,7 +31,7 @@ export const registerSchema = z
 export const loginSchema = z
   .object({
     email: emailString(),
-    password: z.string().trim().min(1).max(200),
+    password: z.string().min(1).max(200),
     captchaToken: captchaTokenSchema,
   })
   .strict();
