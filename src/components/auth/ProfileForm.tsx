@@ -135,10 +135,7 @@ export function ProfileForm() {
           </Button>
         </Box>
       </Box>
-      <ChangePasswordForm
-        expanded={passwordExpanded}
-        onCollapse={() => setPasswordExpanded(false)}
-      />
+      <ChangePasswordForm expanded={passwordExpanded} />
     </>
   );
 }
