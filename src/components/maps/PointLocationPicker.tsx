@@ -3,13 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AddressAutocomplete } from '@/components/maps/AddressAutocomplete';
 import { GoogleMapView } from '@/components/maps/GoogleMapView';
-import {
-  Alert,
-  Button,
-  CircularProgress,
-  Snackbar,
-  Stack,
-} from '@mui/material';
+import { Alert, Button, CircularProgress, Snackbar, Stack } from '@mui/material';
 import { useGoogleMapsLoader } from '@/hooks/useGoogleMapsLoader';
 import {
   GEOLOCATION_OPTIONS,
@@ -48,9 +42,7 @@ export function PointLocationPicker({
   const [address, setAddress] = useState('');
   const [locating, setLocating] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
-  const emittedRef = useRef<MapPosition | null>(
-    coordinatePairToMapPosition(latitude, longitude),
-  );
+  const emittedRef = useRef<MapPosition | null>(coordinatePairToMapPosition(latitude, longitude));
   const mapRef = useRef<google.maps.Map | null>(null);
 
   const position = coordinatePairToMapPosition(latitude, longitude);
@@ -119,14 +111,14 @@ export function PointLocationPicker({
         zoom={MAP_POINT_PICKER_ZOOM}
         height={MAP_POINT_PICKER_HEIGHT}
         maxWidth={600}
-          markers={position ? [{ id: 'selected-position', position, draggable: true }] : []}
-          onLoad={(map) => {
-            mapRef.current = map;
-          }}
-          onUnmount={() => {
-            mapRef.current = null;
-          }}
-          onMapClick={emitPosition}
+        markers={position ? [{ id: 'selected-position', position, draggable: true }] : []}
+        onLoad={(map) => {
+          mapRef.current = map;
+        }}
+        onUnmount={() => {
+          mapRef.current = null;
+        }}
+        onMapClick={emitPosition}
         onMarkerDragEnd={(nextPosition) => emitPosition(nextPosition)}
       />
 
@@ -200,7 +192,6 @@ export function PointLocationPicker({
         >
           Gps position
         </Button>
-
       </Stack>
 
       <Snackbar

@@ -2,7 +2,20 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Box, Button, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import { adminApi } from '@/api/admin';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
@@ -20,7 +33,11 @@ export function AdminReports() {
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
-  const { data, isLoading, error: queryError } = useQuery({
+  const {
+    data,
+    isLoading,
+    error: queryError,
+  } = useQuery({
     queryKey: ['admin', 'reports', page, ADMIN_PAGE_SIZE_DEFAULT],
     queryFn: () => adminApi.listReports({ page, pageSize: ADMIN_PAGE_SIZE_DEFAULT }),
   });
@@ -38,7 +55,11 @@ export function AdminReports() {
   return (
     <Box>
       <Typography variant="h4">Reports</Typography>
-      {error ? <Alert severity="error" onClose={() => setError(null)}>{error}</Alert> : null}
+      {error ? (
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
       {queryError ? <Alert severity="error">{getGenericErrorMessage(queryError)}</Alert> : null}
       {isLoading ? <CircularProgress /> : null}
       {data ? (
@@ -88,9 +109,18 @@ export function AdminReports() {
       ) : null}
       {pagination && (pagination.totalPages ?? 0) > 1 ? (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
-          <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-          <Typography>Page {page} of {pagination.totalPages}</Typography>
-          <Button disabled={page >= (pagination.totalPages ?? 1)} onClick={() => setPage((p) => p + 1)}>Next</Button>
+          <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            Previous
+          </Button>
+          <Typography>
+            Page {page} of {pagination.totalPages}
+          </Typography>
+          <Button
+            disabled={page >= (pagination.totalPages ?? 1)}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
         </Box>
       ) : null}
     </Box>

@@ -32,10 +32,7 @@ export async function getTripOgData(rawId: string): Promise<TripOgData> {
       ),
     );
 
-    const title =
-      firstDay?.title?.trim() ||
-      destinations[0] ||
-      FALLBACK_DATA.title;
+    const title = firstDay?.title?.trim() || destinations[0] || FALLBACK_DATA.title;
     const subtitle =
       destinations.length > 1
         ? destinations.slice(0, 3).join(' · ')

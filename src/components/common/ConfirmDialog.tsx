@@ -2,7 +2,14 @@
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
 
 interface ConfirmDialogContextValue {
   confirm: (message: string, title?: string) => Promise<boolean>;
@@ -16,17 +23,14 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
   const [title, setTitle] = useState<string | undefined>(undefined);
   const resolveRef = useRef<((value: boolean) => void) | null>(null);
 
-  const confirm = useCallback(
-    (confirmMessage: string, confirmTitle?: string): Promise<boolean> => {
-      setMessage(confirmMessage);
-      setTitle(confirmTitle);
-      setOpen(true);
-      return new Promise<boolean>((resolve) => {
-        resolveRef.current = resolve;
-      });
-    },
-    [],
-  );
+  const confirm = useCallback((confirmMessage: string, confirmTitle?: string): Promise<boolean> => {
+    setMessage(confirmMessage);
+    setTitle(confirmTitle);
+    setOpen(true);
+    return new Promise<boolean>((resolve) => {
+      resolveRef.current = resolve;
+    });
+  }, []);
 
   function handleClose(result: boolean): void {
     resolveRef.current?.(result);

@@ -61,14 +61,26 @@ export function ProfileImage({ refreshToken = 0 }: { refreshToken?: number }) {
   }
 
   if (loading) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', py: 2 }}><CircularProgress size={24} /></Box>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', py: 2 }}>
+        <CircularProgress size={24} />
+      </Box>
+    );
   }
 
   if (!image) return null;
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'min(300px, 75vw)', mb: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: 'min(300px, 75vw)',
+          mb: 1,
+        }}
+      >
         <Tooltip title="Delete profile image" arrow>
           <Box
             component="button"
@@ -76,7 +88,17 @@ export function ProfileImage({ refreshToken = 0 }: { refreshToken?: number }) {
             aria-label="Delete profile image"
             onClick={() => void handleDelete()}
             disabled={deleting}
-            sx={{ display: 'flex', p: 0, border: 0, background: 'transparent', cursor: 'pointer', marginTop: '20px', position: 'relative', translate: '0 28px', zIndex: 1 }}
+            sx={{
+              display: 'flex',
+              p: 0,
+              border: 0,
+              background: 'transparent',
+              cursor: 'pointer',
+              marginTop: '20px',
+              position: 'relative',
+              translate: '0 28px',
+              zIndex: 1,
+            }}
           >
             <RemoveProfileImageIcon sx={{ backgroundColor: 'white', borderRadius: '50%' }} />
           </Box>
@@ -87,18 +109,65 @@ export function ProfileImage({ refreshToken = 0 }: { refreshToken?: number }) {
             type="button"
             aria-label="View profile image full screen"
             onClick={() => setFullscreen(true)}
-            sx={{ display: 'block', width: '100%', height: 'min(300px, 75vw)', p: 0, border: '1px solid', borderRadius: '50%', overflow: 'hidden', boxShadow: '3px 2px 5px black', cursor: 'pointer', background: 'transparent' }}
+            sx={{
+              display: 'block',
+              width: '100%',
+              height: 'min(300px, 75vw)',
+              p: 0,
+              border: '1px solid',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              boxShadow: '3px 2px 5px black',
+              cursor: 'pointer',
+              background: 'transparent',
+            }}
           >
-            <AppImage image={image} alt="Profile image" preset="profile" width={300} height={300} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <AppImage
+              image={image}
+              alt="Profile image"
+              preset="profile"
+              width={300}
+              height={300}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           </Box>
         </Tooltip>
       </Box>
       <Dialog open={fullscreen} onClose={() => setFullscreen(false)} maxWidth="xl" fullWidth>
-        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', maxHeight: '90vh', p: 2, backgroundColor: 'black' }}>
-          <IconButton aria-label="Close full screen image" onClick={() => setFullscreen(false)} sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2, color: 'white', backgroundColor: 'rgba(0,0,0,0.45)' }}>
+        <Box
+          sx={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '50vh',
+            maxHeight: '90vh',
+            p: 2,
+            backgroundColor: 'black',
+          }}
+        >
+          <IconButton
+            aria-label="Close full screen image"
+            onClick={() => setFullscreen(false)}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 2,
+              color: 'white',
+              backgroundColor: 'rgba(0,0,0,0.45)',
+            }}
+          >
             <CloseIcon />
           </IconButton>
-          <AppImage image={image} alt="Profile image full screen" useThumbnail={false} width={1600} height={1200} style={{ width: '100%', height: 'auto', maxHeight: '85vh', objectFit: 'contain' }} />
+          <AppImage
+            image={image}
+            alt="Profile image full screen"
+            useThumbnail={false}
+            width={1600}
+            height={1200}
+            style={{ width: '100%', height: 'auto', maxHeight: '85vh', objectFit: 'contain' }}
+          />
         </Box>
       </Dialog>
     </>
@@ -110,13 +179,22 @@ interface ProfileImageUploadProps {
   onSelectedFileChange: (file: File | null) => void;
 }
 
-export function ProfileImageUpload({ selectedFile, onSelectedFileChange }: ProfileImageUploadProps) {
+export function ProfileImageUpload({
+  selectedFile,
+  onSelectedFileChange,
+}: ProfileImageUploadProps) {
   const notification = useNotification();
-  const previewUrl = useMemo(() => selectedFile ? URL.createObjectURL(selectedFile) : null, [selectedFile]);
+  const previewUrl = useMemo(
+    () => (selectedFile ? URL.createObjectURL(selectedFile) : null),
+    [selectedFile],
+  );
 
-  useEffect(() => () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
+  useEffect(
+    () => () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    },
+    [previewUrl],
+  );
 
   function handleFilesChange(event: ChangeEvent<HTMLInputElement>): void {
     const file = event.currentTarget.files?.[0];
@@ -131,7 +209,9 @@ export function ProfileImageUpload({ selectedFile, onSelectedFileChange }: Profi
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%', alignItems: 'center' }}>
+    <Box
+      sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%', alignItems: 'center' }}
+    >
       <CustomFileUploadButton
         handleFilesChange={handleFilesChange}
         images={[]}
@@ -142,11 +222,43 @@ export function ProfileImageUpload({ selectedFile, onSelectedFileChange }: Profi
         multiple={false}
       />
       {selectedFile && previewUrl ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', maxWidth: 360, p: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-          <Box component="img" src={previewUrl} alt="Selected profile image preview" sx={{ width: 55, height: 45, objectFit: 'cover', borderRadius: 1 }} />
-          <Box component="span" sx={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedFile.name}</Box>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            width: '100%',
+            maxWidth: 360,
+            p: 1,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 1,
+          }}
+        >
+          <Box
+            component="img"
+            src={previewUrl}
+            alt="Selected profile image preview"
+            sx={{ width: 55, height: 45, objectFit: 'cover', borderRadius: 1 }}
+          />
+          <Box
+            component="span"
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {selectedFile.name}
+          </Box>
           <Tooltip title="Remove selected image" arrow>
-            <IconButton aria-label="Remove selected image" onClick={() => onSelectedFileChange(null)} size="small">
+            <IconButton
+              aria-label="Remove selected image"
+              onClick={() => onSelectedFileChange(null)}
+              size="small"
+            >
               <RemoveProfileImageIcon />
             </IconButton>
           </Tooltip>

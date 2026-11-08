@@ -11,7 +11,11 @@ interface SocialConfigStatusProps {
 export function SocialConfigStatus({ isLoading, error }: SocialConfigStatusProps) {
   if (isLoading) {
     return (
-      <Box role="status" aria-label="Loading social actions" sx={{ display: 'inline-flex', p: 0.5 }}>
+      <Box
+        role="status"
+        aria-label="Loading social actions"
+        sx={{ display: 'inline-flex', p: 0.5 }}
+      >
         <CircularProgress size={18} />
       </Box>
     );

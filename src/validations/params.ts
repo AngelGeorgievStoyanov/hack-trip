@@ -4,9 +4,7 @@ import { positiveIdParam, userIdParam } from './shared';
 export const userIdParams = z.object({ userId: userIdParam }).strict();
 export const tripIdParams = z.object({ id: positiveIdParam }).strict();
 export const tripIdOnlyParams = z.object({ tripId: positiveIdParam }).strict();
-export const tripDayParams = z
-  .object({ tripId: positiveIdParam, dayId: positiveIdParam })
-  .strict();
+export const tripDayParams = z.object({ tripId: positiveIdParam, dayId: positiveIdParam }).strict();
 export const dayIdParams = z.object({ dayId: positiveIdParam }).strict();
 export const pointIdParams = z.object({ pointId: positiveIdParam }).strict();
 export const pointImageParams = z

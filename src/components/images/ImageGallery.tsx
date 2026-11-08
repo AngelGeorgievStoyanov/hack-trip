@@ -45,7 +45,7 @@ export function ImageGallery({
           display: variant === 'grid' ? 'grid' : 'flex',
           gridTemplateColumns:
             variant === 'grid'
-               ? `repeat(${Math.min(images.length, 3)}, minmax(0, 1fr))`
+              ? `repeat(${Math.min(images.length, 3)}, minmax(0, 1fr))`
               : undefined,
           flexDirection: variant === 'stack' ? 'column' : 'row',
           flexWrap: 'wrap',
@@ -92,9 +92,7 @@ export function ImageGallery({
                     lineHeight: 0,
                     borderRadius: 1,
                     overflow: 'hidden',
-                    ...(variant === 'grid'
-                      ? { aspectRatio: '1 / 1', position: 'relative' }
-                      : {}),
+                    ...(variant === 'grid' ? { aspectRatio: '1 / 1', position: 'relative' } : {}),
                     '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main' },
                   }}
                 >

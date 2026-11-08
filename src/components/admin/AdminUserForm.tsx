@@ -4,7 +4,15 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Alert, Box, Button, CircularProgress, MenuItem, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  MenuItem,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { adminApi, type AdminUserUpdateInput } from '@/api/admin';
 import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
@@ -42,7 +50,11 @@ export function AdminUserForm({ userId }: { userId: string }) {
   const [serverError, setServerError] = useState<string | null>(null);
   const isAdmin = isModeratorUser(user);
 
-  const { data: target, isLoading, error: queryError } = useQuery({
+  const {
+    data: target,
+    isLoading,
+    error: queryError,
+  } = useQuery({
     queryKey: ['admin', 'user', userId],
     queryFn: () => findUserById(userId),
   });
@@ -99,10 +111,16 @@ export function AdminUserForm({ userId }: { userId: string }) {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Typography variant="h4">Edit user</Typography>
       <Typography>Email: {target.email}</Typography>
-      <Typography>Name: {target.firstName} {target.lastName}</Typography>
+      <Typography>
+        Name: {target.firstName} {target.lastName}
+      </Typography>
       <Typography>Role: {target.role}</Typography>
       <Typography>Status: {target.status}</Typography>
-      {serverError ? <Alert severity="error" onClose={() => setServerError(null)}>{serverError}</Alert> : null}
+      {serverError ? (
+        <Alert severity="error" onClose={() => setServerError(null)}>
+          {serverError}
+        </Alert>
+      ) : null}
 
       {isAdmin ? (
         <Box
@@ -122,14 +140,30 @@ export function AdminUserForm({ userId }: { userId: string }) {
             error={!!errors.lastName}
             helperText={errors.lastName?.message}
           />
-          <TextField select label="Role" {...register('role')} error={!!errors.role} helperText={errors.role?.message}>
+          <TextField
+            select
+            label="Role"
+            {...register('role')}
+            error={!!errors.role}
+            helperText={errors.role?.message}
+          >
             {ROLE_OPTIONS.map((role) => (
-              <MenuItem key={role} value={role}>{role}</MenuItem>
+              <MenuItem key={role} value={role}>
+                {role}
+              </MenuItem>
             ))}
           </TextField>
-          <TextField select label="Status" {...register('status')} error={!!errors.status} helperText={errors.status?.message}>
+          <TextField
+            select
+            label="Status"
+            {...register('status')}
+            error={!!errors.status}
+            helperText={errors.status?.message}
+          >
             {STATUS_OPTIONS.map((status) => (
-              <MenuItem key={status} value={status}>{status}</MenuItem>
+              <MenuItem key={status} value={status}>
+                {status}
+              </MenuItem>
             ))}
           </TextField>
           <Button type="submit" variant="contained" disabled={updateMutation.isPending}>

@@ -73,12 +73,7 @@ export function TripGroupSocialActions({
     'tripGroup',
     reported ? 'delete' : 'create',
   );
-  const canComment = isSocialOperationAllowed(
-    socialConfig.data,
-    'comment',
-    'tripGroup',
-    'create',
-  );
+  const canComment = isSocialOperationAllowed(socialConfig.data, 'comment', 'tripGroup', 'create');
 
   const isTripGroupCommentsOpen = open !== undefined ? open : internalTripGroupCommentsOpen;
 
@@ -115,7 +110,9 @@ export function TripGroupSocialActions({
                 likeMutation.mutate();
               }}
               disabled={likeMutation.isPending}
-              aria-label={liked ? `Unlike trip group (${likes} likes)` : `Like trip group (${likes} likes)`}
+              aria-label={
+                liked ? `Unlike trip group (${likes} likes)` : `Like trip group (${likes} likes)`
+              }
               aria-pressed={liked}
               color={liked ? 'primary' : 'default'}
             >
@@ -131,12 +128,17 @@ export function TripGroupSocialActions({
         </Tooltip>
       ) : null}
       {isAuthenticated && canFavorite ? (
-        <Tooltip title={favorited ? 'Remove trip group from favorites' : 'Add trip group to favorites'} arrow>
+        <Tooltip
+          title={favorited ? 'Remove trip group from favorites' : 'Add trip group to favorites'}
+          arrow
+        >
           <span>
             <IconButton
               onClick={() => favoriteMutation.mutate()}
               disabled={favoriteMutation.isPending}
-              aria-label={favorited ? 'Remove trip group from favorites' : 'Add trip group to favorites'}
+              aria-label={
+                favorited ? 'Remove trip group from favorites' : 'Add trip group to favorites'
+              }
               aria-pressed={favorited}
               color="primary"
             >
@@ -182,7 +184,10 @@ export function TripGroupSocialActions({
         />
       ) : null}
       <Tooltip title={shareCopied ? 'Link copied' : 'Share trip group'} arrow>
-        <IconButton onClick={() => void handleShare()} aria-label={shareCopied ? 'Link copied' : 'Share trip group'}>
+        <IconButton
+          onClick={() => void handleShare()}
+          aria-label={shareCopied ? 'Link copied' : 'Share trip group'}
+        >
           <ShareIcon />
         </IconButton>
       </Tooltip>

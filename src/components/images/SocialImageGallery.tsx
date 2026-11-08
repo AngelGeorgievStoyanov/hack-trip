@@ -41,10 +41,7 @@ export function SocialImageGallery({
         }}
       >
         {images.map((image, position) => (
-          <Box
-            key={image.id}
-            sx={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}
-          >
+          <Box key={image.id} sx={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <Box
               component="button"
               type="button"

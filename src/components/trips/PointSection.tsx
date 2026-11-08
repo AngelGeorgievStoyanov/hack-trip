@@ -31,7 +31,11 @@ const POINT_CARD_STYLE = {
   borderRadius: '0px',
 } as const;
 
-export function PointSection({ point, pointCommentTarget, togglePointComments }: PointSectionProps) {
+export function PointSection({
+  point,
+  pointCommentTarget,
+  togglePointComments,
+}: PointSectionProps) {
   if (!point) {
     return null;
   }

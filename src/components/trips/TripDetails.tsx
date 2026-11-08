@@ -2,7 +2,16 @@
 
 import { useState, type CSSProperties } from 'react';
 import Link from 'next/link';
-import { Typography, CardContent, CardActions, Collapse, IconButton, Tooltip, Box, Button } from '@mui/material';
+import {
+  Typography,
+  CardContent,
+  CardActions,
+  Collapse,
+  IconButton,
+  Tooltip,
+  Box,
+  Button,
+} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import { TripActions } from './TripActions';
@@ -36,7 +45,13 @@ const LINE_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1rem', font
  * Trip Group actions use `tripGroup.social`; Like/Favorite/Report for the selected day
  * use that day's `social` state. Comments remain day-level.
  */
-export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComments, onDayDeleted }: TripDetailsProps) {
+export function TripDetails({
+  tripGroup,
+  day,
+  tripCommentTarget,
+  toggleTripComments,
+  onDayDeleted,
+}: TripDetailsProps) {
   const totalPoints = tripGroup.days.reduce((sum, current) => sum + current.points.length, 0);
   const [expanded, setExpanded] = useState(false);
 
@@ -60,121 +75,152 @@ export function TripDetails({ tripGroup, day, tripCommentTarget, toggleTripComme
 
   return (
     <div style={infoPanelStyle}>
-        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-          <Typography variant="h5" component="div" style={NAME_STYLE}>
-            TRIP NAME : {day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
-          </Typography>
-          {isAuthenticated && canFavorite ? (
-            <FavoriteButton
-              targetType="trip"
-              targetId={day.id}
-              initialFavorited={day.social.favoritedByMe ?? false}
-              initialFavorites={day.social.favorites ?? 0}
-            />
-          ) : null}
-        </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          mb: 1,
+        }}
+      >
+        <Typography variant="h5" component="div" style={NAME_STYLE}>
+          TRIP NAME : {day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
+        </Typography>
+        {isAuthenticated && canFavorite ? (
+          <FavoriteButton
+            targetType="trip"
+            targetId={day.id}
+            initialFavorited={day.social.favoritedByMe ?? false}
+            initialFavorites={day.social.favorites ?? 0}
+          />
+        ) : null}
+      </Box>
 
-          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-            <Typography variant="subtitle1" component="h5" style={LINE_STYLE}>
-              PRICE OF THE TRIP:
-            </Typography>
-            <Typography variant="subtitle1" component="h5" style={{ ...LINE_STYLE, margin: 0 }}>
-              {day.price != null ? `${day.price} ${day.currency?.code ?? 'N/A'}` : 'N/A'}
-            </Typography>
-            <Tooltip title={day.currency?.name ?? 'Currency'} arrow>
-              <IconButton size="small" aria-label="Currency info">
-                <InfoIcon fontSize="inherit" />
-              </IconButton>
-            </Tooltip>
-          </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+        <Typography variant="subtitle1" component="h5" style={LINE_STYLE}>
+          PRICE OF THE TRIP:
+        </Typography>
+        <Typography variant="subtitle1" component="h5" style={{ ...LINE_STYLE, margin: 0 }}>
+          {day.price != null ? `${day.price} ${day.currency?.code ?? 'N/A'}` : 'N/A'}
+        </Typography>
+        <Tooltip title={day.currency?.name ?? 'Currency'} arrow>
+          <IconButton size="small" aria-label="Currency info">
+            <InfoIcon fontSize="inherit" />
+          </IconButton>
+        </Tooltip>
+      </Box>
 
-          <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
-            TRANSPORT WITH: {day.transport.name ?? 'N/A'}
-          </Typography>
-          <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
-            COUNT OF PEOPLE: {day.countPeoples}
-          </Typography>
-          <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
-            TYPE OF THE GROUP: {day.group.name ?? 'N/A'}
-          </Typography>
-          <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
-            DESTINATION: {day.destination ?? 'N/A'}
-          </Typography>
+      <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
+        TRANSPORT WITH: {day.transport.name ?? 'N/A'}
+      </Typography>
+      <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
+        COUNT OF PEOPLE: {day.countPeoples}
+      </Typography>
+      <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
+        TYPE OF THE GROUP: {day.group.name ?? 'N/A'}
+      </Typography>
+      <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
+        DESTINATION: {day.destination ?? 'N/A'}
+      </Typography>
 
-          {day.description ? (
-            <>
-              {day.description.length < 150 ? (
-                <Typography variant="subtitle1" component="div" style={{ ...LINE_STYLE, padding: '0px 15px', marginTop: '10px' }}>
-                  Description: {day.description}
-                </Typography>
-              ) : (
-                <>
-                  <Typography variant="subtitle1" component="div" style={{ ...LINE_STYLE, padding: '0px 15px', marginTop: '10px' }}>
-                    Description: {day.description.slice(0, 150)}...
-                  </Typography>
-                  <CardActions disableSpacing>
-                    <IconButton
-                      onClick={handleExpandClick}
-                      aria-expanded={expanded}
-                      aria-label={expanded ? 'Show less' : 'Show more'}
-                      sx={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 150ms', marginLeft: 'auto' }}
-                    >
-                      <ExpandMoreIcon />
-                    </IconButton>
-                  </CardActions>
-                  <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    <CardContent>
-                      <Typography paragraph>
-                        {day.description}
-                      </Typography>
-                    </CardContent>
-                  </Collapse>
-                </>
-              )}
-            </>
-          ) : null}
-
-          <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
-            {totalPoints > 0
-              ? `FOR THIS TRIP HAVE ${totalPoints} POINTS`
-              : 'FOR THIS TRIP DONT HAVE POINTS'}
-          </Typography>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1, mt: 1, width: '100%' }}>
-            <TripActions tripGroup={tripGroup} tripId={day.id} section="navigation" />
-            <TripActions tripGroup={tripGroup} tripId={day.id} section="management" onDayDeleted={onDayDeleted} />
-            <Link
-              href="/trips"
-              style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}
+      {day.description ? (
+        <>
+          {day.description.length < 150 ? (
+            <Typography
+              variant="subtitle1"
+              component="div"
+              style={{ ...LINE_STYLE, padding: '0px 15px', marginTop: '10px' }}
             >
-              <Button
-                variant="contained"
-                sx={{
-                  ':hover': { background: '#4daf30' },
-                  padding: '10px',
-                  width: '100%',
-                  minHeight: '48px',
-                }}
+              Description: {day.description}
+            </Typography>
+          ) : (
+            <>
+              <Typography
+                variant="subtitle1"
+                component="div"
+                style={{ ...LINE_STYLE, padding: '0px 15px', marginTop: '10px' }}
               >
-                BACK
-              </Button>
-            </Link>
-          </Box>
+                Description: {day.description.slice(0, 150)}...
+              </Typography>
+              <CardActions disableSpacing>
+                <IconButton
+                  onClick={handleExpandClick}
+                  aria-expanded={expanded}
+                  aria-label={expanded ? 'Show less' : 'Show more'}
+                  sx={{
+                    transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 150ms',
+                    marginLeft: 'auto',
+                  }}
+                >
+                  <ExpandMoreIcon />
+                </IconButton>
+              </CardActions>
+              <Collapse in={expanded} timeout="auto" unmountOnExit>
+                <CardContent>
+                  <Typography paragraph>{day.description}</Typography>
+                </CardContent>
+              </Collapse>
+            </>
+          )}
+        </>
+      ) : null}
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%', mt: 1 }}>
-            <EngagementBar
-              targetType="trip"
-              targetId={day.id}
-              social={day.social}
-              commentTarget={dayTarget}
-              showComments
-              commentsOpen={isDayOpen}
-              onToggleComments={() => toggleTripComments(dayTarget)}
-              showFavorite={false}
-              actionsJustify="space-around"
-            />
-          </Box>
+      <Typography variant="subtitle1" component="div" style={LINE_STYLE}>
+        {totalPoints > 0
+          ? `FOR THIS TRIP HAVE ${totalPoints} POINTS`
+          : 'FOR THIS TRIP DONT HAVE POINTS'}
+      </Typography>
 
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'stretch',
+          gap: 1,
+          mt: 1,
+          width: '100%',
+        }}
+      >
+        <TripActions tripGroup={tripGroup} tripId={day.id} section="navigation" />
+        <TripActions
+          tripGroup={tripGroup}
+          tripId={day.id}
+          section="management"
+          onDayDeleted={onDayDeleted}
+        />
+        <Link
+          href="/trips"
+          style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}
+        >
+          <Button
+            variant="contained"
+            sx={{
+              ':hover': { background: '#4daf30' },
+              padding: '10px',
+              width: '100%',
+              minHeight: '48px',
+            }}
+          >
+            BACK
+          </Button>
+        </Link>
+      </Box>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%', mt: 1 }}>
+        <EngagementBar
+          targetType="trip"
+          targetId={day.id}
+          social={day.social}
+          commentTarget={dayTarget}
+          showComments
+          commentsOpen={isDayOpen}
+          onToggleComments={() => toggleTripComments(dayTarget)}
+          showFavorite={false}
+          actionsJustify="space-around"
+        />
+      </Box>
     </div>
   );
 }

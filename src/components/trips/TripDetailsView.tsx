@@ -13,12 +13,7 @@ import { buildTripUrl } from '@/lib/tripUrl';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import { useTripGroup } from '@/hooks/useTripGroup';
 import { TripGroupSocialActions } from '@/components/social/TripGroupSocialActions';
-import {
-  CARD_BORDER,
-  CARD_SHADOW,
-  COLORS,
-  pageBackgroundStyle,
-} from '@/constants/ui';
+import { CARD_BORDER, CARD_SHADOW, COLORS, pageBackgroundStyle } from '@/constants/ui';
 import type { TripGroupResponse } from '@/types';
 
 interface TripDetailsViewProps {
@@ -62,7 +57,9 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
       return false;
     }
     if (activeTarget.type === 'day' && target.type === 'day') {
-      return activeTarget.tripGroupId === target.tripGroupId && activeTarget.tripId === target.tripId;
+      return (
+        activeTarget.tripGroupId === target.tripGroupId && activeTarget.tripId === target.tripId
+      );
     }
     if (activeTarget.type === 'point' && target.type === 'point') {
       return activeTarget.pointId === target.pointId;
@@ -90,10 +87,9 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
         return point?.social.comments.count ?? 0;
       }
       case 'image': {
-        const image = [
-          ...day.images,
-          ...day.points.flatMap((current) => current.images),
-        ].find((current) => current.id === target.imageId);
+        const image = [...day.images, ...day.points.flatMap((current) => current.images)].find(
+          (current) => current.id === target.imageId,
+        );
         return image?.social.comments.count ?? 0;
       }
       default:
@@ -216,7 +212,9 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
             <TripMapSection
               key={`day-map-${day.id}`}
               points={day.points}
-              dayPosition={day.lat != null && day.lng != null ? { lat: day.lat, lng: day.lng } : null}
+              dayPosition={
+                day.lat != null && day.lng != null ? { lat: day.lat, lng: day.lng } : null
+              }
               selectedPointIndex={selectedPointIndex}
               onPointChange={(index) => {
                 setSelectedPointIndex(index);
@@ -248,10 +246,6 @@ export function TripDetailsView({ trip, initialDayNumber }: TripDetailsViewProps
           </Box>
         ) : null}
       </Box>
-
-
-
-
     </>
   );
 }

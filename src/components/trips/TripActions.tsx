@@ -78,7 +78,6 @@ export function TripActions({
   }
 
   if (section === 'navigation') {
-
     return (
       <Box sx={ACTION_BUTTON_BOX_SX}>
         <Button

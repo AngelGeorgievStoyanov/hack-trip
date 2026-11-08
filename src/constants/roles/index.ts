@@ -11,7 +11,10 @@ export const MODERATOR_ROLES = [ROLES.admin, ROLES.manager] as const;
 export const ADMIN_ROLES = [ROLES.admin] as const;
 
 /** Checks `ProfileDto.permissions` (§6.16) instead of a `role` field that the backend never sends to auth/profile endpoints. */
-export function hasRole(user: ProfileDto | null, role: (typeof ROLES)[keyof typeof ROLES]): boolean {
+export function hasRole(
+  user: ProfileDto | null,
+  role: (typeof ROLES)[keyof typeof ROLES],
+): boolean {
   if (!user) return false;
   switch (role) {
     case ROLES.admin:

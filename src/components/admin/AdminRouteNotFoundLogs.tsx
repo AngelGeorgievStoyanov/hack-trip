@@ -2,7 +2,20 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Box, Button, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import { adminApi } from '@/api/admin';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { ADMIN_PAGE_SIZE_DEFAULT } from '@/constants/ui';
@@ -56,9 +69,18 @@ export function AdminRouteNotFoundLogs() {
       ) : null}
       {pagination && (pagination.totalPages ?? 0) > 1 ? (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
-          <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-          <Typography>Page {page} of {pagination.totalPages}</Typography>
-          <Button disabled={page >= (pagination.totalPages ?? 1)} onClick={() => setPage((p) => p + 1)}>Next</Button>
+          <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            Previous
+          </Button>
+          <Typography>
+            Page {page} of {pagination.totalPages}
+          </Typography>
+          <Button
+            disabled={page >= (pagination.totalPages ?? 1)}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
         </Box>
       ) : null}
     </Box>

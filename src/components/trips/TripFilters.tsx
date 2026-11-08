@@ -2,7 +2,16 @@
 
 import { useState, type ChangeEvent, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { AppBar, Box, FormControl, InputBase, InputLabel, MenuItem, Select, Toolbar } from '@mui/material';
+import {
+  AppBar,
+  Box,
+  FormControl,
+  InputBase,
+  InputLabel,
+  MenuItem,
+  Select,
+  Toolbar,
+} from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import SearchIcon from '@mui/icons-material/Search';
@@ -75,7 +84,6 @@ const SELECT_BOX_SX = {
   margin: { xs: '5px', sm: '3px' },
   width: { xs: '100%', sm: 'auto' },
 } as const;
-
 
 /**
  * Trip list filters. Legacy applied a filter as soon as a select changed or the search was

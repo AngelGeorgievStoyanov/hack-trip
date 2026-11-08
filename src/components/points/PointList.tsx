@@ -12,13 +12,7 @@ interface PointListProps {
   disabled?: boolean;
 }
 
-export function PointList({
-  points,
-  onEdit,
-  onDelete,
-  onMove,
-  disabled = false,
-}: PointListProps) {
+export function PointList({ points, onEdit, onDelete, onMove, disabled = false }: PointListProps) {
   const sortedPoints = [...points].sort(
     (first, second) => Number(first.pointNumber) - Number(second.pointNumber),
   );

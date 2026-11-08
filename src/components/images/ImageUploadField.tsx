@@ -1,6 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState, type ChangeEvent, type Dispatch, type SetStateAction } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
 import {
   Alert,
   Box,
@@ -24,7 +31,9 @@ interface ImageUploadFieldProps {
   existingCount?: number;
 }
 
-function loadImage(file: File): Promise<{ image: CanvasImageSource; width: number; height: number; cleanup: () => void }> {
+function loadImage(
+  file: File,
+): Promise<{ image: CanvasImageSource; width: number; height: number; cleanup: () => void }> {
   if (typeof createImageBitmap === 'function') {
     return createImageBitmap(file).then((bitmap) => ({
       image: bitmap,
@@ -37,12 +46,13 @@ function loadImage(file: File): Promise<{ image: CanvasImageSource; width: numbe
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const image = new Image();
-    image.onload = () => resolve({
-      image,
-      width: image.naturalWidth,
-      height: image.naturalHeight,
-      cleanup: () => URL.revokeObjectURL(url),
-    });
+    image.onload = () =>
+      resolve({
+        image,
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+        cleanup: () => URL.revokeObjectURL(url),
+      });
     image.onerror = () => {
       URL.revokeObjectURL(url);
       reject(new Error('Could not read image'));
@@ -53,19 +63,24 @@ function loadImage(file: File): Promise<{ image: CanvasImageSource; width: numbe
 
 function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error('Could not encode image'));
-    }, 'image/jpeg', quality);
+    canvas.toBlob(
+      (blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('Could not encode image'));
+      },
+      'image/jpeg',
+      quality,
+    );
   });
 }
 
 async function compressImage(file: File): Promise<File> {
   const { image, width, height, cleanup } = await loadImage(file);
   try {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(
-      window.navigator.userAgent,
-    );
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(
+        window.navigator.userAgent,
+      );
     const maxDimension = isMobile ? 2048 : 2560;
     const scale = Math.min(1, maxDimension / Math.max(width, height));
     const canvas = document.createElement('canvas');
@@ -94,7 +109,11 @@ async function compressImage(file: File): Promise<File> {
   }
 }
 
-export default function ImageUploadField({ files, setFiles, existingCount = 0 }: ImageUploadFieldProps) {
+export default function ImageUploadField({
+  files,
+  setFiles,
+  existingCount = 0,
+}: ImageUploadFieldProps) {
   const isMobileUpload = useMediaQuery('(max-width:599px)');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -173,7 +192,15 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, width: '100%' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 1,
+        }}
+      >
         <CustomFileUploadButton
           handleFilesChange={handleFilesChange}
           images={[]}
@@ -182,7 +209,7 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
           maxImages={Math.max(0, MAX_IMAGES_PER_ENTITY - existingCount)}
           disabled={processing}
         />
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {processing ? <CircularProgress size={18} aria-label="Processing images" /> : null}
           <Typography variant="body2" sx={{ mr: 1 }}>
             {existingCount + files.length}/{MAX_IMAGES_PER_ENTITY} uploaded images
@@ -195,7 +222,11 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
           9 images are the maximum number to upload.
         </Typography>
       ) : null}
-      {errorMessage ? <Alert severity="warning" onClose={() => setErrorMessage(null)}>{errorMessage}</Alert> : null}
+      {errorMessage ? (
+        <Alert severity="warning" onClose={() => setErrorMessage(null)}>
+          {errorMessage}
+        </Alert>
+      ) : null}
 
       {previews.length > 0 ? (
         <Box
@@ -214,7 +245,16 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
           {previews.map(({ file, url }, index) => (
             <Box
               key={`${file.name}-${file.lastModified}-${index}`}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0, p: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                minWidth: 0,
+                p: 1,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+              }}
             >
               <Box
                 component="img"
@@ -222,11 +262,21 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
                 alt={file.name}
                 sx={{ width: 55, height: 45, objectFit: 'cover', flexShrink: 0 }}
               />
-              <Typography variant="body2" title={file.name} sx={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
+              <Typography
+                variant="body2"
+                title={file.name}
+                sx={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}
+              >
                 {file.name}
               </Typography>
               <Tooltip title="Remove image" arrow>
-                <IconButton aria-label={`Remove ${file.name}`} color="error" onClick={() => removeFile(index)} disabled={processing} size="small">
+                <IconButton
+                  aria-label={`Remove ${file.name}`}
+                  color="error"
+                  onClick={() => removeFile(index)}
+                  disabled={processing}
+                  size="small"
+                >
                   <RemoveImageIcon />
                 </IconButton>
               </Tooltip>
@@ -238,12 +288,24 @@ export default function ImageUploadField({ files, setFiles, existingCount = 0 }:
       {files.length > 0 ? (
         isMobileUpload ? (
           <Tooltip title="REMOVE ALL IMAGES" arrow>
-            <IconButton aria-label="Remove all images" color="primary" onClick={removeAllFiles} disabled={processing} size="large" sx={{ alignSelf: 'flex-start' }}>
+            <IconButton
+              aria-label="Remove all images"
+              color="primary"
+              onClick={removeAllFiles}
+              disabled={processing}
+              size="large"
+              sx={{ alignSelf: 'flex-start' }}
+            >
               <DeleteAllImagesIcon fontSize="large" />
             </IconButton>
           </Tooltip>
         ) : (
-          <Button variant="contained" onClick={removeAllFiles} disabled={processing} sx={{ alignSelf: 'flex-start' }}>
+          <Button
+            variant="contained"
+            onClick={removeAllFiles}
+            disabled={processing}
+            sx={{ alignSelf: 'flex-start' }}
+          >
             Remove all images
           </Button>
         )

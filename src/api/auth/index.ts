@@ -93,11 +93,9 @@ export const authApi = {
 
   resendVerification: async (input: ResendVerificationInput): Promise<MessageResponse> => {
     const body = resendVerificationSchema.parse(input);
-    const { data } = await apiClient.post<MessageResponse>(
-      `${AUTH}/resend-verification`,
-      body,
-      { skipAuthHeader: true },
-    );
+    const { data } = await apiClient.post<MessageResponse>(`${AUTH}/resend-verification`, body, {
+      skipAuthHeader: true,
+    });
     return data;
   },
 

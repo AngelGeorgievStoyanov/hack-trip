@@ -73,7 +73,7 @@ export function EngagementBar({
   );
   const externallyControlledComments = onToggleComments !== undefined;
   const isCommentsOpen = externallyControlledComments
-    ? commentsOpen ?? false
+    ? (commentsOpen ?? false)
     : internalCommentsOpen;
 
   function toggleComments(): void {
@@ -84,9 +84,10 @@ export function EngagementBar({
     setInternalCommentsOpen((previous) => !previous);
   }
 
-  const reportLabel = targetType === 'day' || targetType === 'trip'
-    ? 'REPORT TRIP'
-    : `REPORT ${targetType.toUpperCase()}`;
+  const reportLabel =
+    targetType === 'day' || targetType === 'trip'
+      ? 'REPORT TRIP'
+      : `REPORT ${targetType.toUpperCase()}`;
 
   return (
     <Box
@@ -95,35 +96,46 @@ export function EngagementBar({
       onTouchStart={(event) => event.stopPropagation()}
       onTouchMove={(event) => event.stopPropagation()}
       onTouchEnd={(event) => event.stopPropagation()}
-      sx={presentation === 'overlay'
-        ? {
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            zIndex: 2,
-            p: 0.35,
-            border: '1px solid rgba(255,255,255,0.22)',
-            borderRadius: 3,
-            backgroundColor: 'rgba(24, 31, 26, 0.82)',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-      '& .MuiIconButton-root': { color: 'common.white', p: size === 'small' ? 0.5 : 0.65 },
-      '& .MuiIconButton-root:hover': { backgroundColor: 'rgba(255,255,255,0.16)' },
-      '& .MuiBadge-badge': {
-        fontSize: size === 'small' ? '0.65rem' : undefined,
-        height: size === 'small' ? 14 : undefined,
-        minWidth: size === 'small' ? 14 : undefined,
-        padding: size === 'small' ? '0 3px' : undefined,
-        lineHeight: size === 'small' ? 1 : undefined,
-      },
-          }
-        : { display: 'flex', flexDirection: 'column', gap: '0.25rem', margin: '0.25rem 0' }}
+      sx={
+        presentation === 'overlay'
+          ? {
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 2,
+              p: 0.35,
+              border: '1px solid rgba(255,255,255,0.22)',
+              borderRadius: 3,
+              backgroundColor: 'rgba(24, 31, 26, 0.82)',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              '& .MuiIconButton-root': { color: 'common.white', p: size === 'small' ? 0.5 : 0.65 },
+              '& .MuiIconButton-root:hover': { backgroundColor: 'rgba(255,255,255,0.16)' },
+              '& .MuiBadge-badge': {
+                fontSize: size === 'small' ? '0.65rem' : undefined,
+                height: size === 'small' ? 14 : undefined,
+                minWidth: size === 'small' ? 14 : undefined,
+                padding: size === 'small' ? '0 3px' : undefined,
+                lineHeight: size === 'small' ? 1 : undefined,
+              },
+            }
+          : { display: 'flex', flexDirection: 'column', gap: '0.25rem', margin: '0.25rem 0' }
+      }
     >
       {showConfigStatus ? (
         <SocialConfigStatus isLoading={socialConfig.isLoading} error={socialConfig.error} />
       ) : null}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'nowrap', justifyContent: actionsJustify, width: '100%' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 1,
+          alignItems: 'center',
+          flexWrap: 'nowrap',
+          justifyContent: actionsJustify,
+          width: '100%',
+        }}
+      >
         {status === 'authenticated' ? (
           <>
             {canLike ? (
@@ -156,10 +168,25 @@ export function EngagementBar({
           </>
         ) : null}
         {showComments ? (
-        <Tooltip title={isCommentsOpen ? 'Hide comments' : social.comments.count > 0 ? `Show ${social.comments.count} comments` : 'Add comment'} arrow>
-          <IconButton
-            onClick={toggleComments}
-            aria-label={isCommentsOpen ? 'Hide comments' : social.comments.count > 0 ? `Show ${social.comments.count} comments` : 'Add comment'}
+          <Tooltip
+            title={
+              isCommentsOpen
+                ? 'Hide comments'
+                : social.comments.count > 0
+                  ? `Show ${social.comments.count} comments`
+                  : 'Add comment'
+            }
+            arrow
+          >
+            <IconButton
+              onClick={toggleComments}
+              aria-label={
+                isCommentsOpen
+                  ? 'Hide comments'
+                  : social.comments.count > 0
+                    ? `Show ${social.comments.count} comments`
+                    : 'Add comment'
+              }
               aria-expanded={isCommentsOpen}
               color="primary"
               size={size}
@@ -167,7 +194,11 @@ export function EngagementBar({
               {isCommentsOpen ? (
                 <CloseIcon />
               ) : social.comments.count > 0 ? (
-                <Badge badgeContent={social.comments.count} max={Number.MAX_SAFE_INTEGER} color="primary">
+                <Badge
+                  badgeContent={social.comments.count}
+                  max={Number.MAX_SAFE_INTEGER}
+                  color="primary"
+                >
                   <CommentIcon />
                 </Badge>
               ) : (
@@ -178,10 +209,7 @@ export function EngagementBar({
         ) : null}
       </Box>
       {!externallyControlledComments && showComments && isCommentsOpen ? (
-        <CommentsSection
-          target={commentTarget}
-          defaultFormOpen={social.comments.count === 0}
-        />
+        <CommentsSection target={commentTarget} defaultFormOpen={social.comments.count === 0} />
       ) : null}
     </Box>
   );

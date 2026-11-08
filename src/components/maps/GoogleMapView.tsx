@@ -100,12 +100,16 @@ export function GoogleMapView({
     ) : null;
   }
 
-  const selectedMarker = selectedMarkerId == null ? undefined : markers.find((marker) => marker.id === selectedMarkerId);
+  const selectedMarker =
+    selectedMarkerId == null ? undefined : markers.find((marker) => marker.id === selectedMarkerId);
 
   return (
     <Box sx={{ display: 'flex', width: '100%', maxWidth, minWidth: 0, height }}>
       <GoogleMap
-        mapContainerStyle={{ width: '100%', height: typeof height === 'number' ? `${height}px` : height }}
+        mapContainerStyle={{
+          width: '100%',
+          height: typeof height === 'number' ? `${height}px` : height,
+        }}
         center={center}
         zoom={zoom}
         options={options}
@@ -150,12 +154,16 @@ export function GoogleMapView({
             animation={google.maps.Animation.DROP}
             onClick={() => onMarkerSelect?.(marker)}
             onDragEnd={(event) => {
-              if (event.latLng) onMarkerDragEnd?.({ lat: event.latLng.lat(), lng: event.latLng.lng() }, marker);
+              if (event.latLng)
+                onMarkerDragEnd?.({ lat: event.latLng.lat(), lng: event.latLng.lng() }, marker);
             }}
           />
         ))}
         {selectedMarker && renderInfoWindow ? (
-          <InfoWindowF position={selectedMarker.position} onCloseClick={() => onMarkerSelect?.(null)}>
+          <InfoWindowF
+            position={selectedMarker.position}
+            onCloseClick={() => onMarkerSelect?.(null)}
+          >
             {renderInfoWindow(selectedMarker)}
           </InfoWindowF>
         ) : null}

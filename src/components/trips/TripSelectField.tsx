@@ -91,13 +91,7 @@ export function TripSelectField({
         autoHighlight
         openOnFocus
         renderInput={(params) => (
-          <TextField
-            {...params}
-            name={name}
-            label={label}
-            error={error}
-            helperText={helperText}
-          />
+          <TextField {...params} name={name} label={label} error={error} helperText={helperText} />
         )}
       />
     );

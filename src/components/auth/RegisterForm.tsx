@@ -33,10 +33,11 @@ import {
 const registerFormSchema = registerSchema
   .extend({
     confirmPassword: z.string().trim().min(1, 'Confirm password is required.'),
-    acceptedTerms: z.boolean().refine(
-      (accepted) => accepted,
-      { message: 'You must accept the terms of use and privacy policy.' },
-    ),
+    acceptedTerms: z
+      .boolean()
+      .refine((accepted) => accepted, {
+        message: 'You must accept the terms of use and privacy policy.',
+      }),
   })
   .refine((values) => values.confirmPassword === values.password, {
     path: ['confirmPassword'],
@@ -156,7 +157,7 @@ export function RegisterForm() {
           autoComplete="email"
           {...register('email')}
           error={(isSubmitted || touchedFields.email) && !!errors.email}
-          helperText={isSubmitted || touchedFields.email ? errors.email?.message ?? ' ' : ' '}
+          helperText={isSubmitted || touchedFields.email ? (errors.email?.message ?? ' ') : ' '}
         />
         <TextField
           label="First name"
@@ -164,7 +165,9 @@ export function RegisterForm() {
           autoComplete="given-name"
           {...register('firstName')}
           error={(isSubmitted || touchedFields.firstName) && !!errors.firstName}
-          helperText={isSubmitted || touchedFields.firstName ? errors.firstName?.message ?? ' ' : ' '}
+          helperText={
+            isSubmitted || touchedFields.firstName ? (errors.firstName?.message ?? ' ') : ' '
+          }
         />
         <TextField
           label="Last name"
@@ -172,7 +175,9 @@ export function RegisterForm() {
           autoComplete="family-name"
           {...register('lastName')}
           error={(isSubmitted || touchedFields.lastName) && !!errors.lastName}
-          helperText={isSubmitted || touchedFields.lastName ? errors.lastName?.message ?? ' ' : ' '}
+          helperText={
+            isSubmitted || touchedFields.lastName ? (errors.lastName?.message ?? ' ') : ' '
+          }
         />
         <PasswordField
           label="Password"
@@ -198,7 +203,7 @@ export function RegisterForm() {
             isSubmitted || touchedFields.confirmPassword
               ? confirmPasswordMismatch
                 ? 'Passwords must match'
-                : errors.confirmPassword?.message ?? ' '
+                : (errors.confirmPassword?.message ?? ' ')
               : ' '
           }
         />
@@ -217,7 +222,14 @@ export function RegisterForm() {
           </Typography>
         ) : null}
         <input type="hidden" {...register('captchaToken')} />
-        <Captcha resetKey={captchaResetKey} disabled={isFormLocked} onTokenChange={(token) => { setCaptchaToken(token || null); setValue('captchaToken', token, { shouldValidate: true }); }} />
+        <Captcha
+          resetKey={captchaResetKey}
+          disabled={isFormLocked}
+          onTokenChange={(token) => {
+            setCaptchaToken(token || null);
+            setValue('captchaToken', token, { shouldValidate: true });
+          }}
+        />
         <Button
           type="submit"
           variant="contained"
@@ -228,7 +240,13 @@ export function RegisterForm() {
           Register
         </Button>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mt: 1 }}>
-          <Button component={Link} href="/login" disabled={submitting} variant="contained" sx={SECONDARY_BUTTON_SX}>
+          <Button
+            component={Link}
+            href="/login"
+            disabled={submitting}
+            variant="contained"
+            sx={SECONDARY_BUTTON_SX}
+          >
             Already have an account? Login
           </Button>
           <Button

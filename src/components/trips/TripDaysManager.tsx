@@ -16,7 +16,11 @@ interface TripDaysManagerProps {
   initialEditingDayId?: number;
 }
 
-export function TripDaysManager({ tripGroupId, initialTrip, initialEditingDayId }: TripDaysManagerProps) {
+export function TripDaysManager({
+  tripGroupId,
+  initialTrip,
+  initialEditingDayId,
+}: TripDaysManagerProps) {
   const queryClient = useQueryClient();
   const notification = useNotification();
   const [addingDay, setAddingDay] = useState<{ dayNumber: number } | null>(null);

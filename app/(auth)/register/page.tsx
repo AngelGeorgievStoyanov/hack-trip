@@ -9,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
-  return <GuestOnly><RegisterForm /></GuestOnly>;
+  return (
+    <GuestOnly>
+      <RegisterForm />
+    </GuestOnly>
+  );
 }

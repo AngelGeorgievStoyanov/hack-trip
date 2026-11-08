@@ -52,10 +52,9 @@ export const adminApi = {
 
   listFailedLogs: async (query: AdminListQuery = {}): Promise<AdminPage<FailedLogDto>> => {
     const params = adminPaginationQuerySchema.parse(query);
-    const { data } = await apiClient.get<AdminPage<FailedLogDto>>(
-      `${ADMIN}/failed-login-logs`,
-      { params },
-    );
+    const { data } = await apiClient.get<AdminPage<FailedLogDto>>(`${ADMIN}/failed-login-logs`, {
+      params,
+    });
     return data;
   },
 

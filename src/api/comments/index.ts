@@ -1,7 +1,12 @@
 import { apiClient } from '../client';
 import { API_PREFIX, COMMENTS, IMAGES, POINTS, TRIPS, TRIP_GROUPS } from '../../constants/api';
 import type { CommentDto, CommentListResponse } from '../../types';
-import { commentBodySchema, commentIdParams, commentPageQuerySchema, replyIdParams } from '../../validations';
+import {
+  commentBodySchema,
+  commentIdParams,
+  commentPageQuerySchema,
+  replyIdParams,
+} from '../../validations';
 
 export interface CommentCreateInput {
   comment: string;
@@ -32,7 +37,10 @@ function commentBasePath(target: CommentTarget): string {
 }
 
 export const commentApi = {
-  list: async (target: CommentTarget, query: CommentListQuery = {}): Promise<CommentListResponse> => {
+  list: async (
+    target: CommentTarget,
+    query: CommentListQuery = {},
+  ): Promise<CommentListResponse> => {
     const params = commentPageQuerySchema.parse(query);
     const { data } = await apiClient.get<CommentListResponse>(commentBasePath(target), { params });
     return data;
@@ -54,10 +62,15 @@ export const commentApi = {
     await apiClient.delete(COMMENTS + '/' + commentId);
   },
 
-  replies: async (commentId: number, query: CommentListQuery = {}): Promise<CommentListResponse> => {
+  replies: async (
+    commentId: number,
+    query: CommentListQuery = {},
+  ): Promise<CommentListResponse> => {
     const { commentId: id } = commentIdParams.parse({ commentId: String(commentId) });
     const params = commentPageQuerySchema.parse(query);
-    const { data } = await apiClient.get<CommentListResponse>(COMMENTS + '/' + id + '/replies', { params });
+    const { data } = await apiClient.get<CommentListResponse>(COMMENTS + '/' + id + '/replies', {
+      params,
+    });
     return data;
   },
 

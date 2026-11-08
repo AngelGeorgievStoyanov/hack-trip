@@ -16,7 +16,8 @@ import type { Role } from '@/types';
 export function RequireRole({ roles, children }: { roles: Role[]; children: ReactNode }) {
   const { status, user } = useAuth();
 
-  const allowed = status === 'authenticated' && user !== null && roles.some((role) => hasRole(user, role));
+  const allowed =
+    status === 'authenticated' && user !== null && roles.some((role) => hasRole(user, role));
 
   if (status === 'loading') {
     return null;

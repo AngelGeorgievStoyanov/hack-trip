@@ -1,8 +1,16 @@
 import { z } from 'zod';
 import { emailString, passwordString, trimmedString } from '../shared';
 
-const captchaTokenSchema = z.string().min(1, 'Please complete the CAPTCHA.').max(8192).refine((value) => !/\s/.test(value));
-const opaqueTokenSchema = z.string().min(1).max(200).refine((value) => !/\s/.test(value));
+const captchaTokenSchema = z
+  .string()
+  .min(1, 'Please complete the CAPTCHA.')
+  .max(8192)
+  .refine((value) => !/\s/.test(value));
+const opaqueTokenSchema = z
+  .string()
+  .min(1)
+  .max(200)
+  .refine((value) => !/\s/.test(value));
 
 export const registerSchema = z
   .object({

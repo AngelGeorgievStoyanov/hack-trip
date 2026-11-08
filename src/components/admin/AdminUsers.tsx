@@ -3,7 +3,20 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
-import { Alert, Box, Button, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import { adminApi } from '@/api/admin';
 import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
@@ -19,7 +32,11 @@ export function AdminUsers() {
   const [error, setError] = useState<string | null>(null);
   const isAdmin = isModeratorUser(user);
 
-  const { data, isLoading, error: queryError } = useQuery({
+  const {
+    data,
+    isLoading,
+    error: queryError,
+  } = useQuery({
     queryKey: ['admin', 'users', page, ADMIN_PAGE_SIZE_DEFAULT],
     queryFn: () => adminApi.listUsers({ page, pageSize: ADMIN_PAGE_SIZE_DEFAULT }),
   });
@@ -35,7 +52,11 @@ export function AdminUsers() {
   return (
     <Box>
       <Typography variant="h4">Users</Typography>
-      {error ? <Alert severity="error" onClose={() => setError(null)}>{error}</Alert> : null}
+      {error ? (
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
       {isLoading ? <CircularProgress /> : null}
       {queryError ? <Alert severity="error">{getGenericErrorMessage(queryError)}</Alert> : null}
       {data ? (
@@ -54,7 +75,9 @@ export function AdminUsers() {
               {data.items.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell>{u.email}</TableCell>
-                  <TableCell>{u.firstName} {u.lastName}</TableCell>
+                  <TableCell>
+                    {u.firstName} {u.lastName}
+                  </TableCell>
                   <TableCell>{u.role}</TableCell>
                   <TableCell>{u.status}</TableCell>
                   <TableCell>
@@ -67,13 +90,14 @@ export function AdminUsers() {
                       size="small"
                       color="error"
                       onClick={() =>
-                        void confirm('Are you sure you want to delete this user?', 'Delete Confirmation').then(
-                          (confirmed) => {
-                            if (confirmed) {
-                              deleteMutation.mutate(u.id);
-                            }
-                          },
-                        )
+                        void confirm(
+                          'Are you sure you want to delete this user?',
+                          'Delete Confirmation',
+                        ).then((confirmed) => {
+                          if (confirmed) {
+                            deleteMutation.mutate(u.id);
+                          }
+                        })
                       }
                     >
                       Delete
@@ -87,9 +111,18 @@ export function AdminUsers() {
       ) : null}
       {pagination && (pagination.totalPages ?? 0) > 1 ? (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
-          <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-          <Typography>Page {page} of {pagination.totalPages}</Typography>
-          <Button disabled={page >= (pagination.totalPages ?? 1)} onClick={() => setPage((p) => p + 1)}>Next</Button>
+          <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            Previous
+          </Button>
+          <Typography>
+            Page {page} of {pagination.totalPages}
+          </Typography>
+          <Button
+            disabled={page >= (pagination.totalPages ?? 1)}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
         </Box>
       ) : null}
     </Box>

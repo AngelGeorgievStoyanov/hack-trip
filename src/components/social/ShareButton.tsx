@@ -28,7 +28,11 @@ export function ShareButton({ url, title, text, image }: ShareButtonProps) {
 
   return (
     <Tooltip title={copied ? 'Link copied' : 'Share'} arrow>
-      <IconButton type="button" onClick={() => void handleShare()} aria-label={copied ? 'Link copied' : 'Share'}>
+      <IconButton
+        type="button"
+        onClick={() => void handleShare()}
+        aria-label={copied ? 'Link copied' : 'Share'}
+      >
         <ShareIcon />
       </IconButton>
     </Tooltip>

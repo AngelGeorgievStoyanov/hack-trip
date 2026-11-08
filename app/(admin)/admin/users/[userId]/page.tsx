@@ -19,4 +19,3 @@ export default async function AdminUserEditPage({ params }: AdminUserEditPagePro
     </section>
   );
 }
-

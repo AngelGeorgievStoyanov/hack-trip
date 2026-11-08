@@ -38,24 +38,30 @@ export function PointActions({ point }: { point: TripPoint }) {
       <SocialConfigStatus isLoading={socialConfig.isLoading} error={socialConfig.error} />
       {isAuthenticated && (canLike || canFavorite || canReport) ? (
         <>
-          {canLike ? <LikeButton
-            targetType="point"
-            targetId={point.id}
-            initialLiked={point.social.likedByMe}
-            initialLikes={point.social.likes}
-          /> : null}
-          {canFavorite ? <FavoriteButton
-            targetType="point"
-            targetId={point.id}
-            initialFavorited={point.social.favoritedByMe ?? false}
-            initialFavorites={point.social.favorites ?? 0}
-          /> : null}
-          {canReport ? <ReportButton
-            targetType="point"
-            targetId={point.id}
-            initialReported={point.social.reportedByMe}
-            label="REPORT POINT"
-          /> : null}
+          {canLike ? (
+            <LikeButton
+              targetType="point"
+              targetId={point.id}
+              initialLiked={point.social.likedByMe}
+              initialLikes={point.social.likes}
+            />
+          ) : null}
+          {canFavorite ? (
+            <FavoriteButton
+              targetType="point"
+              targetId={point.id}
+              initialFavorited={point.social.favoritedByMe ?? false}
+              initialFavorites={point.social.favorites ?? 0}
+            />
+          ) : null}
+          {canReport ? (
+            <ReportButton
+              targetType="point"
+              targetId={point.id}
+              initialReported={point.social.reportedByMe}
+              label="REPORT POINT"
+            />
+          ) : null}
         </>
       ) : null}
     </Box>

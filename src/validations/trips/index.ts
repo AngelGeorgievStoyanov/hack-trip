@@ -9,7 +9,17 @@ import {
   TRIP_TRANSPORT_MAX_LENGTH,
 } from '@/constants/trips';
 import { PAGE_MAX, TRIP_LIMIT_MAX } from '@/constants/ui';
-import { idList, optionalInt, optionalText, patchText, positiveId, requiredInt, requiredIntInput, requiredNumber, trimmedString } from '../shared';
+import {
+  idList,
+  optionalInt,
+  optionalText,
+  patchText,
+  positiveId,
+  requiredInt,
+  requiredIntInput,
+  requiredNumber,
+  trimmedString,
+} from '../shared';
 
 export const tripWriteSchema = z
   .object({
@@ -49,7 +59,11 @@ export const tripListQuerySchema = z
 export const dayCreateSchema = z
   .object({
     dayNumber: requiredIntInput({ min: 1, max: DAY_NUMBER_MAX }),
-    title: trimmedString({ min: 1, max: DAY_TITLE_MAX_LENGTH, minMessage: 'Title cannot be empty.' }),
+    title: trimmedString({
+      min: 1,
+      max: DAY_TITLE_MAX_LENGTH,
+      minMessage: 'Title cannot be empty.',
+    }),
     description: optionalText(
       { max: TRIP_DESCRIPTION_MAX_LENGTH },
       { max: `Description max length is ${TRIP_DESCRIPTION_MAX_LENGTH} chars` },
@@ -68,10 +82,7 @@ export const tripEditSchema = z
     }),
     description: z.preprocess(
       (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
-      z.union([
-        trimmedString({ max: TRIP_DESCRIPTION_MAX_LENGTH }),
-        z.null(),
-      ]),
+      z.union([trimmedString({ max: TRIP_DESCRIPTION_MAX_LENGTH }), z.null()]),
     ),
     price: requiredNumber({ min: 0, max: 1000000 }),
     transport: trimmedString({ min: 1, max: TRIP_TRANSPORT_MAX_LENGTH }),
@@ -80,10 +91,7 @@ export const tripEditSchema = z
     currency: trimmedString({ min: 1, max: 3 }),
     destination: z.preprocess(
       (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
-      z.union([
-        trimmedString({ min: 1, max: TRIP_TITLE_MAX_LENGTH }),
-        z.null(),
-      ]),
+      z.union([trimmedString({ min: 1, max: TRIP_TITLE_MAX_LENGTH }), z.null()]),
     ),
     lat: z.union([z.number().min(-90).max(90), z.null()]),
     lng: z.union([z.number().min(-180).max(180), z.null()]),
@@ -125,10 +133,18 @@ export const dayReorderSchema = z
 
     days.forEach((day, index) => {
       if (tripIds.has(day.tripId)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['days', index, 'tripId'], message: 'Trip IDs must be unique.' });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['days', index, 'tripId'],
+          message: 'Trip IDs must be unique.',
+        });
       }
       if (dayNumbers.has(day.dayNumber)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['days', index, 'dayNumber'], message: 'Day numbers must be unique.' });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['days', index, 'dayNumber'],
+          message: 'Day numbers must be unique.',
+        });
       }
       tripIds.add(day.tripId);
       dayNumbers.add(day.dayNumber);

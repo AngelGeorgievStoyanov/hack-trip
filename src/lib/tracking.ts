@@ -11,9 +11,7 @@ export function distanceMeters(from: GeoPoint, to: GeoPoint): number {
   const dLng = toRadians(to.lng - from.lng);
   const a =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRadians(from.lat)) *
-      Math.cos(toRadians(to.lat)) *
-      Math.sin(dLng / 2) ** 2;
+    Math.cos(toRadians(from.lat)) * Math.cos(toRadians(to.lat)) * Math.sin(dLng / 2) ** 2;
   return 2 * EARTH_RADIUS_METERS * Math.asin(Math.sqrt(a));
 }
 
@@ -38,8 +36,5 @@ export function formatDuration(totalSeconds: number): string {
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainder = seconds % 60;
   const pad = (value: number): string => String(value).padStart(2, '0');
-  return hours > 0
-    ? `${hours}:${pad(minutes)}:${pad(remainder)}`
-    : `${minutes}:${pad(remainder)}`;
+  return hours > 0 ? `${hours}:${pad(minutes)}:${pad(remainder)}` : `${minutes}:${pad(remainder)}`;
 }
-

@@ -58,7 +58,8 @@ export function Footer() {
       }}
     >
       <h4 style={{ fontFamily: 'Space Mono, monospace', color: '#fff', opacity: 1 }}>
-        {'Copyright © '} {COPYRIGHT_START} - {new Date().getFullYear()} {'"HACK-TRIP" by Angel Stoyanov.  All rights reserved.'}
+        {'Copyright © '} {COPYRIGHT_START} - {new Date().getFullYear()}{' '}
+        {'"HACK-TRIP" by Angel Stoyanov.  All rights reserved.'}
       </h4>
     </footer>
   );

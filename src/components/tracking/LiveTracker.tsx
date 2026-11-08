@@ -5,11 +5,7 @@ import { GoogleMap, MarkerF, PolylineF } from '@react-google-maps/api';
 import { Alert, Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import { useGoogleMapsLoader } from '@/hooks/useGoogleMapsLoader';
 import { useLiveTracking } from '@/hooks/useLiveTracking';
-import {
-  MAP_CONTAINER_HEIGHT,
-  MAP_DEFAULT_CENTER,
-  MAP_TRACKING_ZOOM,
-} from '@/constants/maps';
+import { MAP_CONTAINER_HEIGHT, MAP_DEFAULT_CENTER, MAP_TRACKING_ZOOM } from '@/constants/maps';
 import { formatDistance, formatDuration } from '@/lib/tracking';
 
 export function LiveTracker() {
@@ -19,10 +15,7 @@ export function LiveTracker() {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [follow, setFollow] = useState(true);
 
-  const path = useMemo(
-    () => points.map((point) => ({ lat: point.lat, lng: point.lng })),
-    [points],
-  );
+  const path = useMemo(() => points.map((point) => ({ lat: point.lat, lng: point.lng })), [points]);
 
   useEffect(() => {
     if (!follow || !current) {

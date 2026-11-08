@@ -69,10 +69,7 @@ export function ScrambleHeading({ text, ref, style }: ScrambleHeadingProps) {
       const revealed = Math.floor(iterations);
       let next = text.slice(0, revealed);
       for (let index = revealed; index < text.length; index += 1) {
-        next +=
-          text[index] === ' '
-            ? ' '
-            : LETTERS[Math.floor(Math.random() * LETTERS.length)];
+        next += text[index] === ' ' ? ' ' : LETTERS[Math.floor(Math.random() * LETTERS.length)];
       }
       setDisplay(next);
     }, SCRAMBLE_INTERVAL_MS);

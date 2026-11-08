@@ -9,7 +9,12 @@ import { absoluteUrl } from '@/config';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [
     { url: absoluteUrl('/'), lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
-    { url: absoluteUrl('/trips'), lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    {
+      url: absoluteUrl('/trips'),
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
   ];
 
   try {

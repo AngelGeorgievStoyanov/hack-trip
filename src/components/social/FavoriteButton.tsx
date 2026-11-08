@@ -62,12 +62,32 @@ export function FavoriteButton({
           <IconButton
             onClick={() => mutation.mutate()}
             disabled={mutation.isPending}
-            aria-label={favorited ? `Remove from favorites (${count})` : `Add to favorites (${count})`}
+            aria-label={
+              favorited ? `Remove from favorites (${count})` : `Add to favorites (${count})`
+            }
             aria-pressed={favorited}
             color={favorited ? 'error' : 'default'}
             size={size}
           >
-            <Badge badgeContent={count} invisible={count === 0} max={Number.MAX_SAFE_INTEGER} color="error" sx={size === 'small' ? { '& .MuiBadge-badge': { fontSize: '0.65rem', height: 14, minWidth: 14, padding: '0 3px', lineHeight: 1 } } : undefined}>
+            <Badge
+              badgeContent={count}
+              invisible={count === 0}
+              max={Number.MAX_SAFE_INTEGER}
+              color="error"
+              sx={
+                size === 'small'
+                  ? {
+                      '& .MuiBadge-badge': {
+                        fontSize: '0.65rem',
+                        height: 14,
+                        minWidth: 14,
+                        padding: '0 3px',
+                        lineHeight: 1,
+                      },
+                    }
+                  : undefined
+              }
+            >
               {favorited ? <BookmarkRemoveIcon /> : <BookmarkAddIcon />}
             </Badge>
           </IconButton>

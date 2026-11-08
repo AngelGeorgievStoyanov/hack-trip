@@ -15,4 +15,3 @@ export * from './TripSelectField';
 export * from './DayForm';
 export * from './DayEditor';
 export * from './TripDaysManager';
-

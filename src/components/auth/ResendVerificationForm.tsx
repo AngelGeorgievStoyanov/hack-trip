@@ -84,7 +84,7 @@ export function ResendVerificationForm() {
           autoComplete="email"
           {...register('email')}
           error={isSubmitted && !!errors.email}
-          helperText={isSubmitted ? errors.email?.message ?? ' ' : ' '}
+          helperText={isSubmitted ? (errors.email?.message ?? ' ') : ' '}
         />
         <input type="hidden" {...register('captchaToken')} />
         <Captcha
@@ -105,7 +105,13 @@ export function ResendVerificationForm() {
           Resend verification email
         </Button>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-          <Button component={Link} href="/login" disabled={submitting} variant="contained" sx={SECONDARY_BUTTON_SX}>
+          <Button
+            component={Link}
+            href="/login"
+            disabled={submitting}
+            variant="contained"
+            sx={SECONDARY_BUTTON_SX}
+          >
             Back to login
           </Button>
         </Box>

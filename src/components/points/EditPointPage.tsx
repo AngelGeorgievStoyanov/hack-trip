@@ -24,7 +24,10 @@ export function EditPointPage() {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [findInMapTrigger, setFindInMapTrigger] = useState(0);
-  const [mapSearchSelection, setMapSearchSelection] = useState<{ name: string; revision: number } | null>(null);
+  const [mapSearchSelection, setMapSearchSelection] = useState<{
+    name: string;
+    revision: number;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +39,8 @@ export function EditPointPage() {
     }
 
     let cancelled = false;
-    pointApi.getPoint(pointId)
+    pointApi
+      .getPoint(pointId)
       .then((result) => {
         if (cancelled) return;
         if (!result.permissions.canEdit) {
@@ -61,7 +65,10 @@ export function EditPointPage() {
   }, [pointId]);
 
   async function handleDeleteImage(image: SocialImageDto): Promise<void> {
-    const accepted = await confirm('Are you sure you want to delete this image?', 'Delete Confirmation');
+    const accepted = await confirm(
+      'Are you sure you want to delete this image?',
+      'Delete Confirmation',
+    );
     if (!accepted) return;
 
     setDeletingImageId(image.id);
@@ -77,16 +84,44 @@ export function EditPointPage() {
   }
 
   if (loading) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress /></Box>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error && !point) return <Alert severity="error">{error}</Alert>;
   if (!point) return <Alert severity="error">The point could not be loaded.</Alert>;
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', px: { xs: 1, sm: 2 }, py: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', rowGap: { xs: 2, md: 0 } }}>
-      {error ? <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert> : null}
-      <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto', order: 0, '@media (max-width:1020px)': { order: 1 } }}>
+    <Box
+      sx={{
+        width: '100%',
+        maxWidth: 1200,
+        mx: 'auto',
+        px: { xs: 1, sm: 2 },
+        py: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        rowGap: { xs: 2, md: 0 },
+      }}
+    >
+      {error ? (
+        <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+          {error}
+        </Alert>
+      ) : null}
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: 600,
+          mx: 'auto',
+          order: 0,
+          '@media (max-width:1020px)': { order: 1 },
+        }}
+      >
         <PointLocationPicker
           latitude={latitude}
           longitude={longitude}
@@ -95,7 +130,9 @@ export function EditPointPage() {
             setLatitude(nextLatitude);
             setLongitude(nextLongitude);
           }}
-          onAddressSelect={(name) => setMapSearchSelection((current) => ({ name, revision: (current?.revision ?? 0) + 1 }))}
+          onAddressSelect={(name) =>
+            setMapSearchSelection((current) => ({ name, revision: (current?.revision ?? 0) + 1 }))
+          }
         />
       </Box>
       <Box
@@ -111,7 +148,22 @@ export function EditPointPage() {
           gap: 2.5,
         }}
       >
-        <Paper variant="outlined" sx={{ p: { xs: 2, sm: '30px' }, width: '100%', maxWidth: 600, minWidth: 0, boxSizing: 'border-box', backgroundColor: '#eee7e79e', border: '1px solid black', borderRadius: 0, boxShadow: '3px 2px 5px black', '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' }, '@media (max-width:1020px)': { order: 2 } }}>
+        <Paper
+          variant="outlined"
+          sx={{
+            p: { xs: 2, sm: '30px' },
+            width: '100%',
+            maxWidth: 600,
+            minWidth: 0,
+            boxSizing: 'border-box',
+            backgroundColor: '#eee7e79e',
+            border: '1px solid black',
+            borderRadius: 0,
+            boxShadow: '3px 2px 5px black',
+            '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+            '@media (max-width:1020px)': { order: 2 },
+          }}
+        >
           <PointForm
             key={point.id}
             tripGroupId={0}
@@ -132,7 +184,18 @@ export function EditPointPage() {
           />
         </Paper>
 
-        <Box sx={{ width: { xs: '100%', sm: '100%', lg: 520 }, maxWidth: 520, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', mt: { xs: 0, lg: 1 }, '@media (max-width:1020px)': { order: 0 } }}>
+        <Box
+          sx={{
+            width: { xs: '100%', sm: '100%', lg: 520 },
+            maxWidth: 520,
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            mt: { xs: 0, lg: 1 },
+            '@media (max-width:1020px)': { order: 0 },
+          }}
+        >
           {existingImages.length > 0 ? (
             <Box
               sx={{
@@ -144,7 +207,17 @@ export function EditPointPage() {
               }}
             >
               {existingImages.map((image) => (
-                <Box key={image.id} sx={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', m: { xs: 0, sm: 1 }, p: { xs: 0, sm: 1 }, boxSizing: 'border-box' }}>
+                <Box
+                  key={image.id}
+                  sx={{
+                    position: 'relative',
+                    width: '100%',
+                    aspectRatio: '1 / 1',
+                    m: { xs: 0, sm: 1 },
+                    p: { xs: 0, sm: 1 },
+                    boxSizing: 'border-box',
+                  }}
+                >
                   <AppImage
                     image={image}
                     alt={point.name}
@@ -160,7 +233,14 @@ export function EditPointPage() {
                         onClick={() => void handleDeleteImage(image)}
                         disabled={deletingImageId !== null}
                         size="small"
-                        sx={{ position: 'absolute', top: 4, left: 4, zIndex: 1, backgroundColor: '#ffffffaa', '&:hover': { backgroundColor: '#ffffff' } }}
+                        sx={{
+                          position: 'absolute',
+                          top: 4,
+                          left: 4,
+                          zIndex: 1,
+                          backgroundColor: '#ffffffaa',
+                          '&:hover': { backgroundColor: '#ffffff' },
+                        }}
                       >
                         <RemoveImageIcon />
                       </IconButton>

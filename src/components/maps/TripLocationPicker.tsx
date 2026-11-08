@@ -30,9 +30,7 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
   const [notice, setNotice] = useState<string | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const position: MapPosition | null =
-    latitude !== '' && longitude !== ''
-      ? { lat: Number(latitude), lng: Number(longitude) }
-      : null;
+    latitude !== '' && longitude !== '' ? { lat: Number(latitude), lng: Number(longitude) } : null;
 
   function emitPosition(next: MapPosition): void {
     setCenter(next);
@@ -69,7 +67,18 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
           zoom={MAP_POINT_PICKER_ZOOM}
           height="100%"
           maxWidth={600}
-          markers={position ? [{ id: 'trip-location', position, draggable: true, title: address || 'Trip location' }] : []}
+          markers={
+            position
+              ? [
+                  {
+                    id: 'trip-location',
+                    position,
+                    draggable: true,
+                    title: address || 'Trip location',
+                  },
+                ]
+              : []
+          }
           onLoad={(map) => {
             mapRef.current = map;
           }}
@@ -112,8 +121,12 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
           '& .MuiInputLabel-root': { color: '#333' },
           '& .MuiInputLabel-root.Mui-focused': { color: 'primary.main' },
           '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0, 0, 0, 0.35)' },
-          '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0, 0, 0, 0.7)' },
-          '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main' },
+          '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'rgba(0, 0, 0, 0.7)',
+          },
+          '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'primary.main',
+          },
         }}
         buttonSx={{
           m: 0,
@@ -146,7 +159,11 @@ export function TripLocationPicker({ latitude, longitude, onChange }: TripLocati
         }
       />
 
-      {notice ? <Alert severity="info" onClose={() => setNotice(null)}>{notice}</Alert> : null}
+      {notice ? (
+        <Alert severity="info" onClose={() => setNotice(null)}>
+          {notice}
+        </Alert>
+      ) : null}
     </Stack>
   );
 }

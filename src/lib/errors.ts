@@ -45,17 +45,15 @@ export function getGenericErrorMessage(error: unknown): string {
 
   const apiError = normalizeApiError(error);
 
-  if (
-    apiError.code === API_ERROR_CODES.INTERNAL_SERVER_ERROR ||
-    apiError.status === 500
-  ) {
+  if (apiError.code === API_ERROR_CODES.INTERNAL_SERVER_ERROR || apiError.status === 500) {
     return AUTH_NOTIFICATION_MESSAGES.genericErrorLater;
   }
 
   if (
     !apiError.message ||
     isTechnicalErrorMessage(apiError.message) ||
-    (apiError.status === undefined && /network error|timeout|timed out|err_network|econnaborted/i.test(apiError.message))
+    (apiError.status === undefined &&
+      /network error|timeout|timed out|err_network|econnaborted/i.test(apiError.message))
   ) {
     return GENERIC_MESSAGE;
   }

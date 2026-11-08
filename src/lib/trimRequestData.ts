@@ -9,8 +9,14 @@ function trimValue(value: unknown, fieldName?: string): unknown {
     return fieldName && OPAQUE_FIELD.test(fieldName) ? value : value.trim();
   }
   if (Array.isArray(value)) return value.map((item) => trimValue(item, fieldName));
-  if (value !== null && typeof value === 'object' && (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null)) {
-    return Object.fromEntries(Object.entries(value).map(([key, nested]) => [key, trimValue(nested, key)]));
+  if (
+    value !== null &&
+    typeof value === 'object' &&
+    (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null)
+  ) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nested]) => [key, trimValue(nested, key)]),
+    );
   }
   return value;
 }
@@ -24,7 +30,10 @@ export function trimRequestData<T>(data: T): T {
 export function trimFormData(data: FormData): FormData {
   const normalized = new FormData();
   data.forEach((value, key) => {
-    normalized.append(key, typeof value === 'string' && !OPAQUE_FIELD.test(key) ? value.trim() : value);
+    normalized.append(
+      key,
+      typeof value === 'string' && !OPAQUE_FIELD.test(key) ? value.trim() : value,
+    );
   });
   return normalized;
 }

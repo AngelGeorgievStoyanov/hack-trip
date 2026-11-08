@@ -2,16 +2,35 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Box, Button, CircularProgress, List, ListItem, ListItemText, Tab, Tabs, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  Tab,
+  Tabs,
+  Typography,
+} from '@mui/material';
 import { adminApi } from '@/api/admin';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { ADMIN_PAGE_SIZE_DEFAULT } from '@/constants/ui';
 
 function stringList(items: string[], empty: string) {
   if (items.length === 0) {
-    return <ListItem><ListItemText primary={empty} /></ListItem>;
+    return (
+      <ListItem>
+        <ListItemText primary={empty} />
+      </ListItem>
+    );
   }
-  return items.map((item) => <ListItem key={item}><ListItemText primary={item} /></ListItem>);
+  return items.map((item) => (
+    <ListItem key={item}>
+      <ListItemText primary={item} />
+    </ListItem>
+  ));
 }
 
 function CloudImages() {
@@ -30,9 +49,13 @@ function CloudImages() {
         <Box>
           <List dense>{stringList(data.items, 'No cloud images.')}</List>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
+            <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+              Previous
+            </Button>
             <Typography>Page {page}</Typography>
-            <Button disabled={!hasNext} onClick={() => setPage((p) => p + 1)}>Next</Button>
+            <Button disabled={!hasNext} onClick={() => setPage((p) => p + 1)}>
+              Next
+            </Button>
           </Box>
         </Box>
       ) : null}
@@ -57,9 +80,18 @@ function DatabaseImages() {
           <List dense>{stringList(data.items, 'No database images.')}</List>
           {pagination && (pagination.totalPages ?? 0) > 1 ? (
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-              <Typography>Page {page} of {pagination.totalPages}</Typography>
-              <Button disabled={page >= (pagination.totalPages ?? 1)} onClick={() => setPage((p) => p + 1)}>Next</Button>
+              <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                Previous
+              </Button>
+              <Typography>
+                Page {page} of {pagination.totalPages}
+              </Typography>
+              <Button
+                disabled={page >= (pagination.totalPages ?? 1)}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </Button>
             </Box>
           ) : null}
         </Box>
@@ -87,9 +119,13 @@ function OrphanImages() {
           <Typography variant="h6">Database only ({data.databaseOnly.length})</Typography>
           <List dense>{stringList(data.databaseOnly, 'None.')}</List>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
+            <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+              Previous
+            </Button>
             <Typography>Page {page}</Typography>
-            <Button disabled={!hasNext} onClick={() => setPage((p) => p + 1)}>Next</Button>
+            <Button disabled={!hasNext} onClick={() => setPage((p) => p + 1)}>
+              Next
+            </Button>
           </Box>
         </Box>
       ) : null}

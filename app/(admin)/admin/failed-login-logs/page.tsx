@@ -14,4 +14,3 @@ export default function FailedLoginLogsPage() {
     </section>
   );
 }
-

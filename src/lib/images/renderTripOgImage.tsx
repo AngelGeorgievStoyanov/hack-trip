@@ -10,9 +10,7 @@ function detectImageType(bytes: Uint8Array): string | null {
   }
   if (
     bytes.length >= 8 &&
-    [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every(
-      (value, index) => bytes[index] === value,
-    )
+    [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((value, index) => bytes[index] === value)
   ) {
     return 'image/png';
   }
@@ -99,127 +97,141 @@ export async function renderTripOgImage({
   const imageSrc = await loadImageDataUrl(imageUrl);
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        display: 'flex',
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg, #142a22 0%, #315c48 58%, #b18b53 100%)',
+        color: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+      }}
+    >
+      {imageSrc ? (
+        <img
+          src={imageSrc}
+          alt={title}
+          width={1200}
+          height={630}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+      ) : null}
       <div
         style={{
           display: 'flex',
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg, #142a22 0%, #315c48 58%, #b18b53 100%)',
-          color: '#ffffff',
-          fontFamily: 'Arial, sans-serif',
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          background:
+            'linear-gradient(90deg, rgba(9, 20, 16, 0.88) 0%, rgba(9, 20, 16, 0.62) 55%, rgba(9, 20, 16, 0.18) 100%)',
+        }}
+      />
+      <div
+        style={{
+          display: 'flex',
+          position: 'absolute',
+          top: 54,
+          left: 66,
+          alignItems: 'center',
+          gap: 14,
         }}
       >
-        {imageSrc ? (
-          <img
-            src={imageSrc}
-            alt={title}
-            width={1200}
-            height={630}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          />
-        ) : null}
         <div
           style={{
             display: 'flex',
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            background:
-              'linear-gradient(90deg, rgba(9, 20, 16, 0.88) 0%, rgba(9, 20, 16, 0.62) 55%, rgba(9, 20, 16, 0.18) 100%)',
-          }}
-        />
-        <div
-          style={{
-            display: 'flex',
-            position: 'absolute',
-            top: 54,
-            left: 66,
+            width: 54,
+            height: 46,
             alignItems: 'center',
-            gap: 14,
+            justifyContent: 'center',
+            borderRadius: 12,
+            background: '#e8ad59',
+            color: '#142a22',
+            fontSize: 24,
+            fontWeight: 800,
+            letterSpacing: -1,
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              width: 54,
-              height: 46,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 12,
-              background: '#e8ad59',
-              color: '#142a22',
-              fontSize: 24,
-              fontWeight: 800,
-              letterSpacing: -1,
-            }}
-          >
-            HT
-          </div>
-          <div style={{ display: 'flex', fontSize: 28, fontWeight: 800, letterSpacing: 4 }}>
-            HACKTRIP
-          </div>
+          HT
         </div>
-        <div
-          style={{
-            display: 'flex',
-            position: 'absolute',
-            top: 62,
-            right: 66,
-            padding: '10px 18px',
-            border: '1px solid rgba(255,255,255,0.55)',
-            borderRadius: 24,
-            background: 'rgba(12, 24, 19, 0.38)',
-            fontSize: 16,
-            fontWeight: 700,
-            letterSpacing: 2,
-          }}
-        >
-          TRIP GROUP
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            position: 'absolute',
-            right: 72,
-            bottom: 66,
-            left: 72,
-            flexDirection: 'column',
-            gap: 17,
-          }}
-        >
-          <div style={{ display: 'flex', color: '#f0c27f', fontSize: 19, fontWeight: 700, letterSpacing: 3 }}>
-            PLAN · EXPLORE · SHARE
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              maxWidth: 1000,
-              fontSize: 64,
-              lineHeight: 1.08,
-              fontWeight: 800,
-              letterSpacing: -1,
-            }}
-          >
-            {title}
-          </div>
-          <div style={{ display: 'flex', maxWidth: 980, color: '#f1f3ed', fontSize: 27, lineHeight: 1.25 }}>
-            {subtitle}
-          </div>
+        <div style={{ display: 'flex', fontSize: 28, fontWeight: 800, letterSpacing: 4 }}>
+          HACKTRIP
         </div>
       </div>
-    ),
+      <div
+        style={{
+          display: 'flex',
+          position: 'absolute',
+          top: 62,
+          right: 66,
+          padding: '10px 18px',
+          border: '1px solid rgba(255,255,255,0.55)',
+          borderRadius: 24,
+          background: 'rgba(12, 24, 19, 0.38)',
+          fontSize: 16,
+          fontWeight: 700,
+          letterSpacing: 2,
+        }}
+      >
+        TRIP GROUP
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          position: 'absolute',
+          right: 72,
+          bottom: 66,
+          left: 72,
+          flexDirection: 'column',
+          gap: 17,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            color: '#f0c27f',
+            fontSize: 19,
+            fontWeight: 700,
+            letterSpacing: 3,
+          }}
+        >
+          PLAN · EXPLORE · SHARE
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            maxWidth: 1000,
+            fontSize: 64,
+            lineHeight: 1.08,
+            fontWeight: 800,
+            letterSpacing: -1,
+          }}
+        >
+          {title}
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            maxWidth: 980,
+            color: '#f1f3ed',
+            fontSize: 27,
+            lineHeight: 1.25,
+          }}
+        >
+          {subtitle}
+        </div>
+      </div>
+    </div>,
     IMAGE_SIZE,
   );
 }

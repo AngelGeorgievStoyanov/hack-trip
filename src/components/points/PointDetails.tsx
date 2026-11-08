@@ -19,9 +19,17 @@ export function PointDetails({ point }: { point: TripPoint }) {
       {current.description ? <ExpandableText text={current.description} /> : null}
       {current.lat != null && current.lng != null ? (
         <>
-          <p>Coordinates: {current.lat.toFixed(6)}, {current.lng.toFixed(6)}</p>
+          <p>
+            Coordinates: {current.lat.toFixed(6)}, {current.lng.toFixed(6)}
+          </p>
           <GoogleMapView
-            markers={[{ id: current.id, title: current.name, position: { lat: current.lat, lng: current.lng } }]}
+            markers={[
+              {
+                id: current.id,
+                title: current.name,
+                position: { lat: current.lat, lng: current.lng },
+              },
+            ]}
             center={{ lat: current.lat, lng: current.lng }}
             zoom={14}
             height={150}
@@ -31,7 +39,13 @@ export function PointDetails({ point }: { point: TripPoint }) {
         </>
       ) : null}
       <PointActions point={current} />
-      <SocialImageGallery images={current.images} alt={current.name} preset="gallery" leadPreset="hero" variant="stack" />
+      <SocialImageGallery
+        images={current.images}
+        alt={current.name}
+        preset="gallery"
+        leadPreset="hero"
+        variant="stack"
+      />
       <CommentsSection target={{ type: 'point', pointId: current.id }} />
     </article>
   );

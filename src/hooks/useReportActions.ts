@@ -69,10 +69,7 @@ export function useReportActions(
     onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
-  const report = useCallback(
-    (reason?: string) => reportMutation.mutate(reason),
-    [reportMutation],
-  );
+  const report = useCallback((reason?: string) => reportMutation.mutate(reason), [reportMutation]);
   const unreport = useCallback(() => unreportMutation.mutate(), [unreportMutation]);
   const clearError = useCallback(() => setError(null), []);
 

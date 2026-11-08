@@ -71,9 +71,7 @@ apiClient.interceptors.request.use((requestConfig: InternalAxiosRequestConfig) =
 });
 
 export type RefreshResult =
-  | { status: 'ok'; token: string }
-  | { status: 'accountError' }
-  | { status: 'failed' };
+  { status: 'ok'; token: string } | { status: 'accountError' } | { status: 'failed' };
 
 const ACCOUNT_STATUS_CODES = [
   API_ERROR_CODES.EMAIL_NOT_VERIFIED,
@@ -136,8 +134,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const original = error.config as
-      | (InternalAxiosRequestConfig & { _retry?: boolean; _usedPublicToken?: boolean })
-      | undefined;
+      (InternalAxiosRequestConfig & { _retry?: boolean; _usedPublicToken?: boolean }) | undefined;
 
     if (
       original &&

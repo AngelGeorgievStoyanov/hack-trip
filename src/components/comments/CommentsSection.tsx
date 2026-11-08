@@ -135,11 +135,8 @@ export function CommentsSection({
     'create',
   );
   const queryKey = commentKey(target, viewerCacheKey);
-  const targetSocialType = target.type === 'tripGroup'
-    ? 'tripgroup'
-    : target.type === 'day'
-      ? 'day'
-      : target.type;
+  const targetSocialType =
+    target.type === 'tripGroup' ? 'tripgroup' : target.type === 'day' ? 'day' : target.type;
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey,
@@ -187,7 +184,12 @@ export function CommentsSection({
 
   return (
     <section aria-label="Comments" style={commentsPanelStyle}>
-      <Typography variant="h5" component="h2" aria-label={`Comments, ${total} total`} sx={{ marginBottom: '10px' }}>
+      <Typography
+        variant="h5"
+        component="h2"
+        aria-label={`Comments, ${total} total`}
+        sx={{ marginBottom: '10px' }}
+      >
         Comments
       </Typography>
       <SocialConfigStatus isLoading={socialConfig.isLoading} error={socialConfig.error} />
@@ -222,18 +224,12 @@ export function CommentsSection({
             'comment',
             commentItem.social.reportedByMe ? 'delete' : 'create',
           );
-          const canEdit = commentItem.permissions.canEdit && isSocialOperationAllowed(
-            socialConfig.data,
-            'comment',
-            'comment',
-            'edit',
-          );
-          const canDelete = commentItem.permissions.canDelete && isSocialOperationAllowed(
-            socialConfig.data,
-            'comment',
-            'comment',
-            'delete',
-          );
+          const canEdit =
+            commentItem.permissions.canEdit &&
+            isSocialOperationAllowed(socialConfig.data, 'comment', 'comment', 'edit');
+          const canDelete =
+            commentItem.permissions.canDelete &&
+            isSocialOperationAllowed(socialConfig.data, 'comment', 'comment', 'delete');
           const hasCommentActions = canLike || canFavorite || canReport || canEdit || canDelete;
 
           return (
@@ -259,13 +255,21 @@ export function CommentsSection({
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                     <Tooltip title="Save comment" arrow>
                       <span>
-                        <IconButton type="submit" aria-label="Save comment" disabled={updateMutation.isPending}>
+                        <IconButton
+                          type="submit"
+                          aria-label="Save comment"
+                          disabled={updateMutation.isPending}
+                        >
                           <CheckIcon />
                         </IconButton>
                       </span>
                     </Tooltip>
                     <Tooltip title="Cancel edit" arrow>
-                      <IconButton type="button" aria-label="Cancel edit" onClick={() => setEditingId(null)}>
+                      <IconButton
+                        type="button"
+                        aria-label="Cancel edit"
+                        onClick={() => setEditingId(null)}
+                      >
                         <CloseIcon />
                       </IconButton>
                     </Tooltip>
@@ -317,17 +321,33 @@ export function CommentsSection({
                         marginTop: '10px',
                       }}
                     >
-                      {canLike ? <LikeButton targetType="comment" targetId={commentItem.id} initialLiked={commentItem.social.likedByMe} initialLikes={commentItem.social.likes} /> : null}
-                      {canFavorite ? <FavoriteButton targetType="comment" targetId={commentItem.id} initialFavorited={commentItem.social.favoritedByMe ?? false} initialFavorites={commentItem.social.favorites ?? 0} /> : null}
-                      {canReport ? <ReportButton
-                        targetType="comment"
-                        targetId={commentItem.id}
-                        initialReported={commentItem.social.reportedByMe}
-                        label="REPORT COMMENT"
-                        onReportedChange={() => {
-                          void queryClient.invalidateQueries({ queryKey });
-                        }}
-                      /> : null}
+                      {canLike ? (
+                        <LikeButton
+                          targetType="comment"
+                          targetId={commentItem.id}
+                          initialLiked={commentItem.social.likedByMe}
+                          initialLikes={commentItem.social.likes}
+                        />
+                      ) : null}
+                      {canFavorite ? (
+                        <FavoriteButton
+                          targetType="comment"
+                          targetId={commentItem.id}
+                          initialFavorited={commentItem.social.favoritedByMe ?? false}
+                          initialFavorites={commentItem.social.favorites ?? 0}
+                        />
+                      ) : null}
+                      {canReport ? (
+                        <ReportButton
+                          targetType="comment"
+                          targetId={commentItem.id}
+                          initialReported={commentItem.social.reportedByMe}
+                          label="REPORT COMMENT"
+                          onReportedChange={() => {
+                            void queryClient.invalidateQueries({ queryKey });
+                          }}
+                        />
+                      ) : null}
                       {canEdit ? (
                         <Tooltip title="Edit comment" arrow>
                           <IconButton
@@ -368,14 +388,26 @@ export function CommentsSection({
                 </>
               )}
               <Tooltip
-                title={openRepliesId === commentItem.id ? 'Hide replies' : `Show ${commentItem.social.comments.count} replies`}
+                title={
+                  openRepliesId === commentItem.id
+                    ? 'Hide replies'
+                    : `Show ${commentItem.social.comments.count} replies`
+                }
                 arrow
               >
                 <IconButton
                   size="small"
-                  aria-label={openRepliesId === commentItem.id ? 'Hide replies' : `Show ${commentItem.social.comments.count} replies`}
+                  aria-label={
+                    openRepliesId === commentItem.id
+                      ? 'Hide replies'
+                      : `Show ${commentItem.social.comments.count} replies`
+                  }
                   aria-expanded={openRepliesId === commentItem.id}
-                  onClick={() => setOpenRepliesId((current) => current === commentItem.id ? null : commentItem.id)}
+                  onClick={() =>
+                    setOpenRepliesId((current) =>
+                      current === commentItem.id ? null : commentItem.id,
+                    )
+                  }
                 >
                   {openRepliesId === commentItem.id ? (
                     <CloseIcon />

@@ -1,12 +1,7 @@
 import { config } from '../config';
 import { GOOGLE_MAPS_LIBRARIES, MAP_COORDINATE_PRECISION } from '@/constants/maps';
 import type { GoogleMapsLibrary } from '@/constants/maps';
-import {
-  LATITUDE_MAX,
-  LATITUDE_MIN,
-  LONGITUDE_MAX,
-  LONGITUDE_MIN,
-} from '@/constants/points';
+import { LATITUDE_MAX, LATITUDE_MIN, LONGITUDE_MAX, LONGITUDE_MIN } from '@/constants/points';
 
 export type { GoogleMapsLibrary };
 
@@ -37,10 +32,7 @@ export function toMapPosition(point: {
   return { lat: point.lat, lng: point.lng };
 }
 
-export function hasCoordinates(point: {
-  lat: number | null;
-  lng: number | null;
-}): boolean {
+export function hasCoordinates(point: { lat: number | null; lng: number | null }): boolean {
   return point.lat != null && point.lng != null;
 }
 
@@ -66,12 +58,7 @@ export function coordinatePairToMapPosition(
   if (lat == null || lng == null) {
     return null;
   }
-  if (
-    lat < LATITUDE_MIN ||
-    lat > LATITUDE_MAX ||
-    lng < LONGITUDE_MIN ||
-    lng > LONGITUDE_MAX
-  ) {
+  if (lat < LATITUDE_MIN || lat > LATITUDE_MAX || lng < LONGITUDE_MIN || lng > LONGITUDE_MAX) {
     return null;
   }
   return { lat, lng };

@@ -31,4 +31,3 @@ export function absoluteUrl(path: string): string {
   const normalized = path.startsWith('/') ? path : `/${path}`;
   return `${base}${normalized}`;
 }
-

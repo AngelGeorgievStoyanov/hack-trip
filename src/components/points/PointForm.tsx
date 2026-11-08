@@ -3,14 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import { pointApi } from '@/api/points';
 import ImageUploadField from '@/components/images/ImageUploadField';
 import { AddressAutocomplete } from '@/components/maps/AddressAutocomplete';
@@ -60,7 +53,20 @@ const stackedActionButtonSx = {
   },
 };
 
-export function PointForm({ tripGroupId, tripId, point, existingImages: providedExistingImages, latitude, longitude, mapSearchSelection, onLocationChange, onFindInMap, onAddNextDay, onBack, onDone }: PointFormProps) {
+export function PointForm({
+  tripGroupId,
+  tripId,
+  point,
+  existingImages: providedExistingImages,
+  latitude,
+  longitude,
+  mapSearchSelection,
+  onLocationChange,
+  onFindInMap,
+  onAddNextDay,
+  onBack,
+  onDone,
+}: PointFormProps) {
   const queryClient = useQueryClient();
   const notification = useNotification();
   const { isLoaded } = useGoogleMapsLoader();
@@ -172,7 +178,7 @@ export function PointForm({ tripGroupId, tripId, point, existingImages: provided
         const updatedPoints = await pointApi.createPoint({ tripId, ...input });
         updateTripCache(updatedPoints);
         const createdPoint = updatedPoints.reduce<TripPoint | null>(
-          (latest, item) => !latest || item.pointNumber > latest.pointNumber ? item : latest,
+          (latest, item) => (!latest || item.pointNumber > latest.pointNumber ? item : latest),
           null,
         );
         if (!createdPoint) {
@@ -224,7 +230,6 @@ export function PointForm({ tripGroupId, tripId, point, existingImages: provided
     }
   }
 
-
   return (
     <Box
       component="form"
@@ -243,7 +248,11 @@ export function PointForm({ tripGroupId, tripId, point, existingImages: provided
       <Typography gutterBottom variant="h5" sx={{ margin: '10px auto' }}>
         {isEdit ? 'EDIT POINT' : 'ADD POINT'}
       </Typography>
-      {serverError ? <Alert severity="error" sx={{ width: '100%' }}>{serverError}</Alert> : null}
+      {serverError ? (
+        <Alert severity="error" sx={{ width: '100%' }}>
+          {serverError}
+        </Alert>
+      ) : null}
 
       <AddressAutocomplete
         value={watch('name')}
@@ -276,7 +285,11 @@ export function PointForm({ tripGroupId, tripId, point, existingImages: provided
         </Button>
       </Box>
 
-      {locationError ? <Alert severity="error" sx={{ width: '100%' }}>{locationError}</Alert> : null}
+      {locationError ? (
+        <Alert severity="error" sx={{ width: '100%' }}>
+          {locationError}
+        </Alert>
+      ) : null}
 
       <TextField
         label="DESCRIPTION"
@@ -311,7 +324,13 @@ export function PointForm({ tripGroupId, tripId, point, existingImages: provided
         <Button
           type="submit"
           variant="contained"
-          disabled={submitting || !latitude || !longitude || (isEdit ? ((!isDirty || !isValid) && files.length === 0) : (!isDirty || !isValid)) || existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY}
+          disabled={
+            submitting ||
+            !latitude ||
+            !longitude ||
+            (isEdit ? (!isDirty || !isValid) && files.length === 0 : !isDirty || !isValid) ||
+            existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY
+          }
           startIcon={submitting ? <CircularProgress size={16} /> : undefined}
           sx={stackedActionButtonSx}
         >

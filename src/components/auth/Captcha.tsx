@@ -11,12 +11,15 @@ declare global {
     grecaptcha?: {
       ready: (callback: () => void) => void;
       reset: (widgetId?: number) => void;
-      render: (container: HTMLElement, parameters: {
-        sitekey: string;
-        callback: (token: string) => void;
-        'expired-callback': () => void;
-        'error-callback': () => void;
-      }) => number;
+      render: (
+        container: HTMLElement,
+        parameters: {
+          sitekey: string;
+          callback: (token: string) => void;
+          'expired-callback': () => void;
+          'error-callback': () => void;
+        },
+      ) => number;
     };
   }
 }
@@ -38,7 +41,14 @@ export function Captcha({ onTokenChange, disabled = false, resetKey = 0 }: Captc
   }, [onTokenChange]);
 
   useEffect(() => {
-    if (!loaded || !config.recaptchaV2SiteKey || !containerRef.current || !window.grecaptcha || widgetIdRef.current !== null) return;
+    if (
+      !loaded ||
+      !config.recaptchaV2SiteKey ||
+      !containerRef.current ||
+      !window.grecaptcha ||
+      widgetIdRef.current !== null
+    )
+      return;
     window.grecaptcha.ready(() => {
       const api = window.grecaptcha;
       const container = containerRef.current;
@@ -60,8 +70,20 @@ export function Captcha({ onTokenChange, disabled = false, resetKey = 0 }: Captc
 
   return (
     <>
-      <Script src={CAPTCHA_SCRIPT_URL} strategy="afterInteractive" onReady={() => setLoaded(true)} />
-      <Box sx={{ display: 'flex', justifyContent: 'center', minHeight: 78, pointerEvents: disabled ? 'none' : 'auto', opacity: disabled ? 0.6 : 1 }}>
+      <Script
+        src={CAPTCHA_SCRIPT_URL}
+        strategy="afterInteractive"
+        onReady={() => setLoaded(true)}
+      />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          minHeight: 78,
+          pointerEvents: disabled ? 'none' : 'auto',
+          opacity: disabled ? 0.6 : 1,
+        }}
+      >
         <Box ref={containerRef} />
       </Box>
     </>

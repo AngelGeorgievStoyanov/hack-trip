@@ -47,8 +47,7 @@ export function AddressAutocomplete({
   const [searching, setSearching] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const supportsAutocomplete =
-    isLoaded && typeof google.maps.places?.Autocomplete === 'function';
+  const supportsAutocomplete = isLoaded && typeof google.maps.places?.Autocomplete === 'function';
 
   async function handleSearch(): Promise<void> {
     const query = value.trim();
@@ -72,10 +71,7 @@ export function AddressAutocomplete({
       const location = match.geometry.location;
       const formattedAddress = match.formatted_address;
       onChange(formattedAddress);
-      onLocationSelect(
-        { lat: location.lat(), lng: location.lng() },
-        formattedAddress,
-      );
+      onLocationSelect({ lat: location.lat(), lng: location.lng() }, formattedAddress);
     } catch {
       setNotice('Address search is unavailable right now.');
     } finally {
@@ -93,10 +89,7 @@ export function AddressAutocomplete({
 
     const selectedName = place.name ?? place.formatted_address ?? value;
     onChange(selectedName);
-    onLocationSelect(
-      { lat: location.lat(), lng: location.lng() },
-      selectedName,
-    );
+    onLocationSelect({ lat: location.lat(), lng: location.lng() }, selectedName);
     setNotice(null);
   }
 
@@ -131,7 +124,14 @@ export function AddressAutocomplete({
         alignItems="stretch"
         sx={{ width: '100%', minWidth: 0 }}
       >
-        <Box sx={{ flex: '1 1 0', width: '100%', minWidth: 0, '& .MuiFormControl-root': { width: '100%' } }}>
+        <Box
+          sx={{
+            flex: '1 1 0',
+            width: '100%',
+            minWidth: 0,
+            '& .MuiFormControl-root': { width: '100%' },
+          }}
+        >
           {supportsAutocomplete ? (
             <Autocomplete
               fields={PLACE_FIELDS}
@@ -168,7 +168,15 @@ export function AddressAutocomplete({
           </Button>
         ) : null}
         {extraAction ? (
-          <Box sx={{ flex: '1 1 0', width: '100%', minWidth: 0, display: 'flex', '& > *': { width: '100%' } }}>
+          <Box
+            sx={{
+              flex: '1 1 0',
+              width: '100%',
+              minWidth: 0,
+              display: 'flex',
+              '& > *': { width: '100%' },
+            }}
+          >
             {extraAction}
           </Box>
         ) : null}

@@ -50,7 +50,9 @@ export function isSocialOperationAllowed(
     if (!contextKey) {
       return false;
     }
-    return target.contextRules?.find((rule) => rule.key === contextKey)?.operations[operation] === true;
+    return (
+      target.contextRules?.find((rule) => rule.key === contextKey)?.operations[operation] === true
+    );
   }
 
   return target.operations[operation] === true;

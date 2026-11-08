@@ -44,20 +44,16 @@ export function ReportButton({
     setDone(initialReported);
   }, [initialReported]);
 
-  const { report, unreport, pending, error, clearError } = useReportActions(
-    targetType,
-    targetId,
-    {
-      onReportedChange: (reported) => {
-        setDone(reported);
-        onReportedChange?.(reported);
-        if (reported) {
-          setReason('');
-          setOpen(false);
-        }
-      },
+  const { report, unreport, pending, error, clearError } = useReportActions(targetType, targetId, {
+    onReportedChange: (reported) => {
+      setDone(reported);
+      onReportedChange?.(reported);
+      if (reported) {
+        setReason('');
+        setOpen(false);
+      }
     },
-  );
+  });
 
   const { status, viewerCacheKey } = useAuth();
   const isAuthenticated = status === 'authenticated';

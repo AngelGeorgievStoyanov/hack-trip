@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -32,9 +31,7 @@ const EMPTY_STATE: BackgroundState = {
   next: null,
 };
 
-const BackgroundContext = createContext<
-  BackgroundContextValue | undefined
->(undefined);
+const BackgroundContext = createContext<BackgroundContextValue | undefined>(undefined);
 
 function isBackgroundRoute(pathname: string): boolean {
   return !pathname.startsWith('/admin');
@@ -74,10 +71,7 @@ function preloadImage(url: string): Promise<BackgroundImage> {
 
       decoding = true;
 
-      img.decode().then(
-        succeed,
-        () => fail('Failed to decode background image'),
-      );
+      img.decode().then(succeed, () => fail('Failed to decode background image'));
     };
 
     img.onload = decode;
@@ -96,11 +90,7 @@ function preloadImage(url: string): Promise<BackgroundImage> {
   });
 }
 
-export function BackgroundProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function BackgroundProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? '';
 
   const [state, setState] = useState<BackgroundState>(EMPTY_STATE);

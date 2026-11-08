@@ -178,12 +178,12 @@ The application uses the Next.js App Router.
 
 The `app/` directory owns:
 
-* routing
-* layouts
-* pages
-* route groups
-* metadata
-* route-level composition
+- routing
+- layouts
+- pages
+- route groups
+- metadata
+- route-level composition
 
 Route organization should represent application navigation and page boundaries rather than backend controller structure.
 
@@ -197,23 +197,23 @@ Server Components are the default.
 
 Use Server Components when a component does not require:
 
-* browser APIs
-* React client hooks
-* browser event handlers
-* interactive state
-* client-only authentication interaction
-* map SDK access
-* geolocation
-* live tracking
+- browser APIs
+- React client hooks
+- browser event handlers
+- interactive state
+- client-only authentication interaction
+- map SDK access
+- geolocation
+- live tracking
 
 Server Components are preferred for:
 
-* public trip pages
-* public point pages
-* informational pages
-* SEO-sensitive content
-* static page composition
-* server-side data loading where appropriate
+- public trip pages
+- public point pages
+- informational pages
+- SEO-sensitive content
+- static page composition
+- server-side data loading where appropriate
 
 Avoid unnecessary `"use client"` boundaries.
 
@@ -225,21 +225,21 @@ Client Components are required for browser-side functionality.
 
 Typical examples:
 
-* interactive forms
-* authentication forms
-* interactive navigation
-* dialogs
-* image upload UI
-* drag/drop
-* likes
-* favorites
-* comments interaction
-* Google Maps
-* geolocation
-* live tracking
-* touch interactions
-* swipe interactions
-* browser-specific behavior
+- interactive forms
+- authentication forms
+- interactive navigation
+- dialogs
+- image upload UI
+- drag/drop
+- likes
+- favorites
+- comments interaction
+- Google Maps
+- geolocation
+- live tracking
+- touch interactions
+- swipe interactions
+- browser-specific behavior
 
 Client Components should remain as small and isolated as practical.
 
@@ -287,21 +287,21 @@ The layers have distinct responsibilities.
 
 It owns common HTTP behavior such as:
 
-* backend base URL
-* common headers
-* `x-hacktrip-client`
-* authentication header handling
-* credentials
-* refresh behavior
-* common response handling
-* request payload normalization before transport
+- backend base URL
+- common headers
+- `x-hacktrip-client`
+- authentication header handling
+- credentials
+- refresh behavior
+- common response handling
+- request payload normalization before transport
 
 The request interceptor normalizes every outgoing request body:
 
-* JSON-like objects and arrays are copied and their ordinary string values are trimmed recursively.
-* `FormData` is copied; text fields are trimmed and file/blob values are preserved unchanged.
-* Fields whose names contain `token` or `captcha` are opaque and are preserved unchanged. The frontend must not trim verification/reset tokens or CAPTCHA response tokens.
-* The normalizer does not mutate the caller's original object or FormData instance.
+- JSON-like objects and arrays are copied and their ordinary string values are trimmed recursively.
+- `FormData` is copied; text fields are trimmed and file/blob values are preserved unchanged.
+- Fields whose names contain `token` or `captcha` are opaque and are preserved unchanged. The frontend must not trim verification/reset tokens or CAPTCHA response tokens.
+- The normalizer does not mutate the caller's original object or FormData instance.
 
 This is transport normalization, not a replacement for Zod validation. It must remain aligned with the backend's global body-trim middleware.
 
@@ -361,11 +361,11 @@ Services provide application-level orchestration.
 
 A service may:
 
-* coordinate multiple API operations
-* transform API data into application models
-* combine related API operations
-* provide a feature-oriented interface for components
-* encapsulate non-trivial application workflows
+- coordinate multiple API operations
+- transform API data into application models
+- combine related API operations
+- provide a feature-oriented interface for components
+- encapsulate non-trivial application workflows
 
 Services should not duplicate Axios configuration.
 
@@ -397,17 +397,17 @@ Do not create empty service wrappers simply to add another layer.
 
 The frontend must follow:
 
-* endpoint paths
-* HTTP methods
-* request DTOs
-* response DTOs
-* authentication requirements
-* authorization requirements
-* error codes
-* pagination
-* ownership rules
-* image rules
-* public access rules
+- endpoint paths
+- HTTP methods
+- request DTOs
+- response DTOs
+- authentication requirements
+- authorization requirements
+- error codes
+- pagination
+- ownership rules
+- image rules
+- public access rules
 
 Do not invent frontend assumptions about the backend.
 
@@ -553,11 +553,11 @@ Day images, point images and all social structures must be consumed exactly as d
 
 Endpoint cardinality:
 
-* `GET /trips` → `TripGroupResponse[]`
-* `GET /trips/top` → up to 5 `TripGroupResponse[]`
-* `GET /trips/:id` → one complete `TripGroupResponse`
-* `GET /me/trips` → `TripGroupResponse[]`
-* `GET /me/favorites` → `TripGroupResponse[]`
+- `GET /trips` → `TripGroupResponse[]`
+- `GET /trips/top` → up to 5 `TripGroupResponse[]`
+- `GET /trips/:id` → one complete `TripGroupResponse`
+- `GET /me/trips` → `TripGroupResponse[]`
+- `GET /me/favorites` → `TripGroupResponse[]`
 
 For `GET /trips/:id`, `id` is the `tripGroupId`. The backend returns the complete group and all its days. If the user opened a specific day, the frontend selects that day from the returned `days[]`; it must not expect the endpoint to return only that day.
 
@@ -655,6 +655,7 @@ tripGroupId exists?
 The returned `TripGroupResponse` is then used to identify both required IDs:
 
 648:
+
 ```text
 TripGroupResponse
 ├── id
@@ -731,7 +732,6 @@ When navigation originates from a specific day, the frontend must preserve that 
 
 The frontend must never assume that the first day is the selected day.
 
-
 # 11. Authentication Architecture
 
 Authentication has two separate token mechanisms:
@@ -747,7 +747,6 @@ HttpOnly cookie
 ```
 
 The frontend never reads the refresh token.
-
 
 ## 11.1 Login
 
@@ -769,7 +768,6 @@ access token stored in memory
 
 The refresh token must never enter React state or JavaScript-accessible storage.
 
-
 ## 11.2 Session Restoration
 
 After a browser reload, the frontend must not use `localStorage`, `sessionStorage`, IndexedDB, or another client-side persistence mechanism to store authentication/session state or a session-presence hint.
@@ -784,13 +782,13 @@ GET /auth/session
 
 The probe:
 
-* uses the public frontend bearer token;
-* is sent with credentials enabled so the browser may include the HttpOnly refresh cookie;
-* returns only `{ "hasSession": true|false }`;
-* does not return or rotate access/refresh tokens;
-* does not return user identity, role, account status or other account data;
-* does not establish an authenticated access-token context;
-* must return the same response shape for absent or invalid sessions.
+- uses the public frontend bearer token;
+- is sent with credentials enabled so the browser may include the HttpOnly refresh cookie;
+- returns only `{ "hasSession": true|false }`;
+- does not return or rotate access/refresh tokens;
+- does not return user identity, role, account status or other account data;
+- does not establish an authenticated access-token context;
+- must return the same response shape for absent or invalid sessions.
 
 The expected public-page reload behavior is:
 
@@ -827,16 +825,15 @@ Public pages must remain usable for anonymous visitors. Anonymous page loads and
 
 Public API requests follow the public-access rules in `docs/API_CONTRACT.md`. The public frontend token identifies the frontend client for public access; it is not a substitute for a user's authentication token.
 
-
 # 12. Access Token Handling
 
 Access tokens are application-memory state.
 
 Do not persist access tokens in:
 
-* localStorage
-* sessionStorage
-* IndexedDB
+- localStorage
+- sessionStorage
+- IndexedDB
 
 Do not create alternative token storage mechanisms.
 
@@ -852,11 +849,11 @@ The browser owns the cookie lifecycle.
 
 The frontend JavaScript must not:
 
-* read the refresh token
-* write the refresh token
-* copy the refresh token into state
-* log the refresh token
-* expose the refresh token to components
+- read the refresh token
+- write the refresh token
+- copy the refresh token into state
+- log the refresh token
+- expose the refresh token to components
 
 Axios requests that depend on the refresh cookie use:
 
@@ -960,11 +957,11 @@ They are not security boundaries.
 
 The backend must independently enforce:
 
-* authentication
-* role permissions
-* ownership
-* account status
-* resource access
+- authentication
+- role permissions
+- ownership
+- account status
+- resource access
 
 Never assume that hiding a button or route is sufficient authorization.
 
@@ -976,10 +973,10 @@ Authentication state and account state are separate concerns.
 
 Relevant backend states include:
 
-* pending verification
-* active
-* suspended
-* deactivated
+- pending verification
+- active
+- suspended
+- deactivated
 
 Frontend behavior should distinguish meaningful backend authentication/account errors rather than treating every failure as anonymous.
 
@@ -1045,11 +1042,11 @@ Prefer server-side fetching for public, SEO-sensitive content when possible.
 
 Use client-side fetching when functionality requires:
 
-* browser interaction
-* live updates
-* user-specific state
-* interactive mutations
-* browser-only APIs
+- browser interaction
+- live updates
+- user-specific state
+- interactive mutations
+- browser-only APIs
 
 Do not automatically introduce a client-side data fetching layer for every request.
 
@@ -1065,12 +1062,12 @@ If React Query is used by the application, it must have a clear responsibility.
 
 React Query is appropriate for client-side server state requiring features such as:
 
-* caching
-* synchronization
-* invalidation
-* background refetching
-* mutation state
-* query lifecycle management
+- caching
+- synchronization
+- invalidation
+- background refetching
+- mutation state
+- query lifecycle management
 
 React Query must not replace the API architecture.
 
@@ -1136,10 +1133,10 @@ Google Maps functionality should remain within Client Components because the Map
 
 The integration should centralize:
 
-* API key configuration
-* script loading
-* map availability
-* map-related context/provider behavior
+- API key configuration
+- script loading
+- map availability
+- map-related context/provider behavior
 
 Do not load the Google Maps JavaScript SDK independently in multiple components.
 
@@ -1219,13 +1216,13 @@ map component
 
 The tracking system may combine:
 
-* browser geolocation
-* current coordinates
-* trip route data
-* map position
-* polylines
-* markers
-* user interaction
+- browser geolocation
+- current coordinates
+- trip route data
+- map position
+- polylines
+- markers
+- user interaction
 
 Tracking should not require converting the complete trip page into a Client Component.
 
@@ -1321,11 +1318,11 @@ Do not reconstruct backend storage URLs manually inside components.
 
 Image presentation may include:
 
-* thumbnails
-* full-size images
-* galleries
-* previews
-* upload previews
+- thumbnails
+- full-size images
+- galleries
+- previews
+- upload previews
 
 Image interaction must preserve existing legacy behavior.
 
@@ -1339,10 +1336,10 @@ The frontend must respect backend limits.
 
 Typical constraints include:
 
-* one image per request
-* maximum image count per entity
-* maximum file size
-* supported image formats
+- one image per request
+- maximum image count per entity
+- maximum file size
+- supported image formats
 
 Client-side validation is only an early UX check.
 
@@ -1376,11 +1373,11 @@ Backend validation remains authoritative.
 
 The FE and BE must apply matching input semantics:
 
-* Ordinary text fields are trimmed before validation and submission.
-* Passwords are trimmed at the boundaries before password validation; the resulting password must satisfy the backend policy. Do not preserve surrounding whitespace as part of a password.
-* Opaque token and CAPTCHA fields are not trimmed. Their values must be preserved unchanged and whitespace must be rejected by validation.
-* JSON API body schemas accept actual JSON numbers, not numeric strings. Form-only adapters may convert numeric input strings to numbers before calling the API; API request schemas remain strict.
-* Multipart upload requests preserve file/blob content. Text fields, if an endpoint allows them, are trimmed; current image upload endpoints send only the binary `file` field.
+- Ordinary text fields are trimmed before validation and submission.
+- Passwords are trimmed at the boundaries before password validation; the resulting password must satisfy the backend policy. Do not preserve surrounding whitespace as part of a password.
+- Opaque token and CAPTCHA fields are not trimmed. Their values must be preserved unchanged and whitespace must be rejected by validation.
+- JSON API body schemas accept actual JSON numbers, not numeric strings. Form-only adapters may convert numeric input strings to numbers before calling the API; API request schemas remain strict.
+- Multipart upload requests preserve file/blob content. Text fields, if an endpoint allows them, are trimmed; current image upload endpoints send only the binary `file` field.
 
 Forms must handle documented backend validation errors.
 
@@ -1457,19 +1454,19 @@ Public pages should be designed for server rendering and SEO.
 
 Relevant content includes:
 
-* trips
-* points
-* About
-* Privacy Policy
-* other public informational pages
+- trips
+- points
+- About
+- Privacy Policy
+- other public informational pages
 
 Use Next.js metadata APIs for:
 
-* title
-* description
-* canonical
-* Open Graph
-* Twitter/X metadata
+- title
+- description
+- canonical
+- Open Graph
+- Twitter/X metadata
 
 SEO metadata should not expose private user information.
 
@@ -1517,21 +1514,21 @@ Responsive behavior is part of the existing application's functionality.
 
 The modernization must support:
 
-* desktop
-* tablet
-* mobile
+- desktop
+- tablet
+- mobile
 
 Responsive behavior includes more than CSS.
 
 It may include:
 
-* different navigation
-* different controls
-* different interaction patterns
-* different component layouts
-* touch behavior
-* mobile-specific gestures
-* desktop hover behavior
+- different navigation
+- different controls
+- different interaction patterns
+- different component layouts
+- touch behavior
+- mobile-specific gestures
+- desktop hover behavior
 
 Do not remove behavior simply because a new responsive implementation looks visually equivalent.
 
@@ -1543,15 +1540,15 @@ Existing input behavior is considered functionality.
 
 Preserve, where applicable:
 
-* mouse click
-* mouse hover
-* mouse movement
-* touch
-* swipe
-* drag
-* keyboard
-* pointer events
-* device-specific behavior
+- mouse click
+- mouse hover
+- mouse movement
+- touch
+- swipe
+- drag
+- keyboard
+- pointer events
+- device-specific behavior
 
 When replacing a component:
 
@@ -1599,20 +1596,20 @@ Remove obsolete code
 
 Legacy behavior includes:
 
-* UI behavior
-* API calls
-* navigation
-* validation
-* responsive behavior
-* mouse behavior
-* touch behavior
-* swipe behavior
-* map behavior
-* image behavior
-* keyboard behavior
-* loading states
-* error states
-* animations when functionally relevant
+- UI behavior
+- API calls
+- navigation
+- validation
+- responsive behavior
+- mouse behavior
+- touch behavior
+- swipe behavior
+- map behavior
+- image behavior
+- keyboard behavior
+- loading states
+- error states
+- animations when functionally relevant
 
 Do not interpret "modernization" as permission to redesign or simplify functionality.
 
@@ -1639,13 +1636,13 @@ Good:
 
 Comments should explain:
 
-* why
-* architectural constraint
-* security requirement
-* backend contract requirement
-* compatibility requirement
-* workaround
-* non-obvious browser behavior
+- why
+- architectural constraint
+- security requirement
+- backend contract requirement
+- compatibility requirement
+- workaround
+- non-obvious browser behavior
 
 Do not add comments solely to increase documentation volume.
 
@@ -1657,21 +1654,21 @@ The browser is not a trusted security boundary.
 
 Never trust:
 
-* frontend role state
-* frontend ownership state
-* hidden buttons
-* hidden routes
-* client-side validation
-* locally stored permissions
+- frontend role state
+- frontend ownership state
+- hidden buttons
+- hidden routes
+- client-side validation
+- locally stored permissions
 
 The backend must enforce authorization.
 
 Frontend checks are for:
 
-* navigation
-* UX
-* avoiding unnecessary requests
-* presenting appropriate UI
+- navigation
+- UX
+- avoiding unnecessary requests
+- presenting appropriate UI
 
 They are not security controls.
 
@@ -1707,23 +1704,23 @@ Existing dependencies should be reused where appropriate.
 
 Current relevant dependencies include:
 
-* Next.js
-* React
-* MUI
-* Axios
-* Zod
-* React Hook Form
-* React Query
-* Google Maps integration
+- Next.js
+- React
+- MUI
+- Axios
+- Zod
+- React Hook Form
+- React Query
+- Google Maps integration
 
 Do not add another library solving an existing problem without an explicit reason.
 
 In particular, do not introduce:
 
-* another HTTP client
-* another validation library
-* another data-fetching library
-* another Google Maps loader
+- another HTTP client
+- another validation library
+- another data-fetching library
+- another Google Maps loader
 
 without a documented architectural need.
 
@@ -1735,10 +1732,10 @@ React Query, where used, is a client-side server-state mechanism.
 
 It does not replace:
 
-* API modules
-* services
-* Axios client
-* backend contract
+- API modules
+- services
+- Axios client
+- backend contract
 
 Its responsibility is state lifecycle:
 
@@ -1833,12 +1830,12 @@ Where a component is replaced, verify its previous functionality.
 
 Where an API operation is migrated, verify:
 
-* endpoint
-* method
-* request payload
-* authentication
-* response handling
-* error handling
+- endpoint
+- method
+- request payload
+- authentication
+- response handling
+- error handling
 
 ---
 
@@ -1987,17 +1984,17 @@ The backend API contract remains the authoritative source for backend communicat
 
 The frontend architecture remains responsible for clean separation between:
 
-* pages
-* UI
-* services
-* API modules
-* HTTP transport
-* authentication
-* browser integrations
-* Google Maps
-* validation
-* configuration
-* constants
+- pages
+- UI
+- services
+- API modules
+- HTTP transport
+- authentication
+- browser integrations
+- Google Maps
+- validation
+- configuration
+- constants
 
 No layer should silently absorb another layer's responsibility.
 
@@ -2051,15 +2048,15 @@ The frontend implements a preloading pipeline to enable instant background trans
    - If a ready `next` image exists, it is promoted to `current` immediately and synchronously, without waiting for an API request.
    - If no ready `next` image exists at that moment, the currently visible background remains unchanged. The navigation proceeds without a background transition.
 
-4. **After navigation**: After a navigation (whether a transition occurred or not), the frontend requests a new image pair from the API and begins preloading the new `next` candidate in the background. The preloaded candidate becomes available for the next navigation.
+3. **After navigation**: After a navigation (whether a transition occurred or not), the frontend requests a new image pair from the API and begins preloading the new `next` candidate in the background. The preloaded candidate becomes available for the next navigation.
 
-5. **No delayed transitions**: A candidate that finishes loading *after* a navigation has been handled must not trigger a delayed background transition for that navigation. The preload completion only updates the `next` candidate for future navigations; it never changes the visible `current` background independently.
+4. **No delayed transitions**: A candidate that finishes loading _after_ a navigation has been handled must not trigger a delayed background transition for that navigation. The preload completion only updates the `next` candidate for future navigations; it never changes the visible `current` background independently.
 
 5. **Error handling**: If an API request or image preload fails, the currently visible background is preserved. The error is logged silently and does not clear or replace the visible background. A subsequent navigation will retry fetching a new image pair.
 
 6. **Exclusions**: The `/admin` route group is excluded from background rendering. When entering `/admin`, the background is cleared. When leaving `/admin`, a fresh initial load begins.
 
-6. **Concurrency and stale results**: The implementation uses generation counters to prevent stale asynchronous operations (API responses or image preloads) from overwriting newer state. Rapid navigation and concurrent requests are handled safely without duplicate or stale transitions.
+7. **Concurrency and stale results**: The implementation uses generation counters to prevent stale asynchronous operations (API responses or image preloads) from overwriting newer state. Rapid navigation and concurrent requests are handled safely without duplicate or stale transitions.
 
 The frontend must send the required `PUBLIC_FRONTEND_TOKEN` for this public anonymous API request. Loading a background image must not require user login or `/auth/refresh`.
 
@@ -2126,7 +2123,6 @@ Normal user → Reports → denied
 
 These rules supplement the existing architecture and migration-verification sections. They do not remove or replace existing functionality or documentation.
 
-
 # 49.7 Current-user Trip and Favorite API Boundary
 
 The current-user endpoints are:
@@ -2173,11 +2169,11 @@ The Trip Group is only the container identified by `tripGroupId`. Trip-specific 
 
 For both endpoints:
 
-* `tripGroupId` identifies the Trip Group.
-* `days[].id` identifies the actual `trips` row/day.
-* `days[].dayNumber` is the displayed/logical day number and is not the database ID.
-* Existing day numbers must be preserved; the frontend must not generate missing days.
-* Day, point and image social state must be consumed from their respective response levels.
+- `tripGroupId` identifies the Trip Group.
+- `days[].id` identifies the actual `trips` row/day.
+- `days[].dayNumber` is the displayed/logical day number and is not the database ID.
+- Existing day numbers must be preserved; the frontend must not generate missing days.
+- Day, point and image social state must be consumed from their respective response levels.
 
 ### Security boundary
 
@@ -2251,7 +2247,6 @@ Viewer-specific trip, point, comment, and reply query keys include an opaque aut
 Replies use the dedicated /comments/:commentId/replies collection and /replies/:replyId update/delete routes. They retain the parent comment's target and are displayed one level deep. Like, favorite and report mutations on comments or replies use the comment target id. A user's report is withdrawn with DELETE /reports?targetType=comment&targetId=...; report ids are only used by administrative report removal.
 
 Feature API modules validate query/body inputs and preserve backend DTO field names. The shared Axios error normalizer retains the backend error code and HTTP status so feature UI can display contract-specific outcomes.
-
 
 ## 10.3 Trip creation form implementation rules
 

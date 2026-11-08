@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Box, CircularProgress, IconButton, TextField, Tooltip, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  CircularProgress,
+  IconButton,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -112,20 +120,24 @@ export function RepliesSection({
       'comment',
       item.social.reportedByMe ? 'delete' : 'create',
     );
-    const canEdit = item.permissions.canEdit && isSocialOperationAllowed(
-      socialConfig.data,
-      'replyComment',
-      'comment',
-      'edit',
-      parentTargetType,
-    );
-    const canDelete = item.permissions.canDelete && isSocialOperationAllowed(
-      socialConfig.data,
-      'replyComment',
-      'comment',
-      'delete',
-      parentTargetType,
-    );
+    const canEdit =
+      item.permissions.canEdit &&
+      isSocialOperationAllowed(
+        socialConfig.data,
+        'replyComment',
+        'comment',
+        'edit',
+        parentTargetType,
+      );
+    const canDelete =
+      item.permissions.canDelete &&
+      isSocialOperationAllowed(
+        socialConfig.data,
+        'replyComment',
+        'comment',
+        'delete',
+        parentTargetType,
+      );
     const hasReplyActions = canLike || canFavorite || canReport || canEdit || canDelete;
 
     return (
@@ -153,7 +165,11 @@ export function RepliesSection({
             />
             <Tooltip title="Save reply" arrow>
               <span>
-                <IconButton type="submit" aria-label="Save reply" disabled={updateMutation.isPending}>
+                <IconButton
+                  type="submit"
+                  aria-label="Save reply"
+                  disabled={updateMutation.isPending}
+                >
                   <CheckIcon />
                 </IconButton>
               </span>
@@ -178,25 +194,31 @@ export function RepliesSection({
         )}
         {authenticated && hasReplyActions ? (
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 1 }}>
-            {canLike ? <LikeButton
-              targetType="comment"
-              targetId={item.id}
-              initialLiked={item.social.likedByMe}
-              initialLikes={item.social.likes}
-            /> : null}
-            {canFavorite ? <FavoriteButton
-              targetType="comment"
-              targetId={item.id}
-              initialFavorited={item.social.favoritedByMe ?? false}
-              initialFavorites={item.social.favorites ?? 0}
-            /> : null}
-            {canReport ? <ReportButton
-              targetType="comment"
-              targetId={item.id}
-              initialReported={item.social.reportedByMe}
-              label="REPORT REPLY"
-              onReportedChange={() => void refresh()}
-            /> : null}
+            {canLike ? (
+              <LikeButton
+                targetType="comment"
+                targetId={item.id}
+                initialLiked={item.social.likedByMe}
+                initialLikes={item.social.likes}
+              />
+            ) : null}
+            {canFavorite ? (
+              <FavoriteButton
+                targetType="comment"
+                targetId={item.id}
+                initialFavorited={item.social.favoritedByMe ?? false}
+                initialFavorites={item.social.favorites ?? 0}
+              />
+            ) : null}
+            {canReport ? (
+              <ReportButton
+                targetType="comment"
+                targetId={item.id}
+                initialReported={item.social.reportedByMe}
+                label="REPORT REPLY"
+                onReportedChange={() => void refresh()}
+              />
+            ) : null}
             {canEdit ? (
               <Tooltip title="Edit reply" arrow>
                 <IconButton
@@ -234,7 +256,11 @@ export function RepliesSection({
   }
 
   return (
-    <Box component="section" aria-label={`Replies, ${data?.total ?? initialRepliesCount} total`} sx={{ mt: 1, pl: 2 }}>
+    <Box
+      component="section"
+      aria-label={`Replies, ${data?.total ?? initialRepliesCount} total`}
+      sx={{ mt: 1, pl: 2 }}
+    >
       <Typography variant="subtitle2">Replies</Typography>
       <SocialConfigStatus isLoading={socialConfig.isLoading} error={socialConfig.error} />
       {isLoading ? <CircularProgress size={20} /> : null}

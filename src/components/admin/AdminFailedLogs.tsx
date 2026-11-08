@@ -2,7 +2,21 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Box, Button, Checkbox, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import { adminApi } from '@/api/admin';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
@@ -21,7 +35,11 @@ export function AdminFailedLogs() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
-  const { data, isLoading, error: queryError } = useQuery({
+  const {
+    data,
+    isLoading,
+    error: queryError,
+  } = useQuery({
     queryKey: ['admin', 'failed-logs', page, ADMIN_PAGE_SIZE_DEFAULT],
     queryFn: () => adminApi.listFailedLogs({ page, pageSize: ADMIN_PAGE_SIZE_DEFAULT }),
   });
@@ -36,7 +54,9 @@ export function AdminFailedLogs() {
   });
 
   const pagination = data?.pagination;
-  const allChecked = data ? data.items.length > 0 && data.items.every((item) => selected.has(item.id)) : false;
+  const allChecked = data
+    ? data.items.length > 0 && data.items.every((item) => selected.has(item.id))
+    : false;
 
   function toggleAll() {
     if (!data) return;
@@ -55,7 +75,11 @@ export function AdminFailedLogs() {
   return (
     <Box>
       <Typography variant="h4">Failed login logs</Typography>
-      {error ? <Alert severity="error" onClose={() => setError(null)}>{error}</Alert> : null}
+      {error ? (
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
       {queryError ? <Alert severity="error">{getGenericErrorMessage(queryError)}</Alert> : null}
       {selected.size > 0 ? (
         <Box sx={{ my: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
@@ -64,13 +88,14 @@ export function AdminFailedLogs() {
             color="error"
             disabled={deleteMutation.isPending}
             onClick={() =>
-              void confirm('Are you sure you want to delete the selected logs?', 'Delete Confirmation').then(
-                (confirmed) => {
-                  if (confirmed) {
-                    deleteMutation.mutate([...selected]);
-                  }
-                },
-              )
+              void confirm(
+                'Are you sure you want to delete the selected logs?',
+                'Delete Confirmation',
+              ).then((confirmed) => {
+                if (confirmed) {
+                  deleteMutation.mutate([...selected]);
+                }
+              })
             }
           >
             Delete selected
@@ -114,9 +139,18 @@ export function AdminFailedLogs() {
       ) : null}
       {pagination && (pagination.totalPages ?? 0) > 1 ? (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
-          <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-          <Typography>Page {page} of {pagination.totalPages}</Typography>
-          <Button disabled={page >= (pagination.totalPages ?? 1)} onClick={() => setPage((p) => p + 1)}>Next</Button>
+          <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            Previous
+          </Button>
+          <Typography>
+            Page {page} of {pagination.totalPages}
+          </Typography>
+          <Button
+            disabled={page >= (pagination.totalPages ?? 1)}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
         </Box>
       ) : null}
     </Box>

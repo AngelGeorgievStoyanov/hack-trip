@@ -23,13 +23,7 @@ const controlSx = {
   '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.7)' },
 };
 
-export function ImageLightbox({
-  images,
-  index,
-  alt,
-  onIndexChange,
-  onClose,
-}: ImageLightboxProps) {
+export function ImageLightbox({ images, index, alt, onIndexChange, onClose }: ImageLightboxProps) {
   const touchStartX = useRef<number | null>(null);
   const count = images.length;
   const current = index !== null ? images[index] : undefined;
@@ -73,9 +67,7 @@ export function ImageLightbox({
           if (Math.abs(delta) < LIGHTBOX_SWIPE_THRESHOLD_PX) {
             return;
           }
-          onIndexChange(
-            delta < 0 ? (index + 1) % count : (index - 1 + count) % count,
-          );
+          onIndexChange(delta < 0 ? (index + 1) % count : (index - 1 + count) % count);
         }}
       >
         {current && index !== null ? (

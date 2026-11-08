@@ -48,7 +48,7 @@ export function AppImage({
   // A thumbnail URL in the DTO does not guarantee the object exists in storage; retry with
   // the full image URL once before giving up to the placeholder.
   const primary = src ?? pickImageUrl(image, resolvedUseThumbnail);
-  const resolved = useFullImage ? image?.url ?? null : primary;
+  const resolved = useFullImage ? (image?.url ?? null) : primary;
 
   if (errored || !resolved) {
     return <div className={className} style={style} role="img" aria-label={alt} />;
@@ -66,13 +66,7 @@ export function AppImage({
       className={className}
       style={style}
       onError={() => {
-        if (
-          !src &&
-          !useFullImage &&
-          resolvedUseThumbnail &&
-          image &&
-          image.url !== primary
-        ) {
+        if (!src && !useFullImage && resolvedUseThumbnail && image && image.url !== primary) {
           setUseFullImage(true);
           return;
         }

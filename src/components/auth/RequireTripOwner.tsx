@@ -22,10 +22,7 @@ export function RequireTripOwner({ tripGroupId, children }: RequireTripOwnerProp
   const router = useRouter();
 
   const isModerator = isModeratorUser(user);
-  const {
-    data: myTrips,
-    isError,
-  } = useQuery({
+  const { data: myTrips, isError } = useQuery({
     queryKey: ['me', 'trips'],
     queryFn: () => tripApi.listMyTrips(),
     enabled: status === 'authenticated' && !isModerator,

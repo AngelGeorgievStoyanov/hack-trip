@@ -33,7 +33,10 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
   const [pointLatitude, setPointLatitude] = useState('');
   const [pointLongitude, setPointLongitude] = useState('');
   const [findInMapTrigger, setFindInMapTrigger] = useState(0);
-  const [mapSearchSelection, setMapSearchSelection] = useState<{ name: string; revision: number } | null>(null);
+  const [mapSearchSelection, setMapSearchSelection] = useState<{
+    name: string;
+    revision: number;
+  } | null>(null);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['trip', tripGroupId] });
 
@@ -99,9 +102,15 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
     <Box component="section" sx={{ border: '1px solid #e0e0e0', borderRadius: 1, p: 2, my: 1 }}>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
         <Typography variant="h6">{day.title ?? `Day ${day.dayNumber}`}</Typography>
-        <Button size="small" onClick={() => onMove(-1)}>↑</Button>
-        <Button size="small" onClick={() => onMove(1)}>↓</Button>
-        <Button size="small" onClick={() => onEditingChange(true)}>Edit</Button>
+        <Button size="small" onClick={() => onMove(-1)}>
+          ↑
+        </Button>
+        <Button size="small" onClick={() => onMove(1)}>
+          ↓
+        </Button>
+        <Button size="small" onClick={() => onEditingChange(true)}>
+          Edit
+        </Button>
         <Button
           size="small"
           color="error"
@@ -123,18 +132,23 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 1, alignItems: 'flex-start' }}>
         {day.images.map((img) => (
           <Box key={img.id} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-            <AppImage image={img} alt={day.title ?? `Day ${day.dayNumber}`} preset="editorDayThumb" />
+            <AppImage
+              image={img}
+              alt={day.title ?? `Day ${day.dayNumber}`}
+              preset="editorDayThumb"
+            />
             <Button
               size="small"
               color="error"
               onClick={() =>
-                void confirm('Are you sure you want to delete this image?', 'Delete Confirmation').then(
-                  (confirmed) => {
-                    if (confirmed) {
-                      deleteImageMutation.mutate(img.id);
-                    }
-                  },
-                )
+                void confirm(
+                  'Are you sure you want to delete this image?',
+                  'Delete Confirmation',
+                ).then((confirmed) => {
+                  if (confirmed) {
+                    deleteImageMutation.mutate(img.id);
+                  }
+                })
               }
             >
               Remove
@@ -195,13 +209,23 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
             ) : (
               <>
                 <Typography variant="subtitle2">{point.name}</Typography>
-                {point.description ? <Typography variant="body2">{point.description}</Typography> : null}
-                {point.lat != null && point.lng != null ? (
-                  <Typography variant="caption">{point.lat.toFixed(6)}, {point.lng.toFixed(6)}</Typography>
+                {point.description ? (
+                  <Typography variant="body2">{point.description}</Typography>
                 ) : null}
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', my: 0.5 }}>
-                  <Button size="small" onClick={() => reorderPoint(index, -1)}>↑</Button>
-                  <Button size="small" onClick={() => reorderPoint(index, 1)}>↓</Button>
+                {point.lat != null && point.lng != null ? (
+                  <Typography variant="caption">
+                    {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
+                  </Typography>
+                ) : null}
+                <Box
+                  sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', my: 0.5 }}
+                >
+                  <Button size="small" onClick={() => reorderPoint(index, -1)}>
+                    ↑
+                  </Button>
+                  <Button size="small" onClick={() => reorderPoint(index, 1)}>
+                    ↓
+                  </Button>
                   <Button
                     size="small"
                     onClick={() => {
@@ -217,13 +241,14 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
                     size="small"
                     color="error"
                     onClick={() =>
-                      void confirm('Are you sure you want to delete this point?', 'Delete Confirmation').then(
-                        (confirmed) => {
-                          if (confirmed) {
-                            deletePointMutation.mutate(point.id);
-                          }
-                        },
-                      )
+                      void confirm(
+                        'Are you sure you want to delete this point?',
+                        'Delete Confirmation',
+                      ).then((confirmed) => {
+                        if (confirmed) {
+                          deletePointMutation.mutate(point.id);
+                        }
+                      })
                     }
                   >
                     Delete
@@ -235,13 +260,17 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
                         size="small"
                         color="error"
                         onClick={() =>
-                          void confirm('Are you sure you want to delete this image?', 'Delete Confirmation').then(
-                            (confirmed) => {
-                              if (confirmed) {
-                                deletePointImageMutation.mutate({ pointId: point.id, imageId: img.id });
-                              }
-                            },
-                          )
+                          void confirm(
+                            'Are you sure you want to delete this image?',
+                            'Delete Confirmation',
+                          ).then((confirmed) => {
+                            if (confirmed) {
+                              deletePointImageMutation.mutate({
+                                pointId: point.id,
+                                imageId: img.id,
+                              });
+                            }
+                          })
                         }
                       >
                         Remove
@@ -249,7 +278,9 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
                     </Box>
                   ))}
                   <ImageUploadButton
-                    onUpload={(file) => uploadPointImageMutation.mutateAsync({ pointId: point.id, file })}
+                    onUpload={(file) =>
+                      uploadPointImageMutation.mutateAsync({ pointId: point.id, file })
+                    }
                     disabled={point.images.length >= MAX_IMAGES_PER_ENTITY}
                     label="Add image"
                   />

@@ -20,12 +20,7 @@ import { SocialObjectPlaceholder } from '@/components/placeholders';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
-import {
-  BREAKPOINTS,
-  LIGHTBOX_SWIPE_THRESHOLD_PX,
-  cardStyle,
-  maxWidthQuery,
-} from '@/constants/ui';
+import { BREAKPOINTS, LIGHTBOX_SWIPE_THRESHOLD_PX, cardStyle, maxWidthQuery } from '@/constants/ui';
 import { buildTripUrl } from '@/lib/tripUrl';
 import type { TripGroupResponse } from '@/types';
 
@@ -272,14 +267,26 @@ export function TripCard({ tripGroup }: TripCardProps) {
 
       <Box aria-label="Trip and day likes" sx={SOCIAL_COUNTS_SX}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography component="span" variant="body2">Trip:</Typography>
+          <Typography component="span" variant="body2">
+            Trip:
+          </Typography>
           <FavoriteIcon fontSize="small" color="error" />
-          {groupLikes > 0 ? <Typography component="span" variant="body2">{groupLikes}</Typography> : null}
+          {groupLikes > 0 ? (
+            <Typography component="span" variant="body2">
+              {groupLikes}
+            </Typography>
+          ) : null}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography component="span" variant="body2">Day:</Typography>
+          <Typography component="span" variant="body2">
+            Day:
+          </Typography>
           <FavoriteIcon fontSize="small" color="error" />
-          {dayLikes > 0 ? <Typography component="span" variant="body2">{dayLikes}</Typography> : null}
+          {dayLikes > 0 ? (
+            <Typography component="span" variant="body2">
+              {dayLikes}
+            </Typography>
+          ) : null}
         </Box>
       </Box>
 

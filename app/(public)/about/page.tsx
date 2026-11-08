@@ -41,14 +41,14 @@ export default function AboutPage() {
         <h1>Welcome travelers or future travelers!</h1>
         <h1>Welcome in Hack Trip!</h1>
         <h2>
-          Hack Trip is an app where you can share your trips or get valuable tips for your
-          future trips.
+          Hack Trip is an app where you can share your trips or get valuable tips for your future
+          trips.
         </h2>
         <h3>
           The idea of Hack Trip is to help all travelers. If you want to visit a certain
-          destination, city or area, search for information and see whether other travelers
-          have been there and what they recommend. You can then add your own journey and help
-          other travelers.
+          destination, city or area, search for information and see whether other travelers have
+          been there and what they recommend. You can then add your own journey and help other
+          travelers.
         </h3>
 
         <Image
@@ -81,9 +81,9 @@ export default function AboutPage() {
         </div>
 
         <h3>
-          You can mark anything you want: a city, hotel, restaurant, shop, hidden beach or
-          mountain location. You can even turn your points into an eco trail. The level of
-          detail is entirely up to you and what you want to describe.
+          You can mark anything you want: a city, hotel, restaurant, shop, hidden beach or mountain
+          location. You can even turn your points into an eco trail. The level of detail is entirely
+          up to you and what you want to describe.
         </h3>
 
         <div className="about-page__image-row">
@@ -106,9 +106,9 @@ export default function AboutPage() {
         </div>
 
         <h3>
-          If you have a trip coming up, you can plan it by setting every point in advance and
-          then following your route. You can edit the points later when you are there, add
-          photos or descriptions, and let others follow your journey live.
+          If you have a trip coming up, you can plan it by setting every point in advance and then
+          following your route. You can edit the points later when you are there, add photos or
+          descriptions, and let others follow your journey live.
         </h3>
 
         <Image

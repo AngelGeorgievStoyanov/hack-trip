@@ -2,12 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  Alert,
-  Box,
-  CircularProgress,
-  Paper,
-} from '@mui/material';
+import { Alert, Box, CircularProgress, Paper } from '@mui/material';
 import { tripApi } from '@/api/trips';
 import { pointApi } from '@/api/points';
 import { PointForm } from '@/components/points/PointForm';
@@ -32,7 +27,10 @@ export function CreatePointPage() {
   const [pointLatitude, setPointLatitude] = useState('');
   const [pointLongitude, setPointLongitude] = useState('');
   const [findInMapTrigger, setFindInMapTrigger] = useState(0);
-  const [mapSearchSelection, setMapSearchSelection] = useState<{ name: string; revision: number } | null>(null);
+  const [mapSearchSelection, setMapSearchSelection] = useState<{
+    name: string;
+    revision: number;
+  } | null>(null);
 
   const selectedDay = useMemo(
     () => tripGroup?.days.find((day) => day.id === tripId) ?? null,
@@ -51,8 +49,10 @@ export function CreatePointPage() {
 
   useEffect(() => {
     if (
-      !Number.isSafeInteger(tripGroupId) || tripGroupId < 1 ||
-      !Number.isSafeInteger(tripId) || tripId < 1
+      !Number.isSafeInteger(tripGroupId) ||
+      tripGroupId < 1 ||
+      !Number.isSafeInteger(tripId) ||
+      tripId < 1
     ) {
       setError('A valid tripGroupId and tripId are required.');
       setLoading(false);
@@ -60,7 +60,8 @@ export function CreatePointPage() {
     }
 
     let cancelled = false;
-    tripApi.getTrip(tripGroupId)
+    tripApi
+      .getTrip(tripGroupId)
       .then((result) => {
         if (cancelled) return;
         const selectedTrip = result.days.find((day) => day.id === tripId);
@@ -92,7 +93,6 @@ export function CreatePointPage() {
     router.replace('/trips');
   }
 
-
   async function handlePointSaved(): Promise<void> {
     setSaving(true);
     setError(null);
@@ -119,7 +119,6 @@ export function CreatePointPage() {
     try {
       await pointApi.deletePoint(point.id);
       await refreshTrip();
-
     } catch (requestError) {
       setError(getGenericErrorMessage(requestError));
     }
@@ -183,13 +182,19 @@ export function CreatePointPage() {
 
   return (
     <Box sx={{ width: '100%', maxWidth: 1440, mx: 'auto', px: { xs: 1, sm: 2 }, py: 2 }}>
-      {error ? <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert> : null}
+      {error ? (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
 
       <Box
         sx={{
           display: 'grid',
           gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'minmax(0, 1fr)' },
-          '@media (min-width:1021px)': { gridTemplateColumns: 'minmax(250px, 0.75fr) minmax(0, 1.6fr)' },
+          '@media (min-width:1021px)': {
+            gridTemplateColumns: 'minmax(250px, 0.75fr) minmax(0, 1.6fr)',
+          },
           alignItems: 'start',
           gap: { xs: 2, md: 3 },
         }}
@@ -204,7 +209,15 @@ export function CreatePointPage() {
           />
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', minWidth: 0 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+            minWidth: 0,
+          }}
+        >
           <PointLocationPicker
             latitude={pointLatitude}
             longitude={pointLongitude}
@@ -213,7 +226,9 @@ export function CreatePointPage() {
               setPointLatitude(latitude);
               setPointLongitude(longitude);
             }}
-            onAddressSelect={(name) => setMapSearchSelection((current) => ({ name, revision: (current?.revision ?? 0) + 1 }))}
+            onAddressSelect={(name) =>
+              setMapSearchSelection((current) => ({ name, revision: (current?.revision ?? 0) + 1 }))
+            }
           />
 
           <Paper

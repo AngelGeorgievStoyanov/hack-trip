@@ -23,9 +23,7 @@ export function PointCard({
   disabled = false,
 }: PointCardProps) {
   const hasCoordinates = point.lat !== null && point.lng !== null;
-  const position = hasCoordinates
-    ? { lat: point.lat as number, lng: point.lng as number }
-    : null;
+  const position = hasCoordinates ? { lat: point.lat as number, lng: point.lng as number } : null;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -69,12 +67,14 @@ export function PointCard({
             center={position}
             zoom={14}
             height={150}
-            markers={[{
-              id: point.id,
-              position,
-              title: `Point №${point.pointNumber}`,
-              label: String(point.pointNumber),
-            }]}
+            markers={[
+              {
+                id: point.id,
+                position,
+                title: `Point №${point.pointNumber}`,
+                label: String(point.pointNumber),
+              },
+            ]}
           />
         ) : (
           <Typography gutterBottom component="p">

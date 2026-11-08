@@ -155,9 +155,7 @@ const privacySections = [
   },
   {
     title: 'How We Use Your Information',
-    paragraphs: [
-      'We may use the information we collect from and about you to:',
-    ],
+    paragraphs: ['We may use the information we collect from and about you to:'],
     bullets: [
       'Fulfill the purposes for which you provided it.',
       'Provide and improve the Services, develop new features, secure the Services, and provide technical and customer support.',
@@ -167,7 +165,8 @@ const privacySections = [
       'Comply with the law and protect the safety, rights, property, or security of HackTrip, the Services, users, and the general public.',
       'Enforce the Terms of Use, including investigating potential violations.',
     ],
-    after: 'We may combine information collected directly and automatically with information obtained from affiliates or third parties. We may aggregate or de-identify information and use that data for purposes including research and marketing.',
+    after:
+      'We may combine information collected directly and automatically with information obtained from affiliates or third parties. We may aggregate or de-identify information and use that data for purposes including research and marketing.',
   },
   {
     title: 'When We Disclose Your Information',
@@ -273,14 +272,13 @@ export default function PrivacyPolicyPage() {
         <section aria-labelledby="terms-of-use">
           <h2 id="terms-of-use">Terms and conditions</h2>
           <p>
-            These terms and conditions (“Agreement”) set forth the general terms and conditions
-            of your use of the <a href="https://www.hack-trip.com">hack-trip.com</a> website
-            (“Website” or “Service”) and any related products and services (“Services”). This
-            Agreement is legally binding between you (“User”, “you” or “your”) and this Website
-            operator (“Operator”, “we”, “us” or “our”). By accessing and using the Website and
-            Services, you acknowledge that you have read, understood, and agree to be bound by
-            this Agreement. If you do not agree, you must not access or use the Website and
-            Services.
+            These terms and conditions (“Agreement”) set forth the general terms and conditions of
+            your use of the <a href="https://www.hack-trip.com">hack-trip.com</a> website (“Website”
+            or “Service”) and any related products and services (“Services”). This Agreement is
+            legally binding between you (“User”, “you” or “your”) and this Website operator
+            (“Operator”, “we”, “us” or “our”). By accessing and using the Website and Services, you
+            acknowledge that you have read, understood, and agree to be bound by this Agreement. If
+            you do not agree, you must not access or use the Website and Services.
           </p>
           <div className="legal-page__toc">
             <h3>Table of contents</h3>
@@ -305,14 +303,13 @@ export default function PrivacyPolicyPage() {
         <section aria-labelledby="privacy-policy">
           <h2 id="privacy-policy">Privacy Policy</h2>
           <p>
-            <strong>Last Updated: 24.03.2023.</strong> This Privacy Policy (“Policy”) explains
-            the information collection, use, and sharing practices of https://www.hack-trip.com
-            (“we,” “us,” and “our”). Unless otherwise stated, this Policy describes practices
-            relating to your use of our website and the services (“Services”) we provide or host
-            on our servers. Please review this Policy before submitting information through the
-            Services. By using any part of the Services, you understand that your information
-            will be collected, used and disclosed as outlined here. If you do not agree, please
-            do not use our Services.
+            <strong>Last Updated: 24.03.2023.</strong> This Privacy Policy (“Policy”) explains the
+            information collection, use, and sharing practices of https://www.hack-trip.com (“we,”
+            “us,” and “our”). Unless otherwise stated, this Policy describes practices relating to
+            your use of our website and the services (“Services”) we provide or host on our servers.
+            Please review this Policy before submitting information through the Services. By using
+            any part of the Services, you understand that your information will be collected, used
+            and disclosed as outlined here. If you do not agree, please do not use our Services.
           </p>
           {privacySections.map((section) => (
             <section key={section.title}>
@@ -336,7 +333,9 @@ export default function PrivacyPolicyPage() {
           Questions or concerns? Contact us at{' '}
           <a href="mailto:www.hack.trip@gmail.com">www.hack.trip@gmail.com</a>.
         </p>
-        <a className="legal-page__back" href="/">Back to Hack Trip</a>
+        <a className="legal-page__back" href="/">
+          Back to Hack Trip
+        </a>
       </article>
     </main>
   );

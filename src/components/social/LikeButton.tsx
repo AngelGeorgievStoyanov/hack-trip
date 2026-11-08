@@ -26,7 +26,13 @@ interface LikeButtonProps {
   size?: 'small' | 'medium';
 }
 
-export function LikeButton({ targetType, targetId, initialLiked, initialLikes, size = 'medium' }: LikeButtonProps) {
+export function LikeButton({
+  targetType,
+  targetId,
+  initialLiked,
+  initialLikes,
+  size = 'medium',
+}: LikeButtonProps) {
   const notification = useNotification();
   const [liked, setLiked] = useState(initialLiked);
   const [likes, setLikes] = useState(initialLikes);
@@ -82,7 +88,25 @@ export function LikeButton({ targetType, targetId, initialLiked, initialLikes, s
             color={liked ? 'primary' : 'default'}
             size={size}
           >
-            <Badge badgeContent={likes} invisible={likes === 0} max={Number.MAX_SAFE_INTEGER} color="primary" sx={size === 'small' ? { '& .MuiBadge-badge': { fontSize: '0.65rem', height: 14, minWidth: 14, padding: '0 3px', lineHeight: 1 } } : undefined}>
+            <Badge
+              badgeContent={likes}
+              invisible={likes === 0}
+              max={Number.MAX_SAFE_INTEGER}
+              color="primary"
+              sx={
+                size === 'small'
+                  ? {
+                      '& .MuiBadge-badge': {
+                        fontSize: '0.65rem',
+                        height: 14,
+                        minWidth: 14,
+                        padding: '0 3px',
+                        lineHeight: 1,
+                      },
+                    }
+                  : undefined
+              }
+            >
               {liked ? (
                 <ThumbUpIcon sx={{ animation: likeAnimation.animation }} />
               ) : (

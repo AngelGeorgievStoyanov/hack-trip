@@ -4,7 +4,11 @@ export type TabSyncEvent =
   | { type: 'logged-out' }
   | { type: 'trip-created'; tripId: number }
   | { type: 'trip-updated'; tripId: number }
-  | { type: 'social-updated'; entityType: 'trip' | 'point' | 'image' | 'comment'; entityId: number };
+  | {
+      type: 'social-updated';
+      entityType: 'trip' | 'point' | 'image' | 'comment';
+      entityId: number;
+    };
 
 const CHANNEL_NAME = 'hacktrip-tab-sync';
 const STORAGE_EVENT_KEY = '__hacktrip_tab_sync__';
@@ -57,9 +61,7 @@ export function publishTabEvent(event: TabSyncEvent): void {
   }
 }
 
-export function subscribeToTabEvents(
-  listener: (event: TabSyncEvent) => void,
-): () => void {
+export function subscribeToTabEvents(listener: (event: TabSyncEvent) => void): () => void {
   if (typeof window === 'undefined') return () => undefined;
 
   if (typeof BroadcastChannel !== 'undefined') {

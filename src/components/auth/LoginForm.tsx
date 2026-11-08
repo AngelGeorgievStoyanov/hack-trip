@@ -39,7 +39,10 @@ export function LoginForm() {
       if (event.data?.type === 'email-verified') notification.success(LOGIN_EMAIL_VERIFIED_MESSAGE);
     };
     channel.addEventListener('message', handleMessage);
-    return () => { channel.removeEventListener('message', handleMessage); channel.close(); };
+    return () => {
+      channel.removeEventListener('message', handleMessage);
+      channel.close();
+    };
   }, [notification]);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -134,7 +137,14 @@ export function LoginForm() {
           }}
         />
         <input type="hidden" {...register('captchaToken')} />
-        <Captcha resetKey={captchaResetKey} disabled={submitting} onTokenChange={(token) => { setCaptchaToken(token); setValue('captchaToken', token, { shouldValidate: true }); }} />
+        <Captcha
+          resetKey={captchaResetKey}
+          disabled={submitting}
+          onTokenChange={(token) => {
+            setCaptchaToken(token);
+            setValue('captchaToken', token, { shouldValidate: true });
+          }}
+        />
         <Button
           type="submit"
           variant="contained"

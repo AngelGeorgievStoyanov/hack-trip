@@ -11,7 +11,11 @@ interface ImageUploadButtonProps {
   label?: string;
 }
 
-export function ImageUploadButton({ onUpload, disabled, label = 'Add image' }: ImageUploadButtonProps) {
+export function ImageUploadButton({
+  onUpload,
+  disabled,
+  label = 'Add image',
+}: ImageUploadButtonProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -91,10 +91,7 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
     : undefined;
 
   function changeDayNumber(delta: -1 | 1): void {
-    const nextDayNumber = Math.min(
-      DAY_NUMBER_MAX,
-      Math.max(1, dayNumber + delta),
-    );
+    const nextDayNumber = Math.min(DAY_NUMBER_MAX, Math.max(1, dayNumber + delta));
     setValue('dayNumber', nextDayNumber, {
       shouldDirty: true,
       shouldValidate: true,
@@ -268,320 +265,318 @@ export function EditTripLayout({ trip, selectedDayId }: EditTripLayoutProps) {
         sx={{
           gridArea: 'form',
           boxSizing: 'border-box',
-            m: { xs: 0, sm: 2 },
-            p: { xs: 2, sm: '30px' },
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            gap: 1,
-            width: 'min(100%, 520px)',
-            flex: '0 1 520px',
-            minWidth: 0,
-            height: 'fit-content',
-            backgroundColor: '#eee7e79e',
-            boxShadow: '3px 2px 5px black',
-            border: '1px solid',
-            borderRadius: 0,
-            '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
-            '& .MuiButton-root': { m: 1 },
-          }}
+          m: { xs: 0, sm: 2 },
+          p: { xs: 2, sm: '30px' },
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          gap: 1,
+          width: 'min(100%, 520px)',
+          flex: '0 1 520px',
+          minWidth: 0,
+          height: 'fit-content',
+          backgroundColor: '#eee7e79e',
+          boxShadow: '3px 2px 5px black',
+          border: '1px solid',
+          borderRadius: 0,
+          '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+          '& .MuiButton-root': { m: 1 },
+        }}
+      >
+        <Typography
+          component="h1"
+          variant="h5"
+          sx={{ m: '10px auto', textTransform: 'uppercase', textAlign: 'center' }}
         >
-          <Typography
-            component="h1"
-            variant="h5"
-            sx={{ m: '10px auto', textTransform: 'uppercase', textAlign: 'center' }}
-          >
-            EDIT TRIP
-          </Typography>
+          EDIT TRIP
+        </Typography>
 
-          {serverError ? <Alert severity="error">{serverError}</Alert> : null}
+        {serverError ? <Alert severity="error">{serverError}</Alert> : null}
 
-          {selectedDay ? (
-            <>
-              <Box
+        {selectedDay ? (
+          <>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                '@media (max-width: 600px)': {
+                  flexDirection: 'column',
+                },
+              }}
+            >
+              <TextField
+                label="DAY"
+                value={dayNumber}
+                size="small"
+                error={!!errors.dayNumber}
+                helperText={errors.dayNumber?.message}
+                slotProps={{
+                  htmlInput: {
+                    readOnly: true,
+                    min: 1,
+                    max: DAY_NUMBER_MAX,
+                    style: { textAlign: 'center' },
+                  },
+                }}
+                sx={{ maxWidth: 90, pointerEvents: 'none' }}
+              />
+              <ButtonGroup
+                disabled={dayNumberLocked || submitting}
                 sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  '@media (max-width: 600px)': {
-                    flexDirection: 'column',
+                  m: 1,
+                  '& .MuiButton-root': {
+                    m: 0,
+                    p: 0,
+                    maxWidth: 100,
+                    height: 36,
+                    width: 50,
                   },
                 }}
               >
-                <TextField
-                  label="DAY"
-                  value={dayNumber}
-                  size="small"
-                  error={!!errors.dayNumber}
-                  helperText={errors.dayNumber?.message}
-                  slotProps={{
-                    htmlInput: {
-                      readOnly: true,
-                      min: 1,
-                      max: DAY_NUMBER_MAX,
-                      style: { textAlign: 'center' },
-                    },
-                  }}
-                  sx={{ maxWidth: 90, pointerEvents: 'none' }}
-                />
-                <ButtonGroup
-                  disabled={dayNumberLocked || submitting}
-                  sx={{
-                    m: 1,
-                    '& .MuiButton-root': {
-                      m: 0,
-                      p: 0,
-                      maxWidth: 100,
-                      height: 36,
-                      width: 50,
-                    },
-                  }}
-                >
-                  <Button
-                    type="button"
-                    variant="contained"
-                    aria-label="Decrease day number"
-                    disabled={dayNumberLocked || submitting || dayNumber <= 1}
-                    onClick={() => changeDayNumber(-1)}
-                  >
-                    <RemoveIcon fontSize="small" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="contained"
-                    aria-label="Increase day number"
-                    disabled={dayNumberLocked || submitting || dayNumber >= DAY_NUMBER_MAX}
-                    onClick={() => changeDayNumber(1)}
-                  >
-                    <AddIcon fontSize="small" />
-                  </Button>
-                </ButtonGroup>
                 <Button
                   type="button"
                   variant="contained"
-                  onClick={setSelectedDayNumber}
-                  disabled={
-                    submitting ||
-                    dayNumber === selectedDay.dayNumber
-                  }
+                  aria-label="Decrease day number"
+                  disabled={dayNumberLocked || submitting || dayNumber <= 1}
+                  onClick={() => changeDayNumber(-1)}
                 >
-                  {dayNumberLocked ? 'CHANGE DAY' : 'SET DAY'}
+                  <RemoveIcon fontSize="small" />
                 </Button>
-              </Box>
+                <Button
+                  type="button"
+                  variant="contained"
+                  aria-label="Increase day number"
+                  disabled={dayNumberLocked || submitting || dayNumber >= DAY_NUMBER_MAX}
+                  onClick={() => changeDayNumber(1)}
+                >
+                  <AddIcon fontSize="small" />
+                </Button>
+              </ButtonGroup>
+              <Button
+                type="button"
+                variant="contained"
+                onClick={setSelectedDayNumber}
+                disabled={submitting || dayNumber === selectedDay.dayNumber}
+              >
+                {dayNumberLocked ? 'CHANGE DAY' : 'SET DAY'}
+              </Button>
+            </Box>
 
-              <TextField
-                label="TITLE"
-                {...register('title')}
-                error={!!errors.title}
-                helperText={errors.title?.message}
-              />
-              <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 1 }}>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <TextField
-                    label="PRICE"
-                    type="number"
-                    {...register('price', { valueAsNumber: true })}
-                    error={!!errors.price}
-                    helperText={errors.price?.message}
-                    slotProps={{ htmlInput: { min: 0, max: 1000000, step: 'any' } }}
-                  />
-                </Box>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Controller
-                    control={control}
-                    name="currency"
-                    render={({ field }) => (
-                      <TripSelectField
-                        name={field.name}
-                        label="CURRENCY"
-                        value={field.value}
-                        choices={currencyChoices}
-                        searchable
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        error={!!errors.currency}
-                        helperText={errors.currency?.message}
-                      />
-                    )}
-                  />
-                </Box>
-              </Box>
-              <Controller
-                control={control}
-                name="transport"
-                render={({ field }) => (
-                  <TripSelectField
-                    name={field.name}
-                    label="TRANSPORT"
-                    value={field.value}
-                    choices={transportChoices}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={!!errors.transport}
-                    helperText={errors.transport?.message}
-                  />
-                )}
-              />
-              <TextField
-                label="COUNT OF PEOPLE"
-                type="number"
-                {...register('countPeoples', { valueAsNumber: true })}
-                error={!!errors.countPeoples}
-                helperText={errors.countPeoples?.message}
-                slotProps={{ htmlInput: { min: 1, max: 1000, step: 1 } }}
-              />
-              <Controller
-                control={control}
-                name="typeOfPeople"
-                render={({ field }) => (
-                  <TripSelectField
-                    name={field.name}
-                    label="TYPE OF THE GROUP"
-                    value={field.value}
-                    choices={groupChoices}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={!!errors.typeOfPeople}
-                    helperText={errors.typeOfPeople?.message}
-                  />
-                )}
-              />
-              <TextField
-                label="DESTINATION"
-                {...register('destination')}
-                error={!!errors.destination}
-                helperText={errors.destination?.message}
-              />
-
-              <Box sx={{ pointerEvents: submitting ? 'none' : 'auto', opacity: submitting ? 0.7 : 1 }}>
-                <ImageUploadField
-                  files={newImages}
-                  setFiles={setNewImages}
-                  existingCount={existingImages.length}
+            <TextField
+              label="TITLE"
+              {...register('title')}
+              error={!!errors.title}
+              helperText={errors.title?.message}
+            />
+            <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 1 }}>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <TextField
+                  label="PRICE"
+                  type="number"
+                  {...register('price', { valueAsNumber: true })}
+                  error={!!errors.price}
+                  helperText={errors.price?.message}
+                  slotProps={{ htmlInput: { min: 0, max: 1000000, step: 'any' } }}
                 />
               </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Controller
+                  control={control}
+                  name="currency"
+                  render={({ field }) => (
+                    <TripSelectField
+                      name={field.name}
+                      label="CURRENCY"
+                      value={field.value}
+                      choices={currencyChoices}
+                      searchable
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      error={!!errors.currency}
+                      helperText={errors.currency?.message}
+                    />
+                  )}
+                />
+              </Box>
+            </Box>
+            <Controller
+              control={control}
+              name="transport"
+              render={({ field }) => (
+                <TripSelectField
+                  name={field.name}
+                  label="TRANSPORT"
+                  value={field.value}
+                  choices={transportChoices}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={!!errors.transport}
+                  helperText={errors.transport?.message}
+                />
+              )}
+            />
+            <TextField
+              label="COUNT OF PEOPLE"
+              type="number"
+              {...register('countPeoples', { valueAsNumber: true })}
+              error={!!errors.countPeoples}
+              helperText={errors.countPeoples?.message}
+              slotProps={{ htmlInput: { min: 1, max: 1000, step: 1 } }}
+            />
+            <Controller
+              control={control}
+              name="typeOfPeople"
+              render={({ field }) => (
+                <TripSelectField
+                  name={field.name}
+                  label="TYPE OF THE GROUP"
+                  value={field.value}
+                  choices={groupChoices}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={!!errors.typeOfPeople}
+                  helperText={errors.typeOfPeople?.message}
+                />
+              )}
+            />
+            <TextField
+              label="DESTINATION"
+              {...register('destination')}
+              error={!!errors.destination}
+              helperText={errors.destination?.message}
+            />
 
-              <TextField
-                label="DESCRIPTION"
-                multiline
-                minRows={4}
-                {...register('description')}
-                error={!!errors.description}
-                helperText={errors.description?.message}
+            <Box
+              sx={{ pointerEvents: submitting ? 'none' : 'auto', opacity: submitting ? 0.7 : 1 }}
+            >
+              <ImageUploadField
+                files={newImages}
+                setFiles={setNewImages}
+                existingCount={existingImages.length}
               />
-            </>
-          ) : (
-            <Typography>No trip days found.</Typography>
-          )}
+            </Box>
 
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={
-                !selectedDay ||
-                submitting ||
-                !isValid ||
-                (!isDirty && newImages.length === 0)
-              }
-              startIcon={submitting ? <CircularProgress size={18} /> : undefined}
-              sx={{ ':hover': { background: '#4daf30' } }}
-            >
-              EDIT YOUR TRIP
-            </Button>
-            <Button
-              type="button"
-              variant="contained"
-              onClick={() => router.back()}
-              sx={{
-                background: 'rgb(194 194 224)',
-                color: 'black',
-                ':hover': { color: 'rgb(248 245 245)', background: 'rgb(194 194 224)' },
-              }}
-            >
-              BACK
-            </Button>
-          </Box>
+            <TextField
+              label="DESCRIPTION"
+              multiline
+              minRows={4}
+              {...register('description')}
+              error={!!errors.description}
+              helperText={errors.description?.message}
+            />
+          </>
+        ) : (
+          <Typography>No trip days found.</Typography>
+        )}
+
+        <Box
+          sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={
+              !selectedDay || submitting || !isValid || (!isDirty && newImages.length === 0)
+            }
+            startIcon={submitting ? <CircularProgress size={18} /> : undefined}
+            sx={{ ':hover': { background: '#4daf30' } }}
+          >
+            EDIT YOUR TRIP
+          </Button>
+          <Button
+            type="button"
+            variant="contained"
+            onClick={() => router.back()}
+            sx={{
+              background: 'rgb(194 194 224)',
+              color: 'black',
+              ':hover': { color: 'rgb(248 245 245)', background: 'rgb(194 194 224)' },
+            }}
+          >
+            BACK
+          </Button>
         </Box>
+      </Box>
 
       <Box
         component="section"
         sx={{
           gridArea: 'images',
           boxSizing: 'border-box',
-            width: 'min(100%, 520px)',
-            flex: '0 1 520px',
-            minWidth: 0,
-            m: { xs: 0, sm: 2 },
-            p: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {existingImages.length > 0 ? (
-            <Box
-              sx={{
-                display: 'grid',
-                width: '100%',
-                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                gap: 1,
-              }}
-            >
-              {existingImages.map((image) => (
-                <Box
-                  key={image.id}
-                  sx={{
-                    position: 'relative',
-                    width: '100%',
-                    aspectRatio: '1 / 1',
-                    overflow: 'hidden',
-                    border: '1px solid rgba(0, 0, 0, 0.2)',
-                    p: 0.5,
-                  }}
-                >
-                  <AppImage
-                    image={image}
-                    alt={selectedDay?.title ?? 'Trip image'}
-                    fill
-                    sizes="(max-width: 600px) 33vw, 170px"
-                  />
-                  <Tooltip title="Delete image" arrow>
-                    <span>
-                      <IconButton
-                        aria-label="Delete image"
-                        size="small"
-                        color="error"
-                        disabled={submitting || deletingImageId !== null}
-                        onClick={() => void deleteExistingImage(image.id)}
-                        sx={{
-                          position: 'absolute',
-                          top: 4,
-                          right: 4,
-                          backgroundColor: 'rgba(255, 255, 255, 0.82)',
-                          '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.96)' },
-                        }}
-                      >
-                        {deletingImageId === image.id ? (
-                          <CircularProgress size={18} />
-                        ) : (
-                          <RemoveImageIcon fontSize="small" />
-                        )}
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                </Box>
-              ))}
-            </Box>
-          ) : (
-            <Box sx={{ width: '50%', maxWidth: 280, aspectRatio: '1 / 1', mx: 'auto' }}>
-              <SocialObjectPlaceholder />
-            </Box>
-          )}
-        </Box>
+          width: 'min(100%, 520px)',
+          flex: '0 1 520px',
+          minWidth: 0,
+          m: { xs: 0, sm: 2 },
+          p: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {existingImages.length > 0 ? (
+          <Box
+            sx={{
+              display: 'grid',
+              width: '100%',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gap: 1,
+            }}
+          >
+            {existingImages.map((image) => (
+              <Box
+                key={image.id}
+                sx={{
+                  position: 'relative',
+                  width: '100%',
+                  aspectRatio: '1 / 1',
+                  overflow: 'hidden',
+                  border: '1px solid rgba(0, 0, 0, 0.2)',
+                  p: 0.5,
+                }}
+              >
+                <AppImage
+                  image={image}
+                  alt={selectedDay?.title ?? 'Trip image'}
+                  fill
+                  sizes="(max-width: 600px) 33vw, 170px"
+                />
+                <Tooltip title="Delete image" arrow>
+                  <span>
+                    <IconButton
+                      aria-label="Delete image"
+                      size="small"
+                      color="error"
+                      disabled={submitting || deletingImageId !== null}
+                      onClick={() => void deleteExistingImage(image.id)}
+                      sx={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        backgroundColor: 'rgba(255, 255, 255, 0.82)',
+                        '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.96)' },
+                      }}
+                    >
+                      {deletingImageId === image.id ? (
+                        <CircularProgress size={18} />
+                      ) : (
+                        <RemoveImageIcon fontSize="small" />
+                      )}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </Box>
+            ))}
+          </Box>
+        ) : (
+          <Box sx={{ width: '50%', maxWidth: 280, aspectRatio: '1 / 1', mx: 'auto' }}>
+            <SocialObjectPlaceholder />
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }

@@ -24,7 +24,8 @@ export function trimmedString({
   maxMessage?: string;
 }): z.ZodString {
   const base = z.string().trim();
-  const withMin = min !== undefined ? (minMessage ? base.min(min, minMessage) : base.min(min)) : base;
+  const withMin =
+    min !== undefined ? (minMessage ? base.min(min, minMessage) : base.min(min)) : base;
   const withMax = maxMessage ? withMin.max(max, maxMessage) : withMin.max(max);
   if (pattern) {
     return patternMessage ? withMax.regex(pattern, patternMessage) : withMax.regex(pattern);
@@ -42,7 +43,14 @@ export const emailString = (message = 'Invalid email address') =>
  * toward the required character classes. Any Unicode whitespace is rejected.
  */
 export interface PasswordRequirement {
-  key: 'minLength' | 'maxLength' | 'printableAscii' | 'latinLetter' | 'number' | 'specialCharacter' | 'noSpaces';
+  key:
+    | 'minLength'
+    | 'maxLength'
+    | 'printableAscii'
+    | 'latinLetter'
+    | 'number'
+    | 'specialCharacter'
+    | 'noSpaces';
   label: string;
   valid: boolean;
 }
@@ -51,7 +59,11 @@ export interface PasswordRequirement {
  * Password requirements used by both the Zod validator and the live form feedback.
  * Keep this as the single frontend source of truth for the password policy.
  */
-export function getPasswordRequirements(value: string, minLength = 8, maxLength = 72): PasswordRequirement[] {
+export function getPasswordRequirements(
+  value: string,
+  minLength = 8,
+  maxLength = 72,
+): PasswordRequirement[] {
   const normalizedValue = value.trim();
   const characters = Array.from(normalizedValue);
   const isPrintableAscii = characters.every((character) => {
@@ -60,8 +72,16 @@ export function getPasswordRequirements(value: string, minLength = 8, maxLength 
   });
 
   return [
-    { key: 'minLength', label: `At least ${minLength} characters`, valid: normalizedValue.length >= minLength },
-    { key: 'maxLength', label: `At most ${maxLength} characters`, valid: normalizedValue.length <= maxLength },
+    {
+      key: 'minLength',
+      label: `At least ${minLength} characters`,
+      valid: normalizedValue.length >= minLength,
+    },
+    {
+      key: 'maxLength',
+      label: `At most ${maxLength} characters`,
+      valid: normalizedValue.length <= maxLength,
+    },
     {
       key: 'printableAscii',
       label: 'English letters, numbers and symbols only',
@@ -78,8 +98,7 @@ export function getPasswordRequirements(value: string, minLength = 8, maxLength 
       label: 'At least one special character (!@#$…)',
       valid: characters.some((character) => {
         const code = character.charCodeAt(0);
-        const isLatinLetter =
-          (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+        const isLatinLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
         const isNumber = code >= 48 && code <= 57;
         return code >= 33 && code <= 126 && !isLatinLetter && !isNumber;
       }),
@@ -93,7 +112,9 @@ export function getPasswordRequirements(value: string, minLength = 8, maxLength 
 }
 
 export function isValidPassword(value: string, minLength = 8, maxLength = 72): boolean {
-  return getPasswordRequirements(value, minLength, maxLength).every((requirement) => requirement.valid);
+  return getPasswordRequirements(value, minLength, maxLength).every(
+    (requirement) => requirement.valid,
+  );
 }
 
 /** Password policy shared by registration, reset and password changes. */
@@ -120,24 +141,14 @@ export function passwordString(
 /** Optional/nullable text: `undefined`/`null`/`''` -> `null`. Output `string | null`. */
 export const optionalText = ({ max, min }: LengthOptions, messages?: { max?: string }) =>
   z
-    .union([
-      trimmedString({ max, min, maxMessage: messages?.max }),
-      z.null(),
-      z.literal(''),
-    ])
+    .union([trimmedString({ max, min, maxMessage: messages?.max }), z.null(), z.literal('')])
     .optional()
-    .transform((value) =>
-      value === undefined || value === null || value === '' ? null : value,
-    );
+    .transform((value) => (value === undefined || value === null || value === '' ? null : value));
 
 /** Patch text: keeps `undefined`; `null`/`''` -> `null`. Output `string | null | undefined`. */
 export const patchText = ({ max, min }: LengthOptions, messages?: { max?: string }) =>
   z
-    .union([
-      trimmedString({ max, min, maxMessage: messages?.max }),
-      z.null(),
-      z.literal(''),
-    ])
+    .union([trimmedString({ max, min, maxMessage: messages?.max }), z.null(), z.literal('')])
     .optional()
     .transform((value) => (value === null || value === '' ? null : value));
 
@@ -164,13 +175,10 @@ export const optionalInt = ({ min, max }: { min: number; max: number }) =>
 export const positiveIdParam = z
   .string()
   .regex(/^\d+$/, 'Id must be a positive integer')
-  .refine(
-    (value) => {
-      const n = Number(value);
-      return n >= 1 && n <= MAX_RESOURCE_ID;
-    },
-    'Id must be between 1 and 2147483647',
-  );
+  .refine((value) => {
+    const n = Number(value);
+    return n >= 1 && n <= MAX_RESOURCE_ID;
+  }, 'Id must be between 1 and 2147483647');
 
 /** UUID route parameter. */
 export const userIdParam = z.string().regex(UUID_REGEX, 'Invalid UUID');
@@ -187,7 +195,9 @@ export const requiredInt = ({ min, max }: { min: number; max: number }) =>
 
 /** Form adapter for numeric text inputs; output is still a bounded JSON integer. */
 export const requiredIntInput = ({ min, max }: { min: number; max: number }) =>
-  z.union([z.number(), z.string().min(1).transform(Number)]).pipe(z.number().int().min(min).max(max));
+  z
+    .union([z.number(), z.string().min(1).transform(Number)])
+    .pipe(z.number().int().min(min).max(max));
 
 /** Like target type input: trimmed, lowercased, then enumerated. */
 export const targetTypeInput = z

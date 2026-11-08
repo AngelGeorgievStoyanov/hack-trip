@@ -118,7 +118,10 @@ function prefersReducedMotion(): boolean {
  * @param isLiked current like state of the rendered thumb.
  * @param options `failed` clears a pending animation after a failed request.
  */
-export function useLikeAnimation(isLiked: boolean, options: UseLikeAnimationOptions = {}): LikeAnimationState {
+export function useLikeAnimation(
+  isLiked: boolean,
+  options: UseLikeAnimationOptions = {},
+): LikeAnimationState {
   const { failed = false } = options;
   const [active, setActive] = useState<ActiveLikeAnimation | null>(null);
   const previousLiked = useRef(isLiked);

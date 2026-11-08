@@ -50,7 +50,10 @@ export function DayForm({
   const isEdit = day !== undefined;
   const transportChoices = useSelectChoices(SELECT_TYPE_KEYS.transport, day?.transport.key);
   const groupChoices = useSelectChoices(SELECT_TYPE_KEYS.group, day?.group.key);
-  const currencyChoices = useSelectChoices(SELECT_TYPE_KEYS.currency, day?.currency?.code ?? undefined);
+  const currencyChoices = useSelectChoices(
+    SELECT_TYPE_KEYS.currency,
+    day?.currency?.code ?? undefined,
+  );
 
   const {
     register,
@@ -98,7 +101,8 @@ export function DayForm({
         const response = await tripApi.updateDay(tripGroupId, day.id, {
           dayNumber: day.dayNumber,
           title: values.title.trim(),
-          description: typeof values.description === 'string' ? values.description.trim() || null : null,
+          description:
+            typeof values.description === 'string' ? values.description.trim() || null : null,
           price: day.price ?? 0,
           transport: day.transport.key || firstSelectValue(transportChoices),
           countPeoples: day.countPeoples,
@@ -120,7 +124,8 @@ export function DayForm({
         {
           dayNumber: Number(values.dayNumber),
           title: values.title.trim(),
-          description: typeof values.description === 'string' ? values.description.trim() || null : null,
+          description:
+            typeof values.description === 'string' ? values.description.trim() || null : null,
           price: sourceDay?.price ?? 0,
           transport: sourceDay?.transport.key || firstSelectValue(transportChoices),
           countPeoples: sourceDay?.countPeoples ?? 1,

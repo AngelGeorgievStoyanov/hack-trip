@@ -2,10 +2,7 @@ import { apiClient } from '../client';
 import { IMAGES, ME, TRIPS } from '../../constants/api';
 import type { TripGroupResponse } from '../../types';
 import type { TripSort } from '../../constants/trips';
-import type {
-  BackgroundImageResponse,
-  ImageDto,
-} from '../../types';
+import type { BackgroundImageResponse, ImageDto } from '../../types';
 import {
   dayReorderSchema,
   tripEditSchema,
@@ -125,18 +122,30 @@ export const tripApi = {
 
   reorderDays: async (tripGroupId: number, input: DayReorderInput): Promise<TripGroupResponse> => {
     const body = dayReorderSchema.parse(input);
-    const { data } = await apiClient.put<TripGroupResponse>(`${TRIPS}/${tripGroupId}/days/reorder`, body);
+    const { data } = await apiClient.put<TripGroupResponse>(
+      `${TRIPS}/${tripGroupId}/days/reorder`,
+      body,
+    );
     return data;
   },
 
-  updateDay: async (tripGroupId: number, dayId: number, input: TripEditInput): Promise<TripGroupResponse> => {
+  updateDay: async (
+    tripGroupId: number,
+    dayId: number,
+    input: TripEditInput,
+  ): Promise<TripGroupResponse> => {
     const body = tripEditSchema.parse(input);
-    const { data } = await apiClient.put<TripGroupResponse>(`${TRIPS}/${tripGroupId}/days/${dayId}`, body);
+    const { data } = await apiClient.put<TripGroupResponse>(
+      `${TRIPS}/${tripGroupId}/days/${dayId}`,
+      body,
+    );
     return data;
   },
 
   deleteDay: async (tripGroupId: number, dayId: number): Promise<TripGroupResponse> => {
-    const { data } = await apiClient.delete<TripGroupResponse>(`${TRIPS}/${tripGroupId}/days/${dayId}`);
+    const { data } = await apiClient.delete<TripGroupResponse>(
+      `${TRIPS}/${tripGroupId}/days/${dayId}`,
+    );
     return data;
   },
 
