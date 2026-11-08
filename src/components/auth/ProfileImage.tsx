@@ -7,7 +7,6 @@ import { validateImageFile } from '@/lib/images/validate';
 import { Box, CircularProgress, Dialog, IconButton, Tooltip } from '@mui/material';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import CloseIcon from '@mui/icons-material/Close';
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import { AppImage } from '@/components/images/AppImage';
 import { authApi } from '@/api/auth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
@@ -69,17 +68,16 @@ export function ProfileImage({ refreshToken = 0 }: { refreshToken?: number }) {
 
   return (
     <>
-      <Box sx={{ position: 'relative', width: 'min(300px, 75vw)', height: 'min(300px, 75vw)', borderRadius: '50%', overflow: 'hidden', border: '1px solid', boxShadow: '3px 2px 5px black', mb: 1 }}>
+      <Box sx={{ position: 'relative', width: 'min(300px, 75vw)', height: 'min(300px, 75vw)', mb: 1 }}>
         <Tooltip title="View profile image" arrow>
           <Box
             component="button"
             type="button"
             aria-label="View profile image full screen"
             onClick={() => setFullscreen(true)}
-            sx={{ display: 'block', width: '100%', height: '100%', p: 0, border: 0, cursor: 'zoom-in', background: 'transparent' }}
+            sx={{ display: 'block', width: '100%', height: '100%', p: 0, border: '1px solid', borderRadius: '50%', overflow: 'hidden', boxShadow: '3px 2px 5px black', cursor: 'pointer', background: 'transparent' }}
           >
             <AppImage image={image} alt="Profile image" preset="profile" width={300} height={300} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            <ZoomInIcon sx={{ position: 'absolute', bottom: 10, right: 12, color: 'white', filter: 'drop-shadow(0 1px 3px black)' }} />
           </Box>
         </Tooltip>
         <Tooltip title="Delete profile image" arrow>
@@ -87,7 +85,7 @@ export function ProfileImage({ refreshToken = 0 }: { refreshToken?: number }) {
             aria-label="Delete profile image"
             onClick={() => void handleDelete()}
             disabled={deleting}
-            sx={{ position: 'absolute', top: 7, right: 7, zIndex: 2, backgroundColor: 'white', color: 'error.main', '&:hover': { backgroundColor: 'rgba(255,255,255,0.85)' } }}
+            sx={{ position: 'absolute', top: 5, right: 5, zIndex: 2, backgroundColor: 'white', color: 'error.main', boxShadow: 2, '&:hover': { backgroundColor: 'rgba(255,255,255,0.85)' } }}
           >
             <HighlightOffSharpIcon />
           </IconButton>
