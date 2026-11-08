@@ -126,7 +126,6 @@ export function ProfileImage() {
           overflow: 'hidden',
           border: '1px solid',
           boxShadow: '3px 2px 5px black',
-          display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: 'rgba(255,255,255,0.35)',
