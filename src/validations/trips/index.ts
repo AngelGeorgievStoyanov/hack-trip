@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import {
   DAY_NUMBER_MAX,
-  DAY_TITLE_MAX_LENGTH,
   TRIP_DESCRIPTION_MAX_LENGTH,
   TRIP_GROUP_MAX_LENGTH,
   TRIP_SEARCH_MAX_LENGTH,
@@ -13,10 +12,8 @@ import {
   idList,
   optionalInt,
   optionalText,
-  patchText,
   positiveId,
   requiredInt,
-  requiredIntInput,
   requiredNumber,
   trimmedString,
 } from '../shared';
@@ -56,21 +53,6 @@ export const tripListQuerySchema = z
   })
   .strict();
 
-export const dayCreateSchema = z
-  .object({
-    dayNumber: requiredIntInput({ min: 1, max: DAY_NUMBER_MAX }),
-    title: trimmedString({
-      min: 1,
-      max: DAY_TITLE_MAX_LENGTH,
-      minMessage: 'Title cannot be empty.',
-    }),
-    description: optionalText(
-      { max: TRIP_DESCRIPTION_MAX_LENGTH },
-      { max: `Description max length is ${TRIP_DESCRIPTION_MAX_LENGTH} chars` },
-    ),
-  })
-  .strict();
-
 /** Full Edit Trip contract, aligned with the backend tripEditSchema. */
 export const tripEditSchema = z
   .object({
@@ -97,20 +79,6 @@ export const tripEditSchema = z
     lng: z.union([z.number().min(-180).max(180), z.null()]),
   })
   .strict();
-
-export const dayUpdateSchema = z
-  .object({
-    title: patchText({ min: 1, max: DAY_TITLE_MAX_LENGTH }),
-    description: patchText(
-      { max: TRIP_DESCRIPTION_MAX_LENGTH },
-      { max: `Description max length is ${TRIP_DESCRIPTION_MAX_LENGTH} chars` },
-    ),
-  })
-  .strict()
-  .refine(
-    (data) => data.title !== undefined || data.description !== undefined,
-    'At least one field is required',
-  );
 
 export const dayReorderSchema = z
   .object({
