@@ -27,19 +27,21 @@ function parseId(value: string): number | null {
   return parsed.success ? Number(parsed.data) : null;
 }
 
-/** Resolves `?day=N` against the real day numbers; missing numbers are never generated. */
+/** Resolves ?day=N against real day numbers; missing numbers are never generated. */
 function resolveDay(
   days: TripGroupDay[],
   value: string | string[] | undefined,
 ): TripGroupDay | undefined {
   const raw = Array.isArray(value) ? value[0] : value;
-  return days.find((day) => day.dayNumber === Number(raw)) ?? days[0];
+  const requestedDay = raw ? Number(raw) : Number.NaN;
+  return days.find((day) => day.dayNumber === requestedDay) ?? days[0];
 }
 
 export async function generateMetadata({
   params,
-}: Pick<TripPageProps, 'params'>): Promise<Metadata> {
-  const { id } = await params;
+  searchParams,
+}: TripPageProps): Promise<Metadata> {
+  const [{ id }, query] = await Promise.all([params, searchParams]);
   const tripId = parseId(id);
   if (tripId === null) {
     return { title: 'Trip not found' };
@@ -47,10 +49,19 @@ export async function generateMetadata({
 
   try {
     const trip = await getTrip(tripId);
-    const day = trip.days[0];
+    const day = resolveDay(trip.days, query.day);
     const url = absoluteUrl(`/trips/${trip.id}`);
+    const imageUrl = absoluteUrl(
+      `/api/og/trips/${trip.id}?day=${day?.dayNumber ?? trip.days[0]?.dayNumber ?? 1}`,
+    );
     const title = day?.title ?? day?.destination ?? 'Trip';
     const description = day?.description ?? undefined;
+    const image = {
+      url: imageUrl,
+      width: 1200,
+      height: 630,
+      alt: `${title} — HackTrip`,
+    };
 
     return {
       title,
@@ -62,11 +73,13 @@ export async function generateMetadata({
         url,
         siteName: 'HackTrip',
         type: 'website',
+        images: [image],
       },
       twitter: {
         card: 'summary_large_image',
         title,
         description,
+        images: [imageUrl],
       },
     };
   } catch (error) {
@@ -106,8 +119,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
 
   return (
     <main style={MAIN_STYLE}>
-      {/* Single `GET /trips/:tripGroupId` above; the view opens the requested day and
-          switches days locally without new requests, keeping TripGroup.social global. */}
+      {/* Single GET /trips/:tripGroupId; day switching uses the already-loaded group. */}
       <TripDetailsView trip={trip} initialDayNumber={day.dayNumber} />
 
       <JsonLd
