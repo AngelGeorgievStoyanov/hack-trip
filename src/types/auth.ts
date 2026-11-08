@@ -5,7 +5,7 @@ import type { Role, UserStatus } from './common';
  * Per API_CONTRACT.md §6.16, this shape intentionally omits `id`, `role`, `status`
  * and verification state — only `permissions` distinguishes manager/admin accounts.
  */
-export interface ProfilePermissions {
+interface ProfilePermissions {
   isManager: boolean;
   isAdmin: boolean;
 }
