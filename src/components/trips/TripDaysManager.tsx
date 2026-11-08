@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { tripApi, type DayReorderInput } from '@/api/trips';
 import { DayForm } from './DayForm';
 import { DayEditor } from './DayEditor';
-import { getGenericErrorMessage } from '@/lib/errors';
 import type { TripGroupResponse } from '@/types';
+import { useNotification } from '@/components/common/NotificationProvider';
 
 interface TripDaysManagerProps {
   tripGroupId: number;
@@ -17,9 +17,9 @@ interface TripDaysManagerProps {
 
 export function TripDaysManager({ tripGroupId, initialTrip, initialEditingDayId }: TripDaysManagerProps) {
   const queryClient = useQueryClient();
+  const notification = useNotification();
   const [addingDay, setAddingDay] = useState<{ dayNumber: number } | null>(null);
   const [editingDayId, setEditingDayId] = useState<number | null>(initialEditingDayId ?? null);
-  const [error, setError] = useState<string | null>(null);
 
   const { data: trip } = useQuery({
     queryKey: ['trip', tripGroupId],
@@ -32,7 +32,7 @@ export function TripDaysManager({ tripGroupId, initialTrip, initialEditingDayId 
     onSuccess: (updatedTripGroup) => {
       queryClient.setQueryData(['trip', tripGroupId], updatedTripGroup);
     },
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const days = trip?.days ?? [];
@@ -58,7 +58,6 @@ export function TripDaysManager({ tripGroupId, initialTrip, initialEditingDayId 
   return (
     <Box sx={{ mt: 3 }}>
       <Typography variant="h5">Days</Typography>
-      {error ? <Alert severity="error" onClose={() => setError(null)}>{error}</Alert> : null}
       {days.map((day, index) => (
         <DayEditor
           key={day.id}
