@@ -8,9 +8,6 @@ export const AUTHORIZATION_HEADER = 'Authorization';
 /** Public, non-secret bearer used for anonymous read-only access. */
 export const PUBLIC_FRONTEND_TOKEN = 'hacktrip-public-v1';
 
-/** HttpOnly refresh cookie name (never read by the frontend). */
-export const REFRESH_COOKIE_NAME = 'hack_trip_refresh';
-
 export const AUTH = `${API_PREFIX}/auth`;
 export const CONFIG = `${API_PREFIX}/config`;
 export const TRIPS = `${API_PREFIX}/trips`;
