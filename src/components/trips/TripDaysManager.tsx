@@ -8,6 +8,7 @@ import { DayForm } from './DayForm';
 import { DayEditor } from './DayEditor';
 import type { TripGroupResponse } from '@/types';
 import { useNotification } from '@/components/common/NotificationProvider';
+import { getGenericErrorMessage } from '@/lib/errors';
 
 interface TripDaysManagerProps {
   tripGroupId: number;
