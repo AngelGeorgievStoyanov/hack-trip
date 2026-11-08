@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Box, Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { tripApi } from '@/api/trips';
 import { getGenericErrorMessage } from '@/lib/errors';
 import type { TripGroupResponse } from '@/types';
 import { tripGroupKeys } from '@/hooks/useTripGroup';
+import { useNotification } from '@/components/common/NotificationProvider';
 
 const LEGACY_BUTTON_SX = {
   ':hover': { background: '#4daf30' },
@@ -40,7 +40,7 @@ export function TripActions({
   const queryClient = useQueryClient();
   const { confirm } = useConfirm();
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
+  const notification = useNotification();
 
   // Trip responses do not expose an owner id. GET /me/trips returns only
   // trip groups owned by the authenticated user.
@@ -58,7 +58,7 @@ export function TripActions({
       router.replace('/trips');
       router.refresh();
     },
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const deleteDayMutation = useMutation({
@@ -73,7 +73,7 @@ export function TripActions({
     onError: (e) => setError(getGenericErrorMessage(e)),
   });
 
-  if (!isOwner && !error) {
+  if (!isOwner) {
     return null;
   }
 
@@ -166,7 +166,6 @@ export function TripActions({
           </Button>
         </>
       ) : null}
-      {error ? <Alert severity="error">{error}</Alert> : null}
     </Box>
   );
 }
