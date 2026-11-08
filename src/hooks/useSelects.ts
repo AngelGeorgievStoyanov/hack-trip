@@ -11,7 +11,7 @@ import { toSelectChoices, type SelectChoice } from '@/lib/selects';
  * so a pending, failed or malformed response must leave each consumer on its own fallback
  * instead of throwing or blocking the page.
  */
-export function useSelects() {
+function useSelects() {
   return useQuery({
     queryKey: SELECTS_QUERY_KEY,
     queryFn: () => configApi.getSelects(),
