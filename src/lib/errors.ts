@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { normalizeApiError } from '@/api/client';
 import { API_ERROR_CODES } from '@/constants/api';
 import { AUTH_NOTIFICATION_MESSAGES } from '@/constants/notifications';
@@ -34,6 +35,14 @@ export function getAuthErrorMessage(error: unknown): string {
 }
 
 export function getGenericErrorMessage(error: unknown): string {
+  if (
+    axios.isAxiosError(error) &&
+    !error.response &&
+    ['ERR_NETWORK', 'ECONNABORTED', 'ETIMEDOUT', 'ECONNREFUSED'].includes(error.code ?? '')
+  ) {
+    return GENERIC_MESSAGE;
+  }
+
   const apiError = normalizeApiError(error);
 
   if (
