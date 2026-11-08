@@ -50,7 +50,10 @@ export async function generateMetadata({
   try {
     const trip = await getTrip(tripId);
     const day = resolveDay(trip.days, query.day);
-    const url = absoluteUrl(`/trips/${trip.id}`);
+    const canonicalUrl = absoluteUrl(`/trips/${trip.id}`);
+    const sharedUrl = absoluteUrl(
+      `/trips/${trip.id}${day ? `?day=${day.dayNumber}` : ''}`,
+    );
     const imageUrl = absoluteUrl(
       `/api/og/trips/${trip.id}?day=${day?.dayNumber ?? trip.days[0]?.dayNumber ?? 1}`,
     );
@@ -66,11 +69,11 @@ export async function generateMetadata({
     return {
       title,
       description,
-      alternates: { canonical: url },
+      alternates: { canonical: canonicalUrl },
       openGraph: {
         title,
         description,
-        url,
+        url: sharedUrl,
         siteName: 'HackTrip',
         type: 'website',
         images: [image],
