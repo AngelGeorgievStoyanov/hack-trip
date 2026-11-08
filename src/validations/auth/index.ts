@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { emailString, passwordString, trimmedString } from '../shared';
 
-const captchaTokenSchema = z.string().trim().min(1, 'Please complete the CAPTCHA.').max(8192);
+const captchaTokenSchema = z.string().min(1, 'Please complete the CAPTCHA.').max(8192);
 
 export const registerSchema = z
   .object({
@@ -24,14 +24,14 @@ export const registerSchema = z
 export const loginSchema = z
   .object({
     email: emailString(),
-    password: z.string().min(1, 'Password cannot be empty string.').max(200),
+    password: z.string().trim().min(1, 'Password cannot be empty string.').max(200),
     captchaToken: captchaTokenSchema,
   })
   .strict();
 
 export const verifyEmailSchema = z
   .object({
-    token: trimmedString({ min: 1, max: 200 }),
+    token: z.string().min(1).max(200),
   })
   .strict();
 
@@ -65,7 +65,7 @@ export const confirmPasswordSchema = z
 
 export const changePasswordSchema = z
   .object({
-    currentPassword: z.string().min(1, 'Old password is required.').max(200),
+    currentPassword: z.string().trim().min(1, 'Old password is required.').max(200),
     newPassword: passwordString({ min: 8, max: 72 }),
   })
   .strict();
