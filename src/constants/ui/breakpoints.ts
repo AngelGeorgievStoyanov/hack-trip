@@ -37,8 +37,3 @@ export function minWidthQuery(px: number): string {
 export function mediaDown(px: number): string {
   return `@media(max-width:${px}px)`;
 }
-
-/** `sx` media query key for min-width rules, e.g. `@media(min-width:600px)`. */
-export function mediaUp(px: number): string {
-  return `@media(min-width:${px}px)`;
-}
