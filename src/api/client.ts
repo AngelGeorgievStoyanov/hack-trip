@@ -9,6 +9,7 @@ import {
   PUBLIC_FRONTEND_TOKEN,
 } from '../constants/api';
 import type { AuthSessionDto } from '../types';
+import { trimFormData, trimRequestData } from '../lib/trimRequestData';
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
@@ -48,6 +49,12 @@ export const apiClient: AxiosInstance = axios.create({
 });
 
 apiClient.interceptors.request.use((requestConfig: InternalAxiosRequestConfig) => {
+  if (requestConfig.data instanceof FormData) {
+    requestConfig.data = trimFormData(requestConfig.data);
+  } else if (requestConfig.data !== undefined) {
+    requestConfig.data = trimRequestData(requestConfig.data);
+  }
+
   requestConfig.headers.set(CLIENT_MARKER_HEADER, CLIENT_MARKER_VALUE);
 
   if (!requestConfig.skipAuthHeader) {
