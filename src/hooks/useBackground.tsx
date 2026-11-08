@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  createContext,
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  type ReactNode,
-} from 'react';
+import { createContext, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { tripApi } from '@/api/trips';
 
