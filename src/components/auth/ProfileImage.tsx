@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState, type ChangeEvent } from 'react';
-import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
+import { Alert, Box, Button, CircularProgress, IconButton, Tooltip, Typography } from '@mui/material';
+import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import { authApi } from '@/api/auth';
 import { AppImage } from '@/components/images/AppImage';
 import CustomFileUploadButton from '@/components/CustomFileUploadButton';
@@ -118,6 +119,7 @@ export function ProfileImage() {
       <Box
         sx={{
           position: 'relative',
+          display: loading || !!previewUrl || !!image ? 'flex' : 'none',
           width: 'min(300px, 75vw)',
           height: 'min(300px, 75vw)',
           borderRadius: '50%',
@@ -153,6 +155,26 @@ export function ProfileImage() {
             No profile image
           </Typography>
         )}
+        {!loading && image && !previewUrl ? (
+          <Tooltip title="Remove profile image" arrow>
+            <IconButton
+              aria-label="Remove profile image"
+              onClick={() => void handleDelete()}
+              disabled={busy}
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                zIndex: 1,
+                backgroundColor: 'white',
+                color: 'error.main',
+                '&:hover': { backgroundColor: 'rgba(255,255,255,0.85)' },
+              }}
+            >
+              <HighlightOffSharpIcon />
+            </IconButton>
+          </Tooltip>
+        ) : null}
       </Box>
 
       {selectedFile ? (
@@ -196,20 +218,6 @@ export function ProfileImage() {
               Cancel
             </Button>
           </>
-        ) : image ? (
-          <Button
-            variant="contained"
-            onClick={() => void handleDelete()}
-            disabled={busy}
-            startIcon={deleting ? <CircularProgress size={18} /> : undefined}
-            sx={{
-              backgroundColor: 'rgb(194 194 224)',
-              color: 'black',
-              ':hover': { color: 'rgb(248 245 245)' },
-            }}
-          >
-            Remove
-          </Button>
         ) : null}
       </Box>
     </Box>
