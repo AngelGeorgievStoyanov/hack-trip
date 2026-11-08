@@ -4,14 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  Alert,
   Box,
   Button,
   ButtonGroup,
   CircularProgress,
   TextField,
   Typography,
-  Snackbar,
 } from '@mui/material';
 import { AddIcon, RemoveIcon } from '@/constants/icons';
 import { tripApi, type TripWriteInput } from '@/api/trips';
@@ -32,6 +30,7 @@ import { TripSelectField } from './TripSelectField';
 import ImageUploadField from '@/components/images/ImageUploadField';
 import { TripLocationPicker } from '@/components/maps/TripLocationPicker';
 import { MAX_CONCURRENT_IMAGE_UPLOADS } from '@/constants/images';
+import { useNotification } from '@/components/common/NotificationProvider';
 
 function preferredSelectValue(choices: SelectChoice[], preferred: string): string {
   const normalize = (value: string) => value.toLowerCase().replace(/[\\s_-]/g, '');
@@ -50,10 +49,10 @@ function preferredSelectValue(choices: SelectChoice[], preferred: string): strin
  */
 export function TripForm() {
   const router = useRouter();
+  const notification = useNotification();
   const searchParams = useSearchParams();
   const urlTripGroupId = Number(searchParams.get('tripGroupId')) || null;
   const [serverError, setServerError] = useState<string | null>(null);
-  const [missingDays, setMissingDays] = useState<number[]>([]);
   const [existingTrip, setExistingTrip] = useState<TripGroupResponse | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -113,7 +112,9 @@ export function TripForm() {
             missingDayNumbers.push(dayNumber);
           }
         }
-        setMissingDays(missingDayNumbers);
+        if (missingDayNumbers.length > 0) {
+          notification.info(`Missing day(s): ${missingDayNumbers.join(', ')}`);
+        }
         if (latestDay) {
           setValue('dayNumber', latestDay.dayNumber + 1, { shouldValidate: true });
           setValue('transport', latestDay.transport.key, { shouldValidate: true });
@@ -122,10 +123,10 @@ export function TripForm() {
         }
       })
       .catch((error) => {
-        if (!cancelled) setServerError(getGenericErrorMessage(error));
+        if (!cancelled) notification.error(getGenericErrorMessage(error));
       });
     return () => { cancelled = true; };
-  }, [urlTripGroupId, setValue]);
+  }, [urlTripGroupId, setValue, notification]);
 
   const transportChoices = useSelectChoices(SELECT_TYPE_KEYS.transport, watch('transport'));
   const currencyChoices = useSelectChoices(SELECT_TYPE_KEYS.currency, watch('currency'));
@@ -328,7 +329,7 @@ export function TripForm() {
       }
       await uploadPendingImages(created, selectedFiles);
     } catch (error) {
-      setServerError(getGenericErrorMessage(error));
+      notification.error(getGenericErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -386,26 +387,6 @@ export function TripForm() {
         Create trip
       </Typography>
 
-      <Snackbar
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        open={Boolean(serverError)}
-        autoHideDuration={5000}
-        onClose={() => setServerError(null)}
-      >
-        <Alert severity="error" onClose={() => setServerError(null)}>
-          {serverError}
-        </Alert>
-      </Snackbar>
-      <Snackbar
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        open={missingDays.length > 0}
-        autoHideDuration={10000}
-        onClose={() => setMissingDays([])}
-      >
-        <Alert severity="info" onClose={() => setMissingDays([])}>
-          Missing day(s): {missingDays.join(', ')}
-        </Alert>
-      </Snackbar>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', m: '4px' }}>
         <TextField
