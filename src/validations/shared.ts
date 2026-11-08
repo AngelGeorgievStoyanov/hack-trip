@@ -175,7 +175,7 @@ export const positiveIdParam = z
 /** UUID route parameter. */
 export const userIdParam = z.string().regex(UUID_REGEX, 'Invalid UUID');
 
-/** Positive integer id (coerced, for bodies/query). */
+/** Positive integer id in a JSON body; strings are rejected. */
 export const positiveId = z.number().int().min(1).max(MAX_RESOURCE_ID);
 
 /** Positive integer id from a query string; query parameters arrive as strings. */
