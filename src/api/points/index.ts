@@ -12,10 +12,10 @@ export interface PointCreateInput {
 }
 
 export interface PointUpdateInput {
-  name?: string;
-  description?: string | null;
-  lat?: number | null;
-  lng?: number | null;
+  name: string;
+  description: string | null;
+  lat: number;
+  lng: number;
 }
 
 export interface PointReorderInput {
