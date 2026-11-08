@@ -19,24 +19,24 @@ export type SocialAction = 'like' | 'favorite' | 'report' | 'comment' | 'replyCo
 export type SocialOperation = 'create' | 'edit' | 'delete';
 export type SocialConfigTargetKey = 'tripGroup' | 'trip' | 'point' | 'image' | 'comment';
 
-export interface SocialConfigOperations {
+interface SocialConfigOperations {
   create: boolean;
   edit: boolean;
   delete: boolean;
 }
 
-export interface SocialConfigContextRule {
+interface SocialConfigContextRule {
   key: SocialConfigTargetKey;
   operations: SocialConfigOperations;
 }
 
-export interface SocialConfigTarget extends SocialConfigOperations {
+interface SocialConfigTarget extends SocialConfigOperations {
   key: SocialConfigTargetKey;
   operations: SocialConfigOperations;
   contextRules?: SocialConfigContextRule[];
 }
 
-export interface SocialActionConfig {
+interface SocialActionConfig {
   key: SocialAction;
   isActive: boolean;
   targets: SocialConfigTarget[];
