@@ -9,7 +9,7 @@ import {
   TRIP_TRANSPORT_MAX_LENGTH,
 } from '@/constants/trips';
 import { PAGE_MAX, TRIP_LIMIT_MAX } from '@/constants/ui';
-import { idList, optionalInt, optionalText, patchText, positiveId, requiredInt, requiredNumber, trimmedString } from '../shared';
+import { idList, optionalInt, optionalText, patchText, positiveId, requiredInt, requiredIntInput, requiredNumber, trimmedString } from '../shared';
 
 export const tripWriteSchema = z
   .object({
@@ -48,7 +48,7 @@ export const tripListQuerySchema = z
 
 export const dayCreateSchema = z
   .object({
-    dayNumber: requiredInt({ min: 1, max: DAY_NUMBER_MAX }),
+    dayNumber: requiredIntInput({ min: 1, max: DAY_NUMBER_MAX }),
     title: trimmedString({ min: 1, max: DAY_TITLE_MAX_LENGTH, minMessage: 'Title cannot be empty.' }),
     description: optionalText(
       { max: TRIP_DESCRIPTION_MAX_LENGTH },
