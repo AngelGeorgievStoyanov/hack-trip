@@ -144,13 +144,6 @@ export const optionalText = ({ max, min }: LengthOptions, messages?: { max?: str
     .optional()
     .transform((value) => (value === undefined || value === null || value === '' ? null : value));
 
-/** Patch text: keeps `undefined`; `null`/`''` -> `null`. Output `string | null | undefined`. */
-export const patchText = ({ max, min }: LengthOptions, messages?: { max?: string }) =>
-  z
-    .union([trimmedString({ max, min, maxMessage: messages?.max }), z.null(), z.literal('')])
-    .optional()
-    .transform((value) => (value === null || value === '' ? null : value));
-
 /** Required JSON number: strings are rejected, matching the backend body contract. */
 export const requiredNumber = ({ min, max }: { min: number; max: number }) =>
   z.number().min(min).max(max);
@@ -184,12 +177,6 @@ export const positiveIdQuery = z.coerce.number().int().min(1).max(MAX_RESOURCE_I
 /** Required JSON integer: strings are rejected, matching the backend body contract. */
 export const requiredInt = ({ min, max }: { min: number; max: number }) =>
   z.number().int().min(min).max(max);
-
-/** Form adapter for numeric text inputs; output is still a bounded JSON integer. */
-export const requiredIntInput = ({ min, max }: { min: number; max: number }) =>
-  z
-    .union([z.number(), z.string().min(1).transform(Number)])
-    .pipe(z.number().int().min(min).max(max));
 
 /** Like target type input: trimmed, lowercased, then enumerated. */
 export const targetTypeInput = z
