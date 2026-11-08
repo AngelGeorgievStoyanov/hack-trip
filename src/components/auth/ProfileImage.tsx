@@ -56,6 +56,7 @@ export function ProfileImage() {
 
     const validationError = validateImageFile(file);
     if (validationError) {
+      setSelectedFile(null);
       setError(validationError);
       return;
     }
