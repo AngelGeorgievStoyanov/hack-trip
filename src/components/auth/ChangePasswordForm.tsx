@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Alert, Box, Button, CircularProgress } from '@mui/material';
+import { Box, Button, CircularProgress } from '@mui/material';
 import { authApi } from '@/api/auth';
 import { zodResolver } from '@/lib/zodResolver';
 import { getAuthErrorMessage } from '@/lib/errors';
 import { changePasswordSchema } from '@/validations/auth';
 import { PasswordField } from '@/components/common/PasswordField';
 import { PasswordRequirements } from '@/components/common/PasswordRequirements';
+import { useNotification } from '@/components/common/NotificationProvider';
 
 const changePasswordFormSchema = changePasswordSchema
   .extend({
@@ -27,8 +28,7 @@ interface ChangePasswordFormProps {
 }
 
 export function ChangePasswordForm({ expanded }: ChangePasswordFormProps) {
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const notification = useNotification();
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -53,30 +53,26 @@ export function ChangePasswordForm({ expanded }: ChangePasswordFormProps) {
   useEffect(() => {
     if (!expanded) {
       reset();
-      setServerError(null);
-      setSuccess(false);
     }
   }, [expanded, reset]);
 
   async function onSubmit(values: ChangePasswordFormValues): Promise<void> {
     setSubmitting(true);
-    setServerError(null);
-    setSuccess(false);
     try {
       await authApi.changePassword({
         currentPassword: values.currentPassword,
         newPassword: values.newPassword,
       });
-      setSuccess(true);
+      notification.success('Password changed.');
       reset();
     } catch (error) {
-      setServerError(getAuthErrorMessage(error));
+      notification.error(getAuthErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
   }
 
-  if (!expanded && !success) return null;
+  if (!expanded) return null;
 
   return (
     <Box
@@ -93,10 +89,8 @@ export function ChangePasswordForm({ expanded }: ChangePasswordFormProps) {
         '& .MuiTextField-root': { width: 'calc(100% - 10px)', mx: '5px' },
       }}
     >
-      {success ? <Alert severity="success">Password changed.</Alert> : null}
       {expanded ? (
         <>
-          {serverError ? <Alert severity="error">{serverError}</Alert> : null}
           <PasswordField
             label="Old Password"
             autoComplete="current-password"
