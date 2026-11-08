@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Alert, Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { tripApi } from '@/api/trips';
 import { pointApi } from '@/api/points';
 import { AppImage } from '@/components/images/AppImage';
@@ -13,6 +13,7 @@ import { PointLocationPicker } from '@/components/maps/PointLocationPicker';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
+import { useNotification } from '@/components/common/NotificationProvider';
 import type { TripGroupDay } from '@/types';
 
 interface DayEditorProps {
@@ -26,20 +27,20 @@ interface DayEditorProps {
 export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }: DayEditorProps) {
   const queryClient = useQueryClient();
   const { confirm } = useConfirm();
+  const notification = useNotification();
   const [addingPoint, setAddingPoint] = useState(false);
   const [editingPointId, setEditingPointId] = useState<number | null>(null);
   const [pointLatitude, setPointLatitude] = useState('');
   const [pointLongitude, setPointLongitude] = useState('');
   const [findInMapTrigger, setFindInMapTrigger] = useState(0);
   const [mapSearchSelection, setMapSearchSelection] = useState<{ name: string; revision: number } | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['trip', tripGroupId] });
 
   const deleteDayMutation = useMutation({
     mutationFn: () => tripApi.deleteDay(tripGroupId, day.id),
     onSuccess: () => void invalidate(),
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const reorderPointsMutation = useMutation({
@@ -118,7 +119,6 @@ export function DayEditor({ tripGroupId, day, editing, onEditingChange, onMove }
           Delete
         </Button>
       </Box>
-      {error ? <Alert severity="error" onClose={() => setError(null)}>{error}</Alert> : null}
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 1, alignItems: 'flex-start' }}>
         {day.images.map((img) => (
