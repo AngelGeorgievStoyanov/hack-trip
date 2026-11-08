@@ -1,7 +1,6 @@
-import type { AuthUserDto } from './auth';
 import type { SocialTargetType } from './social';
 
-export interface AdminPagination {
+interface AdminPagination {
   page: number;
   pageSize: number;
   total?: number;
@@ -67,5 +66,3 @@ export interface ImageInventoryComparison {
     databaseTotalPages: number;
   };
 }
-
-export type AdminUserDto = AuthUserDto;
