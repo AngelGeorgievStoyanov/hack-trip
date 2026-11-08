@@ -17,7 +17,7 @@ import { AddressAutocomplete } from '@/components/maps/AddressAutocomplete';
 import { useGoogleMapsLoader } from '@/hooks/useGoogleMapsLoader';
 import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
-import { pointCreateSchema } from '@/validations/points';
+import { pointFormSchema } from '@/validations/points';
 import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
 import { useNotification } from '@/components/common/NotificationProvider';
 import { truncatePointName } from '@/lib/pointName';
@@ -45,7 +45,7 @@ interface PointFormValues {
   lng: string;
 }
 
-const formSchema = pointCreateSchema.omit({ tripId: true });
+const formSchema = pointFormSchema;
 
 const legacyButtonSx = {
   width: '32ch',
