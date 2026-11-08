@@ -11,12 +11,10 @@ export const registerSchema = z
     firstName: trimmedString({
       min: 1,
       max: 45,
-      minMessage: 'First Name cannot be empty string and must contain at least 2 characters .',
     }),
     lastName: trimmedString({
       min: 1,
       max: 45,
-      minMessage: 'Last Name cannot be empty string and must contain at least 2 characters .',
     }),
     captchaToken: captchaTokenSchema,
   })
@@ -25,7 +23,7 @@ export const registerSchema = z
 export const loginSchema = z
   .object({
     email: emailString(),
-    password: z.string().trim().min(1, 'Password cannot be empty string.').max(200),
+    password: z.string().trim().min(1).max(200),
     captchaToken: captchaTokenSchema,
   })
   .strict();
@@ -48,12 +46,10 @@ export const updateProfileSchema = z
     firstName: trimmedString({
       min: 1,
       max: 45,
-      minMessage: 'First Name cannot be empty string and must contain at least 2 characters .',
     }),
     lastName: trimmedString({
       min: 1,
       max: 45,
-      minMessage: 'Last Name cannot be empty string and must contain at least 2 characters .',
     }),
   })
   .strict();
