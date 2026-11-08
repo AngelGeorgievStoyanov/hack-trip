@@ -35,14 +35,19 @@ export const tripWriteSchema = z
     countPeoples: requiredInt({ min: 1, max: 1000 }),
     typeOfPeople: trimmedString({ min: 1, max: TRIP_GROUP_MAX_LENGTH }),
     currency: trimmedString({ min: 1, max: 3 }),
-    destination: z.preprocess(
-      (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
-      trimmedString({ min: 1, max: TRIP_TITLE_MAX_LENGTH }).optional(),
-    ),
+    destination: trimmedString({ min: 1, max: TRIP_TITLE_MAX_LENGTH }).optional(),
     lat: z.union([z.number().min(-90).max(90), z.null()]).optional(),
     lng: z.union([z.number().min(-180).max(180), z.null()]).optional(),
   })
   .strict();
+
+/** Form adapter: an empty optional destination is omitted before the API request. */
+export const tripWriteFormSchema = tripWriteSchema.extend({
+  destination: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    trimmedString({ min: 1, max: TRIP_TITLE_MAX_LENGTH }).optional(),
+  ),
+});
 
 export const tripListQuerySchema = z
   .object({
