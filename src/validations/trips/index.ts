@@ -39,6 +39,8 @@ export const tripWriteSchema = z
       (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
       trimmedString({ min: 1, max: TRIP_TITLE_MAX_LENGTH }).optional(),
     ),
+    lat: z.union([z.number().min(-90).max(90), z.null()]).optional(),
+    lng: z.union([z.number().min(-180).max(180), z.null()]).optional(),
   })
   .strict();
 
