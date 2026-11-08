@@ -29,11 +29,13 @@ export const metadata: Metadata = {
     url: absoluteUrl('/trips'),
     siteName: 'HackTrip',
     type: 'website',
+    images: [{ url: absoluteUrl('/opengraph-image') }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Trips',
     description: 'Browse and discover trips on HackTrip.',
+    images: [absoluteUrl('/twitter-image')],
   },
 };
 
