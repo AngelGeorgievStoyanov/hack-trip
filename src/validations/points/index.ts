@@ -7,7 +7,7 @@ import {
   POINT_DESCRIPTION_MAX_LENGTH,
   POINT_TITLE_MAX_LENGTH,
 } from '@/constants/points';
-import { optionalText, patchNumber, patchText, positiveId, requiredNumber, trimmedString } from '../shared';
+import { optionalText, positiveId, requiredNumber, trimmedString } from '../shared';
 
 export const pointCreateSchema = z
   .object({
