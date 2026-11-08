@@ -22,7 +22,7 @@ export interface ReportActions {
   unreport: () => void;
   /** True while a report or unreport request is in flight. */
   pending: boolean;
-  /** Message of the last failed request, if any. */
+  /** Contextual conflict message (for example, a duplicate report), if any. */
   error: string | null;
   /** Clears the current error message. */
   clearError: () => void;
