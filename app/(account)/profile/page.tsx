@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Box } from '@mui/material';
 import { NOINDEX } from '@/constants/seo';
 import { ProfileForm } from '@/components/auth/ProfileForm';
-import { ProfileImage } from '@/components/auth/ProfileImage';
 
 export const metadata: Metadata = {
   title: 'Profile',
@@ -39,7 +38,6 @@ export default function ProfilePage() {
           borderRadius: 0,
         }}
       >
-        <ProfileImage />
         <ProfileForm />
       </Box>
     </Box>
