@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 const MAX_RESOURCE_ID = 2147483647;
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface LengthOptions {
@@ -111,7 +110,7 @@ export function getPasswordRequirements(
   ];
 }
 
-export function isValidPassword(value: string, minLength = 8, maxLength = 72): boolean {
+function isValidPassword(value: string, minLength = 8, maxLength = 72): boolean {
   return getPasswordRequirements(value, minLength, maxLength).every(
     (requirement) => requirement.valid,
   );
@@ -160,10 +159,6 @@ export const requiredNumber = ({ min, max }: { min: number; max: number }) =>
 export const requiredNumberInput = ({ min, max }: { min: number; max: number }) =>
   z.union([z.number(), z.string().min(1).transform(Number)]).pipe(z.number().min(min).max(max));
 
-/** Optional patch number. Output `number | null | undefined`; JSON body values stay numeric. */
-export const patchNumber = ({ min, max }: { min: number; max: number }) =>
-  z.union([z.number().min(min).max(max), z.null()]).optional();
-
 /** Optional integer: `''`/`null` -> `undefined`, then coerce int min/max. */
 export const optionalInt = ({ min, max }: { min: number; max: number }) =>
   z.preprocess(
@@ -179,9 +174,6 @@ export const positiveIdParam = z
     const n = Number(value);
     return n >= 1 && n <= MAX_RESOURCE_ID;
   }, 'Id must be between 1 and 2147483647');
-
-/** UUID route parameter. */
-export const userIdParam = z.string().regex(UUID_REGEX, 'Invalid UUID');
 
 /** Positive integer id in a JSON body; strings are rejected. */
 export const positiveId = z.number().int().min(1).max(MAX_RESOURCE_ID);
