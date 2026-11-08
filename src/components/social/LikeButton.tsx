@@ -10,6 +10,7 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { useLikeAnimation } from '@/components/social/LikeAnimation';
 import { invalidateSocialQueries } from '@/lib/socialQuerySync';
 import type { SocialTargetTypeInput } from '@/types';
+import { useNotification } from '@/components/common/NotificationProvider';
 
 interface LikeButtonProps {
   targetType: SocialTargetTypeInput;
@@ -26,9 +27,9 @@ interface LikeButtonProps {
 }
 
 export function LikeButton({ targetType, targetId, initialLiked, initialLikes, size = 'medium' }: LikeButtonProps) {
+  const notification = useNotification();
   const [liked, setLiked] = useState(initialLiked);
   const [likes, setLikes] = useState(initialLikes);
-  const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   // A fresh API response (for example the authenticated read after a reload) restores the
@@ -50,7 +51,6 @@ export function LikeButton({ targetType, targetId, initialLiked, initialLikes, s
       return socialApi.like({ targetType, targetId });
     },
     onSuccess: (state) => {
-      setError(null);
       invalidateSocialQueries(queryClient, targetType);
       // The backend answers a like with the resulting social state; an unlike has no
       // body, so the removed like is applied locally.
@@ -62,7 +62,7 @@ export function LikeButton({ targetType, targetId, initialLiked, initialLikes, s
       setLiked(false);
       setLikes((prev) => Math.max(0, prev - 1));
     },
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const likeAnimation = useLikeAnimation(liked, { failed: mutation.isError });
@@ -92,7 +92,6 @@ export function LikeButton({ targetType, targetId, initialLiked, initialLikes, s
           </IconButton>
         </span>
       </Tooltip>
-      {error ? <span role="alert">{error}</span> : null}
     </>
   );
 }
