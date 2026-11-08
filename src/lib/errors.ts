@@ -43,7 +43,11 @@ export function getGenericErrorMessage(error: unknown): string {
     return AUTH_NOTIFICATION_MESSAGES.genericErrorLater;
   }
 
-  if (!apiError.message || isTechnicalErrorMessage(apiError.message)) {
+  if (
+    !apiError.message ||
+    isTechnicalErrorMessage(apiError.message) ||
+    (apiError.status === undefined && /network error|timeout|timed out|err_network|econnaborted/i.test(apiError.message))
+  ) {
     return GENERIC_MESSAGE;
   }
 
