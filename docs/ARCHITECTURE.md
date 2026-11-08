@@ -294,6 +294,16 @@ It owns common HTTP behavior such as:
 * credentials
 * refresh behavior
 * common response handling
+* request payload normalization before transport
+
+The request interceptor normalizes every outgoing request body:
+
+* JSON-like objects and arrays are copied and their ordinary string values are trimmed recursively.
+* `FormData` is copied; text fields are trimmed and file/blob values are preserved unchanged.
+* Fields whose names contain `token` or `captcha` are opaque and are preserved unchanged. The frontend must not trim verification/reset tokens or CAPTCHA response tokens.
+* The normalizer does not mutate the caller's original object or FormData instance.
+
+This is transport normalization, not a replacement for Zod validation. It must remain aligned with the backend's global body-trim middleware.
 
 There must not be multiple independent Axios clients implementing competing authentication behavior.
 
@@ -1364,6 +1374,14 @@ Client validation exists for usability.
 
 Backend validation remains authoritative.
 
+The FE and BE must apply matching input semantics:
+
+* Ordinary text fields are trimmed before validation and submission.
+* Passwords are trimmed at the boundaries before password validation; the resulting password must satisfy the backend policy. Do not preserve surrounding whitespace as part of a password.
+* Opaque token and CAPTCHA fields are not trimmed. Their values must be preserved unchanged and whitespace must be rejected by validation.
+* JSON API body schemas accept actual JSON numbers, not numeric strings. Form-only adapters may convert numeric input strings to numbers before calling the API; API request schemas remain strict.
+* Multipart upload requests preserve file/blob content. Text fields, if an endpoint allows them, are trimmed; current image upload endpoints send only the binary `file` field.
+
 Forms must handle documented backend validation errors.
 
 Do not send fields that are generated or owned by the backend.
@@ -1405,7 +1423,7 @@ Examples may include:
 403 ACCOUNT_DEACTIVATED
 404 NOT_FOUND
 409 CONFLICT
-422 VALIDATION_ERROR
+400 VALIDATION_ERROR
 500 INTERNAL_SERVER_ERROR
 ```
 
