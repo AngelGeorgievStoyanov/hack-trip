@@ -9,6 +9,7 @@ import { socialApi } from '@/api/social';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { invalidateSocialQueries } from '@/lib/socialQuerySync';
 import type { SocialTargetTypeInput } from '@/types';
+import { useNotification } from '@/components/common/NotificationProvider';
 
 interface FavoriteButtonProps {
   targetType: SocialTargetTypeInput;
@@ -26,9 +27,9 @@ export function FavoriteButton({
   initialFavorites,
   size = 'medium',
 }: FavoriteButtonProps) {
+  const notification = useNotification();
   const [favorited, setFavorited] = useState(initialFavorited);
   const [count, setCount] = useState(initialFavorites);
-  const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   useEffect(() => setFavorited(initialFavorited), [initialFavorited]);
@@ -43,7 +44,6 @@ export function FavoriteButton({
       return socialApi.favorite({ targetType, targetId });
     },
     onSuccess: (state) => {
-      setError(null);
       invalidateSocialQueries(queryClient, targetType);
       setFavorited(state?.favoritedByMe ?? false);
       if (state) {
@@ -52,7 +52,7 @@ export function FavoriteButton({
         setCount((prev) => Math.max(0, prev - 1));
       }
     },
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   return (
@@ -73,7 +73,6 @@ export function FavoriteButton({
           </IconButton>
         </span>
       </Tooltip>
-      {error ? <span role="alert">{error}</span> : null}
     </>
   );
 }
