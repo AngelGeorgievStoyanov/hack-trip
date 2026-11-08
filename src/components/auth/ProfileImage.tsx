@@ -118,8 +118,8 @@ export function ProfileImage() {
       <Box
         sx={{
           position: 'relative',
-          width: 240,
-          height: 240,
+          width: 'min(300px, 75vw)',
+          height: 'min(300px, 75vw)',
           borderRadius: '50%',
           overflow: 'hidden',
           border: '1px solid',
@@ -144,9 +144,9 @@ export function ProfileImage() {
             image={image}
             alt="Profile image"
             preset="profile"
-            width={240}
-            height={240}
-            style={{ width: '240px', height: '240px', objectFit: 'cover' }}
+            width={300}
+            height={300}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
           <Typography variant="body2" color="text.secondary" textAlign="center" px={2}>
