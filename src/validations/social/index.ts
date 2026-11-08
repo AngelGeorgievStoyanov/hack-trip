@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { optionalText, positiveId, reportTargetTypeInput, targetTypeInput } from '../shared';
+import { optionalText, positiveId, positiveIdQuery, reportTargetTypeInput, targetTypeInput } from '../shared';
 
 export const socialTargetBodySchema = z
   .object({
@@ -11,15 +11,17 @@ export const socialTargetBodySchema = z
 export const socialTargetQuerySchema = z
   .object({
     targetType: targetTypeInput,
-    targetId: positiveId,
+    targetId: positiveIdQuery,
   })
   .strict();
 
 const favoriteTripGroupSchema = z.object({ tripGroupId: positiveId }).strict();
 const favoriteTargetSchema = z.object({ targetType: targetTypeInput, targetId: positiveId }).strict();
+const favoriteTripGroupQuerySchema = z.object({ tripGroupId: positiveIdQuery }).strict();
+const favoriteTargetQuerySchema = z.object({ targetType: targetTypeInput, targetId: positiveIdQuery }).strict();
 
 export const favoriteBodySchema = z.union([favoriteTripGroupSchema, favoriteTargetSchema]);
-export const favoriteQuerySchema = z.union([favoriteTripGroupSchema, favoriteTargetSchema]);
+export const favoriteQuerySchema = z.union([favoriteTripGroupQuerySchema, favoriteTargetQuerySchema]);
 
 export const reportBodySchema = z
   .object({
@@ -30,5 +32,5 @@ export const reportBodySchema = z
   .strict();
 
 export const reportTargetQuerySchema = z
-  .object({ targetType: reportTargetTypeInput, targetId: positiveId })
+  .object({ targetType: reportTargetTypeInput, targetId: positiveIdQuery })
   .strict();
