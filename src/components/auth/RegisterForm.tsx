@@ -33,11 +33,9 @@ import {
 const registerFormSchema = registerSchema
   .extend({
     confirmPassword: z.string().trim().min(1, 'Confirm password is required.'),
-    acceptedTerms: z
-      .boolean()
-      .refine((accepted) => accepted, {
-        message: 'You must accept the terms of use and privacy policy.',
-      }),
+    acceptedTerms: z.boolean().refine((accepted) => accepted, {
+      message: 'You must accept the terms of use and privacy policy.',
+    }),
   })
   .refine((values) => values.confirmPassword === values.password, {
     path: ['confirmPassword'],
