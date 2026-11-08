@@ -74,7 +74,7 @@ export function ChangePasswordForm({ expanded }: ChangePasswordFormProps) {
     } catch (error) {
       const apiError = normalizeApiError(error);
       notification.error(
-        apiError.code === API_ERROR_CODES.UNAUTHORIZED
+        apiError.code === API_ERROR_CODES.UNAUTHORIZED && apiError.message === 'Current password is incorrect.'
           ? 'Current password is incorrect.'
           : getAuthErrorMessage(error),
       );
