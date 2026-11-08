@@ -10,6 +10,7 @@ import { useConfirm } from '@/components/common/ConfirmDialog';
 import { useNotification } from '@/components/common/NotificationProvider';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { ACCEPTED_IMAGE_MIME_TYPES, PROFILE_IMAGE_MAX_FILES } from '@/constants/images';
+import { validateImageFile } from '@/lib/images/validate';
 import type { ImageDto } from '@/types';
 
 const ACCEPT_TYPES = (ACCEPTED_IMAGE_MIME_TYPES as readonly string[]).join(',');
@@ -23,13 +24,13 @@ export function ProfileImage({ selectedFile, onSelectedFileChange }: ProfileImag
   const { confirm } = useConfirm();
   const notification = useNotification();
   const [image, setImage] = useState<ImageDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const previewUrl = useMemo(() => selectedFile ? URL.createObjectURL(selectedFile) : null, [selectedFile]);
 
   useEffect(() => () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
   }, [previewUrl]);
-  const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -50,6 +51,12 @@ export function ProfileImage({ selectedFile, onSelectedFileChange }: ProfileImag
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = '';
     if (!file) return;
+
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      notification.error(validationError);
+      return;
+    }
 
     onSelectedFileChange(file);
   }
@@ -149,7 +156,7 @@ export function ProfileImage({ selectedFile, onSelectedFileChange }: ProfileImag
         />
         {selectedFile ? (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', maxWidth: 360, p: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-            <Box component="img" src={URL.createObjectURL(selectedFile)} alt="Selected profile image preview" sx={{ width: 55, height: 45, objectFit: 'cover', borderRadius: 1 }} />
+            <Box component="img" src={previewUrl ?? undefined} alt="Selected profile image preview" sx={{ width: 55, height: 45, objectFit: 'cover', borderRadius: 1 }} />
             <Box component="span" sx={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedFile.name}</Box>
             <Tooltip title="Remove selected image" arrow>
               <IconButton aria-label="Remove selected image" onClick={cancelSelection} disabled={busy} size="small">
