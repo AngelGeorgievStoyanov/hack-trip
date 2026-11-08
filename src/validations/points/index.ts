@@ -7,7 +7,7 @@ import {
   POINT_DESCRIPTION_MAX_LENGTH,
   POINT_TITLE_MAX_LENGTH,
 } from '@/constants/points';
-import { optionalText, positiveId, requiredNumber, trimmedString } from '../shared';
+import { optionalText, positiveId, requiredNumber, requiredNumberInput, trimmedString } from '../shared';
 
 export const pointCreateSchema = z
   .object({
@@ -40,3 +40,9 @@ export const pointUpdateSchema = z
     lng: requiredNumber({ min: LONGITUDE_MIN, max: LONGITUDE_MAX }),
   })
   .strict();
+
+/** Form-only adapter: PointForm keeps latitude/longitude as text until submission. */
+export const pointFormSchema = pointCreateSchema.omit({ tripId: true }).extend({
+  lat: requiredNumberInput({ min: LATITUDE_MIN, max: LATITUDE_MAX }),
+  lng: requiredNumberInput({ min: LONGITUDE_MIN, max: LONGITUDE_MAX }),
+});
