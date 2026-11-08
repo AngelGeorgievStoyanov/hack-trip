@@ -32,20 +32,11 @@ export const pointUpdateSchema = z
       min: 1,
       max: POINT_TITLE_MAX_LENGTH,
       minMessage: 'Title cannot be empty string.',
-    }).optional(),
-    description: patchText(
-      { max: POINT_DESCRIPTION_MAX_LENGTH },
-      { max: `Description max length is ${POINT_DESCRIPTION_MAX_LENGTH} chars` },
-    ),
-    lat: patchNumber({ min: LATITUDE_MIN, max: LATITUDE_MAX }),
-    lng: patchNumber({ min: LONGITUDE_MIN, max: LONGITUDE_MAX }),
+    }),
+    description: z
+      .union([trimmedString({ max: POINT_DESCRIPTION_MAX_LENGTH }), z.null()])
+      .transform((value) => (value === '' ? null : value)),
+    lat: requiredNumber({ min: LATITUDE_MIN, max: LATITUDE_MAX }),
+    lng: requiredNumber({ min: LONGITUDE_MIN, max: LONGITUDE_MAX }),
   })
-  .strict()
-  .refine(
-    (data) =>
-      data.name !== undefined ||
-      data.description !== undefined ||
-      data.lat !== undefined ||
-      data.lng !== undefined,
-    'At least one field is required',
-  );
+  .strict();
