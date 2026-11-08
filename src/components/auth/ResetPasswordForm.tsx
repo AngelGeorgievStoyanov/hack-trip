@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
-import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import { useNotification } from '@/components/common/NotificationProvider';
 import { authApi } from '@/api/auth';
 import { zodResolver } from '@/lib/zodResolver';
@@ -80,6 +80,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
     try {
       await authApi.resetPassword({ token, password: values.password });
+      notification.success('Your password has been reset. You can now log in.');
       setSuccess(true);
     } catch (error) {
       notification.error(getTokenErrorMessage(error));
@@ -95,9 +96,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           <Typography variant="h5" component="h1" sx={{ margin: '10px auto', textAlign: 'center' }}>
             RESET PASSWORD
           </Typography>
-          <Alert severity="success">
+          <Typography variant="body1" textAlign="center">
             Your password has been reset. You can now log in.
-          </Alert>
+          </Typography>
           <Button onClick={() => router.replace('/login')} variant="contained">
             Go to login
           </Button>
