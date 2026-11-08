@@ -5,7 +5,6 @@ import CustomFileUploadButton from '@/components/CustomFileUploadButton';
 import { ACCEPTED_IMAGE_MIME_TYPES, PROFILE_IMAGE_MAX_FILES } from '@/constants/images';
 import { validateImageFile } from '@/lib/images/validate';
 import { Box, CircularProgress, Dialog, IconButton, Tooltip } from '@mui/material';
-import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import CloseIcon from '@mui/icons-material/Close';
 import { AppImage } from '@/components/images/AppImage';
 import { authApi } from '@/api/auth';
@@ -13,6 +12,7 @@ import { useConfirm } from '@/components/common/ConfirmDialog';
 import { useNotification } from '@/components/common/NotificationProvider';
 import { getGenericErrorMessage } from '@/lib/errors';
 import type { ImageDto } from '@/types';
+import { RemoveProfileImageIcon } from '@/constants/icons';
 
 const ACCEPT_TYPES = (ACCEPTED_IMAGE_MIME_TYPES as readonly string[]).join(',');
 
@@ -68,27 +68,29 @@ export function ProfileImage({ refreshToken = 0 }: { refreshToken?: number }) {
 
   return (
     <>
-      <Box sx={{ position: 'relative', width: 'min(300px, 75vw)', height: 'min(300px, 75vw)', mb: 1 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'min(300px, 75vw)', mb: 1 }}>
+        <Tooltip title="Delete profile image" arrow>
+          <Box
+            component="button"
+            type="button"
+            aria-label="Delete profile image"
+            onClick={() => void handleDelete()}
+            disabled={deleting}
+            sx={{ display: 'flex', p: 0, border: 0, background: 'transparent', cursor: 'pointer', marginTop: '20px', position: 'relative', translate: '0 28px', zIndex: 1 }}
+          >
+            <RemoveProfileImageIcon sx={{ backgroundColor: 'white', borderRadius: '50%' }} />
+          </Box>
+        </Tooltip>
         <Tooltip title="View profile image" arrow>
           <Box
             component="button"
             type="button"
             aria-label="View profile image full screen"
             onClick={() => setFullscreen(true)}
-            sx={{ display: 'block', width: '100%', height: '100%', p: 0, border: '1px solid', borderRadius: '50%', overflow: 'hidden', boxShadow: '3px 2px 5px black', cursor: 'pointer', background: 'transparent' }}
+            sx={{ display: 'block', width: '100%', height: 'min(300px, 75vw)', p: 0, border: '1px solid', borderRadius: '50%', overflow: 'hidden', boxShadow: '3px 2px 5px black', cursor: 'pointer', background: 'transparent' }}
           >
             <AppImage image={image} alt="Profile image" preset="profile" width={300} height={300} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </Box>
-        </Tooltip>
-        <Tooltip title="Delete profile image" arrow>
-          <IconButton
-            aria-label="Delete profile image"
-            onClick={() => void handleDelete()}
-            disabled={deleting}
-            sx={{ position: 'absolute', top: 5, right: 5, zIndex: 2, backgroundColor: 'white', color: 'error.main', boxShadow: 2, '&:hover': { backgroundColor: 'rgba(255,255,255,0.85)' } }}
-          >
-            <HighlightOffSharpIcon />
-          </IconButton>
         </Tooltip>
       </Box>
       <Dialog open={fullscreen} onClose={() => setFullscreen(false)} maxWidth="xl" fullWidth>
@@ -145,7 +147,7 @@ export function ProfileImageUpload({ selectedFile, onSelectedFileChange }: Profi
           <Box component="span" sx={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedFile.name}</Box>
           <Tooltip title="Remove selected image" arrow>
             <IconButton aria-label="Remove selected image" onClick={() => onSelectedFileChange(null)} size="small">
-              <HighlightOffSharpIcon />
+              <RemoveProfileImageIcon />
             </IconButton>
           </Tooltip>
         </Box>
