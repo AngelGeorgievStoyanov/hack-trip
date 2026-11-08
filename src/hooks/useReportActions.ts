@@ -8,6 +8,7 @@ import { API_ERROR_CODES } from '@/constants/api';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { invalidateSocialQueries } from '@/lib/socialQuerySync';
 import type { ReportTargetTypeInput } from '@/types';
+import { useNotification } from '@/components/common/NotificationProvider';
 
 interface UseReportActionsOptions {
   /** Called after the current user's report state for the target changed. */
@@ -33,6 +34,7 @@ export function useReportActions(
   options: UseReportActionsOptions = {},
 ): ReportActions {
   const { onReportedChange } = options;
+  const notification = useNotification();
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -53,7 +55,7 @@ export function useReportActions(
         onReportedChange?.(true);
         return;
       }
-      setError(getGenericErrorMessage(e));
+      notification.error(getGenericErrorMessage(e));
     },
   });
 
@@ -64,7 +66,7 @@ export function useReportActions(
       invalidateSocialQueries(queryClient, targetType);
       onReportedChange?.(false);
     },
-    onError: (e) => setError(getGenericErrorMessage(e)),
+    onError: (e) => notification.error(getGenericErrorMessage(e)),
   });
 
   const report = useCallback(
