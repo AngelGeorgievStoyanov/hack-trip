@@ -19,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
           '/favorites',
           '/admin',
           '/trips/create',
+          '/points/edit',
           '/*/edit',
         ],
       },
