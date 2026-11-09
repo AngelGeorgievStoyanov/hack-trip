@@ -20,8 +20,9 @@ import {
 } from '@/constants/ui';
 
 export const metadata: Metadata = buildSeoMetadata({
-  title: 'Trips',
-  description: 'Browse and discover trips on HackTrip.',
+  title: 'Explore Travel Trips and Itineraries',
+  description:
+    'Explore travel itineraries shared by travelers, discover interesting destinations and GPS locations, and find inspiration for your next trip.',
   canonicalPath: '/trips',
 });
 
@@ -96,6 +97,14 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
       <>
         {filters}
         <main style={MAIN_STYLE}>
+          <header className="trips-page__intro">
+            <h1>Explore Trips, Places and Travel Ideas</h1>
+            <p>
+              Browse itineraries shared by travelers, discover destinations and interesting
+              locations, and get ideas for your next journey. Explore routes that include cities,
+              restaurants, nature, viewpoints and places off the beaten path.
+            </p>
+          </header>
           <TripList trips={trips} />
           <TripPagination
             page={page}
@@ -113,7 +122,10 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
       <>
         {filters}
         <main style={MAIN_STYLE}>
-          <p>Trips are temporarily unavailable. Please try again later.</p>
+          <header className="trips-page__intro">
+            <h1>Explore Trips, Places and Travel Ideas</h1>
+            <p>Trips are temporarily unavailable. Please try again later.</p>
+          </header>
         </main>
       </>
     );
