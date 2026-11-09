@@ -48,53 +48,45 @@ function detectImageType(bytes: Uint8Array): string | null {
   return null;
 }
 
-async function loadImageDataUrl(imageUrl: string | null): Promise<string | null> {
-  if (!imageUrl) {
-    return null;
+async function loadImageDataUrl(imageUrls: readonly string[]): Promise<string | null> {
+  for (const imageUrl of imageUrls) {
+    try {
+      const response = await fetch(imageUrl, {
+        signal: AbortSignal.timeout(5000),
+        cache: 'no-store',
+      });
+      if (!response.ok) continue;
+
+      const contentLength = Number(response.headers.get('content-length') ?? 0);
+      if (contentLength > MAX_IMAGE_BYTES) continue;
+
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      if (bytes.byteLength === 0 || bytes.byteLength > MAX_IMAGE_BYTES) continue;
+
+      // Detect the actual file format instead of trusting a thumbnail's URL or HTTP header.
+      const contentType = detectImageType(bytes);
+      if (!contentType) continue;
+
+      return `data:${contentType};base64,${Buffer.from(bytes).toString('base64')}`;
+    } catch {
+      // A missing or inaccessible photo should not prevent trying the next one.
+    }
   }
 
-  try {
-    const response = await fetch(imageUrl, {
-      signal: AbortSignal.timeout(5000),
-      cache: 'no-store',
-    });
-    if (!response.ok) {
-      return null;
-    }
-
-    const contentLength = Number(response.headers.get('content-length') ?? 0);
-    if (contentLength > MAX_IMAGE_BYTES) {
-      return null;
-    }
-
-    const bytes = new Uint8Array(await response.arrayBuffer());
-    if (bytes.byteLength === 0 || bytes.byteLength > MAX_IMAGE_BYTES) {
-      return null;
-    }
-
-    // Detect the actual file format instead of trusting a thumbnail's URL or HTTP header.
-    const contentType = detectImageType(bytes);
-    if (!contentType) {
-      return null;
-    }
-
-    return `data:${contentType};base64,${Buffer.from(bytes).toString('base64')}`;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 /** Creates a 1200x630 branded preview, with a clean fallback when no trip photo is available. */
 export async function renderTripOgImage({
   title,
   subtitle,
-  imageUrl,
+  imageUrls,
 }: {
   title: string;
   subtitle: string;
-  imageUrl: string | null;
+  imageUrls: readonly string[];
 }): Promise<ImageResponse> {
-  const imageSrc = await loadImageDataUrl(imageUrl);
+  const imageSrc = await loadImageDataUrl(imageUrls);
 
   return new ImageResponse(
     <div
