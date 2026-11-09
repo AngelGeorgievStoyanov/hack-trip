@@ -1,10 +1,10 @@
 'use client';
 
 import { useRef, type CSSProperties, type ReactNode } from 'react';
-import { Box, useMediaQuery } from '@mui/material';
+import { Box } from '@mui/material';
 import Image from 'next/image';
 import { ScrambleHeading, type ScrambleHeadingHandle } from '@/components/common/ScrambleHeading';
-import { BREAKPOINTS, headingTextStyle, minWidthQuery } from '@/constants/ui';
+import { headingTextStyle } from '@/constants/ui';
 
 interface HomeHeroProps {
   /** Legacy only announced the Top-5 line once trips were available. */
@@ -22,7 +22,6 @@ const HEADING_STYLE: CSSProperties = {
 /** Homepage introduction with one semantic H1 and a concise product proposition. */
 export function HomeHero({ hasTopTrips, children }: HomeHeroProps) {
   const headingRef = useRef<ScrambleHeadingHandle | null>(null);
-  const singleLineHeading = useMediaQuery(minWidthQuery(BREAKPOINTS.homeHeading));
 
   return (
     <Box
@@ -39,7 +38,7 @@ export function HomeHero({ hasTopTrips, children }: HomeHeroProps) {
       >
         <ScrambleHeading
           ref={headingRef}
-          text={singleLineHeading ? 'Plan, Create and Share Your Trips' : 'Plan and Share Your Trips'}
+          text="Plan, Create and Share Your Trips"
           style={HEADING_STYLE}
         />
         <h2 style={HEADING_STYLE}>
