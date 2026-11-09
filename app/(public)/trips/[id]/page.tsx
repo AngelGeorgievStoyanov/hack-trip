@@ -3,8 +3,12 @@ import type { CSSProperties } from 'react';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/common/JsonLd';
 import { TripDetailsView } from '@/components/trips/TripDetailsView';
-import { TripItineraryIndex } from '@/components/seo/TripItineraryIndex';
-import { buildSeoMetadata, buildTripJsonLd, buildTripSeoContent, seoUrl } from '@/seo';
+import {
+  TripItineraryIndex,
+  buildTripJsonLd,
+  buildTripSeoContent,
+  buildTripSeoMetadata,
+} from '@/seo/modules/trip';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
 import { pageBackgroundStyle } from '@/constants/ui';
@@ -51,19 +55,9 @@ export async function generateMetadata({
   try {
     const trip = await getTrip(tripId);
     const day = resolveDay(trip.days, query.day);
-    const seoContent = buildTripSeoContent(trip);
-    const imageUrl = seoUrl(
-      `/api/og/trips/${trip.id}?day=${day?.dayNumber ?? trip.days[0]?.dayNumber ?? 1}`,
-    );
-    const title = seoContent.title;
-    const description = seoContent.description;
-    return buildSeoMetadata({
-      title,
-      description,
-      canonicalPath: `/trips/${trip.id}`,
-      openGraphPath: `/trips/${trip.id}${day ? `?day=${day.dayNumber}` : ''}`,
-      imageUrl,
-      imageAlt: `${title} — HackTrip`,
+    return buildTripSeoMetadata(trip, {
+      tripId: trip.id,
+      dayNumber: day?.dayNumber,
     });
   } catch (error) {
     if (isNotFoundError(error)) {
@@ -103,7 +97,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
 
   return (
     <main style={MAIN_STYLE}>
-      {/* Single GET /trips/:tripGroupId; day switching uses the already-loaded group. */}
+      {/* One trip-group response; day switching uses the already-loaded group. */}
       <TripDetailsView trip={trip} initialDayNumber={day.dayNumber} />
       <TripItineraryIndex itinerary={seoContent.itinerary} />
 

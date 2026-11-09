@@ -88,8 +88,8 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
 
   try {
     const trips = await tripApi.listTrips({ ...query, page, limit });
-    // Contract §17.1: the response is a raw `TripGroupResponse[]` with no pagination
-    // object, so the total page count is unknown; a full page implies at least one more.
+    // Contract §17.1: the response is a raw TripGroupResponse[] with no pagination
+    // object, so a full page implies at least one more page.
     const totalPages = trips.length === limit ? page + 1 : page;
 
     return (

@@ -1,5 +1,5 @@
-import { seoUrl } from '@/seo/config';
-import type { TripSeoContent } from '@/seo/trip/buildTripSeoContent';
+import { absoluteUrl } from '@/config';
+import type { TripSeoContent } from './types';
 
 export interface TripJsonLdInput {
   name: string;
@@ -9,7 +9,7 @@ export interface TripJsonLdInput {
   itinerary?: TripSeoContent['itinerary'];
 }
 
-/** Creates Trip JSON-LD independently from route components and API calls. */
+/** Creates Trip JSON-LD using only the Trip module's own data contract. */
 export function buildTripJsonLd(input: TripJsonLdInput): Record<string, unknown> {
   let position = 0;
   const itinerary = input.itinerary?.flatMap((day) =>
@@ -50,7 +50,7 @@ export function buildTripJsonLd(input: TripJsonLdInput): Record<string, unknown>
     '@type': 'Trip',
     name: input.name,
     ...(input.description ? { description: input.description } : {}),
-    url: seoUrl(input.canonicalPath),
+    url: absoluteUrl(input.canonicalPath),
     ...(input.imageUrl ? { image: input.imageUrl } : {}),
     ...(itinerary?.length
       ? { itinerary: { '@type': 'ItemList', itemListElement: itinerary } }

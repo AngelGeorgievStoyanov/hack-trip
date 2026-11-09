@@ -6,7 +6,7 @@ import { buildSeoMetadata } from '@/seo';
 import { pageBackgroundStyle } from '@/constants/ui';
 
 export const metadata: Metadata = buildSeoMetadata({
-  title: 'HackTrip — plan and share your trips',
+  title: 'Plan and share your trips',
   description: 'Discover, plan and share trips with HackTrip.',
   canonicalPath: '/',
 });

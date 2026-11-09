@@ -1,8 +1,8 @@
-import type { TripSeoContent } from '@/seo';
+import type { TripSeoContent } from './types';
 
 /**
- * A user-visible, expandable itinerary index. Keeping the real place names in
- * server-rendered HTML makes the full route understandable without client state.
+ * Expandable, server-rendered itinerary index. Real place names remain in the
+ * HTML without requiring client state or JavaScript interaction.
  */
 export function TripItineraryIndex({ itinerary }: Pick<TripSeoContent, 'itinerary'>) {
   if (itinerary.length === 0) return null;
