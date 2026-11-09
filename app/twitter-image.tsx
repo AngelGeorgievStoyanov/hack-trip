@@ -10,6 +10,6 @@ export default function TwitterImage() {
   return renderTripOgImage({
     title: 'Discover your next adventure',
     subtitle: 'Plan and share your trips with HackTrip',
-    imageUrl: null,
+    imageUrls: [],
   });
 }
