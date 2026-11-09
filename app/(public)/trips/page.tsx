@@ -4,6 +4,7 @@ import { tripApi, type TripListQuery } from '@/api/trips';
 import { TripFilters } from '@/components/trips/TripFilters';
 import { TripList } from '@/components/trips/TripList';
 import { TripPagination } from '@/components/trips/TripPagination';
+import { WelcomeHeading } from '@/components/common/WelcomeHeading';
 import { buildSeoMetadata } from '@/seo';
 import {
   TRIP_GROUP_MAX_LENGTH,
@@ -28,6 +29,15 @@ const MAIN_STYLE: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
+};
+
+const INTRO_STYLE: CSSProperties = {
+  maxWidth: 900,
+  margin: '0 20px 24px',
+  textAlign: 'center',
+  color: '#fff',
+  textShadow: '3px 3px 3px rgb(10,10,10)',
+  lineHeight: 1.6,
 };
 
 function first(value: string | string[] | undefined): string | undefined {
@@ -74,9 +84,9 @@ export async function generateMetadata({ searchParams }: TripsPageProps): Promis
   const canonicalPath = page > 1 && !noIndex ? '/trips?page=' + page : '/trips';
 
   return buildSeoMetadata({
-    title: 'Explore Travel Trips and Itineraries',
+    title: 'Discover Trips, Places and Travel Experiences',
     description:
-      'Explore travel itineraries shared by travelers, discover interesting destinations and GPS locations, and find inspiration for your next trip.',
+      'Explore destinations, photos, routes and personal recommendations shared by travelers. Find interesting places and inspiration for your next adventure.',
     canonicalPath,
     noIndex,
   });
@@ -96,6 +106,16 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
     />
   );
 
+  const intro = (
+    <WelcomeHeading>
+      <p style={INTRO_STYLE}>
+        Discover destinations, photos and experiences shared by the HackTrip community. Explore
+        interesting places and personal recommendations from around the world, then share your own
+        discoveries.
+      </p>
+    </WelcomeHeading>
+  );
+
   try {
     const trips = await tripApi.listTrips({ ...query, page, limit });
     const hasNextPage = trips.length === limit;
@@ -103,14 +123,7 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
       <>
         {filters}
         <main style={MAIN_STYLE}>
-          <header style={{ maxWidth: 900, padding: '24px 20px', textAlign: 'center' }}>
-            <h1>Explore Trips, Places and Travel Ideas</h1>
-            <p>
-              Browse itineraries shared by travelers, discover destinations and interesting
-              locations, and get ideas for your next journey. Explore routes that include cities,
-              restaurants, nature, viewpoints and places off the beaten path.
-            </p>
-          </header>
+          {intro}
           <TripList trips={trips} />
           <TripPagination
             page={page}
@@ -128,10 +141,8 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
       <>
         {filters}
         <main style={MAIN_STYLE}>
-          <header className="trips-page__intro">
-            <h1>Explore Trips, Places and Travel Ideas</h1>
-            <p>Trips are temporarily unavailable. Please try again later.</p>
-          </header>
+          {intro}
+          <p style={INTRO_STYLE}>Trips are temporarily unavailable. Please try again later.</p>
         </main>
       </>
     );
