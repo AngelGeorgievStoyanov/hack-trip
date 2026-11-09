@@ -68,6 +68,11 @@ export function AdminUsers() {
                 <TableCell>Name</TableCell>
                 <TableCell>Role</TableCell>
                 <TableCell>Status</TableCell>
+                <TableCell>Email verified</TableCell>
+                <TableCell>Registered</TableCell>
+                <TableCell>Updated</TableCell>
+                <TableCell>Logins</TableCell>
+                <TableCell>Last login</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -80,6 +85,11 @@ export function AdminUsers() {
                   </TableCell>
                   <TableCell>{u.role}</TableCell>
                   <TableCell>{u.status}</TableCell>
+                  <TableCell>{u.emailVerified ? 'Yes' : 'No'}</TableCell>
+                  <TableCell>{u.createdAt ? new Date(u.createdAt).toLocaleString() : '—'}</TableCell>
+                  <TableCell>{u.updatedAt ? new Date(u.updatedAt).toLocaleString() : '—'}</TableCell>
+                  <TableCell>{u.countOfLogs ?? '—'}</TableCell>
+                  <TableCell>{u.lastTimeLogin ? new Date(u.lastTimeLogin).toLocaleString() : '—'}</TableCell>
                   <TableCell>
                     {isAdmin ? (
                       <Link href={`/admin/users/${u.id}`}>
