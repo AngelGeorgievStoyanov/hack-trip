@@ -1,8 +1,5 @@
+import { OG_IMAGE_FETCH_TIMEOUT_MS, OG_IMAGE_HEIGHT, OG_IMAGE_MAX_BYTES, OG_IMAGE_SIZE, OG_IMAGE_WIDTH } from '@/constants/seo';
 import { ImageResponse } from 'next/og';
-
-const IMAGE_SIZE = { width: 1200, height: 630 };
-
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 function detectImageType(bytes: Uint8Array): string | null {
   if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
@@ -52,16 +49,16 @@ async function loadImageDataUrl(imageUrls: readonly string[]): Promise<string | 
   for (const imageUrl of imageUrls) {
     try {
       const response = await fetch(imageUrl, {
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(OG_IMAGE_FETCH_TIMEOUT_MS),
         cache: 'no-store',
       });
       if (!response.ok) continue;
 
       const contentLength = Number(response.headers.get('content-length') ?? 0);
-      if (contentLength > MAX_IMAGE_BYTES) continue;
+      if (contentLength > OG_IMAGE_MAX_BYTES) continue;
 
       const bytes = new Uint8Array(await response.arrayBuffer());
-      if (bytes.byteLength === 0 || bytes.byteLength > MAX_IMAGE_BYTES) continue;
+      if (bytes.byteLength === 0 || bytes.byteLength > OG_IMAGE_MAX_BYTES) continue;
 
       // Detect the actual file format instead of trusting a thumbnail's URL or HTTP header.
       const contentType = detectImageType(bytes);
@@ -76,7 +73,7 @@ async function loadImageDataUrl(imageUrls: readonly string[]): Promise<string | 
   return null;
 }
 
-/** Creates a 1200x630 branded preview, with a clean fallback when no trip photo is available. */
+/** Creates a branded preview using the shared OG dimensions, with a clean fallback when no trip photo is available. */
 export async function renderTripOgImage({
   title,
   subtitle,
@@ -105,8 +102,8 @@ export async function renderTripOgImage({
         <img
           src={imageSrc}
           alt={title}
-          width={1200}
-          height={630}
+          width={OG_IMAGE_WIDTH}
+          height={OG_IMAGE_HEIGHT}
           style={{
             position: 'absolute',
             top: 0,
@@ -224,6 +221,6 @@ export async function renderTripOgImage({
         </div>
       </div>
     </div>,
-    IMAGE_SIZE,
+    OG_IMAGE_SIZE,
   );
 }
