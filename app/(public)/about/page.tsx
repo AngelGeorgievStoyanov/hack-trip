@@ -6,7 +6,7 @@ import { buildSeoMetadata } from '@/seo';
 const ABOUT_IMAGE = IMAGE_PRESETS.aboutIllustration;
 
 export const metadata: Metadata = buildSeoMetadata({
-  title: 'About HackTrip — Create, Plan and Share Trips',
+  title: 'About — Create, Plan and Share Trips',
   description:
     'Create travel itineraries, plan routes, add GPS locations anywhere in the world, describe restaurants, hidden beaches and other places, then share your journey with HackTrip.',
   canonicalPath: '/about',
