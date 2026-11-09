@@ -17,8 +17,7 @@ export function buildTripSeoMetadata(
     ...(selectedDay?.images ?? []),
     ...(selectedDay?.points ?? []).flatMap((point) => point.images ?? []),
   ]
-    .map((image) => image.id)
-    .sort((a, b) => a - b);
+    .map((image) => image.id);
   // A changed image set produces a fresh OG URL, avoiding stale social previews.
   const imageVersion = imageIds.join('-') || 'no-images';
   const imagePath = `/api/og/trips/${options.tripId}?day=${dayNumber}&v=${imageVersion}`;
