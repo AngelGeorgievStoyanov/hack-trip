@@ -22,6 +22,12 @@ export function TripItineraryIndex({ itinerary }: Pick<TripSeoContent, 'itinerar
                     <li key={`${day.dayNumber}-${index}-${point.name}`}>
                       <strong>{point.name}</strong>
                       {point.description ? <p>{point.description}</p> : null}
+                      {point.latitude !== undefined && point.longitude !== undefined &&
+                      point.name === 'Unnamed location' ? (
+                        <p>
+                          Coordinates: {point.latitude}, {point.longitude}
+                        </p>
+                      ) : null}
                     </li>
                   ))}
                 </ul>
