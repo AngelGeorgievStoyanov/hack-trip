@@ -1,4 +1,10 @@
-import { OG_IMAGE_FETCH_TIMEOUT_MS, OG_IMAGE_HEIGHT, OG_IMAGE_MAX_BYTES, OG_IMAGE_SIZE, OG_IMAGE_WIDTH } from '@/constants/seo';
+import {
+  OG_IMAGE_FETCH_TIMEOUT_MS,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_MAX_BYTES,
+  OG_IMAGE_SIZE,
+  OG_IMAGE_WIDTH,
+} from '@/constants/seo';
 import { ImageResponse } from 'next/og';
 
 function detectImageType(bytes: Uint8Array): string | null {
@@ -73,7 +79,7 @@ async function loadImageDataUrl(imageUrls: readonly string[]): Promise<string | 
   return null;
 }
 
-/** Creates a branded preview using the shared OG dimensions, with a clean fallback when no trip photo is available. */
+/** Creates a branded preview using shared OG dimensions, with a clean fallback when needed. */
 export async function renderTripOgImage({
   title,
   subtitle,
