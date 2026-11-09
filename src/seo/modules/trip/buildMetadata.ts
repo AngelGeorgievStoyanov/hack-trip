@@ -10,8 +10,18 @@ export function buildTripSeoMetadata(
   options: TripSeoMetadataOptions,
 ): Metadata {
   const content = buildTripSeoContent(trip);
-  const dayNumber = options.dayNumber ?? trip.days[0]?.dayNumber ?? 1;
-  const imagePath = `/api/og/trips/${options.tripId}?day=${dayNumber}`;
+  const selectedDay =
+    trip.days.find((day) => day.dayNumber === options.dayNumber) ?? trip.days[0];
+  const dayNumber = selectedDay?.dayNumber ?? 1;
+  const imageIds = [
+    ...(selectedDay?.images ?? []),
+    ...(selectedDay?.points ?? []).flatMap((point) => point.images ?? []),
+  ]
+    .map((image) => image.id)
+    .sort((a, b) => a - b);
+  // A changed image set produces a fresh OG URL, avoiding stale social previews.
+  const imageVersion = imageIds.join('-') || 'no-images';
+  const imagePath = `/api/og/trips/${options.tripId}?day=${dayNumber}&v=${imageVersion}`;
 
   return buildSeoMetadata({
     title: content.title,
