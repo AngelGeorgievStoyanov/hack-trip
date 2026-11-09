@@ -37,8 +37,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const trips = await tripApi.listTrips({ page, limit, sort: 'newest' });
       for (const trip of trips) {
         const lastModified = trip.days.reduce<string | null>((latest, day) => {
-          const value = day.updatedAt ?? day.createdAt;
-          return value && (!latest || value > latest) ? value : latest;
+          const timestamps = [
+            day.createdAt,
+            day.updatedAt,
+            ...day.points.flatMap((point) => [point.createdAt, point.updatedAt]),
+          ];
+          return timestamps.reduce<string | null>((current, value) => {
+            return value && (!current || value > current) ? value : current;
+          }, latest);
         }, null);
         entries.push({
           url: absoluteUrl(`/trips/${trip.id}`),
