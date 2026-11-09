@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/common/JsonLd';
 import { TripDetailsView } from '@/components/trips/TripDetailsView';
+import { TripItineraryIndex } from '@/components/seo/TripItineraryIndex';
 import { buildSeoMetadata, buildTripJsonLd, buildTripSeoContent, seoUrl } from '@/seo';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
@@ -104,6 +105,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
     <main style={MAIN_STYLE}>
       {/* Single GET /trips/:tripGroupId; day switching uses the already-loaded group. */}
       <TripDetailsView trip={trip} initialDayNumber={day.dayNumber} />
+      <TripItineraryIndex itinerary={seoContent.itinerary} />
 
       <JsonLd
         data={buildTripJsonLd({
