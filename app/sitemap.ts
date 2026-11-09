@@ -34,7 +34,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Contract §17.1: `GET /trips` returns a raw array without a pagination object, so
     // fetch pages until a short page arrives (bounded by the configured page cap).
     while (page <= SITEMAP_MAX_TRIP_PAGES) {
-      const trips = await tripApi.listTrips({ page, limit: SITEMAP_TRIPS_PAGE_SIZE, sort: 'newest' });
+      const trips = await tripApi.listTrips({
+        page,
+        limit: SITEMAP_TRIPS_PAGE_SIZE,
+        sort: 'newest',
+      });
       for (const trip of trips) {
         const lastModified = trip.days.reduce<string | null>((latest, day) => {
           const timestamps = [
