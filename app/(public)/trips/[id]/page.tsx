@@ -50,22 +50,11 @@ export async function generateMetadata({
   try {
     const trip = await getTrip(tripId);
     const day = resolveDay(trip.days, query.day);
-    const canonicalUrl = absoluteUrl(`/trips/${trip.id}`);
-    const sharedUrl = absoluteUrl(
-      `/trips/${trip.id}${day ? `?day=${day.dayNumber}` : ''}`,
-    );
     const imageUrl = absoluteUrl(
       `/api/og/trips/${trip.id}?day=${day?.dayNumber ?? trip.days[0]?.dayNumber ?? 1}`,
     );
     const title = day?.title ?? day?.destination ?? 'Trip';
     const description = day?.description ?? undefined;
-    const image = {
-      url: imageUrl,
-      width: 1200,
-      height: 630,
-      alt: `${title} — HackTrip`,
-    };
-
     return buildSeoMetadata({
       title,
       description,
@@ -120,7 +109,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
           description: day.description,
           canonicalPath,
           imageUrl: image ?? undefined,
-        })}}
+        })}
       />
     </main>
   );
