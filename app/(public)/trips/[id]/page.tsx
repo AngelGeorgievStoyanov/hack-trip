@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/common/JsonLd';
 import { TripDetailsView } from '@/components/trips/TripDetailsView';
-import { absoluteUrl } from '@/config';
+import { buildSeoMetadata, buildTripJsonLd } from '@/seo';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
 import { pageBackgroundStyle } from '@/constants/ui';
@@ -66,25 +66,14 @@ export async function generateMetadata({
       alt: `${title} — HackTrip`,
     };
 
-    return {
+    return buildSeoMetadata({
       title,
       description,
-      alternates: { canonical: canonicalUrl },
-      openGraph: {
-        title,
-        description,
-        url: sharedUrl,
-        siteName: 'HackTrip',
-        type: 'website',
-        images: [image],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title,
-        description,
-        images: [imageUrl],
-      },
-    };
+      canonicalPath: `/trips/${trip.id}`,
+      openGraphPath: `/trips/${trip.id}${day ? `?day=${day.dayNumber}` : ''}`,
+      imageUrl,
+      imageAlt: `${title} — HackTrip`,
+    });
   } catch (error) {
     if (isNotFoundError(error)) {
       return { title: 'Trip not found' };
@@ -117,7 +106,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
     notFound();
   }
 
-  const url = absoluteUrl(`/trips/${trip.id}`);
+  const canonicalPath = `/trips/${trip.id}`;
   const image = tripRepresentativeImage(trip);
 
   return (
@@ -126,14 +115,12 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
       <TripDetailsView trip={trip} initialDayNumber={day.dayNumber} />
 
       <JsonLd
-        data={{
-          '@context': 'https://schema.org',
-          '@type': 'Trip',
-          name: day.title ?? 'Trip',
-          description: day.description ?? undefined,
-          url,
-          image: image ?? undefined,
-        }}
+        data={buildTripJsonLd({
+          name: day.title ?? day.destination ?? 'Trip',
+          description: day.description,
+          canonicalPath,
+          imageUrl: image ?? undefined,
+        })}}
       />
     </main>
   );
