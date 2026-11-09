@@ -2,26 +2,16 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { absoluteUrl } from '@/config';
 import { IMAGE_PRESETS } from '@/constants/images/presets';
+import { buildSeoMetadata } from '@/seo';
 
 const ABOUT_IMAGE = IMAGE_PRESETS.aboutIllustration;
 
-export const metadata: Metadata = {
-  title: 'About',
-  description: 'Plan trips, set every point and share your journey live with HackTrip.',
-  alternates: { canonical: absoluteUrl('/about') },
-  openGraph: {
-    title: 'About',
-    description: 'Plan trips, set every point and share your journey live with HackTrip.',
-    url: absoluteUrl('/about'),
-    siteName: 'HackTrip',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'About',
-    description: 'Plan trips, set every point and share your journey live with HackTrip.',
-  },
-};
+export const metadata: Metadata = buildSeoMetadata({
+  title: 'About HackTrip — Create, Plan and Share Trips',
+  description:
+    'Create travel itineraries, plan routes, add GPS locations anywhere in the world, describe restaurants, hidden beaches and other places, then share your journey with HackTrip.',
+  canonicalPath: '/about',
+});
 
 const imageStyle = {
   display: 'block',
@@ -37,34 +27,62 @@ const imageStyle = {
 export default function AboutPage() {
   return (
     <main className="about-page">
-      <div className="about-page__content">
-        <h1>Welcome travelers or future travelers!</h1>
-        <h1>Welcome in Hack Trip!</h1>
-        <h2>
-          Hack Trip is an app where you can share your trips or get valuable tips for your future
-          trips.
-        </h2>
-        <h3>
-          The idea of Hack Trip is to help all travelers. If you want to visit a certain
-          destination, city or area, search for information and see whether other travelers have
-          been there and what they recommend. You can then add your own journey and help other
-          travelers.
-        </h3>
+      <article className="about-page__content">
+        <h1>Discover More. Plan Better. Share Every Journey.</h1>
+        <p>
+          HackTrip is a travel planning and sharing platform where you can create your own trips,
+          organize them day by day, map the places that matter to you and share useful experiences
+          with other travelers.
+        </p>
+
+        <Image
+          src="/og/hacktrip-travel-planner.svg"
+          alt="HackTrip travel planner illustration with a route, map pins and an airplane"
+          width={1200}
+          height={630}
+          priority
+          style={{ ...imageStyle, maxWidth: 760 }}
+        />
+
+        <section aria-labelledby="create-trips">
+          <h2 id="create-trips">Create and organize your trips</h2>
+          <p>
+            Build a trip around your destination, arrange it into days and add as many stops as you
+            need. Keep your itinerary and travel ideas organized in one place.
+          </p>
+        </section>
+
+        <section aria-labelledby="gps-locations">
+          <h2 id="gps-locations">Add any location with GPS coordinates</h2>
+          <p>
+            Save places anywhere in the world, including remote spots that do not have a recognized
+            name on the map. A GPS position is enough to mark the exact place you want to remember
+            or visit.
+          </p>
+        </section>
 
         <Image
           src="https://storage.googleapis.com/hack-trip/hack-trip-markers.png"
-          alt="HackTrip map markers"
+          alt="HackTrip map with travel location markers"
           width={ABOUT_IMAGE.width}
           height={ABOUT_IMAGE.height}
           sizes={ABOUT_IMAGE.sizes}
           style={{ ...imageStyle, maxWidth: 520 }}
         />
-        <h3>Hack Trip is integrated with Google Maps, where you can add point markers.</h3>
+
+        <section aria-labelledby="discover-places">
+          <h2 id="discover-places">Save the places worth discovering</h2>
+          <p>
+            Add restaurants, hotels, attractions, shops, viewpoints, mountain locations, hidden
+            beaches, nature spots and places known mainly by locals. Your map can include popular
+            destinations as well as the small discoveries that make a journey memorable.
+          </p>
+        </section>
 
         <div className="about-page__image-row">
           <Image
             src="https://storage.googleapis.com/hack-trip/hack-trip-points1.0.png"
-            alt="Trip points displayed on a map"
+            alt="Travel points displayed on a HackTrip map"
             width={ABOUT_IMAGE.width}
             height={ABOUT_IMAGE.height}
             sizes={ABOUT_IMAGE.sizes}
@@ -72,7 +90,7 @@ export default function AboutPage() {
           />
           <Image
             src="https://storage.googleapis.com/hack-trip/hack-trip-points1.1.png"
-            alt="More examples of points on a HackTrip map"
+            alt="Different types of locations saved in a HackTrip itinerary"
             width={ABOUT_IMAGE.width}
             height={ABOUT_IMAGE.height}
             sizes={ABOUT_IMAGE.sizes}
@@ -80,16 +98,18 @@ export default function AboutPage() {
           />
         </div>
 
-        <h3>
-          You can mark anything you want: a city, hotel, restaurant, shop, hidden beach or mountain
-          location. You can even turn your points into an eco trail. The level of detail is entirely
-          up to you and what you want to describe.
-        </h3>
+        <section aria-labelledby="describe-experiences">
+          <h2 id="describe-experiences">Describe places with useful details</h2>
+          <p>
+            Add photos, descriptions and personal tips to your points. Share what makes a place
+            special, how to find it and what another traveler should know before visiting.
+          </p>
+        </section>
 
         <div className="about-page__image-row">
           <Image
             src="https://storage.googleapis.com/hack-trip/hack-trip-points2.0.png"
-            alt="A HackTrip route with selected points"
+            alt="A route planned with selected HackTrip locations"
             width={ABOUT_IMAGE.width}
             height={ABOUT_IMAGE.height}
             sizes={ABOUT_IMAGE.sizes}
@@ -97,7 +117,7 @@ export default function AboutPage() {
           />
           <Image
             src="https://storage.googleapis.com/hack-trip/hack-trip-points2.1.png"
-            alt="Trip point details in HackTrip"
+            alt="Descriptions and details for a saved HackTrip location"
             width={ABOUT_IMAGE.width}
             height={ABOUT_IMAGE.height}
             sizes={ABOUT_IMAGE.sizes}
@@ -105,27 +125,38 @@ export default function AboutPage() {
           />
         </div>
 
-        <h3>
-          If you have a trip coming up, you can plan it by setting every point in advance and then
-          following your route. You can edit the points later when you are there, add photos or
-          descriptions, and let others follow your journey live.
-        </h3>
+        <section aria-labelledby="plan-share">
+          <h2 id="plan-share">Plan your route and share your journey</h2>
+          <p>
+            Prepare your stops before you leave, update your trip as you travel, add new discoveries
+            along the way and let others follow your journey live when you choose to share it.
+          </p>
+        </section>
 
         <Image
           src="https://storage.googleapis.com/hack-trip/hack-trip-points3.png"
-          alt="A journey shared live with other HackTrip users"
+          alt="A HackTrip journey shared with other travelers"
           width={ABOUT_IMAGE.width}
           height={ABOUT_IMAGE.height}
           sizes={ABOUT_IMAGE.sizes}
           style={imageStyle}
         />
 
-        <h2>Enjoy the Hack Trip!</h2>
-        <h3>
-          You can contact us at email:{' '}
-          <a href="mailto:www.hack.trip@gmail.com">www.hack.trip@gmail.com</a>
-        </h3>
-      </div>
+        <section aria-labelledby="travel-community">
+          <h2 id="travel-community">Explore trips shared by other travelers</h2>
+          <p>
+            Browse real itineraries for inspiration, discover places you might otherwise miss and
+            use other travelers’ experiences when planning your next adventure. Then share your own
+            discoveries with the HackTrip community.
+          </p>
+        </section>
+
+        <h2>Make every stop part of the story.</h2>
+        <p>
+          Have a question or an idea for HackTrip? Contact us at{' '}
+          <a href="mailto:www.hack.trip@gmail.com">www.hack.trip@gmail.com</a>.
+        </p>
+      </article>
     </main>
   );
 }
