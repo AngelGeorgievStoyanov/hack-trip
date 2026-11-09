@@ -11,39 +11,42 @@ export interface TripJsonLdInput {
 
 /** Creates Trip JSON-LD using only the Trip module's own data contract. */
 export function buildTripJsonLd(input: TripJsonLdInput): Record<string, unknown> {
-  let position = 0;
-  const itinerary = input.itinerary?.flatMap((day) =>
-    day.points.length
-      ? day.points.map((point) => ({
-          '@type': 'ListItem',
-          position: ++position,
-          name: point.name,
-          item: {
-            '@type': 'Place',
-            name: point.name,
-            ...(point.description ? { description: point.description } : {}),
-            ...(point.latitude !== undefined && point.longitude !== undefined
-              ? {
-                  geo: {
-                    '@type': 'GeoCoordinates',
-                    latitude: point.latitude,
-                    longitude: point.longitude,
-                  },
-                }
-              : {}),
-          },
-        }))
-      : [{
-          '@type': 'ListItem',
-          position: ++position,
-          name: day.name,
-          item: {
-            '@type': 'TouristTrip',
-            name: day.name,
-            ...(day.description ? { description: day.description } : {}),
-          },
-        }],
-  );
+  const itinerary = input.itinerary?.map((day, dayIndex) => ({
+    '@type': 'ListItem',
+    position: dayIndex + 1,
+    name: day.name,
+    item: {
+      '@type': 'TouristTrip',
+      name: day.name,
+      ...(day.description ? { description: day.description } : {}),
+      ...(day.points.length
+        ? {
+            itinerary: {
+              '@type': 'ItemList',
+              itemListElement: day.points.map((point, pointIndex) => ({
+                '@type': 'ListItem',
+                position: pointIndex + 1,
+                name: point.name,
+                item: {
+                  '@type': 'Place',
+                  name: point.name,
+                  ...(point.description ? { description: point.description } : {}),
+                  ...(point.latitude !== undefined && point.longitude !== undefined
+                    ? {
+                        geo: {
+                          '@type': 'GeoCoordinates',
+                          latitude: point.latitude,
+                          longitude: point.longitude,
+                        },
+                      }
+                    : {}),
+                },
+              })),
+            },
+          }
+        : {}),
+    },
+  }));
 
   return {
     '@context': 'https://schema.org',
