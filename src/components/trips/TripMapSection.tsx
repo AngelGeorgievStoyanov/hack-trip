@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
 import { Box, Button, MobileStepper, useMediaQuery, useTheme } from '@mui/material';
 import { GoogleMapView, type GoogleMapMarker } from '@/components/maps/GoogleMapView';
 import { toMapPosition, type MapPosition } from '@/lib/maps';
@@ -179,7 +178,7 @@ export function TripMapSection({
         onMarkerSelect={showingPointMarkers ? handleMarkerSelect : undefined}
         renderInfoWindow={
           showingPointMarkers
-            ? (marker) => <Link href={`/points/${marker.id}`}>{marker.title}</Link>
+            ? (marker) => marker.title
             : undefined
         }
       />
