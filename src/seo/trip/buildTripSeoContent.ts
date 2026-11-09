@@ -47,7 +47,7 @@ export function buildTripSeoContent(trip: TripGroupResponse): TripSeoContent {
     : days.map((day) => clean(day.title)).find(Boolean) ?? 'Travel itinerary';
   const highlights = pointNames.slice(0, 3);
   const title = fitText(
-    highlights.length ? `${titleSubject}: ${highlights.join(', ')} | HackTrip` : `${titleSubject} | HackTrip`,
+    highlights.length ? `${titleSubject}: ${highlights.join(', ')}` : titleSubject,
     65,
   );
 
