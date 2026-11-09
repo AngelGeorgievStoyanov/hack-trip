@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import { absoluteUrl } from '@/config';
 import { IMAGE_PRESETS } from '@/constants/images/presets';
 import { buildSeoMetadata } from '@/seo';
 
