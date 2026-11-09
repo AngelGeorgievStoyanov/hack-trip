@@ -4,7 +4,7 @@ import { tripApi, type TripListQuery } from '@/api/trips';
 import { TripFilters } from '@/components/trips/TripFilters';
 import { TripList } from '@/components/trips/TripList';
 import { TripPagination } from '@/components/trips/TripPagination';
-import { absoluteUrl } from '@/config';
+import { buildSeoMetadata } from '@/seo';
 import {
   TRIP_GROUP_MAX_LENGTH,
   TRIP_SEARCH_MAX_LENGTH,
@@ -19,25 +19,11 @@ import {
   pageBackgroundStyle,
 } from '@/constants/ui';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildSeoMetadata({
   title: 'Trips',
   description: 'Browse and discover trips on HackTrip.',
-  alternates: { canonical: absoluteUrl('/trips') },
-  openGraph: {
-    title: 'Trips',
-    description: 'Browse and discover trips on HackTrip.',
-    url: absoluteUrl('/trips'),
-    siteName: 'HackTrip',
-    type: 'website',
-    images: [{ url: absoluteUrl('/opengraph-image') }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Trips',
-    description: 'Browse and discover trips on HackTrip.',
-    images: [absoluteUrl('/twitter-image')],
-  },
-};
+  canonicalPath: '/trips',
+});
 
 interface TripsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
