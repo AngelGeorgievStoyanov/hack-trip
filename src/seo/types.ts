@@ -1,5 +1,3 @@
-import type { Metadata } from 'next';
-
 export interface SeoMetadataInput {
   title: string;
   description?: string;
@@ -10,5 +8,3 @@ export interface SeoMetadataInput {
   openGraphType?: 'website' | 'article';
   noIndex?: boolean;
 }
-
-export type SeoMetadata = Metadata;
