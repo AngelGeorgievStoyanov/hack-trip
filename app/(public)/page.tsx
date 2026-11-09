@@ -10,9 +10,9 @@ import { pageBackgroundStyle } from '@/constants/ui';
 export const revalidate = 300;
 
 export const metadata: Metadata = buildSeoMetadata({
-  title: 'Travel Planner: Plan & Share Trips',
+  title: 'Discover Places, Share Experiences | HackTrip',
   description:
-    'Create travel itineraries, plan routes, save GPS locations anywhere and share places like restaurants, hidden beaches and mountain spots with HackTrip.',
+    'Discover destinations, interesting places and real experiences shared by travelers. Explore photos, find inspiration and share your own discoveries with HackTrip.',
   canonicalPath: '/',
 });
 
@@ -33,7 +33,7 @@ export default async function HomePage() {
 
   return (
     <main style={MAIN_STYLE}>
-      <HomeHero hasTopTrips={false}>
+      <HomeHero>
         <HomeTrips trips={topTrips} />
       </HomeHero>
     </main>
