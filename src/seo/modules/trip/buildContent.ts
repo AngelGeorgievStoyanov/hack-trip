@@ -34,7 +34,7 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
   // The root metadata template appends " | HackTrip" to page titles.
   const title = fitText(
     highlights.length ? `${titleSubject}: ${highlights.join(', ')}` : titleSubject,
-    55,
+    49,
   );
 
   const descriptions = unique(days.map((day) => clean(day.description)));
@@ -47,7 +47,7 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
   const description = fitText(
     descriptionParts.join(' ') ||
       'Explore this travel itinerary, its destinations and points of interest on HackTrip.',
-    300,
+    160,
   );
 
   const itinerary: TripSeoDay[] = days.map((day) => ({
