@@ -1,7 +1,7 @@
 import type { TripSeoContent, TripSeoDay, TripSeoInput } from './types';
 
 function clean(value: string | null | undefined): string | undefined {
-  const normalized = value?.replace(/\\s+/g, ' ').trim();
+  const normalized = value?.replace(/\s+/g, ' ').trim();
   return normalized || undefined;
 }
 
