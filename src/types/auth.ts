@@ -31,6 +31,10 @@ export interface AuthUserDto {
   role: Role;
   status: UserStatus;
   emailVerified: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
+  countOfLogs: number | null;
+  lastTimeLogin: string | null;
 }
 
 export interface AuthSessionDto {
