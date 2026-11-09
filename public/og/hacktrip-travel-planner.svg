@@ -40,10 +40,10 @@
   </g>
 
   <g transform="translate(72 183)">
-    <text fill="#CDB78D" font-family="Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="4.5">MAKE EVERY JOURNEY COUNT</text>
-    <text y="91" fill="#F5EFE4" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="500" letter-spacing="-1.5">Plan with purpose.</text>
-    <text y="166" fill="#F5EFE4" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="500" letter-spacing="-1.5">Travel beyond.</text>
-    <text y="220" fill="#D8D0C1" font-family="Arial, sans-serif" font-size="21">Create itineraries. Pin any place. Find your own way.</text>
+    <text fill="#CDB78D" font-family="Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="4.5">YOUR TRIP. YOUR ROUTE. YOUR STORY.</text>
+    <text y="91" fill="#F5EFE4" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="500" letter-spacing="-1.5">Plan your trip.</text>
+    <text y="166" fill="#F5EFE4" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="500" letter-spacing="-1.5">Discover your world.</text>
+    <text y="220" fill="#D8D0C1" font-family="Arial, sans-serif" font-size="21">Plan each day. Save places anywhere. Share your route.</text>
     <g transform="translate(0 263)">
       <rect width="250" height="55" rx="3" fill="url(#gold)"/>
       <text x="125" y="35" text-anchor="middle" fill="#142820" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="2">DISCOVER HACKTRIP</text>
