@@ -10,7 +10,7 @@ export const contentType = 'image/png';
 export default function OpenGraphImage() {
   return renderTripOgImage({
     title: 'Plan. Explore. Share every stop.',
-    subtitle: 'Create itineraries, save any GPS place and discover more with HackTrip.'
+    subtitle: 'Create itineraries, save any GPS place and discover more with HackTrip.',
     imageUrls: [],
   });
 }
