@@ -4,6 +4,7 @@ export interface TripSeoPointInput {
   description?: string | null;
   lat?: number | null;
   lng?: number | null;
+  images?: readonly { id: number }[];
 }
 
 export interface TripSeoDayInput {
@@ -12,6 +13,7 @@ export interface TripSeoDayInput {
   description?: string | null;
   destination?: string | null;
   points?: readonly TripSeoPointInput[];
+  images?: readonly { id: number }[];
 }
 
 export interface TripSeoInput {
