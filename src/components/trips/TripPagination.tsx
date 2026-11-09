@@ -1,44 +1,73 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
-import { Box, Pagination } from '@mui/material';
+import Link from 'next/link';
 import { buildTripsUrl } from '@/lib/tripUrl';
 import type { TripSort } from '@/constants/trips';
 
 interface TripPaginationProps {
   page: number;
-  totalPages: number;
+  hasNextPage: boolean;
   search?: string;
   group?: string;
   transport?: string;
   sort?: TripSort;
 }
 
-/** Client Component: the legacy list used a MUI `Pagination` control that re-queried the page. */
+/** Crawlable pagination: every destination is a regular anchor with a real href. */
 export function TripPagination({
   page,
-  totalPages,
+  hasNextPage,
   search,
   group,
   transport,
   sort,
 }: TripPaginationProps) {
-  const router = useRouter();
+  const pages = [
+    ...(page > 1 ? [page - 1] : []),
+    page,
+    ...(hasNextPage ? [page + 1] : []),
+  ];
 
-  if (totalPages <= 1) {
-    return null;
-  }
+  if (pages.length <= 1) return null;
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', margin: '20px' }}>
-      <Pagination
-        count={totalPages}
-        page={page}
-        color="primary"
-        onChange={(_event, value) => {
-          router.push(buildTripsUrl({ search, group, transport, sort, page: value }));
-        }}
-      />
-    </Box>
+    <nav aria-label="Trip list pages" style={{ display: 'flex', justifyContent: 'center', margin: 20 }}>
+      <ul style={{ display: 'flex', alignItems: 'center', gap: 12, listStyle: 'none', padding: 0 }}>
+        {page > 1 ? (
+          <li>
+            <Link href={buildTripsUrl({ search, group, transport, sort, page: page - 1 })}>
+              Previous
+            </Link>
+          </li>
+        ) : null}
+        {pages.map((pageNumber) => (
+          <li key={pageNumber}>
+            {pageNumber === page ? (
+              <span aria-current="page" aria-label={'Page ' + pageNumber}>
+                {pageNumber}
+              </span>
+            ) : (
+              <Link
+                href={buildTripsUrl({
+                  search,
+                  group,
+                  transport,
+                  sort,
+                  page: pageNumber,
+                })}
+                aria-label={'Page ' + pageNumber}
+              >
+                {pageNumber}
+              </Link>
+            )}
+          </li>
+        ))}
+        {hasNextPage ? (
+          <li>
+            <Link href={buildTripsUrl({ search, group, transport, sort, page: page + 1 })}>
+              Next
+            </Link>
+          </li>
+        ) : null}
+      </ul>
+    </nav>
   );
 }

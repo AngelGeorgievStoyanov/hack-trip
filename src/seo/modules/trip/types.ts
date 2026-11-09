@@ -21,7 +21,7 @@ export interface TripSeoInput {
 }
 
 export interface TripSeoPoint {
-  name: string;
+  name?: string;
   description?: string;
   latitude?: number;
   longitude?: number;
@@ -38,6 +38,7 @@ export interface TripSeoContent {
   title: string;
   description?: string;
   itinerary: TripSeoDay[];
+  isIndexable: boolean;
 }
 
 export interface TripSeoMetadataOptions {

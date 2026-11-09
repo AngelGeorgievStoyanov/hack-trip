@@ -1,3 +1,4 @@
+export * from './branding';
 export * from './coordinates';
 export * from './defaults';
 export * from './images';

@@ -19,13 +19,6 @@ import {
   pageBackgroundStyle,
 } from '@/constants/ui';
 
-export const metadata: Metadata = buildSeoMetadata({
-  title: 'Explore Travel Trips and Itineraries',
-  description:
-    'Explore travel itineraries shared by travelers, discover interesting destinations and GPS locations, and find inspiration for your next trip.',
-  canonicalPath: '/trips',
-});
-
 interface TripsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
@@ -42,26 +35,20 @@ function first(value: string | string[] | undefined): string | undefined {
 }
 
 function parseOptionalInt(value: string | undefined, max: number): number | undefined {
-  if (value === undefined || value === '') {
-    return undefined;
-  }
+  if (value === undefined || value === '') return undefined;
   const n = Number(value);
   return Number.isInteger(n) && n >= 1 && n <= max ? n : undefined;
 }
 
 function cleanString(value: string | undefined, max: number): string | undefined {
   const trimmed = value?.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-  return trimmed.slice(0, max);
+  return trimmed ? trimmed.slice(0, max) : undefined;
 }
 
 function parseQuery(sp: Record<string, string | string[] | undefined>): TripListQuery {
   const sortRaw = first(sp.sort);
   const sort: TripSort | undefined =
     sortRaw === 'newest' || sortRaw === 'oldest' ? sortRaw : undefined;
-
   return {
     page: parseOptionalInt(first(sp.page), PAGE_MAX),
     limit: parseOptionalInt(first(sp.limit), TRIP_LIMIT_MAX),
@@ -72,12 +59,34 @@ function parseQuery(sp: Record<string, string | string[] | undefined>): TripList
   };
 }
 
+export async function generateMetadata({ searchParams }: TripsPageProps): Promise<Metadata> {
+  const sp = await searchParams;
+  const query = parseQuery(sp);
+  const page = query.page ?? TRIP_PAGE_DEFAULT;
+  const hasFilters = Boolean(
+    query.search || query.group || query.transport || query.limit ||
+    (query.sort && query.sort !== 'newest'),
+  );
+  const hasUnknownParams = Object.keys(sp).some(
+    (key) => !['page', 'search', 'group', 'transport', 'sort', 'limit'].includes(key),
+  );
+  const noIndex = hasFilters || hasUnknownParams;
+  const canonicalPath = page > 1 && !noIndex ? '/trips?page=' + page : '/trips';
+
+  return buildSeoMetadata({
+    title: 'Explore Travel Trips and Itineraries',
+    description:
+      'Explore travel itineraries shared by travelers, discover interesting destinations and GPS locations, and find inspiration for your next trip.',
+    canonicalPath,
+    noIndex,
+  });
+}
+
 export default async function TripsPage({ searchParams }: TripsPageProps) {
   const sp = await searchParams;
   const query = parseQuery(sp);
   const page = query.page ?? TRIP_PAGE_DEFAULT;
   const limit = query.limit ?? TRIP_LIMIT_DEFAULT;
-
   const filters = (
     <TripFilters
       search={query.search}
@@ -89,10 +98,7 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
 
   try {
     const trips = await tripApi.listTrips({ ...query, page, limit });
-    // Contract §17.1: the response is a raw TripGroupResponse[] with no pagination
-    // object, so a full page implies at least one more page.
-    const totalPages = trips.length === limit ? page + 1 : page;
-
+    const hasNextPage = trips.length === limit;
     return (
       <>
         {filters}
@@ -108,7 +114,7 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
           <TripList trips={trips} />
           <TripPagination
             page={page}
-            totalPages={totalPages}
+            hasNextPage={hasNextPage}
             search={query.search}
             group={query.group}
             transport={query.transport}

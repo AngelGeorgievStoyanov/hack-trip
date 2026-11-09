@@ -9,7 +9,7 @@ export interface TripJsonLdInput {
   itinerary?: TripSeoContent['itinerary'];
 }
 
-/** Creates Trip JSON-LD using only the Trip module's own data contract. */
+/** Creates Trip and BreadcrumbList entities using only the Trip module's own data contract. */
 export function buildTripJsonLd(input: TripJsonLdInput): Record<string, unknown> {
   const itinerary = input.itinerary?.map((day, dayIndex) => ({
     '@type': 'ListItem',
@@ -26,10 +26,10 @@ export function buildTripJsonLd(input: TripJsonLdInput): Record<string, unknown>
               itemListElement: day.points.map((point, pointIndex) => ({
                 '@type': 'ListItem',
                 position: pointIndex + 1,
-                name: point.name,
+                ...(point.name ? { name: point.name } : {}),
                 item: {
                   '@type': 'Place',
-                  name: point.name,
+                  ...(point.name ? { name: point.name } : {}),
                   ...(point.description ? { description: point.description } : {}),
                   ...(point.latitude !== undefined && point.longitude !== undefined
                     ? {
@@ -48,15 +48,28 @@ export function buildTripJsonLd(input: TripJsonLdInput): Record<string, unknown>
     },
   }));
 
+  const url = absoluteUrl(input.canonicalPath);
   return {
     '@context': 'https://schema.org',
-    '@type': 'Trip',
-    name: input.name,
-    ...(input.description ? { description: input.description } : {}),
-    url: absoluteUrl(input.canonicalPath),
-    ...(input.imageUrl ? { image: input.imageUrl } : {}),
-    ...(itinerary?.length
-      ? { itinerary: { '@type': 'ItemList', itemListElement: itinerary } }
-      : {}),
+    '@graph': [
+      {
+        '@type': 'Trip',
+        name: input.name,
+        ...(input.description ? { description: input.description } : {}),
+        url,
+        ...(input.imageUrl ? { image: input.imageUrl } : {}),
+        ...(itinerary?.length
+          ? { itinerary: { '@type': 'ItemList', itemListElement: itinerary } }
+          : {}),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/') },
+          { '@type': 'ListItem', position: 2, name: 'Trips', item: absoluteUrl('/trips') },
+          { '@type': 'ListItem', position: 3, name: input.name, item: url },
+        ],
+      },
+    ],
   };
 }

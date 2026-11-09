@@ -12,6 +12,7 @@ export async function GET(request: Request, { params }: TripOgRouteProps) {
   const [{ id }, url] = await Promise.all([params, Promise.resolve(new URL(request.url))]);
   const data = await getTripOgData(id, url.searchParams.get('day'));
   const response = await renderTripOgImage(data);
-  response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate');
+  // The metadata URL contains a content-derived version; changed content gets a new cache key.
+  response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
   return response;
 }

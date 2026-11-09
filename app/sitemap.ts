@@ -2,37 +2,21 @@ import type { MetadataRoute } from 'next';
 import { tripApi } from '@/api/trips';
 import { absoluteUrl } from '@/config';
 import { SITEMAP_MAX_TRIP_PAGES, SITEMAP_TRIPS_PAGE_SIZE } from '@/constants/seo';
+import { buildTripSeoContent } from '@/seo/modules/trip/buildContent';
 
-/**
- * Points are intentionally omitted: there is no public "list points" endpoint, so points
- * cannot be discovered without inventing URLs.
- */
+export const revalidate = 3600;
+
+/** Points have no public standalone URL; their GPS data belongs to their parent trip. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [
-    { url: absoluteUrl('/'), lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
-    {
-      url: absoluteUrl('/trips'),
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
-    {
-      url: absoluteUrl('/about'),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: absoluteUrl('/privacy-policy'),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
+    { url: absoluteUrl('/'), changeFrequency: 'daily', priority: 1 },
+    { url: absoluteUrl('/trips'), changeFrequency: 'daily', priority: 0.8 },
+    { url: absoluteUrl('/about'), changeFrequency: 'monthly', priority: 0.5 },
+    { url: absoluteUrl('/privacy-policy'), changeFrequency: 'yearly', priority: 0.3 },
   ];
 
   try {
     let page = 1;
-
-    // Contract §17.1: `GET /trips` returns a raw array without a pagination object, so
-    // fetch pages until a short page arrives (bounded by the configured page cap).
     while (page <= SITEMAP_MAX_TRIP_PAGES) {
       const trips = await tripApi.listTrips({
         page,
@@ -40,30 +24,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         sort: 'newest',
       });
       for (const trip of trips) {
-        const lastModified = trip.days.reduce<string | null>((latest, day) => {
-          const timestamps = [
-            day.createdAt,
-            day.updatedAt,
-            ...day.points.flatMap((point) => [point.createdAt, point.updatedAt]),
-          ];
-          return timestamps.reduce<string | null>((current, value) => {
-            return value && (!current || value > current) ? value : current;
-          }, latest);
-        }, null);
+        if (!buildTripSeoContent(trip).isIndexable) continue;
+        const timestamps = trip.days.flatMap((day) => [
+          day.createdAt,
+          day.updatedAt,
+          ...day.points.flatMap((point) => [point.createdAt, point.updatedAt]),
+        ]).filter((value): value is string => Boolean(value)).sort();
+        const latest = timestamps.length ? timestamps[timestamps.length - 1] : undefined;
         entries.push({
-          url: absoluteUrl(`/trips/${trip.id}`),
-          lastModified: lastModified ? new Date(lastModified) : new Date(),
+          url: absoluteUrl('/trips/' + trip.id),
+          ...(latest ? { lastModified: new Date(latest) } : {}),
           changeFrequency: 'weekly',
           priority: 0.7,
         });
       }
-      if (trips.length < SITEMAP_TRIPS_PAGE_SIZE) {
-        break;
-      }
+      if (trips.length < SITEMAP_TRIPS_PAGE_SIZE) return entries;
       page += 1;
     }
-  } catch {
-    // Backend unreachable: still serve the static routes above.
+    console.error('[SEO] Sitemap reached its configured trip-page cap; some trips may be omitted.');
+  } catch (error) {
+    console.error('[SEO] Could not load all public trips for sitemap generation:', error);
   }
 
   return entries;

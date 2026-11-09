@@ -1,9 +1,6 @@
 import type { TripSeoContent } from './types';
 
-/**
- * Expandable, server-rendered itinerary index. Real place names remain in the
- * HTML without requiring client state or JavaScript interaction.
- */
+/** Expandable, server-rendered itinerary index with no fabricated place labels. */
 export function TripItineraryIndex({ itinerary }: Pick<TripSeoContent, 'itinerary'>) {
   if (itinerary.length === 0) return null;
 
@@ -19,14 +16,11 @@ export function TripItineraryIndex({ itinerary }: Pick<TripSeoContent, 'itinerar
               {day.points.length > 0 ? (
                 <ul>
                   {day.points.map((point, index) => (
-                    <li key={`${day.dayNumber}-${index}-${point.name}`}>
-                      <strong>{point.name}</strong>
+                    <li key={day.dayNumber + '-' + index + '-' + (point.name ?? 'gps-point')}>
+                      {point.name ? <strong>{point.name}</strong> : null}
                       {point.description ? <p>{point.description}</p> : null}
-                      {point.latitude !== undefined && point.longitude !== undefined &&
-                      point.name === 'Unnamed location' ? (
-                        <p>
-                          Coordinates: {point.latitude}, {point.longitude}
-                        </p>
+                      {!point.name && point.latitude !== undefined && point.longitude !== undefined ? (
+                        <p>Coordinates: {point.latitude}, {point.longitude}</p>
                       ) : null}
                     </li>
                   ))}

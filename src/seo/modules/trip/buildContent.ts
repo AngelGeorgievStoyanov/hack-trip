@@ -25,13 +25,10 @@ function fitText(value: string, maxLength: number): string {
   const shortened = value.slice(0, maxLength - 1);
   const lastSpace = shortened.lastIndexOf(' ');
   const endIndex = lastSpace > SEO_TEXT_TRUNCATION_MIN_WORD_BOUNDARY ? lastSpace : maxLength - 1;
-  return `${shortened.slice(0, endIndex).trimEnd()}…`;
+  return shortened.slice(0, endIndex).trimEnd() + '…';
 }
 
-/**
- * Converts the small, stable Trip SEO input contract into metadata copy and
- * an itinerary. No API calls, geocoding, AI processing, or app-wide types.
- */
+/** Converts trip data to SEO content without network calls, geocoding or AI dependencies. */
 export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
   const days = [...trip.days].sort((a, b) => a.dayNumber - b.dayNumber);
   const destinations = unique(days.map((day) => clean(day.destination)));
@@ -40,21 +37,20 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
   );
   const primaryDestination = destinations[0];
   const titleSubject = primaryDestination
-    ? `Trip to ${primaryDestination}`
+    ? 'Trip to ' + primaryDestination
     : days.map((day) => clean(day.title)).find(Boolean) ?? 'Travel itinerary';
   const highlights = pointNames.slice(0, SEO_TITLE_HIGHLIGHTS_MAX_COUNT);
-  // The root metadata template appends " | HackTrip" to page titles.
   const title = fitText(
-    highlights.length ? `${titleSubject}: ${highlights.join(', ')}` : titleSubject,
+    highlights.length ? titleSubject + ': ' + highlights.join(', ') : titleSubject,
     SEO_TITLE_MAX_LENGTH,
   );
 
   const descriptions = unique(days.map((day) => clean(day.description)));
   const pointSummary = pointNames.slice(0, SEO_DESCRIPTION_POINTS_MAX_COUNT).join(', ');
   const descriptionParts = [
-    destinations.length ? `Explore ${destinations.join(', ')}.` : undefined,
+    destinations.length ? 'Explore ' + destinations.join(', ') + '.' : undefined,
     descriptions[0],
-    pointSummary ? `Places along the way: ${pointSummary}.` : undefined,
+    pointSummary ? 'Places along the way: ' + pointSummary + '.' : undefined,
   ].filter((part): part is string => Boolean(part));
   const description = fitText(
     descriptionParts.join(' ') ||
@@ -64,9 +60,8 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
 
   const itinerary: TripSeoDay[] = days.map((day) => ({
     dayNumber: day.dayNumber,
-    name: clean(day.title) ?? clean(day.destination) ?? `Day ${day.dayNumber}`,
+    name: clean(day.title) ?? clean(day.destination) ?? 'Day ' + day.dayNumber,
     ...(clean(day.description) ? { description: clean(day.description) } : {}),
-    // Coordinate-only points remain visible without inventing a geographic place name.
     points: (day.points ?? []).flatMap((point) => {
       const name = clean(point.name);
       const hasCoordinates =
@@ -78,12 +73,10 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
         Number.isFinite(point.lng) &&
         point.lng >= SEO_LONGITUDE_MIN &&
         point.lng <= SEO_LONGITUDE_MAX;
-
-      // Keep coordinate-only places in the itinerary without inventing a real place name.
-      if (!name && !hasCoordinates) return [];
+      if (!name && !hasCoordinates && !clean(point.description)) return [];
 
       return [{
-        name: name ?? 'Unnamed location',
+        ...(name ? { name } : {}),
         ...(clean(point.description) ? { description: clean(point.description) } : {}),
         ...(hasCoordinates
           ? { latitude: point.lat as number, longitude: point.lng as number }
@@ -92,5 +85,10 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
     }),
   }));
 
-  return { title, description, itinerary };
+  const hasEditorialContent =
+    destinations.length > 0 ||
+    descriptions.length > 0 ||
+    days.some((day) => Boolean(clean(day.title))) ||
+    itinerary.some((day) => day.points.some((point) => Boolean(point.name || point.description)));
+  return { title, description, itinerary, isIndexable: hasEditorialContent };
 }

@@ -8,12 +8,6 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         disallow: [
-          '/login',
-          '/register',
-          '/verify-email',
-          '/resend-verification',
-          '/forgot-password',
-          '/reset-password',
           '/profile',
           '/my-trips',
           '/favorites',
@@ -24,7 +18,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: `${config.siteUrl}/sitemap.xml`,
+    sitemap: config.siteUrl + '/sitemap.xml',
     host: config.siteUrl,
   };
 }

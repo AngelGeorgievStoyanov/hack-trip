@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { config } from '@/config';
 import { Providers } from './providers';
+import { SiteStructuredData } from '@/seo/SiteStructuredData';
 
 export const metadata: Metadata = {
   metadataBase: new URL(config.siteUrl),
@@ -32,13 +33,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
-        {/*
-          Sticky-footer app shell: a flex column with a viewport minimum height. The route
-          group layouts render `Header`, page content and `Footer` as its children, and the
-          content area uses `flex: 1` so short pages keep the footer at the bottom of the
-          viewport while long pages scroll normally.
-        */}
         <div className="app-shell">
+          <SiteStructuredData />
           <Providers>{children}</Providers>
         </div>
       </body>
