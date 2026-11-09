@@ -18,11 +18,7 @@ const HEADING_STYLE: CSSProperties = {
   ...headingTextStyle,
 };
 
-/**
- * Client Component: the legacy home page attached a touch handler to the whole page so a
- * touch anywhere re-triggered the heading scramble, and the scramble heading below 550px
- * was split into two lines.
- */
+/** Homepage introduction with one semantic H1 and a concise product proposition. */
 export function HomeHero({ hasTopTrips, children }: HomeHeroProps) {
   const headingRef = useRef<ScrambleHeadingHandle | null>(null);
   const singleLineHeading = useMediaQuery(minWidthQuery(BREAKPOINTS.homeHeading));
@@ -40,21 +36,21 @@ export function HomeHero({ hasTopTrips, children }: HomeHeroProps) {
           padding: '0 25px',
         }}
       >
-        <h1 style={{ ...HEADING_STYLE }}>Welcome travelers or future travelers!</h1>
-        {singleLineHeading ? (
-          <ScrambleHeading ref={headingRef} text="Welcome in Hack Trip!" />
-        ) : (
-          <>
-            <h1 style={{ ...HEADING_STYLE }}>Welcome in</h1>
-            <ScrambleHeading ref={headingRef} text="Hack Trip!" />
-          </>
-        )}
-        <h2 style={{ ...HEADING_STYLE }}>
-          Hack Trip is an app where you can share your trips or get valuable tips for your future
-          trips.
+        <ScrambleHeading
+          ref={headingRef}
+          text={singleLineHeading ? 'Plan, Create and Share Your Trips' : 'Plan and Share Your Trips'}
+          style={HEADING_STYLE}
+        />
+        <h2 style={HEADING_STYLE}>
+          Your travel planner for routes, places and experiences around the world.
         </h2>
+        <p style={{ ...HEADING_STYLE, maxWidth: 850, lineHeight: 1.6 }}>
+          Create day-by-day itineraries, add any GPS location — from restaurants and landmarks to
+          hidden beaches and remote mountain spots — then add photos, descriptions and tips to
+          share with other travelers.
+        </p>
         {hasTopTrips ? (
-          <h3 style={{ ...HEADING_STYLE }}>These are our TOP 5 most liked in Hack Trips!</h3>
+          <h3 style={HEADING_STYLE}>Discover popular trips shared by travelers</h3>
         ) : null}
       </Box>
       {children}
