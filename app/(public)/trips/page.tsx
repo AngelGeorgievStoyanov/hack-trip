@@ -97,7 +97,7 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
       <>
         {filters}
         <main style={MAIN_STYLE}>
-          <header className="trips-page__intro">
+          <header style={{ maxWidth: 900, padding: '24px 20px', textAlign: 'center' }}>
             <h1>Explore Trips, Places and Travel Ideas</h1>
             <p>
               Browse itineraries shared by travelers, discover destinations and interesting
