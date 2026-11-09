@@ -1,0 +1,2 @@
+export const SITEMAP_TRIPS_PAGE_SIZE = 100;
+export const SITEMAP_MAX_TRIP_PAGES = 100;
