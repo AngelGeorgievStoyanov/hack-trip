@@ -8,19 +8,19 @@ import type { SeoMetadataInput } from '@/seo/types';
  */
 export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const title = input.title.trim() || SEO_CONFIG.defaultTitle;
-  const description = input.description?.trim() || SEO_CONFIG.defaultDescription;
+  const description = input.description?.trim();
   const imageUrl = input.imageUrl ?? seoUrl(SEO_CONFIG.defaultImagePath);
   const canonicalUrl = seoUrl(input.canonicalPath);
   const openGraphUrl = seoUrl(input.openGraphPath ?? input.canonicalPath);
 
   return {
     title,
-    description,
+    ...(description ? { description } : {}),
     alternates: { canonical: canonicalUrl },
     robots: input.noIndex ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
       title,
-      description,
+      ...(description ? { description } : {}),
       url: openGraphUrl,
       siteName: SEO_CONFIG.siteName,
       type: input.openGraphType ?? 'website',
@@ -29,7 +29,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
     twitter: {
       card: 'summary_large_image',
       title,
-      description,
+      ...(description ? { description } : {}),
       images: [imageUrl],
     },
   };
