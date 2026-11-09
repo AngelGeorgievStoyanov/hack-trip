@@ -18,8 +18,12 @@ export function buildTripSeoMetadata(
     ...(selectedDay?.points ?? []).flatMap((point) => point.images ?? []),
   ]
     .map((image) => image.id);
-  // A changed image set produces a fresh OG URL, avoiding stale social previews.
-  const imageVersion = imageIds.join('-') || 'no-images';
+  // A changed or reordered image set produces a fresh, compact OG URL.
+  const imageHash = imageIds.reduce(
+    (hash, id) => Math.imul(hash ^ id, 16777619) >>> 0,
+    2166136261,
+  );
+  const imageVersion = imageIds.length ? `${imageIds.length}-${imageHash.toString(36)}` : 'no-images';
   const imagePath = `/api/og/trips/${options.tripId}?day=${dayNumber}&v=${imageVersion}`;
 
   return buildSeoMetadata({
