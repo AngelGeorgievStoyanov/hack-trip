@@ -57,12 +57,20 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
     // Unnamed points are omitted instead of inventing "Point of interest".
     points: (day.points ?? []).flatMap((point) => {
       const name = clean(point.name);
-      if (!name) return [];
+      const hasCoordinates =
+        typeof point.lat === 'number' &&
+        Number.isFinite(point.lat) &&
+        typeof point.lng === 'number' &&
+        Number.isFinite(point.lng);
+
+      // Keep coordinate-only places in the itinerary without inventing a real place name.
+      if (!name && !hasCoordinates) return [];
+
       return [{
-        name,
+        name: name ?? 'Unnamed location',
         ...(clean(point.description) ? { description: clean(point.description) } : {}),
-        ...(typeof point.lat === 'number' && typeof point.lng === 'number'
-          ? { latitude: point.lat, longitude: point.lng }
+        ...(hasCoordinates
+          ? { latitude: point.lat as number, longitude: point.lng as number }
           : {}),
       }];
     }),
