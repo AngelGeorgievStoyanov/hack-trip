@@ -1,17 +1,16 @@
 import { getTrip } from '@/lib/serverApi';
-import { tripDayRepresentativeImage } from '@/lib/images/representative';
 import { positiveIdParam } from '@/validations';
 
 export interface TripOgData {
   title: string;
   subtitle: string;
-  imageUrl: string | null;
+  imageUrls: string[];
 }
 
 const FALLBACK_DATA: TripOgData = {
   title: 'Discover your next adventure',
   subtitle: 'Plan and share your trips with HackTrip',
-  imageUrl: null,
+  imageUrls: [],
 };
 
 /** Loads the selected public Trip Group day for its generated social preview. */
@@ -41,7 +40,11 @@ export async function getTripOgData(
     return {
       title: title.slice(0, 90),
       subtitle: subtitle.slice(0, 120),
-      imageUrl: tripDayRepresentativeImage(day),
+      // Try day photos first, then point photos if an earlier file is unavailable.
+      imageUrls: [
+        ...day.images.map((image) => image.url),
+        ...day.points.flatMap((point) => point.images.map((image) => image.url)),
+      ],
     };
   } catch {
     // Keep social sharing usable even if the trip API is temporarily unavailable.
