@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/common/JsonLd';
 import { TripDetailsView } from '@/components/trips/TripDetailsView';
-import { buildSeoMetadata, buildTripJsonLd, seoUrl } from '@/seo';
+import { buildSeoMetadata, buildTripJsonLd, buildTripSeoContent, seoUrl } from '@/seo';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
 import { pageBackgroundStyle } from '@/constants/ui';
@@ -50,11 +50,12 @@ export async function generateMetadata({
   try {
     const trip = await getTrip(tripId);
     const day = resolveDay(trip.days, query.day);
+    const seoContent = buildTripSeoContent(trip);
     const imageUrl = seoUrl(
       `/api/og/trips/${trip.id}?day=${day?.dayNumber ?? trip.days[0]?.dayNumber ?? 1}`,
     );
-    const title = day?.title ?? day?.destination ?? 'Trip';
-    const description = day?.description ?? undefined;
+    const title = seoContent.title;
+    const description = seoContent.description;
     return buildSeoMetadata({
       title,
       description,
@@ -96,6 +97,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
   }
 
   const canonicalPath = `/trips/${trip.id}`;
+  const seoContent = buildTripSeoContent(trip);
   const image = tripRepresentativeImage(trip);
 
   return (
@@ -105,10 +107,11 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
 
       <JsonLd
         data={buildTripJsonLd({
-          name: day.title ?? day.destination ?? 'Trip',
-          description: day.description,
+          name: seoContent.title,
+          description: seoContent.description,
           canonicalPath,
           imageUrl: image ?? undefined,
+          itinerary: seoContent.itinerary,
         })}
       />
     </main>
