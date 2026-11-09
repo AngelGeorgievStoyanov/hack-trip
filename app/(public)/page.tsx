@@ -2,26 +2,14 @@ import type { Metadata } from 'next';
 import type { CSSProperties } from 'react';
 import { HomeHero } from '@/components/home';
 import { HomeTrips } from '@/components/home/HomeTrips';
-import { absoluteUrl } from '@/config';
+import { buildSeoMetadata } from '@/seo';
 import { pageBackgroundStyle } from '@/constants/ui';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildSeoMetadata({
   title: 'HackTrip — plan and share your trips',
   description: 'Discover, plan and share trips with HackTrip.',
-  alternates: { canonical: absoluteUrl('/') },
-  openGraph: {
-    title: 'HackTrip',
-    description: 'Discover, plan and share trips with HackTrip.',
-    url: absoluteUrl('/'),
-    siteName: 'HackTrip',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'HackTrip',
-    description: 'Discover, plan and share trips with HackTrip.',
-  },
-};
+  canonicalPath: '/',
+});
 
 const MAIN_STYLE: CSSProperties = {
   ...pageBackgroundStyle,

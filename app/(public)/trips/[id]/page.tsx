@@ -3,7 +3,8 @@ import type { CSSProperties } from 'react';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/common/JsonLd';
 import { TripDetailsView } from '@/components/trips/TripDetailsView';
-import { absoluteUrl } from '@/config';
+import { TripItineraryIndex } from '@/components/seo/TripItineraryIndex';
+import { buildSeoMetadata, buildTripJsonLd, buildTripSeoContent, seoUrl } from '@/seo';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
 import { pageBackgroundStyle } from '@/constants/ui';
@@ -50,41 +51,20 @@ export async function generateMetadata({
   try {
     const trip = await getTrip(tripId);
     const day = resolveDay(trip.days, query.day);
-    const canonicalUrl = absoluteUrl(`/trips/${trip.id}`);
-    const sharedUrl = absoluteUrl(
-      `/trips/${trip.id}${day ? `?day=${day.dayNumber}` : ''}`,
-    );
-    const imageUrl = absoluteUrl(
+    const seoContent = buildTripSeoContent(trip);
+    const imageUrl = seoUrl(
       `/api/og/trips/${trip.id}?day=${day?.dayNumber ?? trip.days[0]?.dayNumber ?? 1}`,
     );
-    const title = day?.title ?? day?.destination ?? 'Trip';
-    const description = day?.description ?? undefined;
-    const image = {
-      url: imageUrl,
-      width: 1200,
-      height: 630,
-      alt: `${title} — HackTrip`,
-    };
-
-    return {
+    const title = seoContent.title;
+    const description = seoContent.description;
+    return buildSeoMetadata({
       title,
       description,
-      alternates: { canonical: canonicalUrl },
-      openGraph: {
-        title,
-        description,
-        url: sharedUrl,
-        siteName: 'HackTrip',
-        type: 'website',
-        images: [image],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title,
-        description,
-        images: [imageUrl],
-      },
-    };
+      canonicalPath: `/trips/${trip.id}`,
+      openGraphPath: `/trips/${trip.id}${day ? `?day=${day.dayNumber}` : ''}`,
+      imageUrl,
+      imageAlt: `${title} — HackTrip`,
+    });
   } catch (error) {
     if (isNotFoundError(error)) {
       return { title: 'Trip not found' };
@@ -117,23 +97,24 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
     notFound();
   }
 
-  const url = absoluteUrl(`/trips/${trip.id}`);
+  const canonicalPath = `/trips/${trip.id}`;
+  const seoContent = buildTripSeoContent(trip);
   const image = tripRepresentativeImage(trip);
 
   return (
     <main style={MAIN_STYLE}>
       {/* Single GET /trips/:tripGroupId; day switching uses the already-loaded group. */}
       <TripDetailsView trip={trip} initialDayNumber={day.dayNumber} />
+      <TripItineraryIndex itinerary={seoContent.itinerary} />
 
       <JsonLd
-        data={{
-          '@context': 'https://schema.org',
-          '@type': 'Trip',
-          name: day.title ?? 'Trip',
-          description: day.description ?? undefined,
-          url,
-          image: image ?? undefined,
-        }}
+        data={buildTripJsonLd({
+          name: seoContent.title,
+          description: seoContent.description,
+          canonicalPath,
+          imageUrl: image ?? undefined,
+          itinerary: seoContent.itinerary,
+        })}
       />
     </main>
   );
