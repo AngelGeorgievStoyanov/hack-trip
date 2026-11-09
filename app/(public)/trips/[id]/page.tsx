@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/common/JsonLd';
 import { TripDetailsView } from '@/components/trips/TripDetailsView';
-import { buildSeoMetadata, buildTripJsonLd } from '@/seo';
+import { buildSeoMetadata, buildTripJsonLd, seoUrl } from '@/seo';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
 import { pageBackgroundStyle } from '@/constants/ui';
@@ -50,7 +50,7 @@ export async function generateMetadata({
   try {
     const trip = await getTrip(tripId);
     const day = resolveDay(trip.days, query.day);
-    const imageUrl = absoluteUrl(
+    const imageUrl = seoUrl(
       `/api/og/trips/${trip.id}?day=${day?.dayNumber ?? trip.days[0]?.dayNumber ?? 1}`,
     );
     const title = day?.title ?? day?.destination ?? 'Trip';
