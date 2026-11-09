@@ -25,7 +25,14 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
       url: openGraphUrl,
       siteName: SEO_CONFIG.siteName,
       type: input.openGraphType ?? 'website',
-      images: [{ url: imageUrl, width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT, alt: input.imageAlt ?? title }],
+      images: [
+        {
+          url: imageUrl,
+          width: OG_IMAGE_WIDTH,
+          height: OG_IMAGE_HEIGHT,
+          alt: input.imageAlt ?? title,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
