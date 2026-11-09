@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { tripApi } from '@/api/trips';
 import { absoluteUrl } from '@/config';
+import { SITEMAP_MAX_TRIP_PAGES, SITEMAP_TRIPS_PAGE_SIZE } from '@/constants/seo';
 
 /**
  * Points are intentionally omitted: there is no public "list points" endpoint, so points
@@ -28,13 +29,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const limit = 100;
     let page = 1;
 
     // Contract §17.1: `GET /trips` returns a raw array without a pagination object, so
-    // fetch pages until a short page arrives (bounded by a 100-page safety cap).
-    while (page <= 100) {
-      const trips = await tripApi.listTrips({ page, limit, sort: 'newest' });
+    // fetch pages until a short page arrives (bounded by the configured page cap).
+    while (page <= SITEMAP_MAX_TRIP_PAGES) {
+      const trips = await tripApi.listTrips({ page, limit: SITEMAP_TRIPS_PAGE_SIZE, sort: 'newest' });
       for (const trip of trips) {
         const lastModified = trip.days.reduce<string | null>((latest, day) => {
           const timestamps = [
@@ -53,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           priority: 0.7,
         });
       }
-      if (trips.length < limit) {
+      if (trips.length < SITEMAP_TRIPS_PAGE_SIZE) {
         break;
       }
       page += 1;
