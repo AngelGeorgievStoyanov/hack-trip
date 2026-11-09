@@ -1,5 +1,5 @@
 /** Minimal trip data required by the Trip SEO module. */
-export interface TripSeoPointInput {
+interface TripSeoPointInput {
   name?: string | null;
   description?: string | null;
   lat?: number | null;
@@ -7,7 +7,7 @@ export interface TripSeoPointInput {
   images?: readonly { id: number }[];
 }
 
-export interface TripSeoDayInput {
+interface TripSeoDayInput {
   dayNumber: number;
   title?: string | null;
   description?: string | null;
@@ -20,7 +20,7 @@ export interface TripSeoInput {
   days: readonly TripSeoDayInput[];
 }
 
-export interface TripSeoPoint {
+interface TripSeoPoint {
   name?: string;
   description?: string;
   latitude?: number;
