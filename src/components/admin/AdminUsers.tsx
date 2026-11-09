@@ -63,7 +63,7 @@ export function AdminUsers() {
       {data ? (
         <>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: 2 }}>
-            {data.items.map((u) => {
+            {data.items.filter((u) => isAdmin || u.role !== 'admin').map((u) => {
               const canEdit = isAdmin || (isManager && u.role !== 'admin');
               return (
                 <Card
@@ -121,7 +121,7 @@ export function AdminUsers() {
               );
             })}
           </Box>
-          {data.items.length === 0 ? <Typography>WELCOME!</Typography> : null}
+          {data.items.filter((u) => isAdmin || u.role !== 'admin').length === 0 ? <Typography>WELCOME!</Typography> : null}
         </>
       ) : null}
       {pagination && (pagination.totalPages ?? 0) > 1 ? (
