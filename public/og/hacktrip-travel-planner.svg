@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">HackTrip — Plan. Explore. Share.</title>
+  <desc id="desc">A travel advertisement showing a route across a map, GPS pins, a mountain, beach and airplane.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#102820"/>
+      <stop offset=".58" stop-color="#24533f"/>
+      <stop offset="1" stop-color="#b88b50"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".04"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#07150f" flood-opacity=".28"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1030" cy="70" r="250" fill="#e8b86e" opacity=".12"/>
+  <circle cx="1080" cy="560" r="280" fill="#d9e8d9" opacity=".08"/>
+  <path d="M0 470 C180 390 270 490 430 430 S720 360 870 450 S1070 500 1200 390 V630 H0Z" fill="#0d241c" opacity=".32"/>
+  <g opacity=".2" stroke="#d9e8d9" fill="none">
+    <path d="M0 110H1200M0 190H1200M0 270H1200M0 350H1200M0 430H1200M0 510H1200"/>
+    <path d="M120 0V630M240 0V630M360 0V630M480 0V630M600 0V630M720 0V630M840 0V630M960 0V630M1080 0V630"/>
+  </g>
+  <g transform="translate(72 58)">
+    <rect width="58" height="52" rx="14" fill="#e8b86e"/>
+    <path d="M16 35V16h8l5 8 5-8h8v19h-7V26l-6 8-6-8v9z" fill="#102820"/>
+    <text x="76" y="36" fill="#fff" font-family="Arial,sans-serif" font-size="30" font-weight="800" letter-spacing="5">HACKTRIP</text>
+  </g>
+  <g transform="translate(72 174)">
+    <text fill="#f0c27f" font-family="Arial,sans-serif" font-size="20" font-weight="700" letter-spacing="4">YOUR JOURNEY, YOUR MAP</text>
+    <text y="88" fill="#fff" font-family="Arial,sans-serif" font-size="66" font-weight="800">Plan. Explore.</text>
+    <text y="164" fill="#fff" font-family="Arial,sans-serif" font-size="66" font-weight="800">Share every stop.</text>
+    <text y="218" fill="#e7eee8" font-family="Arial,sans-serif" font-size="25">Create itineraries. Save any GPS place. Discover more.</text>
+    <g transform="translate(0 258)">
+      <rect width="282" height="58" rx="29" fill="#e8b86e"/>
+      <text x="141" y="37" text-anchor="middle" fill="#102820" font-family="Arial,sans-serif" font-size="19" font-weight="800" letter-spacing="1.4">START YOUR NEXT TRIP</text>
+    </g>
+  </g>
+  <g transform="translate(690 104)" filter="url(#shadow)">
+    <rect width="430" height="420" rx="34" fill="url(#card)" stroke="#ffffff" stroke-opacity=".32"/>
+    <path d="M44 282 C92 222 132 242 178 176 S265 104 302 154 S348 232 384 92" fill="none" stroke="#f0c27f" stroke-width="8" stroke-linecap="round" stroke-dasharray="2 18"/>
+    <path d="M44 282 C92 222 132 242 178 176 S265 104 302 154 S348 232 384 92" fill="none" stroke="#fff" stroke-opacity=".42" stroke-width="2" stroke-dasharray="8 14"/>
+    <g transform="translate(24 252)">
+      <path d="M20 0C9 0 0 9 0 20c0 16 20 38 20 38s20-22 20-38C40 9 31 0 20 0Z" fill="#e8b86e"/>
+      <circle cx="20" cy="20" r="7" fill="#17372a"/>
+    </g>
+    <g transform="translate(158 145)">
+      <path d="M20 0C9 0 0 9 0 20c0 16 20 38 20 38s20-22 20-38C40 9 31 0 20 0Z" fill="#fff"/>
+      <circle cx="20" cy="20" r="7" fill="#315c48"/>
+    </g>
+    <g transform="translate(282 124)">
+      <path d="M20 0C9 0 0 9 0 20c0 16 20 38 20 38s20-22 20-38C40 9 31 0 20 0Z" fill="#e8b86e"/>
+      <circle cx="20" cy="20" r="7" fill="#17372a"/>
+    </g>
+    <g transform="translate(330 48) rotate(18)">
+      <path d="M0 18 68 0 48 30 35 26 22 50 18 31Z" fill="#fff"/>
+    </g>
+    <g transform="translate(56 338)">
+      <path d="M0 44 48 0 84 44Z" fill="#dce8df" opacity=".9"/>
+      <path d="M30 44 75 9 111 44Z" fill="#9db8a5"/>
+      <path d="M48 0 59 14 49 12 42 19Z" fill="#fff"/>
+      <path d="M132 44Q154 16 176 44Z" fill="#e8b86e"/>
+      <path d="M132 44Q154 27 176 44" fill="none" stroke="#fff" stroke-width="3"/>
+    </g>
+    <text x="215" y="394" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="17" font-weight="700" letter-spacing="2">PLAN • EXPLORE • SHARE</text>
+  </g>
+</svg>
