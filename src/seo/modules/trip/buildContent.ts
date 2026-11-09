@@ -24,7 +24,8 @@ function fitText(value: string, maxLength: number): string {
   if (value.length <= maxLength) return value;
   const shortened = value.slice(0, maxLength - 1);
   const lastSpace = shortened.lastIndexOf(' ');
-  return `${shortened.slice(0, lastSpace > SEO_TEXT_TRUNCATION_MIN_WORD_BOUNDARY ? lastSpace : maxLength - 1).trimEnd()}…`;
+  const endIndex = lastSpace > SEO_TEXT_TRUNCATION_MIN_WORD_BOUNDARY ? lastSpace : maxLength - 1;
+  return `${shortened.slice(0, endIndex).trimEnd()}…`;
 }
 
 /**
