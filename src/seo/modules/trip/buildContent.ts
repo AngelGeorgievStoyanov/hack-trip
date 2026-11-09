@@ -1,3 +1,14 @@
+import {
+  SEO_DESCRIPTION_MAX_LENGTH,
+  SEO_DESCRIPTION_POINTS_MAX_COUNT,
+  SEO_LATITUDE_MAX,
+  SEO_LATITUDE_MIN,
+  SEO_LONGITUDE_MAX,
+  SEO_LONGITUDE_MIN,
+  SEO_TEXT_TRUNCATION_MIN_WORD_BOUNDARY,
+  SEO_TITLE_HIGHLIGHTS_MAX_COUNT,
+  SEO_TITLE_MAX_LENGTH,
+} from '@/constants/seo';
 import type { TripSeoContent, TripSeoDay, TripSeoInput } from './types';
 
 function clean(value: string | null | undefined): string | undefined {
@@ -13,7 +24,7 @@ function fitText(value: string, maxLength: number): string {
   if (value.length <= maxLength) return value;
   const shortened = value.slice(0, maxLength - 1);
   const lastSpace = shortened.lastIndexOf(' ');
-  return `${shortened.slice(0, lastSpace > 35 ? lastSpace : maxLength - 1).trimEnd()}…`;
+  return `${shortened.slice(0, lastSpace > SEO_TEXT_TRUNCATION_MIN_WORD_BOUNDARY ? lastSpace : maxLength - 1).trimEnd()}…`;
 }
 
 /**
@@ -30,15 +41,15 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
   const titleSubject = primaryDestination
     ? `Trip to ${primaryDestination}`
     : days.map((day) => clean(day.title)).find(Boolean) ?? 'Travel itinerary';
-  const highlights = pointNames.slice(0, 3);
+  const highlights = pointNames.slice(0, SEO_TITLE_HIGHLIGHTS_MAX_COUNT);
   // The root metadata template appends " | HackTrip" to page titles.
   const title = fitText(
     highlights.length ? `${titleSubject}: ${highlights.join(', ')}` : titleSubject,
-    49,
+    SEO_TITLE_MAX_LENGTH,
   );
 
   const descriptions = unique(days.map((day) => clean(day.description)));
-  const pointSummary = pointNames.slice(0, 5).join(', ');
+  const pointSummary = pointNames.slice(0, SEO_DESCRIPTION_POINTS_MAX_COUNT).join(', ');
   const descriptionParts = [
     destinations.length ? `Explore ${destinations.join(', ')}.` : undefined,
     descriptions[0],
@@ -47,7 +58,7 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
   const description = fitText(
     descriptionParts.join(' ') ||
       'Explore this travel itinerary, its destinations and points of interest on HackTrip.',
-    160,
+    SEO_DESCRIPTION_MAX_LENGTH,
   );
 
   const itinerary: TripSeoDay[] = days.map((day) => ({
@@ -60,12 +71,12 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
       const hasCoordinates =
         typeof point.lat === 'number' &&
         Number.isFinite(point.lat) &&
-        point.lat >= -90 &&
-        point.lat <= 90 &&
+        point.lat >= SEO_LATITUDE_MIN &&
+        point.lat <= SEO_LATITUDE_MAX &&
         typeof point.lng === 'number' &&
         Number.isFinite(point.lng) &&
-        point.lng >= -180 &&
-        point.lng <= 180;
+        point.lng >= SEO_LONGITUDE_MIN &&
+        point.lng <= SEO_LONGITUDE_MAX;
 
       // Keep coordinate-only places in the itinerary without inventing a real place name.
       if (!name && !hasCoordinates) return [];
