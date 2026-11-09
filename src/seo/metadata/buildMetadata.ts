@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { absoluteUrl } from '@/config';
-import { SEO_CONFIG } from '@/seo/config';
+import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH, SEO_CONFIG } from '@/constants/seo';
 import type { SeoMetadataInput } from '@/seo/types';
 
 /**
@@ -25,7 +25,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
       url: openGraphUrl,
       siteName: SEO_CONFIG.siteName,
       type: input.openGraphType ?? 'website',
-      images: [{ url: imageUrl, width: 1200, height: 630, alt: input.imageAlt ?? title }],
+      images: [{ url: imageUrl, width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT, alt: input.imageAlt ?? title }],
     },
     twitter: {
       card: 'summary_large_image',
