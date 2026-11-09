@@ -3,12 +3,10 @@ import type { CSSProperties } from 'react';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/common/JsonLd';
 import { TripDetailsView } from '@/components/trips/TripDetailsView';
-import {
-  TripItineraryIndex,
-  buildTripJsonLd,
-  buildTripSeoContent,
-  buildTripSeoMetadata,
-} from '@/seo/modules/trip';
+import { TripItineraryIndex } from '@/seo/modules/trip/TripItineraryIndex';
+import { buildTripJsonLd } from '@/seo/modules/trip/buildStructuredData';
+import { buildTripSeoContent } from '@/seo/modules/trip/buildContent';
+import { buildTripSeoMetadata } from '@/seo/modules/trip/buildMetadata';
 import { tripRepresentativeImage } from '@/lib/images/representative';
 import { getTrip, isNotFoundError } from '@/lib/serverApi';
 import { pageBackgroundStyle } from '@/constants/ui';
