@@ -5,16 +5,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import {
   Alert,
+  Avatar,
   Box,
   Button,
+  Card,
+  CardContent,
   CircularProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  Divider,
+  Stack,
   Typography,
 } from '@mui/material';
 import { adminApi } from '@/api/admin';
@@ -22,7 +20,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { ADMIN_PAGE_SIZE_DEFAULT } from '@/constants/ui';
-import { isModeratorUser } from '@/constants/roles';
+import { hasRole } from '@/constants/roles';
+
+function formatDate(value: string | null): string {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString();
+}
 
 export function AdminUsers() {
   const queryClient = useQueryClient();
@@ -30,7 +34,8 @@ export function AdminUsers() {
   const { confirm } = useConfirm();
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  const isAdmin = isModeratorUser(user);
+  const isAdmin = hasRole(user, 'admin');
+  const isManager = hasRole(user, 'manager');
 
   const {
     data,
@@ -51,88 +56,79 @@ export function AdminUsers() {
 
   return (
     <Box>
-      <Typography variant="h4">Users</Typography>
-      {error ? (
-        <Alert severity="error" onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      ) : null}
+      <Typography variant="h4" sx={{ mb: 2 }}>Users</Typography>
+      {error ? <Alert severity="error" onClose={() => setError(null)}>{error}</Alert> : null}
       {isLoading ? <CircularProgress /> : null}
       {queryError ? <Alert severity="error">{getGenericErrorMessage(queryError)}</Alert> : null}
       {data ? (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Email</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Email verified</TableCell>
-                <TableCell>Registered</TableCell>
-                <TableCell>Updated</TableCell>
-                <TableCell>Logins</TableCell>
-                <TableCell>Last login</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.items.map((u) => (
-                <TableRow key={u.id}>
-                  <TableCell>{u.email}</TableCell>
-                  <TableCell>
-                    {u.firstName} {u.lastName}
-                  </TableCell>
-                  <TableCell>{u.role}</TableCell>
-                  <TableCell>{u.status}</TableCell>
-                  <TableCell>{u.emailVerified ? 'Yes' : 'No'}</TableCell>
-                  <TableCell>{u.createdAt ? new Date(u.createdAt).toLocaleString() : '—'}</TableCell>
-                  <TableCell>{u.updatedAt ? new Date(u.updatedAt).toLocaleString() : '—'}</TableCell>
-                  <TableCell>{u.countOfLogs ?? '—'}</TableCell>
-                  <TableCell>{u.lastTimeLogin ? new Date(u.lastTimeLogin).toLocaleString() : '—'}</TableCell>
-                  <TableCell>
-                    {isAdmin ? (
-                      <Link href={`/admin/users/${u.id}`}>
-                        <Button size="small">Edit</Button>
-                      </Link>
+        <>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: 2 }}>
+            {data.items.map((u) => {
+              const canEdit = isAdmin || (isManager && u.role !== 'admin');
+              return (
+                <Card
+                  key={u.id}
+                  variant="outlined"
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minWidth: 0,
+                    p: 1,
+                    borderRadius: 0,
+                    bgcolor: 'action.hover',
+                    boxShadow: 2,
+                    '& .MuiTypography-root': { overflowWrap: 'anywhere' },
+                  }}
+                >
+                  <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.25, flexGrow: 1 }}>
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <Avatar sx={{ width: 48, height: 48 }}>
+                        {(u.firstName?.[0] || u.email?.[0] || '?').toUpperCase()}
+                      </Avatar>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="h6">{u.firstName} {u.lastName}</Typography>
+                        <Typography variant="body2" color="text.secondary">{u.role} · {u.status}</Typography>
+                      </Box>
+                    </Stack>
+                    <Divider />
+                    <Typography variant="body2"><strong>User ID:</strong> {u.id}</Typography>
+                    <Typography variant="body2"><strong>Email:</strong> {u.email}</Typography>
+                    <Typography variant="body2"><strong>Email verified:</strong> {u.emailVerified ? 'Yes' : 'No'}</Typography>
+                    <Typography variant="body2"><strong>Profile created:</strong> {formatDate(u.createdAt)}</Typography>
+                    <Typography variant="body2"><strong>Profile last edited:</strong> {formatDate(u.updatedAt)}</Typography>
+                    <Typography variant="body2"><strong>Count of logs:</strong> {u.countOfLogs ?? '—'}</Typography>
+                    <Typography variant="body2"><strong>Last login:</strong> {formatDate(u.lastTimeLogin)}</Typography>
+                  </CardContent>
+                  <Divider />
+                  <Stack direction="row" spacing={1} justifyContent="center" sx={{ p: 1 }}>
+                    {canEdit ? (
+                      <Button component={Link} href={`/admin/users/${u.id}`} variant="contained">
+                        Edit user
+                      </Button>
                     ) : null}
                     <Button
-                      size="small"
                       color="error"
                       onClick={() =>
-                        void confirm(
-                          'Are you sure you want to delete this user?',
-                          'Delete Confirmation',
-                        ).then((confirmed) => {
-                          if (confirmed) {
-                            deleteMutation.mutate(u.id);
-                          }
+                        void confirm('Are you sure you want to delete this user?', 'Delete Confirmation').then((confirmed) => {
+                          if (confirmed) deleteMutation.mutate(u.id);
                         })
                       }
                     >
                       Delete
                     </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                  </Stack>
+                </Card>
+              );
+            })}
+          </Box>
+          {data.items.length === 0 ? <Typography>WELCOME!</Typography> : null}
+        </>
       ) : null}
       {pagination && (pagination.totalPages ?? 0) > 1 ? (
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
-          <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-            Previous
-          </Button>
-          <Typography>
-            Page {page} of {pagination.totalPages}
-          </Typography>
-          <Button
-            disabled={page >= (pagination.totalPages ?? 1)}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </Button>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 2 }}>
+          <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
+          <Typography>Page {page} of {pagination.totalPages}</Typography>
+          <Button disabled={page >= (pagination.totalPages ?? 1)} onClick={() => setPage((p) => p + 1)}>Next</Button>
         </Box>
       ) : null}
     </Box>
