@@ -32,7 +32,12 @@ const ROLE_OPTIONS: Role[] = ['user', 'admin', 'manager'];
 const STATUS_OPTIONS: UserStatus[] = ['PENDING_VERIFICATION', 'ACTIVE', 'SUSPENDED', 'DEACTIVATED'];
 
 const adminUserFormSchema = adminUserUpdateSchema
-  .extend({ confirmPassword: z.string().optional() })
+  .extend({
+    confirmPassword: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      z.string().optional(),
+    ),
+  })
   .refine(
     (values) =>
       values.password === undefined
