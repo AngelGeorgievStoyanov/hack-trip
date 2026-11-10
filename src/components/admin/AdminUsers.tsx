@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import PersonOutlineRoundedIcon from '@mui/icons-material/PersonOutlineRounded';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import {
@@ -83,8 +84,12 @@ export function AdminUsers() {
                 >
                   <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.25, flexGrow: 1 }}>
                     <Stack direction="row" spacing={1.5} alignItems="center">
-                      <Avatar sx={{ width: 48, height: 48 }}>
-                        {(u.firstName?.[0] || u.email?.[0] || '?').toUpperCase()}
+                      <Avatar
+                        src={u.profileImage?.thumbnailUrl || u.profileImage?.url || undefined}
+                        alt={`${u.firstName} ${u.lastName}`.trim() || 'User profile'}
+                        sx={{ width: 56, height: 56, bgcolor: 'action.selected' }}
+                      >
+                        <PersonOutlineRoundedIcon fontSize="large" />
                       </Avatar>
                       <Box sx={{ minWidth: 0 }}>
                         <Typography variant="h6">{u.firstName} {u.lastName}</Typography>
