@@ -135,7 +135,22 @@ export function AdminUserForm({ userId }: { userId: string }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        width: '100%',
+        maxWidth: 760,
+        mx: 'auto',
+        p: { xs: 2, sm: 3 },
+        border: 1,
+        borderColor: 'divider',
+        borderRadius: 2,
+        bgcolor: 'background.paper',
+        boxShadow: 2,
+      }}
+    >
       <Button
         variant="outlined"
         startIcon={<ArrowBackRoundedIcon />}
