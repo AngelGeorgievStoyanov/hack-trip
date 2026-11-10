@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import {
@@ -9,7 +9,9 @@ import {
   Box,
   Button,
   CircularProgress,
+  FormControlLabel,
   MenuItem,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material';
@@ -61,6 +63,7 @@ export function AdminUserForm({ userId }: { userId: string }) {
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
@@ -73,6 +76,8 @@ export function AdminUserForm({ userId }: { userId: string }) {
       reset({
         firstName: target.firstName,
         lastName: target.lastName,
+        email: target.email,
+        emailVerified: target.emailVerified,
         ...(isAdmin ? { role: target.role } : {}),
         status: target.status,
       });
@@ -121,6 +126,17 @@ export function AdminUserForm({ userId }: { userId: string }) {
       >
         <TextField label="First name" {...register('firstName')} error={!!errors.firstName} helperText={errors.firstName?.message} />
         <TextField label="Last name" {...register('lastName')} error={!!errors.lastName} helperText={errors.lastName?.message} />
+        <TextField label="Email" type="email" {...register('email')} error={!!errors.email} helperText={errors.email?.message} />
+        <Controller
+          name="emailVerified"
+          control={control}
+          render={({ field }) => (
+            <FormControlLabel
+              label="Email verified"
+              control={<Switch checked={field.value ?? false} onChange={(_, checked) => field.onChange(checked)} />}
+            />
+          )}
+        />
         {isAdmin ? (
           <TextField select label="Role" {...register('role')} error={!!errors.role} helperText={errors.role?.message}>
             {ROLE_OPTIONS.map((role) => <MenuItem key={role} value={role}>{role}</MenuItem>)}
