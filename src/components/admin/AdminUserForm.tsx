@@ -129,7 +129,7 @@ export function AdminUserForm({ userId }: { userId: string }) {
 
   if (isLoading) return <CircularProgress />;
   if (queryError || !target) return <Alert severity="error">User not found.</Alert>;
-  if (!isAdmin && (!isManager || target.role === 'admin')) {
+  if (!isAdmin && (!isManager || target.role !== 'user')) {
     return <Alert severity="error">You are not allowed to edit this user.</Alert>;
   }
 
@@ -145,8 +145,19 @@ export function AdminUserForm({ userId }: { userId: string }) {
       <Box
         component="form"
         onSubmit={handleSubmit((values) => {
-          const { confirmPassword: _confirmPassword, ...input } = values;
-          updateMutation.mutate(input);
+          if (isAdmin) {
+            const { confirmPassword: _confirmPassword, ...input } = values;
+            updateMutation.mutate(input);
+            return;
+          }
+
+          const managerInput: AdminUserUpdateInput = {
+            ...(values.firstName !== undefined ? { firstName: values.firstName } : {}),
+            ...(values.lastName !== undefined ? { lastName: values.lastName } : {}),
+            ...(values.status !== undefined ? { status: values.status } : {}),
+            ...(values.emailVerified !== undefined ? { emailVerified: values.emailVerified } : {}),
+          };
+          updateMutation.mutate(managerInput);
         })}
         sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
       >
