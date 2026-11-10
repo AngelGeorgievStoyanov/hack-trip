@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Alert,
@@ -115,8 +115,8 @@ export function AdminRouteNotFoundLogs() {
                 const isExpanded = Boolean(expandedRows[item.id]);
 
                 return (
-                  <>
-                    <TableRow key={item.id} hover>
+                  <Fragment key={item.id}>
+                    <TableRow hover>
                       <TableCell>{formatDate(item.date)}</TableCell>
                       <TableCell>{item.reqMethod ?? '—'}</TableCell>
                       <TableCell>{item.reqIp ?? '—'}</TableCell>
@@ -133,7 +133,7 @@ export function AdminRouteNotFoundLogs() {
                         </Button>
                       </TableCell>
                     </TableRow>
-                    <TableRow key={`details-${item.id}`}>
+                    <TableRow>
                       <TableCell colSpan={6} sx={{ p: 0, borderBottom: isExpanded ? undefined : 0 }}>
                         <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                           <Box id={`route-not-found-details-${item.id}`}>
@@ -142,7 +142,7 @@ export function AdminRouteNotFoundLogs() {
                         </Collapse>
                       </TableCell>
                     </TableRow>
-                  </>
+                  </Fragment>
                 );
               })}
             </TableBody>
