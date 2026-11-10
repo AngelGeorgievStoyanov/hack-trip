@@ -25,6 +25,8 @@ export interface AdminListQuery {
 export interface AdminUserUpdateInput {
   firstName?: string;
   lastName?: string;
+  email?: string;
+  emailVerified?: boolean;
   role?: Role;
   status?: UserStatus;
 }
