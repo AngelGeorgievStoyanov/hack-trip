@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -22,11 +23,24 @@ import { zodResolver } from '@/lib/zodResolver';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { ADMIN_PAGE_SIZE_MAX } from '@/constants/ui';
 import { adminUserUpdateSchema } from '@/validations/admin';
+import { PasswordField } from '@/components/common/PasswordField';
+import { PasswordRequirements } from '@/components/common/PasswordRequirements';
 import { hasRole } from '@/constants/roles';
 import type { AuthUserDto, Role, UserStatus } from '@/types';
 
 const ROLE_OPTIONS: Role[] = ['user', 'admin', 'manager'];
 const STATUS_OPTIONS: UserStatus[] = ['PENDING_VERIFICATION', 'ACTIVE', 'SUSPENDED', 'DEACTIVATED'];
+
+const adminUserFormSchema = adminUserUpdateSchema
+  .extend({ confirmPassword: z.string().optional() })
+  .refine(
+    (values) =>
+      values.password === undefined
+        ? values.confirmPassword === undefined
+        : values.password === values.confirmPassword,
+    { path: ['confirmPassword'], message: 'Passwords must match.' },
+  );
+type AdminUserFormValues = z.infer<typeof adminUserFormSchema>;
 
 async function findUserById(userId: string): Promise<AuthUserDto | null> {
   const pageSize = ADMIN_PAGE_SIZE_MAX;
@@ -49,6 +63,7 @@ export function AdminUserForm({ userId }: { userId: string }) {
   const { user } = useAuth();
   const { confirm } = useConfirm();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [passwordExpanded, setPasswordExpanded] = useState(false);
   const isAdmin = hasRole(user, 'admin');
   const isManager = hasRole(user, 'manager');
 
@@ -66,9 +81,11 @@ export function AdminUserForm({ userId }: { userId: string }) {
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
-  } = useForm<AdminUserUpdateInput>({
-    resolver: zodResolver(adminUserUpdateSchema),
+  } = useForm<AdminUserFormValues>({
+    resolver: zodResolver<AdminUserFormValues>(adminUserFormSchema),
   });
 
   useEffect(() => {
@@ -83,6 +100,8 @@ export function AdminUserForm({ userId }: { userId: string }) {
       });
     }
   }, [target, reset, isAdmin]);
+
+  const newPassword = watch('password') ?? '';
 
   const updateMutation = useMutation({
     mutationFn: (input: AdminUserUpdateInput) => adminApi.updateUser(userId, input),
@@ -121,12 +140,17 @@ export function AdminUserForm({ userId }: { userId: string }) {
 
       <Box
         component="form"
-        onSubmit={handleSubmit((values) => updateMutation.mutate(values))}
+        onSubmit={handleSubmit((values) => {
+          const { confirmPassword: _confirmPassword, ...input } = values;
+          updateMutation.mutate(input);
+        })}
         sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
       >
         <TextField label="First name" {...register('firstName')} error={!!errors.firstName} helperText={errors.firstName?.message} />
         <TextField label="Last name" {...register('lastName')} error={!!errors.lastName} helperText={errors.lastName?.message} />
-        <TextField label="Email" type="email" {...register('email')} error={!!errors.email} helperText={errors.email?.message} />
+        {isAdmin ? (
+          <TextField label="Email" type="email" {...register('email')} error={!!errors.email} helperText={errors.email?.message} />
+        ) : null}
         <Controller
           name="emailVerified"
           control={control}
@@ -141,6 +165,42 @@ export function AdminUserForm({ userId }: { userId: string }) {
           <TextField select label="Role" {...register('role')} error={!!errors.role} helperText={errors.role?.message}>
             {ROLE_OPTIONS.map((role) => <MenuItem key={role} value={role}>{role}</MenuItem>)}
           </TextField>
+        ) : null}
+        {isAdmin ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Button
+              type="button"
+              variant="outlined"
+              onClick={() => {
+                setPasswordExpanded((expanded) => {
+                  if (expanded) {
+                    setValue('password', undefined, { shouldValidate: true });
+                    setValue('confirmPassword', undefined, { shouldValidate: true });
+                  }
+                  return !expanded;
+                });
+              }}
+            >
+              {passwordExpanded ? 'Hide password fields' : 'Change user password'}
+            </Button>
+            {passwordExpanded ? (
+              <>
+                <PasswordField
+                  label="New password"
+                  registration={register('password')}
+                  error={!!errors.password}
+                  helperText={errors.password?.message ?? 'Create a password that meets all requirements below.'}
+                />
+                <PasswordRequirements password={newPassword} />
+                <PasswordField
+                  label="Confirm password"
+                  registration={register('confirmPassword')}
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword?.message ?? ' '}
+                />
+              </>
+            ) : null}
+          </Box>
         ) : null}
         <TextField select label="Status" {...register('status')} error={!!errors.status} helperText={errors.status?.message}>
           {STATUS_OPTIONS.map((status) => <MenuItem key={status} value={status}>{status}</MenuItem>)}
