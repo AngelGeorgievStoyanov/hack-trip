@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -135,6 +136,14 @@ export function AdminUserForm({ userId }: { userId: string }) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Button
+        variant="outlined"
+        startIcon={<ArrowBackRoundedIcon />}
+        onClick={() => router.push('/admin/users')}
+        sx={{ alignSelf: 'flex-start' }}
+      >
+        Back
+      </Button>
       <Typography variant="h4">Edit user</Typography>
       <Typography>Email: {target.email}</Typography>
       <Typography>
@@ -204,19 +213,27 @@ export function AdminUserForm({ userId }: { userId: string }) {
           )}
         />
         {isAdmin ? (
-          <TextField
-            select
-            label="Role"
-            {...register('role')}
-            error={!!errors.role}
-            helperText={errors.role?.message}
-          >
-            {ROLE_OPTIONS.map((role) => (
-              <MenuItem key={role} value={role}>
-                {role}
-              </MenuItem>
-            ))}
-          </TextField>
+          <Controller
+            name="role"
+            control={control}
+            defaultValue={target.role}
+            render={({ field }) => (
+              <TextField
+                select
+                label="Role"
+                {...field}
+                value={field.value ?? target.role}
+                error={!!errors.role}
+                helperText={errors.role?.message}
+              >
+                {ROLE_OPTIONS.map((role) => (
+                  <MenuItem key={role} value={role}>
+                    {role}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
+          />
         ) : null}
         {isAdmin ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
