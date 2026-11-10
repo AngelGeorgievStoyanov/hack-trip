@@ -7,6 +7,7 @@ import {
   Box,
   Button,
   CircularProgress,
+  Collapse,
   Paper,
   Table,
   TableBody,
@@ -19,6 +20,7 @@ import {
 import { adminApi } from '@/api/admin';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { ADMIN_PAGE_SIZE_DEFAULT } from '@/constants/ui';
+import type { RouteNotFoundLogDto } from '@/types/admin';
 
 function formatDate(value: string | null): string {
   if (!value) return '—';
@@ -26,8 +28,58 @@ function formatDate(value: string | null): string {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 }
 
+function formatDiagnosticValue(value: string | null): string {
+  if (!value) return '—';
+
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2);
+  } catch {
+    return value;
+  }
+}
+
+function DiagnosticField({ label, value }: { label: string; value: string | null }) {
+  return (
+    <Box sx={{ minWidth: 0 }}>
+      <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+        {label}
+      </Typography>
+      <Box
+        component="pre"
+        sx={{
+          m: 0,
+          p: 1,
+          maxWidth: '100%',
+          overflow: 'auto',
+          whiteSpace: 'pre-wrap',
+          overflowWrap: 'anywhere',
+          borderRadius: 1,
+          bgcolor: 'action.hover',
+          fontFamily: 'monospace',
+          fontSize: '0.8rem',
+        }}
+      >
+        {formatDiagnosticValue(value)}
+      </Box>
+    </Box>
+  );
+}
+
+function RouteNotFoundLogDetails({ item }: { item: RouteNotFoundLogDto }) {
+  return (
+    <Box sx={{ display: 'grid', gap: 2, p: 2 }}>
+      <DiagnosticField label="Request URL" value={item.reqUrl} />
+      <DiagnosticField label="Headers" value={item.reqHeaders} />
+      <DiagnosticField label="Query" value={item.reqQuery} />
+      <DiagnosticField label="Body" value={item.reqBody} />
+      <DiagnosticField label="Params" value={item.reqParams} />
+    </Box>
+  );
+}
+
 export function AdminRouteNotFoundLogs() {
   const [page, setPage] = useState(1);
+  const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'route-not-found-logs', page, ADMIN_PAGE_SIZE_DEFAULT],
@@ -35,6 +87,10 @@ export function AdminRouteNotFoundLogs() {
   });
 
   const pagination = data?.pagination;
+
+  const toggleRow = (id: number) => {
+    setExpandedRows((current) => ({ ...current, [id]: !current[id] }));
+  };
 
   return (
     <Box>
@@ -51,18 +107,44 @@ export function AdminRouteNotFoundLogs() {
                 <TableCell>IP</TableCell>
                 <TableCell>User</TableCell>
                 <TableCell>Email</TableCell>
+                <TableCell align="right">Details</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.items.map((item) => (
-                <TableRow key={item.id} hover>
-                  <TableCell>{formatDate(item.date)}</TableCell>
-                  <TableCell>{item.reqMethod ?? '—'}</TableCell>
-                  <TableCell>{item.reqIp ?? '—'}</TableCell>
-                  <TableCell>{item.reqUserId ?? '—'}</TableCell>
-                  <TableCell>{item.reqUserEmail ?? '—'}</TableCell>
-                </TableRow>
-              ))}
+              {data.items.map((item) => {
+                const isExpanded = Boolean(expandedRows[item.id]);
+
+                return (
+                  <>
+                    <TableRow key={item.id} hover>
+                      <TableCell>{formatDate(item.date)}</TableCell>
+                      <TableCell>{item.reqMethod ?? '—'}</TableCell>
+                      <TableCell>{item.reqIp ?? '—'}</TableCell>
+                      <TableCell>{item.reqUserId ?? '—'}</TableCell>
+                      <TableCell>{item.reqUserEmail ?? '—'}</TableCell>
+                      <TableCell align="right">
+                        <Button
+                          size="small"
+                          aria-expanded={isExpanded}
+                          aria-controls={`route-not-found-details-${item.id}`}
+                          onClick={() => toggleRow(item.id)}
+                        >
+                          {isExpanded ? 'Hide' : 'View'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow key={`details-${item.id}`}>
+                      <TableCell colSpan={6} sx={{ p: 0, borderBottom: isExpanded ? undefined : 0 }}>
+                        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                          <Box id={`route-not-found-details-${item.id}`}>
+                            <RouteNotFoundLogDetails item={item} />
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
