@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { Box, Button } from '@mui/material';
 
 const sections = [
-  { href: '/admin', label: 'Dashboard', exact: true },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/reports', label: 'Reports' },
   { href: '/admin/failed-login-logs', label: 'Failed login logs' },
@@ -19,9 +18,8 @@ export function AdminNavigation() {
   return (
     <Box component="nav" aria-label="Admin navigation" sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
       {sections.map((section) => {
-        const active = section.exact
-          ? pathname === section.href
-          : pathname === section.href || pathname.startsWith(section.href + '/');
+        const active =
+          pathname === section.href || pathname.startsWith(section.href + '/');
 
         return (
           <Button
