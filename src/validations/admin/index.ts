@@ -5,7 +5,7 @@ import {
   ADMIN_PAGE_SIZE_MAX,
   PAGE_MAX,
 } from '@/constants/ui';
-import { emailString, idList, optionalInt, trimmedString } from '../shared';
+import { emailString, idList, optionalInt, passwordString, trimmedString } from '../shared';
 
 export const adminUserUpdateSchema = z
   .object({
@@ -13,6 +13,7 @@ export const adminUserUpdateSchema = z
     lastName: trimmedString({ min: 1, max: 45 }).optional(),
     email: emailString().optional(),
     emailVerified: z.boolean().optional(),
+    password: passwordString({ min: 8, max: 72 }).optional(),
     role: z.enum(['user', 'admin', 'manager']).optional(),
     status: z.enum(['PENDING_VERIFICATION', 'ACTIVE', 'SUSPENDED', 'DEACTIVATED']).optional(),
   })
@@ -24,7 +25,8 @@ export const adminUserUpdateSchema = z
       data.email !== undefined ||
       data.emailVerified !== undefined ||
       data.role !== undefined ||
-      data.status !== undefined,
+      data.status !== undefined ||
+      data.password !== undefined,
     'At least one field is required',
   );
 
