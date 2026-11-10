@@ -31,12 +31,12 @@ export interface FailedLogDto {
 export interface RouteNotFoundLogDto {
   id: number;
   date: string | null;
-  reqUrl: null;
+  reqUrl: string | null;
   reqMethod: string | null;
-  reqHeaders: null;
-  reqQuery: null;
-  reqBody: null;
-  reqParams: null;
+  reqHeaders: string | null;
+  reqQuery: string | null;
+  reqBody: string | null;
+  reqParams: string | null;
   reqIp: string | null;
   reqUserId: string | null;
   reqUserEmail: string | null;
