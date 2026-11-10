@@ -98,9 +98,8 @@ export function AdminUserForm({ userId }: { userId: string }) {
       reset({
         firstName: target.firstName,
         lastName: target.lastName,
-        email: target.email,
         emailVerified: target.emailVerified,
-        ...(isAdmin ? { role: target.role } : {}),
+        ...(isAdmin ? { email: target.email, role: target.role } : {}),
         status: target.status,
       });
     }
