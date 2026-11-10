@@ -53,6 +53,7 @@ export function AdminUsers() {
   });
 
   const pagination = data?.pagination;
+  const visibleUsers = data?.items.filter((item) => isAdmin || (isManager && item.role === 'user')) ?? [];
 
   return (
     <Box>
@@ -63,8 +64,8 @@ export function AdminUsers() {
       {data ? (
         <>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: 2 }}>
-            {data.items.filter((u) => isAdmin || u.role !== 'admin').map((u) => {
-              const canEdit = isAdmin || (isManager && u.role !== 'admin');
+            {visibleUsers.map((u) => {
+              const canManage = isAdmin || (isManager && u.role === 'user');
               return (
                 <Card
                   key={u.id}
@@ -101,27 +102,29 @@ export function AdminUsers() {
                   </CardContent>
                   <Divider />
                   <Stack direction="row" spacing={1} justifyContent="center" sx={{ p: 1 }}>
-                    {canEdit ? (
+                    {canManage ? (
                       <Button component={Link} href={`/admin/users/${u.id}`} variant="contained">
                         Edit user
                       </Button>
                     ) : null}
-                    <Button
-                      color="error"
-                      onClick={() =>
-                        void confirm('Are you sure you want to delete this user?', 'Delete Confirmation').then((confirmed) => {
-                          if (confirmed) deleteMutation.mutate(u.id);
-                        })
-                      }
-                    >
-                      Delete
-                    </Button>
+                    {canManage ? (
+                      <Button
+                        color="error"
+                        onClick={() =>
+                          void confirm('Are you sure you want to delete this user?', 'Delete Confirmation').then((confirmed) => {
+                            if (confirmed) deleteMutation.mutate(u.id);
+                          })
+                        }
+                      >
+                        Delete
+                      </Button>
+                    ) : null}
                   </Stack>
                 </Card>
               );
             })}
           </Box>
-          {data.items.filter((u) => isAdmin || u.role !== 'admin').length === 0 ? <Typography>WELCOME!</Typography> : null}
+          {visibleUsers.length === 0 ? <Typography>WELCOME!</Typography> : null}
         </>
       ) : null}
       {pagination && (pagination.totalPages ?? 0) > 1 ? (
