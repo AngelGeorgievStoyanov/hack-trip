@@ -16,10 +16,21 @@ export function AdminNavigation() {
   const pathname = usePathname();
 
   return (
-    <Box component="nav" aria-label="Admin navigation" sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
+    <Box
+      component="nav"
+      aria-label="Admin navigation"
+      sx={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 1,
+        mb: 3,
+        pb: 2,
+        borderBottom: 1,
+        borderColor: 'divider',
+      }}
+    >
       {sections.map((section) => {
-        const active =
-          pathname === section.href || pathname.startsWith(section.href + '/');
+        const active = pathname === section.href || pathname.startsWith(section.href + '/');
 
         return (
           <Button
