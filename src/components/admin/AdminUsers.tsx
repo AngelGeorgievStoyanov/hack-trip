@@ -102,7 +102,7 @@ export function AdminUsers() {
                       <Avatar
                         src={u.profileImage?.thumbnailUrl || u.profileImage?.url || undefined}
                         alt={`${u.firstName} ${u.lastName}`.trim() || 'User profile'}
-                        sx={{ width: 56, height: 56, bgcolor: 'action.selected' }}
+                        sx={{ width: 88, height: 88, bgcolor: 'action.selected', flexShrink: 0 }}
                       >
                         <PersonOutlineRoundedIcon fontSize="large" />
                       </Avatar>
