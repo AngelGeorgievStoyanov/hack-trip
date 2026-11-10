@@ -13,7 +13,10 @@ export const adminUserUpdateSchema = z
     lastName: trimmedString({ min: 1, max: 45 }).optional(),
     email: emailString().optional(),
     emailVerified: z.boolean().optional(),
-    password: passwordString({ min: 8, max: 72 }).optional(),
+    password: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      passwordString({ min: 8, max: 72 }).optional(),
+    ),
     role: z.enum(['user', 'admin', 'manager']).optional(),
     status: z.enum(['PENDING_VERIFICATION', 'ACTIVE', 'SUSPENDED', 'DEACTIVATED']).optional(),
   })
