@@ -1,4 +1,5 @@
 import type { Role, UserStatus } from './common';
+import type { ImageDto } from './images';
 
 /**
  * Profile returned by auth/profile endpoints (login, refresh, verify-email, PUT /auth/me, GET /auth/me).
@@ -31,6 +32,7 @@ export interface AuthUserDto {
   role: Role;
   status: UserStatus;
   emailVerified: boolean;
+  profileImage: ImageDto | null;
   createdAt: string | null;
   updatedAt: string | null;
   countOfLogs: number | null;
