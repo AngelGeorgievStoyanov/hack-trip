@@ -20,16 +20,15 @@ export function TripPagination({
   transport,
   sort,
 }: TripPaginationProps) {
-  const pages = [
-    ...(page > 1 ? [page - 1] : []),
-    page,
-    ...(hasNextPage ? [page + 1] : []),
-  ];
+  const pages = [...(page > 1 ? [page - 1] : []), page, ...(hasNextPage ? [page + 1] : [])];
 
   if (pages.length <= 1) return null;
 
   return (
-    <nav aria-label="Trip list pages" style={{ display: 'flex', justifyContent: 'center', margin: 20 }}>
+    <nav
+      aria-label="Trip list pages"
+      style={{ display: 'flex', justifyContent: 'center', margin: 20 }}
+    >
       <ul style={{ display: 'flex', alignItems: 'center', gap: 12, listStyle: 'none', padding: 0 }}>
         {page > 1 ? (
           <li>

@@ -176,11 +176,7 @@ export function TripMapSection({
         focusZoom={MAP_DEFAULT_ZOOM}
         selectedMarkerId={showingPointMarkers ? (selectedMarker?.id ?? null) : null}
         onMarkerSelect={showingPointMarkers ? handleMarkerSelect : undefined}
-        renderInfoWindow={
-          showingPointMarkers
-            ? (marker) => marker.title
-            : undefined
-        }
+        renderInfoWindow={showingPointMarkers ? (marker) => marker.title : undefined}
       />
     </Box>
   );

@@ -74,7 +74,10 @@ export async function generateMetadata({ searchParams }: TripsPageProps): Promis
   const query = parseQuery(sp);
   const page = query.page ?? TRIP_PAGE_DEFAULT;
   const hasFilters = Boolean(
-    query.search || query.group || query.transport || query.limit ||
+    query.search ||
+    query.group ||
+    query.transport ||
+    query.limit ||
     (query.sort && query.sort !== 'newest'),
   );
   const hasUnknownParams = Object.keys(sp).some(

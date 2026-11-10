@@ -10,7 +10,8 @@ export const contentType = 'image/png';
 export default function OpenGraphImage() {
   return renderTripOgImage({
     title: 'Discover places. Share experiences.',
-    subtitle: 'Explore destinations, photos and real experiences shared by travelers. Share your own discoveries with HackTrip.',
+    subtitle:
+      'Explore destinations, photos and real experiences shared by travelers. Share your own discoveries with HackTrip.',
     imageUrls: [],
   });
 }

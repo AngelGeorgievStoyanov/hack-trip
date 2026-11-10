@@ -40,10 +40,7 @@ function resolveDay(
   return days.find((day) => day.dayNumber === requestedDay) ?? days[0];
 }
 
-export async function generateMetadata({
-  params,
-  searchParams,
-}: TripPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: TripPageProps): Promise<Metadata> {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const tripId = parseId(id);
   if (tripId === null) {

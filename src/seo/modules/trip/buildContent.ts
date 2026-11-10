@@ -38,7 +38,7 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
   const primaryDestination = destinations[0];
   const titleSubject = primaryDestination
     ? 'Trip to ' + primaryDestination
-    : days.map((day) => clean(day.title)).find(Boolean) ?? 'Travel itinerary';
+    : (days.map((day) => clean(day.title)).find(Boolean) ?? 'Travel itinerary');
   const highlights = pointNames.slice(0, SEO_TITLE_HIGHLIGHTS_MAX_COUNT);
   const title = fitText(
     highlights.length ? titleSubject + ': ' + highlights.join(', ') : titleSubject,
@@ -75,13 +75,15 @@ export function buildTripSeoContent(trip: TripSeoInput): TripSeoContent {
         point.lng <= SEO_LONGITUDE_MAX;
       if (!name && !hasCoordinates && !clean(point.description)) return [];
 
-      return [{
-        ...(name ? { name } : {}),
-        ...(clean(point.description) ? { description: clean(point.description) } : {}),
-        ...(hasCoordinates
-          ? { latitude: point.lat as number, longitude: point.lng as number }
-          : {}),
-      }];
+      return [
+        {
+          ...(name ? { name } : {}),
+          ...(clean(point.description) ? { description: clean(point.description) } : {}),
+          ...(hasCoordinates
+            ? { latitude: point.lat as number, longitude: point.lng as number }
+            : {}),
+        },
+      ];
     }),
   }));
 

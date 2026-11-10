@@ -137,10 +137,16 @@ export function AdminUserForm({ userId }: { userId: string }) {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Typography variant="h4">Edit user</Typography>
       <Typography>Email: {target.email}</Typography>
-      <Typography>Name: {target.firstName} {target.lastName}</Typography>
+      <Typography>
+        Name: {target.firstName} {target.lastName}
+      </Typography>
       <Typography>Role: {target.role}</Typography>
       <Typography>Status: {target.status}</Typography>
-      {serverError ? <Alert severity="error" onClose={() => setServerError(null)}>{serverError}</Alert> : null}
+      {serverError ? (
+        <Alert severity="error" onClose={() => setServerError(null)}>
+          {serverError}
+        </Alert>
+      ) : null}
 
       <Box
         component="form"
@@ -161,10 +167,26 @@ export function AdminUserForm({ userId }: { userId: string }) {
         })}
         sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
       >
-        <TextField label="First name" {...register('firstName')} error={!!errors.firstName} helperText={errors.firstName?.message} />
-        <TextField label="Last name" {...register('lastName')} error={!!errors.lastName} helperText={errors.lastName?.message} />
+        <TextField
+          label="First name"
+          {...register('firstName')}
+          error={!!errors.firstName}
+          helperText={errors.firstName?.message}
+        />
+        <TextField
+          label="Last name"
+          {...register('lastName')}
+          error={!!errors.lastName}
+          helperText={errors.lastName?.message}
+        />
         {isAdmin ? (
-          <TextField label="Email" type="email" {...register('email')} error={!!errors.email} helperText={errors.email?.message} />
+          <TextField
+            label="Email"
+            type="email"
+            {...register('email')}
+            error={!!errors.email}
+            helperText={errors.email?.message}
+          />
         ) : null}
         <Controller
           name="emailVerified"
@@ -172,13 +194,28 @@ export function AdminUserForm({ userId }: { userId: string }) {
           render={({ field }) => (
             <FormControlLabel
               label="Email verified"
-              control={<Switch checked={field.value ?? false} onChange={(_, checked) => field.onChange(checked)} />}
+              control={
+                <Switch
+                  checked={field.value ?? false}
+                  onChange={(_, checked) => field.onChange(checked)}
+                />
+              }
             />
           )}
         />
         {isAdmin ? (
-          <TextField select label="Role" {...register('role')} error={!!errors.role} helperText={errors.role?.message}>
-            {ROLE_OPTIONS.map((role) => <MenuItem key={role} value={role}>{role}</MenuItem>)}
+          <TextField
+            select
+            label="Role"
+            {...register('role')}
+            error={!!errors.role}
+            helperText={errors.role?.message}
+          >
+            {ROLE_OPTIONS.map((role) => (
+              <MenuItem key={role} value={role}>
+                {role}
+              </MenuItem>
+            ))}
           </TextField>
         ) : null}
         {isAdmin ? (
@@ -204,7 +241,10 @@ export function AdminUserForm({ userId }: { userId: string }) {
                   label="New password"
                   registration={register('password')}
                   error={!!errors.password}
-                  helperText={errors.password?.message ?? 'Create a password that meets all requirements below.'}
+                  helperText={
+                    errors.password?.message ??
+                    'Create a password that meets all requirements below.'
+                  }
                 />
                 <PasswordRequirements password={newPassword} />
                 <PasswordField
@@ -217,8 +257,18 @@ export function AdminUserForm({ userId }: { userId: string }) {
             ) : null}
           </Box>
         ) : null}
-        <TextField select label="Status" {...register('status')} error={!!errors.status} helperText={errors.status?.message}>
-          {STATUS_OPTIONS.map((status) => <MenuItem key={status} value={status}>{status}</MenuItem>)}
+        <TextField
+          select
+          label="Status"
+          {...register('status')}
+          error={!!errors.status}
+          helperText={errors.status?.message}
+        >
+          {STATUS_OPTIONS.map((status) => (
+            <MenuItem key={status} value={status}>
+              {status}
+            </MenuItem>
+          ))}
         </TextField>
         <Button type="submit" variant="contained" disabled={updateMutation.isPending}>
           {updateMutation.isPending ? <CircularProgress size={18} /> : 'Save'}
@@ -226,11 +276,17 @@ export function AdminUserForm({ userId }: { userId: string }) {
       </Box>
 
       <Box>
-        <Button color="error" disabled={deleteMutation.isPending} onClick={() =>
-          void confirm('Are you sure you want to delete this user?', 'Delete Confirmation').then((confirmed) => {
-            if (confirmed) deleteMutation.mutate();
-          })
-        }>
+        <Button
+          color="error"
+          disabled={deleteMutation.isPending}
+          onClick={() =>
+            void confirm('Are you sure you want to delete this user?', 'Delete Confirmation').then(
+              (confirmed) => {
+                if (confirmed) deleteMutation.mutate();
+              },
+            )
+          }
+        >
           Delete user
         </Button>
       </Box>

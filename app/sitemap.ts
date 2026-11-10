@@ -25,11 +25,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
       for (const trip of trips) {
         if (!buildTripSeoContent(trip).isIndexable) continue;
-        const timestamps = trip.days.flatMap((day) => [
-          day.createdAt,
-          day.updatedAt,
-          ...day.points.flatMap((point) => [point.createdAt, point.updatedAt]),
-        ]).filter((value): value is string => Boolean(value)).sort();
+        const timestamps = trip.days
+          .flatMap((day) => [
+            day.createdAt,
+            day.updatedAt,
+            ...day.points.flatMap((point) => [point.createdAt, point.updatedAt]),
+          ])
+          .filter((value): value is string => Boolean(value))
+          .sort();
         const latest = timestamps.length ? timestamps[timestamps.length - 1] : undefined;
         entries.push({
           url: absoluteUrl('/trips/' + trip.id),

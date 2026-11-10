@@ -19,8 +19,12 @@ export function TripItineraryIndex({ itinerary }: Pick<TripSeoContent, 'itinerar
                     <li key={day.dayNumber + '-' + index + '-' + (point.name ?? 'gps-point')}>
                       {point.name ? <strong>{point.name}</strong> : null}
                       {point.description ? <p>{point.description}</p> : null}
-                      {!point.name && point.latitude !== undefined && point.longitude !== undefined ? (
-                        <p>Coordinates: {point.latitude}, {point.longitude}</p>
+                      {!point.name &&
+                      point.latitude !== undefined &&
+                      point.longitude !== undefined ? (
+                        <p>
+                          Coordinates: {point.latitude}, {point.longitude}
+                        </p>
                       ) : null}
                     </li>
                   ))}

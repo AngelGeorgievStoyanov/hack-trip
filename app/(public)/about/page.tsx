@@ -48,17 +48,17 @@ export default function AboutPage() {
           <section aria-labelledby="create-trips">
             <h2 id="create-trips">Create and organize your trips</h2>
             <p>
-              Build a trip around your destination, arrange it into days and add as many stops as you
-              need. Keep your itinerary and travel ideas organized in one place.
+              Build a trip around your destination, arrange it into days and add as many stops as
+              you need. Keep your itinerary and travel ideas organized in one place.
             </p>
           </section>
 
           <section aria-labelledby="gps-locations">
             <h2 id="gps-locations">Add any location with GPS coordinates</h2>
             <p>
-              Save places anywhere in the world, including remote spots that do not have a recognized
-              name on the map. A GPS position is enough to mark the exact place you want to remember
-              or visit.
+              Save places anywhere in the world, including remote spots that do not have a
+              recognized name on the map. A GPS position is enough to mark the exact place you want
+              to remember or visit.
             </p>
           </section>
 
@@ -129,8 +129,9 @@ export default function AboutPage() {
           <section aria-labelledby="plan-share">
             <h2 id="plan-share">Plan your route and share your journey</h2>
             <p>
-              Prepare your stops before you leave, update your trip as you travel, add new discoveries
-              along the way and let others follow your journey live when you choose to share it.
+              Prepare your stops before you leave, update your trip as you travel, add new
+              discoveries along the way and let others follow your journey live when you choose to
+              share it.
             </p>
           </section>
 
@@ -147,8 +148,8 @@ export default function AboutPage() {
             <h2 id="travel-community">Explore trips shared by other travelers</h2>
             <p>
               Browse real itineraries for inspiration, discover places you might otherwise miss and
-              use other travelers’ experiences when planning your next adventure. Then share your own
-              discoveries with the HackTrip community.
+              use other travelers’ experiences when planning your next adventure. Then share your
+              own discoveries with the HackTrip community.
             </p>
           </section>
 

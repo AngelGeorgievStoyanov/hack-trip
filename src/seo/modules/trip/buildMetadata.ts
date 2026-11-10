@@ -18,8 +18,7 @@ export function buildTripSeoMetadata(
   options: TripSeoMetadataOptions,
 ): Metadata {
   const content = buildTripSeoContent(trip);
-  const selectedDay =
-    trip.days.find((day) => day.dayNumber === options.dayNumber) ?? trip.days[0];
+  const selectedDay = trip.days.find((day) => day.dayNumber === options.dayNumber) ?? trip.days[0];
   const dayNumber = selectedDay?.dayNumber ?? 1;
   const imageIds = [
     ...(selectedDay?.images ?? []),

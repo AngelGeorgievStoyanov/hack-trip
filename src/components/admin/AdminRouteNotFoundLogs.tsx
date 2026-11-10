@@ -134,7 +134,10 @@ export function AdminRouteNotFoundLogs() {
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell colSpan={6} sx={{ p: 0, borderBottom: isExpanded ? undefined : 0 }}>
+                      <TableCell
+                        colSpan={6}
+                        sx={{ p: 0, borderBottom: isExpanded ? undefined : 0 }}
+                      >
                         <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                           <Box id={`route-not-found-details-${item.id}`}>
                             <RouteNotFoundLogDetails item={item} />
