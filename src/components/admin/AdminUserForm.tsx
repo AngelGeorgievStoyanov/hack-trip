@@ -281,19 +281,27 @@ export function AdminUserForm({ userId }: { userId: string }) {
             ) : null}
           </Box>
         ) : null}
-        <TextField
-          select
-          label="Status"
-          {...register('status')}
-          error={!!errors.status}
-          helperText={errors.status?.message}
-        >
-          {STATUS_OPTIONS.map((status) => (
-            <MenuItem key={status} value={status}>
-              {status}
-            </MenuItem>
-          ))}
-        </TextField>
+        <Controller
+          name="status"
+          control={control}
+          defaultValue={target.status}
+          render={({ field }) => (
+            <TextField
+              select
+              label="Status"
+              {...field}
+              value={field.value ?? target.status}
+              error={!!errors.status}
+              helperText={errors.status?.message}
+            >
+              {STATUS_OPTIONS.map((status) => (
+                <MenuItem key={status} value={status}>
+                  {status}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+        />
         <Button type="submit" variant="contained" disabled={updateMutation.isPending}>
           {updateMutation.isPending ? <CircularProgress size={18} /> : 'Save'}
         </Button>
