@@ -151,14 +151,6 @@ export function AdminUserForm({ userId }: { userId: string }) {
         boxShadow: 2,
       }}
     >
-      <Button
-        variant="outlined"
-        startIcon={<ArrowBackRoundedIcon />}
-        onClick={() => router.push('/admin/users')}
-        sx={{ alignSelf: 'flex-start' }}
-      >
-        Back
-      </Button>
       <Typography variant="h4">Edit user</Typography>
       <Typography>Email: {target.email}</Typography>
       <Typography>
@@ -322,6 +314,15 @@ export function AdminUserForm({ userId }: { userId: string }) {
           Delete user
         </Button>
       </Box>
+
+      <Button
+        variant="outlined"
+        startIcon={<ArrowBackRoundedIcon />}
+        onClick={() => router.push('/admin/users')}
+        sx={{ alignSelf: 'flex-start', mt: 1 }}
+      >
+        Back
+      </Button>
     </Box>
   );
 }
