@@ -27,6 +27,7 @@ export interface AdminUserUpdateInput {
   lastName?: string;
   email?: string;
   emailVerified?: boolean;
+  password?: string;
   role?: Role;
   status?: UserStatus;
 }
