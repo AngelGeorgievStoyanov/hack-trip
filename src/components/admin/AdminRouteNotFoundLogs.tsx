@@ -68,7 +68,7 @@ function DiagnosticField({ label, value }: { label: string; value: string | null
 function RouteNotFoundLogDetails({ item }: { item: RouteNotFoundLogDto }) {
   return (
     <Box sx={{ display: 'grid', gap: 2, p: 2 }}>
-      <DiagnosticField label="Request URL" value={item.reqUrl} />
+      <DiagnosticField label="Request path" value={item.reqUrl} />
       <DiagnosticField label="Headers" value={item.reqHeaders} />
       <DiagnosticField label="Query" value={item.reqQuery} />
       <DiagnosticField label="Body" value={item.reqBody} />
