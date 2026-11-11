@@ -104,9 +104,7 @@ export const adminApi = {
     return data;
   },
 
-  listMissingThumbnails: async (
-    query: AdminListQuery = {},
-  ): Promise<MissingThumbnailPageDto> => {
+  listMissingThumbnails: async (query: AdminListQuery = {}): Promise<MissingThumbnailPageDto> => {
     const params = adminPaginationQuerySchema.parse(query);
     const { data } = await apiClient.get<MissingThumbnailPageDto>(
       `${ADMIN}/images/missing-thumbnails`,

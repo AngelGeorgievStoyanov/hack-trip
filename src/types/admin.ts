@@ -67,7 +67,6 @@ export interface ImageInventoryComparison {
   };
 }
 
-
 export interface MissingThumbnailImageDto {
   id: number;
   url: string;

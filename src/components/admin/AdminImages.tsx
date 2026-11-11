@@ -217,11 +217,25 @@ function MissingThumbnails() {
         listed. Select images to generate their thumbnails.
       </Typography>
 
-      {error ? <Alert severity="error" sx={{ mb: 2 }}>{getGenericErrorMessage(error)}</Alert> : null}
-      {resultMessage ? <Alert severity="success" sx={{ mb: 2 }}>{resultMessage}</Alert> : null}
-      {selectionError ? <Alert severity="warning" sx={{ mb: 2 }}>{selectionError}</Alert> : null}
+      {error ? (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {getGenericErrorMessage(error)}
+        </Alert>
+      ) : null}
+      {resultMessage ? (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {resultMessage}
+        </Alert>
+      ) : null}
+      {selectionError ? (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          {selectionError}
+        </Alert>
+      ) : null}
       {mutation.error ? (
-        <Alert severity="error" sx={{ mb: 2 }}>{getGenericErrorMessage(mutation.error)}</Alert>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {getGenericErrorMessage(mutation.error)}
+        </Alert>
       ) : null}
 
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
@@ -255,7 +269,10 @@ function MissingThumbnails() {
                   <TableCell padding="checkbox">
                     <Checkbox
                       checked={allSelected}
-                      indeterminate={selectedIds.some((id) => items.some((item) => item.id === id)) && !allSelected}
+                      indeterminate={
+                        selectedIds.some((id) => items.some((item) => item.id === id)) &&
+                        !allSelected
+                      }
                       onChange={(event) => togglePage(event.target.checked)}
                       inputProps={{ 'aria-label': 'Select all images on this page' }}
                     />
@@ -325,7 +342,10 @@ function MissingThumbnails() {
             </Table>
           </TableContainer>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 2 }}>
-            <Button disabled={page <= 1 || isFetching} onClick={() => setPage((value) => value - 1)}>
+            <Button
+              disabled={page <= 1 || isFetching}
+              onClick={() => setPage((value) => value - 1)}
+            >
               Previous
             </Button>
             <Typography>Page {page}</Typography>
@@ -356,7 +376,12 @@ function MissingThumbnails() {
               component="img"
               src={previewUrl}
               alt="Full-size original"
-              sx={{ display: 'block', maxWidth: 'min(85vw, 1100px)', maxHeight: '75vh', objectFit: 'contain' }}
+              sx={{
+                display: 'block',
+                maxWidth: 'min(85vw, 1100px)',
+                maxHeight: '75vh',
+                objectFit: 'contain',
+              }}
             />
           ) : null}
         </DialogContent>
