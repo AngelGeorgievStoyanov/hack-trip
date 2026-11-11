@@ -66,3 +66,33 @@ export interface ImageInventoryComparison {
     databaseTotalPages: number;
   };
 }
+
+
+export interface MissingThumbnailImageDto {
+  id: number;
+  url: string;
+  thumbnailUrl: string;
+}
+
+export interface MissingThumbnailPageDto {
+  items: MissingThumbnailImageDto[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    hasNext: boolean;
+  };
+}
+
+export interface GenerateThumbnailsResponse {
+  results: Array<{
+    imageId: number;
+    status: 'generated' | 'already_exists' | 'original_missing' | 'not_found' | 'failed';
+  }>;
+  summary: {
+    generated: number;
+    alreadyExists: number;
+    originalMissing: number;
+    notFound: number;
+    failed: number;
+  };
+}
