@@ -152,6 +152,7 @@ function MissingThumbnails() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
+  const [selectionError, setSelectionError] = useState<string | null>(null);
 
   const queryKey = ['admin', 'images', 'missing-thumbnails', page, ADMIN_PAGE_SIZE_DEFAULT];
   const { data, isLoading, error, isFetching } = useQuery({
@@ -166,6 +167,7 @@ function MissingThumbnails() {
         `Generated: ${generated}; already existed: ${alreadyExists}; missing original: ${originalMissing}; not found: ${notFound}; failed: ${failed}.`,
       );
       setSelectedIds([]);
+      setSelectionError(null);
       await queryClient.invalidateQueries({ queryKey: ['admin', 'images', 'missing-thumbnails'] });
     },
   });
@@ -174,18 +176,31 @@ function MissingThumbnails() {
   const allSelected = items.length > 0 && items.every((item) => selectedIds.includes(item.id));
 
   const toggleSelected = (id: number, checked: boolean) => {
-    setSelectedIds((current) =>
-      checked ? [...new Set([...current, id])] : current.filter((value) => value !== id),
-    );
+    setSelectedIds((current) => {
+      if (!checked) return current.filter((value) => value !== id);
+      if (current.includes(id)) return current;
+      if (current.length >= 100) {
+        setSelectionError('You can generate at most 100 thumbnails per request.');
+        return current;
+      }
+      setSelectionError(null);
+      return [...current, id];
+    });
   };
 
   const togglePage = (checked: boolean) => {
     const pageIds = items.map((item) => item.id);
-    setSelectedIds((current) =>
-      checked
-        ? [...new Set([...current, ...pageIds])]
-        : current.filter((id) => !pageIds.includes(id)),
-    );
+    setSelectedIds((current) => {
+      if (!checked) return current.filter((id) => !pageIds.includes(id));
+      const additions = pageIds.filter((id) => !current.includes(id));
+      const availableSlots = Math.max(0, 100 - current.length);
+      if (additions.length > availableSlots) {
+        setSelectionError('You can generate at most 100 thumbnails per request.');
+      } else {
+        setSelectionError(null);
+      }
+      return [...current, ...additions.slice(0, availableSlots)];
+    });
   };
 
   return (
@@ -200,6 +215,7 @@ function MissingThumbnails() {
 
       {error ? <Alert severity="error" sx={{ mb: 2 }}>{getGenericErrorMessage(error)}</Alert> : null}
       {resultMessage ? <Alert severity="success" sx={{ mb: 2 }}>{resultMessage}</Alert> : null}
+      {selectionError ? <Alert severity="warning" sx={{ mb: 2 }}>{selectionError}</Alert> : null}
       {mutation.error ? (
         <Alert severity="error" sx={{ mb: 2 }}>{getGenericErrorMessage(mutation.error)}</Alert>
       ) : null}
