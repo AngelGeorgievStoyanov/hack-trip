@@ -176,31 +176,35 @@ function MissingThumbnails() {
   const allSelected = items.length > 0 && items.every((item) => selectedIds.includes(item.id));
 
   const toggleSelected = (id: number, checked: boolean) => {
-    setSelectedIds((current) => {
-      if (!checked) return current.filter((value) => value !== id);
-      if (current.includes(id)) return current;
-      if (current.length >= 100) {
-        setSelectionError('You can generate at most 100 thumbnails per request.');
-        return current;
-      }
+    if (!checked) {
+      setSelectedIds((current) => current.filter((value) => value !== id));
       setSelectionError(null);
-      return [...current, id];
-    });
+      return;
+    }
+    if (selectedIds.includes(id)) return;
+    if (selectedIds.length >= 100) {
+      setSelectionError('You can generate at most 100 thumbnails per request.');
+      return;
+    }
+    setSelectedIds((current) => [...current, id]);
+    setSelectionError(null);
   };
 
   const togglePage = (checked: boolean) => {
     const pageIds = items.map((item) => item.id);
-    setSelectedIds((current) => {
-      if (!checked) return current.filter((id) => !pageIds.includes(id));
-      const additions = pageIds.filter((id) => !current.includes(id));
-      const availableSlots = Math.max(0, 100 - current.length);
-      if (additions.length > availableSlots) {
-        setSelectionError('You can generate at most 100 thumbnails per request.');
-      } else {
-        setSelectionError(null);
-      }
-      return [...current, ...additions.slice(0, availableSlots)];
-    });
+    if (!checked) {
+      setSelectedIds((current) => current.filter((id) => !pageIds.includes(id)));
+      setSelectionError(null);
+      return;
+    }
+    const additions = pageIds.filter((id) => !selectedIds.includes(id));
+    const availableSlots = Math.max(0, 100 - selectedIds.length);
+    if (additions.length > availableSlots) {
+      setSelectionError('You can generate at most 100 thumbnails per request.');
+    } else {
+      setSelectionError(null);
+    }
+    setSelectedIds((current) => [...current, ...additions.slice(0, availableSlots)]);
   };
 
   return (
