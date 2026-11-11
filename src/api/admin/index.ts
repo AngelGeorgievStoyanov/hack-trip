@@ -8,6 +8,8 @@ import type {
   DeleteCountResponse,
   FailedLogDto,
   ImageInventoryComparison,
+  MissingThumbnailPageDto,
+  GenerateThumbnailsResponse,
   RouteNotFoundLogDto,
 } from '../../types';
 import {
@@ -99,6 +101,25 @@ export const adminApi = {
     const { data } = await apiClient.get<ImageInventoryComparison>(`${ADMIN}/images/orphans`, {
       params,
     });
+    return data;
+  },
+
+  listMissingThumbnails: async (
+    query: AdminListQuery = {},
+  ): Promise<MissingThumbnailPageDto> => {
+    const params = adminPaginationQuerySchema.parse(query);
+    const { data } = await apiClient.get<MissingThumbnailPageDto>(
+      `${ADMIN}/images/missing-thumbnails`,
+      { params },
+    );
+    return data;
+  },
+
+  generateThumbnails: async (imageIds: number[]): Promise<GenerateThumbnailsResponse> => {
+    const { data } = await apiClient.post<GenerateThumbnailsResponse>(
+      `${ADMIN}/images/generate-thumbnails`,
+      { imageIds },
+    );
     return data;
   },
 
