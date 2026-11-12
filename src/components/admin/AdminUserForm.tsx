@@ -90,7 +90,7 @@ export function AdminUserForm({ userId }: { userId: string }) {
     reset,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<AdminUserFormValues>({
     resolver: zodResolver<AdminUserFormValues>(adminUserFormSchema),
   });
@@ -304,7 +304,11 @@ export function AdminUserForm({ userId }: { userId: string }) {
             </TextField>
           )}
         />
-        <Button type="submit" variant="contained" disabled={updateMutation.isPending}>
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={!isDirty || updateMutation.isPending}
+        >
           {updateMutation.isPending ? <CircularProgress size={18} /> : 'Save'}
         </Button>
       </Box>
