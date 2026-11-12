@@ -26,6 +26,7 @@ import { ADMIN_PAGE_SIZE_MAX } from '@/constants/ui';
 import { adminUserUpdateSchema } from '@/validations/admin';
 import { PasswordField } from '@/components/common/PasswordField';
 import { PasswordRequirements } from '@/components/common/PasswordRequirements';
+import { AdminUserProfileImage } from '@/components/admin/AdminUserProfileImage';
 import { hasRole } from '@/constants/roles';
 import type { AuthUserDto, Role, UserStatus } from '@/types';
 
@@ -158,6 +159,7 @@ export function AdminUserForm({ userId }: { userId: string }) {
       </Typography>
       <Typography>Role: {target.role}</Typography>
       <Typography>Status: {target.status}</Typography>
+      <AdminUserProfileImage userId={userId} />
       {serverError ? (
         <Alert severity="error" onClose={() => setServerError(null)}>
           {serverError}
