@@ -11,4 +11,14 @@ export const theme = createTheme({
       main: COLORS.brand,
     },
   },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        ':root': {
+          '--ht-color-brand': COLORS.brand,
+          '--ht-color-page-background': COLORS.pageBackground,
+        },
+      },
+    },
+  },
 });
