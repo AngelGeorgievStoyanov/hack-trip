@@ -44,36 +44,30 @@ The frontend follows these principles:
 
 # 3. High-Level Architecture
 
-The frontend consists of several major layers:
+The frontend has two rendering environments and a feature-oriented data layer. The service layer is optional; feature hooks are used where React-facing state or React Query coordination is needed.
 
 ```text
-┌─────────────────────────────────────────────────────────┐
-│                      Next.js App                         │
-│                                                         │
-│  App Router                                             │
-│  Pages / Layouts / Route Groups                         │
-│                                                         │
-│  ┌───────────────────────┐  ┌────────────────────────┐  │
-│  │ Server Components     │  │ Client Components      │  │
-│  │                       │  │                        │  │
-│  │ Public pages          │  │ Forms                  │  │
-│  │ SEO content           │  │ Maps                   │  │
-│  │ Server composition    │  │ Tracking               │  │
-│  │ Data loading          │  │ Interactive UI         │  │
-│  └───────────┬───────────┘  └────────────┬───────────┘  │
-│              │                           │              │
-│              └──────────────┬────────────┘              │
-│                             ↓                           │
-│                         Services                        │
-│                             ↓                           │
-│                       Feature APIs                      │
-│                             ↓                           │
-│                       api/client.ts                     │
-└─────────────────────────────┬───────────────────────────┘
-                              │
-                              ↓
-                       HackTrip Backend
+                         Next.js App
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+       Server Components           Client Components
+              │                           │
+       Server composition          Feature Hooks
+       Server data loading         Interaction state
+              │                           │
+              └─────────────┬─────────────┘
+                            ↓
+                 Feature API / optional Service
+                            ↓
+                       api/client.ts
+                            ↓
+                          Axios
+                            ↓
+                    HackTrip Backend
 ```
+
+A service is introduced only when it provides meaningful application-level orchestration. A direct Server Component → Feature API or Feature Hook → Feature API path is valid.
 
 Google Maps is deliberately outside the backend API flow:
 
@@ -93,85 +87,65 @@ Google Maps is deliberately outside the backend API flow:
 ```
 
 Google Maps operations must not be routed through `api/client.ts` unless the backend contract explicitly introduces a corresponding endpoint.
-
----
-
 # 4. Repository Structure
 
 The primary frontend structure is:
 
 ```text
 app/
-components/
-api/
-services/
-hooks/
-validations/
-types/
-constants/
-lib/
-config/
+src/
+  api/
+  components/
+  constants/
+  hooks/
+  lib/
+  theme/          target location for MUI theme configuration
+  types/
+  validations/
+  config/
 docs/
 ```
+
+The repository currently uses `src/constants/icons.ts` as its central icon registry. Do not refer to `src/constants/icons/index.ts` unless the registry is deliberately moved and all imports are updated together.
 
 Responsibilities:
 
 ```text
 app/
-    Next.js App Router
-    pages
-    layouts
-    route groups
-    route-level composition
+    Next.js App Router, pages, layouts, route groups and route-level composition
 
-components/
-    reusable UI components
-    feature UI
-    interactive UI
+src/components/
+    reusable UI components, feature UI and interactive UI
 
-api/
-    backend API communication
-    feature endpoint modules
-    centralized Axios client
+src/api/
+    backend API communication, feature endpoint modules and centralized Axios client
 
-services/
-    application-level orchestration
-    coordination between API operations
-    application-specific transformations
+src/hooks/
+    reusable React hooks, feature query/mutation coordination and browser interactions
 
-hooks/
-    reusable React hooks
-    browser interactions
-    authentication state
-    tracking and interactive behavior
+src/services/ (optional)
+    application-level orchestration, multi-operation workflows and application-specific transformations
 
-validations/
-    Zod schemas
-    form validation
-    request/query validation where appropriate
+src/validations/
+    Zod schemas, form validation and request/query validation where appropriate
 
-types/
-    TypeScript models
-    API DTO types
-    feature models
-    UI models
+src/types/
+    TypeScript models, API DTO types, feature models and UI models
 
-constants/
-    reusable application constants
-    organized by responsibility
+src/constants/
+    centralized application constants organized by responsibility
 
-lib/
-    framework-independent utilities
-    shared low-level helpers
+src/theme/ (target)
+    MUI theme creation, palette, typography, shape and component overrides
 
-config/
+src/lib/
+    framework-independent utilities and shared low-level helpers
+
+src/config/
     application/environment configuration
 ```
 
-Do not create additional top-level architectural layers without a clear reason.
-
----
-
+Do not create a service for every API module or add architectural layers without a concrete responsibility.
 # 5. Next.js App Router
 
 The application uses the Next.js App Router.
@@ -261,12 +235,36 @@ Client interactive island
 
 All communication with the HackTrip Backend must use the centralized API architecture.
 
-The intended flow is:
+The transport path is:
 
 ```text
-Page / Component
+Feature API
+    ↓
+api/client.ts
+    ↓
+Axios
+    ↓
+HackTrip Backend
+```
+
+A Server Component may call a feature API directly for server-side data loading. An interactive Client Component normally uses a feature hook when it needs React Query, mutations, cache invalidation, or reusable client-side lifecycle state:
+
+```text
+Server Component ───────────────→ Feature API
+                                      ↓
+                                  api/client.ts
+
+Client Component → Feature Hook → Feature API
+                                      ↓
+                                  api/client.ts
+```
+
+A service may sit between the caller and the Feature API only when meaningful application orchestration is needed:
+
+```text
+Component / Page
        ↓
-Service
+Feature Hook or Service (optional)
        ↓
 Feature API
        ↓
@@ -285,16 +283,7 @@ The layers have distinct responsibilities.
 
 `src/api/client.ts` is the centralized Axios client.
 
-It owns common HTTP behavior such as:
-
-- backend base URL
-- common headers
-- `x-hacktrip-client`
-- authentication header handling
-- credentials
-- refresh behavior
-- common response handling
-- request payload normalization before transport
+It owns common HTTP behavior such as backend base URL, common headers, `x-hacktrip-client`, authentication header handling, credentials, refresh behavior, common response handling, and request payload normalization before transport.
 
 The request interceptor normalizes every outgoing request body:
 
@@ -313,84 +302,32 @@ Raw Axios calls must not be scattered across the application.
 
 ## 8.2 Feature API modules
 
-Feature API modules expose endpoint-specific operations.
-
-Examples include:
-
-```text
-src/api/
-├── auth/
-├── trips/
-├── points/
-├── comments/
-├── social/
-├── admin/
-└── ...
-```
+Feature API modules expose endpoint-specific operations. Examples include `auth/`, `trips/`, `points/`, `comments/`, `social/`, `admin/`, and other feature directories under `src/api/`.
 
 The exact directory structure follows the actual repository.
 
-Feature APIs should contain HTTP endpoint operations rather than UI logic.
+Feature APIs should contain HTTP endpoint operations and their request/response typing rather than UI logic. They must use the centralized client and follow `docs/API_CONTRACT.md`.
 
-Example responsibility:
+Feature APIs must not contain React hooks, component state, presentation logic, or UI notifications.
+# 9. Feature Hooks and Optional Services
 
-```text
-trips API
-    ↓
-GET /trips
-GET /trips/top
-GET /trips/:id
-POST /trips
-DELETE /trips/:id
-POST /trips/:tripId/days
-PUT /trips/:tripGroupId/days/reorder
-PUT /trips/:tripId/days/:dayId
-DELETE /trips/:tripId/days/:dayId
-POST /trips/:tripId/days/:dayId/images
-```
+## 9.1 Feature hooks
 
-Trip Group is only the container that associates days and carries group-level social state. Day content is created and edited through the day endpoints defined above.
+Feature hooks provide a React-facing interface for interactive features. They may coordinate React Query queries and mutations, query keys and cache invalidation, loading/error state, client-side lifecycle and interaction state, and calls to one or more feature API operations.
 
-The exact endpoints and payloads are defined by `docs/API_CONTRACT.md`.
+Hooks may live under `src/hooks/` or in a feature-local hooks directory when that improves cohesion.
 
----
+Do not create a hook that only renames a single API call unless it provides a useful, reusable React-facing contract.
 
-# 9. Services
+## 9.2 Services
 
-Services provide application-level orchestration.
+Services provide application-level orchestration and are optional.
 
-A service may:
+A service may coordinate multiple API operations, transform API data into application models, combine related API operations, provide a feature-oriented interface for workflows shared by multiple UI entry points, or encapsulate a non-trivial application workflow.
 
-- coordinate multiple API operations
-- transform API data into application models
-- combine related API operations
-- provide a feature-oriented interface for components
-- encapsulate non-trivial application workflows
+Services should not wrap every API method without adding behavior, duplicate Axios configuration, contain React component/presentation logic, or replace React Query for server-state caching.
 
-Services should not duplicate Axios configuration.
-
-Services should not contain presentation/UI logic.
-
-Example:
-
-```text
-Trip page
-   ↓
-tripService
-   ↓
-tripApi
-   ↓
-apiClient
-   ↓
-Backend
-```
-
-A service should exist when it provides meaningful application-level behavior.
-
-Do not create empty service wrappers simply to add another layer.
-
----
-
+A service should exist when it provides meaningful application-level behavior. A direct Feature Hook → Feature API or Server Component → Feature API path is valid when no orchestration is needed.
 # 10. API Contract Boundary
 
 `docs/API_CONTRACT.md` defines the backend boundary.
@@ -2257,3 +2194,54 @@ The Trip creation form reads an optional `tripGroupId` from the `/trips/create?t
 - Before submission, compare the selected `dayNumber` against the group's actual `days[]`. If occupied, show the legacy-style error Snackbar (for example, `Day 3 already exists!`) and disable both submit actions. A free number re-enables submission. The backend unique constraint remains authoritative for concurrent requests.
 - Both create operations use the full `tripWriteSchema` payload. Coordinates are included as `lat` and `lng`; day images are uploaded through the separate day-image endpoint after the day exists.
 - Do not infer missing days from the highest number except when calculating the next day for the form. Existing groups may legitimately contain gaps.
+
+---
+
+# 11. UI Architecture and Design System
+
+MUI is the primary UI component system. The design system must provide one consistent source of truth for shared visual decisions without forcing every component into a global abstraction.
+
+## 11.1 Ownership
+
+The target ownership is:
+
+```text
+src/constants/ui/
+    design tokens and shared UI constants
+
+src/theme/
+    MUI theme creation, palette, typography, shape and component overrides
+
+app/providers.tsx
+    provider composition and theme/provider wiring
+
+src/components/
+    reusable UI building blocks and feature components
+```
+
+The current implementation may still create the MUI theme in `app/providers.tsx`. Extracting theme construction into `src/theme/` is a planned implementation step.
+
+## 11.2 Styling rules
+
+- Reusable colors, typography values, spacing decisions, radii, shadows and breakpoints must have a clear central owner.
+- MUI palette, typography, shape and reusable component defaults belong in the MUI theme.
+- Shared non-theme constants and layout presets belong under `src/constants/ui/`.
+- Global CSS is reserved for document-level styles, resets, font declarations, CSS variables and behavior that cannot reasonably be expressed through MUI.
+- Component-local `sx` is appropriate for one-off layout or state-dependent styling; it must not introduce repeated palette values or duplicate design tokens.
+- Do not create a global style abstraction for a one-off style. Extract shared patterns when they have repeated use and the same visual or behavioral meaning.
+- Use MUI theme breakpoints for MUI responsive styles. Use CSS media/container queries when they are the correct tool, while keeping breakpoint values consistent with the responsive system.
+- Centralization must preserve existing visual behavior; it is not an unrequested redesign.
+
+## 11.3 Reusable UI patterns
+
+Extract shared components or patterns when multiple call sites have the same semantics and behavior. Prefer small, composable building blocks for repeated form fields/actions, cards and content surfaces, dialogs and confirmation flows, icon buttons/action groups, and loading/empty/error states.
+
+Do not merge components solely because their markup looks similar when their domain behavior or accessibility semantics differ. Avoid universal components with many feature-specific flags.
+
+## 11.4 Icon registry
+
+The current central registry is `src/constants/icons.ts`, imported through `@/constants/icons`.
+
+Components must not import icons directly from `@mui/icons-material/*`. Add new icon exports to the registry using stable semantic names and keep icon-library implementation details inside that file.
+
+The directory-style path `src/constants/icons/index.ts` is not the current repository structure. Do not move the registry without updating all consumers and the agent instructions in the same change.
