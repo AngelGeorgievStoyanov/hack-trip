@@ -1011,11 +1011,11 @@ React Query must not replace the API architecture.
 The flow remains:
 
 ```text
-Component / hook
+Client Component / hook
       ↓
 React Query
       ↓
-Service / feature API
+Feature API (via optional hook/service orchestration)
       ↓
 api/client.ts
       ↓
@@ -1122,7 +1122,7 @@ Backend trip
     ↓
 Trip API
     ↓
-Trip service/model
+Feature hook or optional service/model
     ↓
 Map component
     ↓
@@ -1297,7 +1297,7 @@ Form
  ↓
 Zod validation
  ↓
-Service
+Feature hook or optional service (when orchestration is needed)
  ↓
 Feature API
  ↓
@@ -1436,11 +1436,11 @@ Prefer:
 ```text
 Button
   ↓
-feature action
+feature action / hook
   ↓
-service
+optional service (only when orchestration is needed)
   ↓
-API
+Feature API
 ```
 
 ---
@@ -1691,7 +1691,7 @@ The HTTP boundary remains:
 ```text
 React Query
     ↓
-service/API
+Feature API (optionally coordinated by a hook/service)
     ↓
 api/client.ts
     ↓
@@ -1714,11 +1714,11 @@ components/
 api/
     backend HTTP operations
 
-services/
-    application orchestration
+services/ (optional)
+    meaningful application orchestration only
 
 hooks/
-    reusable React/browser behavior
+    reusable React/browser behavior and feature query/mutation coordination
 
 validations/
     Zod validation
@@ -1831,13 +1831,11 @@ The target frontend architecture is:
               │                           │
        Server Components           Client Components
               │                           │
-              │                    hooks / interaction
+       Feature API direct         Feature Hooks
               │                           │
               └─────────────┬─────────────┘
                             ↓
-                         Services
-                            ↓
-                      Feature APIs
+                 Feature API / optional Service
                             ↓
                        api/client.ts
                             ↓
@@ -2125,11 +2123,9 @@ For `GET /me/favorites`, only groups for which the authenticated user has a pers
 The frontend should call these endpoints through the existing service/API-client architecture:
 
 ```text
-Page / hook
+Page / feature hook
     ↓
-service
-    ↓
-feature API
+feature API (optional service for orchestration)
     ↓
 api/client.ts
     ↓
