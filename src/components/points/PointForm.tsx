@@ -1,0 +1,377 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
+import { pointApi } from '@/api/points';
+import ImageUploadField from '@/components/images/ImageUploadField';
+import { AddressAutocomplete } from '@/components/maps/AddressAutocomplete';
+import { useGoogleMapsLoader } from '@/hooks/useGoogleMapsLoader';
+import { zodResolver } from '@/lib/zodResolver';
+import { getGenericErrorMessage } from '@/lib/errors';
+import { pointFormSchema } from '@/validations/points';
+import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
+import { useNotification } from '@/components/common/NotificationProvider';
+import { truncatePointName } from '@/lib/pointName';
+import type { SocialImageDto, TripGroupResponse, TripPoint } from '@/types';
+
+interface PointFormProps {
+  tripGroupId: number;
+  tripId: number;
+  point?: TripPoint;
+  existingImages?: SocialImageDto[];
+  latitude: string;
+  longitude: string;
+  onLocationChange: (latitude: string, longitude: string) => void;
+  mapSearchSelection?: { name: string; revision: number } | null;
+  onFindInMap: () => void;
+  onAddNextDay?: () => void;
+  onBack: () => void;
+  onDone: () => void;
+}
+
+interface PointFormValues {
+  name: string;
+  description: string;
+  lat: string;
+  lng: string;
+}
+
+const formSchema = pointFormSchema;
+
+const legacyButtonSx = {
+  width: '32ch',
+  m: 1,
+  '&:hover': { backgroundColor: '#4daf30' },
+};
+
+const stackedActionButtonSx = {
+  ...legacyButtonSx,
+  '@media (max-width:610px)': {
+    width: 'calc(100% - 16px)',
+  },
+};
+
+export function PointForm({
+  tripGroupId,
+  tripId,
+  point,
+  existingImages: providedExistingImages,
+  latitude,
+  longitude,
+  mapSearchSelection,
+  onLocationChange,
+  onFindInMap,
+  onAddNextDay,
+  onBack,
+  onDone,
+}: PointFormProps) {
+  const queryClient = useQueryClient();
+  const notification = useNotification();
+  const { isLoaded } = useGoogleMapsLoader();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [createdPointId, setCreatedPointId] = useState<number | null>(null);
+  const existingImages = providedExistingImages ?? point?.images ?? [];
+  const [uploadedImageCount, setUploadedImageCount] = useState(0);
+  const [findingLocation, setFindingLocation] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const isEdit = point !== undefined;
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors, isDirty, isValid },
+  } = useForm<PointFormValues>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: {
+      name: point?.name ?? '',
+      description: point?.description ?? '',
+      lat: point?.lat != null ? String(point.lat) : '',
+      lng: point?.lng != null ? String(point.lng) : '',
+    },
+  });
+
+  useEffect(() => {
+    setValue('lat', latitude, { shouldValidate: true, shouldDirty: true });
+    setValue('lng', longitude, { shouldValidate: true, shouldDirty: true });
+  }, [latitude, longitude, setValue]);
+
+  useEffect(() => {
+    if (mapSearchSelection?.name) {
+      setValue('name', truncatePointName(mapSearchSelection.name), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [mapSearchSelection?.name, mapSearchSelection?.revision, setValue]);
+
+  async function handleFindInMap(): Promise<void> {
+    const query = watch('name').trim();
+    if (!query) {
+      setLocationError('Enter a place name first.');
+      return;
+    }
+    if (!isLoaded) {
+      setLocationError('Google Maps is not ready yet.');
+      return;
+    }
+
+    setFindingLocation(true);
+    setLocationError(null);
+    try {
+      const response = await new google.maps.Geocoder().geocode({ address: query });
+      const match = response.results[0];
+      if (!match) {
+        setLocationError('No location matched that name.');
+        return;
+      }
+
+      const nextLatitude = String(match.geometry.location.lat());
+      const nextLongitude = String(match.geometry.location.lng());
+      setValue('lat', nextLatitude, { shouldValidate: true, shouldDirty: true });
+      setValue('lng', nextLongitude, { shouldValidate: true, shouldDirty: true });
+      onLocationChange(nextLatitude, nextLongitude);
+      onFindInMap();
+    } catch {
+      setLocationError('Could not find this location. Check the name and try again.');
+    } finally {
+      setFindingLocation(false);
+    }
+  }
+
+  function updateTripCache(updatedPoints: TripPoint[]): void {
+    queryClient.setQueryData<TripGroupResponse>(['trip', tripGroupId], (current) =>
+      current === undefined
+        ? current
+        : {
+            ...current,
+            days: current.days.map((day) =>
+              day.id === tripId ? { ...day, points: updatedPoints } : day,
+            ),
+          },
+    );
+  }
+
+  async function onSubmit(values: PointFormValues): Promise<void> {
+    setSubmitting(true);
+    setServerError(null);
+    try {
+      const input = {
+        name: values.name,
+        description: values.description || null,
+        lat: Number(values.lat),
+        lng: Number(values.lng),
+      };
+
+      let pointId = point?.id ?? createdPointId;
+      if (isEdit && point) {
+        const updatedPoints = await pointApi.updatePoint(point.id, input);
+        updateTripCache(updatedPoints);
+      } else if (pointId === null) {
+        const updatedPoints = await pointApi.createPoint({ tripId, ...input });
+        updateTripCache(updatedPoints);
+        const createdPoint = updatedPoints.reduce<TripPoint | null>(
+          (latest, item) => (!latest || item.pointNumber > latest.pointNumber ? item : latest),
+          null,
+        );
+        if (!createdPoint) {
+          throw new Error('The point was created, but its ID could not be identified.');
+        }
+        pointId = createdPoint.id;
+        setCreatedPointId(pointId);
+      } else if (!isEdit && pointId !== null) {
+        const updatedPoints = await pointApi.updatePoint(pointId, input);
+        updateTripCache(updatedPoints);
+      }
+
+      if (pointId !== null && files.length > 0) {
+        const failedFiles: File[] = [];
+        for (const file of files) {
+          try {
+            await pointApi.uploadPointImage(pointId, file);
+            setUploadedImageCount((current) => current + 1);
+          } catch {
+            failedFiles.push(file);
+          }
+        }
+        if (failedFiles.length > 0) {
+          setFiles(failedFiles);
+          setServerError(
+            `${failedFiles.length} image upload(s) failed. Select Add again to retry without creating a duplicate point.`,
+          );
+          await queryClient.invalidateQueries({ queryKey: ['trip', tripGroupId] });
+          return;
+        }
+      }
+
+      if (files.length > 0) {
+        await queryClient.invalidateQueries({ queryKey: ['trip', tripGroupId] });
+      }
+
+      if (!isEdit) {
+        setCreatedPointId(null);
+        setUploadedImageCount(0);
+        setFiles([]);
+        reset({ name: '', description: '', lat: '', lng: '' });
+        onLocationChange('', '');
+      }
+      onDone();
+    } catch (error) {
+      notification.error(getGenericErrorMessage(error));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1,
+        minWidth: 0,
+        width: '100%',
+        maxWidth: '100%',
+        alignItems: 'stretch',
+        '& .MuiFormControl-root': { m: 0.5, width: 'calc(100% - 10px)' },
+      }}
+    >
+      <Typography gutterBottom variant="h5" sx={{ margin: '10px auto' }}>
+        {isEdit ? 'EDIT POINT' : 'ADD POINT'}
+      </Typography>
+      {serverError ? (
+        <Alert severity="error" sx={{ width: '100%' }}>
+          {serverError}
+        </Alert>
+      ) : null}
+
+      <AddressAutocomplete
+        value={watch('name')}
+        isLoaded={isLoaded}
+        onChange={(value) => setValue('name', value, { shouldDirty: true, shouldValidate: true })}
+        onLocationSelect={(position, address) => {
+          setValue('name', truncatePointName(address), { shouldDirty: true, shouldValidate: true });
+          onLocationChange(String(position.lat), String(position.lng));
+        }}
+        label="NAME OF CITY, PLACE, LANDMARK OR ANOTHER"
+        size="medium"
+        showSearchButton={false}
+        textFieldProps={{
+          InputLabelProps: { shrink: true },
+          error: !!errors.name,
+          helperText: errors.name?.message,
+        }}
+      />
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={() => void handleFindInMap()}
+          disabled={findingLocation || !isLoaded || !watch('name').trim()}
+          startIcon={findingLocation ? <CircularProgress size={16} /> : undefined}
+          sx={{ m: 1, '&:hover': { backgroundColor: '#4daf30' } }}
+        >
+          FIND IN MAP
+        </Button>
+      </Box>
+
+      {locationError ? (
+        <Alert severity="error" sx={{ width: '100%' }}>
+          {locationError}
+        </Alert>
+      ) : null}
+
+      <TextField
+        label="DESCRIPTION"
+        fullWidth
+        multiline
+        rows={4}
+        InputLabelProps={{ shrink: true }}
+        {...register('description')}
+        error={!!errors.description}
+        helperText={errors.description?.message}
+      />
+
+      {!isEdit ? (
+        <Box sx={{ width: '100%' }}>
+          <ImageUploadField
+            files={files}
+            setFiles={setFiles}
+            existingCount={existingImages.length + uploadedImageCount}
+          />
+        </Box>
+      ) : null}
+
+      <Box
+        sx={{
+          display: 'flex',
+          '@media (max-width:610px)': {
+            flexDirection: 'column',
+            alignItems: 'center',
+          },
+        }}
+      >
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={
+            submitting ||
+            !latitude ||
+            !longitude ||
+            (isEdit ? (!isDirty || !isValid) && files.length === 0 : !isDirty || !isValid) ||
+            existingImages.length + uploadedImageCount + files.length > MAX_IMAGES_PER_ENTITY
+          }
+          startIcon={submitting ? <CircularProgress size={16} /> : undefined}
+          sx={stackedActionButtonSx}
+        >
+          {isEdit ? 'EDIT POINT' : createdPointId ? 'RETRY IMAGE UPLOAD' : 'ADD POINT'}
+        </Button>
+        {!isEdit && onAddNextDay ? (
+          <Button
+            type="button"
+            variant="contained"
+            onClick={onAddNextDay}
+            disabled={submitting}
+            sx={stackedActionButtonSx}
+          >
+            ADD NEXT DAY TRIP
+          </Button>
+        ) : null}
+        <Button
+          type="button"
+          variant="contained"
+          onClick={() => {
+            if (!isEdit) {
+              setCreatedPointId(null);
+              setUploadedImageCount(0);
+              setFiles([]);
+              reset({ name: '', description: '', lat: '', lng: '' });
+              onLocationChange('', '');
+            }
+            if (isEdit) onDone();
+            else onBack();
+          }}
+          disabled={submitting}
+          sx={{
+            ...stackedActionButtonSx,
+            backgroundColor: 'rgb(194, 194, 224)',
+            color: 'black',
+            '&:hover': { backgroundColor: 'rgb(170, 170, 210)', color: 'black' },
+          }}
+        >
+          BACK
+        </Button>
+      </Box>
+    </Box>
+  );
+}

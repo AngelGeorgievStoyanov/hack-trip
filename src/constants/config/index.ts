@@ -1,0 +1,21 @@
+/**
+ * Only the select type keys live here. The selectable options themselves are owned by the
+ * backend runtime config and must never be mirrored as frontend constants.
+ */
+
+export type TripSelectFieldName = 'group' | 'transport' | 'currency';
+
+export const SELECT_TYPE_KEYS: Record<TripSelectFieldName, string> = {
+  group: 'group_type',
+  transport: 'transport',
+  currency: 'currency',
+};
+
+/** Dynamic config only changes with a backend deployment, so a single load covers a long session. */
+export const SELECTS_STALE_TIME_MS = 30 * 60 * 1000;
+
+export const SELECTS_QUERY_KEY = ['config', 'selects'] as const;
+
+/** Keep backend social-permission changes testable without discarding the shared query cache. */
+export const SOCIAL_CONFIG_STALE_TIME_MS = 30 * 1000;
+export const SOCIAL_CONFIG_QUERY_KEY = ['config', 'social'] as const;

@@ -1,0 +1,153 @@
+import { apiClient } from '../client';
+import { ADMIN } from '../../constants/api';
+import type { Role, UserStatus } from '../../types';
+import type {
+  AdminPage,
+  AdminReportDto,
+  AuthUserDto,
+  ImageDto,
+  DeleteCountResponse,
+  FailedLogDto,
+  ImageInventoryComparison,
+  MissingThumbnailPageDto,
+  GenerateThumbnailsResponse,
+  RouteNotFoundLogDto,
+} from '../../types';
+import {
+  adminPaginationQuerySchema,
+  adminReportIdParams,
+  adminUserUpdateSchema,
+  failedLogDeleteSchema,
+} from '../../validations';
+
+export interface AdminListQuery {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface AdminUserUpdateInput {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  emailVerified?: boolean;
+  password?: string;
+  role?: Role;
+  status?: UserStatus;
+}
+
+export interface FailedLogDeleteInput {
+  ids: number[];
+}
+
+export const adminApi = {
+  listUsers: async (query: AdminListQuery = {}): Promise<AdminPage<AuthUserDto>> => {
+    const params = adminPaginationQuerySchema.parse(query);
+    const { data } = await apiClient.get<AdminPage<AuthUserDto>>(`${ADMIN}/users`, { params });
+    return data;
+  },
+
+  updateUser: async (userId: string, input: AdminUserUpdateInput): Promise<AuthUserDto> => {
+    const body = adminUserUpdateSchema.parse(input);
+    const { data } = await apiClient.put<AuthUserDto>(`${ADMIN}/users/${userId}`, body);
+    return data;
+  },
+
+  deleteUser: async (userId: string): Promise<void> => {
+    await apiClient.delete(`${ADMIN}/users/${userId}`);
+  },
+
+  getUserProfileImage: async (userId: string): Promise<ImageDto | null> => {
+    const { data } = await apiClient.get<ImageDto | null>(`${ADMIN}/users/${userId}/image`);
+    return data;
+  },
+
+  uploadUserProfileImage: async (userId: string, file: File): Promise<ImageDto> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await apiClient.post<ImageDto>(`${ADMIN}/users/${userId}/image`, formData);
+    return data;
+  },
+
+  deleteUserProfileImage: async (userId: string): Promise<void> => {
+    await apiClient.delete(`${ADMIN}/users/${userId}/image`);
+  },
+
+  listFailedLogs: async (query: AdminListQuery = {}): Promise<AdminPage<FailedLogDto>> => {
+    const params = adminPaginationQuerySchema.parse(query);
+    const { data } = await apiClient.get<AdminPage<FailedLogDto>>(`${ADMIN}/failed-login-logs`, {
+      params,
+    });
+    return data;
+  },
+
+  deleteFailedLogs: async (input: FailedLogDeleteInput): Promise<DeleteCountResponse> => {
+    const body = failedLogDeleteSchema.parse(input);
+    const { data } = await apiClient.delete<DeleteCountResponse>(`${ADMIN}/failed-login-logs`, {
+      data: body,
+    });
+    return data;
+  },
+
+  listRouteNotFoundLogs: async (
+    query: AdminListQuery = {},
+  ): Promise<AdminPage<RouteNotFoundLogDto>> => {
+    const params = adminPaginationQuerySchema.parse(query);
+    const { data } = await apiClient.get<AdminPage<RouteNotFoundLogDto>>(
+      `${ADMIN}/route-not-found-logs`,
+      { params },
+    );
+    return data;
+  },
+
+  listCloudImages: async (query: AdminListQuery = {}): Promise<AdminPage<string>> => {
+    const params = adminPaginationQuerySchema.parse(query);
+    const { data } = await apiClient.get<AdminPage<string>>(`${ADMIN}/images/cloud`, { params });
+    return data;
+  },
+
+  listDatabaseImages: async (query: AdminListQuery = {}): Promise<AdminPage<string>> => {
+    const params = adminPaginationQuerySchema.parse(query);
+    const { data } = await apiClient.get<AdminPage<string>>(`${ADMIN}/images/database`, {
+      params,
+    });
+    return data;
+  },
+
+  listOrphanImages: async (query: AdminListQuery = {}): Promise<ImageInventoryComparison> => {
+    const params = adminPaginationQuerySchema.parse(query);
+    const { data } = await apiClient.get<ImageInventoryComparison>(`${ADMIN}/images/orphans`, {
+      params,
+    });
+    return data;
+  },
+
+  listMissingThumbnails: async (query: AdminListQuery = {}): Promise<MissingThumbnailPageDto> => {
+    const params = adminPaginationQuerySchema.parse(query);
+    const { data } = await apiClient.get<MissingThumbnailPageDto>(
+      `${ADMIN}/images/missing-thumbnails`,
+      { params },
+    );
+    return data;
+  },
+
+  generateThumbnails: async (imageIds: number[]): Promise<GenerateThumbnailsResponse> => {
+    const { data } = await apiClient.post<GenerateThumbnailsResponse>(
+      `${ADMIN}/images/generate-thumbnails`,
+      { imageIds },
+    );
+    return data;
+  },
+
+  listReports: async (query: AdminListQuery = {}): Promise<AdminPage<AdminReportDto>> => {
+    const params = adminPaginationQuerySchema.parse(query);
+    const { data } = await apiClient.get<AdminPage<AdminReportDto>>(`${ADMIN}/reports`, {
+      params,
+    });
+    return data;
+  },
+
+  deleteReport: async (reportId: number): Promise<void> => {
+    const params = adminReportIdParams.parse({ reportId });
+    await apiClient.delete(`${ADMIN}/reports/${params.reportId}`);
+  },
+};

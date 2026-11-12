@@ -12,6 +12,16 @@
 /build
 /dist
 
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# migration staging (temporary)
+/legacy
+
+*.tsbuildinfo
+
 # misc
 .DS_Store
 .env
