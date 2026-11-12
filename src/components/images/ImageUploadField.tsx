@@ -147,7 +147,7 @@ export default function ImageUploadField({
       const candidates = incomingFiles.slice(0, remainingSlots);
       const messages: string[] = [];
       if (incomingFiles.length > remainingSlots) {
-        messages.push(`${MAX_IMAGES_PER_ENTITY} images are the maximum number to upload.`);
+        messages.push(`${maxImages} images are the maximum number to upload.`);
       }
 
       const accepted = candidates.filter((file) => {
