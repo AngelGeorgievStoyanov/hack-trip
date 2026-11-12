@@ -58,7 +58,7 @@ The frontend has two rendering environments and a feature-oriented data layer. T
               │                           │
               └─────────────┬─────────────┘
                             ↓
-                 Feature API / optional Service
+                 Feature API
                             ↓
                        api/client.ts
                             ↓
