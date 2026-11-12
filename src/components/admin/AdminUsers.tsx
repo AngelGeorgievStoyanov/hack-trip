@@ -35,6 +35,8 @@ export function AdminUsers() {
   const { confirm } = useConfirm();
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [failedThumbnailIds, setFailedThumbnailIds] = useState<Set<string>>(() => new Set());
+  const [failedProfileImageIds, setFailedProfileImageIds] = useState<Set<string>>(() => new Set());
   const isAdmin = hasRole(user, 'admin');
   const isManager = hasRole(user, 'manager');
 
@@ -100,8 +102,25 @@ export function AdminUsers() {
                   >
                     <Stack direction="row" spacing={1.5} alignItems="center">
                       <Avatar
-                        src={u.profileImage?.thumbnailUrl || u.profileImage?.url || undefined}
+                        src={
+                          failedProfileImageIds.has(u.id)
+                            ? undefined
+                            : failedThumbnailIds.has(u.id)
+                              ? u.profileImage?.url || undefined
+                              : u.profileImage?.thumbnailUrl || u.profileImage?.url || undefined
+                        }
                         alt={`${u.firstName} ${u.lastName}`.trim() || 'User profile'}
+                        onError={() => {
+                          if (
+                            !failedThumbnailIds.has(u.id) &&
+                            u.profileImage?.thumbnailUrl &&
+                            u.profileImage?.url
+                          ) {
+                            setFailedThumbnailIds((current) => new Set(current).add(u.id));
+                          } else {
+                            setFailedProfileImageIds((current) => new Set(current).add(u.id));
+                          }
+                        }}
                         sx={{ width: 88, height: 88, bgcolor: 'action.selected', flexShrink: 0 }}
                       >
                         <PersonOutlineRoundedIcon fontSize="large" />
