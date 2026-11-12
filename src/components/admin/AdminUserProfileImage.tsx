@@ -7,6 +7,7 @@ import { Alert, Avatar, Box, Button, CircularProgress, Stack, Typography } from 
 import { adminApi } from '@/api/admin';
 import { useConfirm } from '@/components/common/ConfirmDialog';
 import ImageUploadField from '@/components/images/ImageUploadField';
+import { AppImage } from '@/components/images/AppImage';
 import { ImageLightbox } from '@/components/images/ImageLightbox';
 import { getGenericErrorMessage } from '@/lib/errors';
 import type { ImageDto } from '@/types';
@@ -58,11 +59,22 @@ export function AdminUserProfileImage({ userId }: { userId: string }) {
       {image ? (
         <Stack direction="row" spacing={2} alignItems="center">
           <Avatar
-            src={image.thumbnailUrl || image.url}
-            alt="User profile image"
+            component="button"
+            type="button"
+            aria-label="Open profile image"
             onClick={() => setLightboxOpen(true)}
-            sx={{ width: 88, height: 88, cursor: 'zoom-in' }}
-          />
+            sx={{ width: 88, height: 88, cursor: 'zoom-in', p: 0, border: 0 }}
+          >
+            <AppImage
+              image={image}
+              alt="User profile image"
+              useThumbnail
+              width={88}
+              height={88}
+              sizes="88px"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </Avatar>
           <Button
             color="error"
             variant="outlined"
