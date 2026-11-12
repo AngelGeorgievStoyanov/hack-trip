@@ -4,7 +4,7 @@
 
 This document describes the architecture of the HackTrip frontend.
 
-The frontend is a Next.js application that communicates with the HackTrip Backend through the documented API contract and integrates with Google Maps independently as a browser-side service.
+The frontend is a Next.js application that communicates with the HackTrip Backend through the documented API contract and integrates with Google Maps independently as a browser-side SDK.
 
 The current modernization is an incremental migration of an existing application.
 
@@ -44,7 +44,7 @@ The frontend follows these principles:
 
 # 3. High-Level Architecture
 
-The frontend has two rendering environments and a feature-oriented data layer. The service layer is optional; feature hooks are used where React-facing state or React Query coordination is needed.
+The frontend has two rendering environments and a feature-oriented data layer. Feature hooks are used where React-facing state or React Query coordination is needed; otherwise callers use the Feature API directly.
 
 ```text
                          Next.js App
@@ -67,7 +67,7 @@ The frontend has two rendering environments and a feature-oriented data layer. T
                     HackTrip Backend
 ```
 
-A service is introduced only when it provides meaningful application-level orchestration. A direct Server Component → Feature API or Feature Hook → Feature API path is valid.
+A Server Component may call the Feature API directly. An interactive Client Component uses a feature hook when React Query or client lifecycle coordination is needed.
 
 Google Maps is deliberately outside the backend API flow:
 
@@ -123,9 +123,6 @@ src/api/
 src/hooks/
     reusable React hooks, feature query/mutation coordination and browser interactions
 
-src/services/ (optional)
-    application-level orchestration, multi-operation workflows and application-specific transformations
-
 src/validations/
     Zod schemas, form validation and request/query validation where appropriate
 
@@ -145,7 +142,7 @@ src/config/
     application/environment configuration
 ```
 
-Do not create a service for every API module or add architectural layers without a concrete responsibility.
+Do not add an intermediate frontend layer or unnecessary pass-through abstractions.
 # 5. Next.js App Router
 
 The application uses the Next.js App Router.
@@ -259,12 +256,12 @@ Client Component → Feature Hook → Feature API
                                   api/client.ts
 ```
 
-A service may sit between the caller and the Feature API only when meaningful application orchestration is needed:
+Use the direct feature-oriented flow:
 
 ```text
 Component / Page
        ↓
-Feature Hook or Service (optional)
+Feature Hook (when needed)
        ↓
 Feature API
        ↓
@@ -274,6 +271,8 @@ Axios
        ↓
 HackTrip Backend
 ```
+
+A Server Component may call Feature API directly.
 
 The layers have distinct responsibilities.
 
@@ -309,7 +308,7 @@ The exact directory structure follows the actual repository.
 Feature APIs should contain HTTP endpoint operations and their request/response typing rather than UI logic. They must use the centralized client and follow `docs/API_CONTRACT.md`.
 
 Feature APIs must not contain React hooks, component state, presentation logic, or UI notifications.
-# 9. Feature Hooks and Optional Services
+# 9. Feature Hooks
 
 ## 9.1 Feature hooks
 
@@ -319,15 +318,6 @@ Hooks may live under `src/hooks/` or in a feature-local hooks directory when tha
 
 Do not create a hook that only renames a single API call unless it provides a useful, reusable React-facing contract.
 
-## 9.2 Services
-
-Services provide application-level orchestration and are optional.
-
-A service may coordinate multiple API operations, transform API data into application models, combine related API operations, provide a feature-oriented interface for workflows shared by multiple UI entry points, or encapsulate a non-trivial application workflow.
-
-Services should not wrap every API method without adding behavior, duplicate Axios configuration, contain React component/presentation logic, or replace React Query for server-state caching.
-
-A service should exist when it provides meaningful application-level behavior. A direct Feature Hook → Feature API or Server Component → Feature API path is valid when no orchestration is needed.
 # 10. API Contract Boundary
 
 `docs/API_CONTRACT.md` defines the backend boundary.
@@ -1015,14 +1005,14 @@ Client Component / hook
       ↓
 React Query
       ↓
-Feature API (via optional hook/service orchestration)
+Feature API (called directly or through a feature hook)
       ↓
 api/client.ts
       ↓
 Backend
 ```
 
-Do not call Axios directly from arbitrary React Query callbacks when an existing API/service layer is responsible for the endpoint.
+Do not call Axios directly from arbitrary React Query callbacks; use the relevant Feature API.
 
 Do not introduce React Query into server-only page data simply because it is available in `package.json`.
 
@@ -1122,7 +1112,7 @@ Backend trip
     ↓
 Trip API
     ↓
-Feature hook or optional service/model
+Feature hook (when needed)
     ↓
 Map component
     ↓
@@ -1297,7 +1287,7 @@ Form
  ↓
 Zod validation
  ↓
-Feature hook or optional service (when orchestration is needed)
+Feature hook (when needed)
  ↓
 Feature API
  ↓
@@ -1438,7 +1428,7 @@ Button
   ↓
 feature action / hook
   ↓
-optional service (only when orchestration is needed)
+Feature API
   ↓
 Feature API
 ```
@@ -1670,7 +1660,6 @@ React Query, where used, is a client-side server-state mechanism.
 It does not replace:
 
 - API modules
-- services
 - Axios client
 - backend contract
 
@@ -1691,7 +1680,7 @@ The HTTP boundary remains:
 ```text
 React Query
     ↓
-Feature API (optionally coordinated by a hook/service)
+Feature API (optionally coordinated by a feature hook)
     ↓
 api/client.ts
     ↓
@@ -1714,9 +1703,6 @@ components/
 api/
     backend HTTP operations
 
-services/ (optional)
-    meaningful application orchestration only
-
 hooks/
     reusable React/browser behavior and feature query/mutation coordination
 
@@ -1738,7 +1724,6 @@ config/
 
 Do not place API calls in constants.
 
-Do not place UI components in services.
 
 Do not place backend transport logic in map components.
 
@@ -1835,7 +1820,7 @@ The target frontend architecture is:
               │                           │
               └─────────────┬─────────────┘
                             ↓
-                 Feature API / optional Service
+                 Feature API
                             ↓
                        api/client.ts
                             ↓
@@ -1921,7 +1906,6 @@ The frontend architecture remains responsible for clean separation between:
 
 - pages
 - UI
-- services
 - API modules
 - HTTP transport
 - authentication
@@ -1967,7 +1951,7 @@ The frontend must not read the Google Cloud Storage bucket directly and must not
 
 The backend's existing `refreshSlow()` flow loads background object names from Google Cloud Storage into dynamic configuration. A successful refresh replaces the stored list with the newly discovered names. If a later refresh fails, the last successful list remains available; the failure may be logged as a warning and must not break startup or dynamic-config refresh.
 
-The backend background service selects random images from the dynamic-config list and returns a pair of ready-to-use public values through the public background endpoint: `current` for the current background and `next` as a candidate for the next navigation.
+The backend background component selects random images from the dynamic-config list and returns a pair of ready-to-use public values through the public background endpoint: `current` for the current background and `next` as a candidate for the next navigation.
 
 The frontend calls the public background endpoint and consumes the image pair. The frontend does not implement the random-selection algorithm.
 
@@ -2120,12 +2104,12 @@ For `GET /me/trips`, only groups owned by the authenticated user are returned.
 
 For `GET /me/favorites`, only groups for which the authenticated user has a persisted favorite relationship are returned. The frontend must not infer favorite state from local UI state.
 
-The frontend should call these endpoints through the existing service/API-client architecture:
+The frontend should call these endpoints through the Feature API and centralized API client:
 
 ```text
 Page / feature hook
     ↓
-feature API (optional service for orchestration)
+feature API
     ↓
 api/client.ts
     ↓
@@ -2149,14 +2133,14 @@ Both are available to anonymous visitors using the required public Frontend auth
 
 `GET /trips/top` returns up to five trip groups ranked by their total likes. The frontend consumes the normal trip response structure and does not implement the ranking or grouping logic.
 
-`GET /trips/background` returns a pair of image objects: `current` for the current background and `next` as a preloaded candidate for the next navigation. Background images are not read directly from Google Cloud Storage by the frontend. The backend refreshes the available filenames through its slow dynamic-config refresh, keeps the last successful list when a refresh fails, and the backend background service selects the random image pair.
+`GET /trips/background` returns a pair of image objects: `current` for the current background and `next` as a preloaded candidate for the next navigation. Background images are not read directly from Google Cloud Storage by the frontend. The backend refreshes the available filenames through its slow dynamic-config refresh, keeps the last successful list when a refresh fails, and the backend background component selects the random image pair.
 
 The frontend therefore performs:
 
 ```text
 public page / component
     ↓
-service / API module
+Feature API
     ↓
 GET /trips/background
     ↓
