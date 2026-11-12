@@ -271,7 +271,7 @@ code {
   width: 100%;
   max-width: 1000px;
   padding: clamp(18px, 4vw, 42px);
-  background: #cfe8fc;
+  background: var(--ht-color-page-background);
   overflow-wrap: anywhere;
 }
 
