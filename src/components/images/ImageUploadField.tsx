@@ -29,6 +29,7 @@ interface ImageUploadFieldProps {
   files: File[];
   setFiles: Dispatch<SetStateAction<File[]>>;
   existingCount?: number;
+  maxImages?: number;
 }
 
 function loadImage(
@@ -113,6 +114,7 @@ export default function ImageUploadField({
   files,
   setFiles,
   existingCount = 0,
+  maxImages = MAX_IMAGES_PER_ENTITY,
 }: ImageUploadFieldProps) {
   const isMobileUpload = useMediaQuery('(max-width:599px)');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -136,9 +138,9 @@ export default function ImageUploadField({
     setProcessing(true);
     setErrorMessage(null);
     try {
-      const remainingSlots = MAX_IMAGES_PER_ENTITY - existingCount - files.length;
+      const remainingSlots = maxImages - existingCount - files.length;
       if (remainingSlots <= 0) {
-        setErrorMessage(`${MAX_IMAGES_PER_ENTITY} images are the maximum number to upload.`);
+        setErrorMessage(`${maxImages} images are the maximum number to upload.`);
         return;
       }
 
@@ -170,7 +172,7 @@ export default function ImageUploadField({
       }
 
       if (processed.length > 0) {
-        setFiles((current) => [...current, ...processed].slice(0, MAX_IMAGES_PER_ENTITY));
+        setFiles((current) => [...current, ...processed].slice(0, maxImages));
       }
       if (messages.length > 0) setErrorMessage(messages.join(' '));
     } finally {
@@ -188,7 +190,7 @@ export default function ImageUploadField({
     setErrorMessage(null);
   }
 
-  const isAtImageLimit = existingCount + files.length >= MAX_IMAGES_PER_ENTITY;
+  const isAtImageLimit = existingCount + files.length >= maxImages;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, width: '100%' }}>
@@ -206,20 +208,20 @@ export default function ImageUploadField({
           images={[]}
           fileSelected={files}
           iconFotoCamera={isMobileUpload}
-          maxImages={Math.max(0, MAX_IMAGES_PER_ENTITY - existingCount)}
+          maxImages={Math.max(0, maxImages - existingCount)}
           disabled={processing}
         />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {processing ? <CircularProgress size={18} aria-label="Processing images" /> : null}
           <Typography variant="body2" sx={{ mr: 1 }}>
-            {existingCount + files.length}/{MAX_IMAGES_PER_ENTITY} uploaded images
+            {existingCount + files.length}/{maxImages} uploaded images
           </Typography>
         </Box>
       </Box>
 
       {isAtImageLimit ? (
         <Typography variant="body2" color="error">
-          9 images are the maximum number to upload.
+          {maxImages} images are the maximum number to upload.
         </Typography>
       ) : null}
       {errorMessage ? (
