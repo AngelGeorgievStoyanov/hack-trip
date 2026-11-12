@@ -51,7 +51,11 @@ export function AdminUserProfileImage({ userId }: { userId: string }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Typography variant="h6">Profile image</Typography>
-      {error ? <Alert severity="error" onClose={() => setError(null)}>{error}</Alert> : null}
+      {error ? (
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
       {imageQuery.isLoading ? <CircularProgress size={24} /> : null}
       {imageQuery.error ? (
         <Alert severity="error">{getGenericErrorMessage(imageQuery.error)}</Alert>
@@ -90,7 +94,9 @@ export function AdminUserProfileImage({ userId }: { userId: string }) {
           </Button>
         </Stack>
       ) : !imageQuery.isLoading && !imageQuery.error ? (
-        <Typography variant="body2" color="text.secondary">No profile image uploaded.</Typography>
+        <Typography variant="body2" color="text.secondary">
+          No profile image uploaded.
+        </Typography>
       ) : null}
       <ImageUploadField files={files} setFiles={setFiles} maxImages={1} />
       <Button
@@ -99,7 +105,13 @@ export function AdminUserProfileImage({ userId }: { userId: string }) {
         onClick={() => uploadMutation.mutate(files[0])}
         sx={{ alignSelf: 'flex-start' }}
       >
-        {uploadMutation.isPending ? <CircularProgress size={18} /> : image ? 'Replace image' : 'Upload image'}
+        {uploadMutation.isPending ? (
+          <CircularProgress size={18} />
+        ) : image ? (
+          'Replace image'
+        ) : (
+          'Upload image'
+        )}
       </Button>
       {image ? (
         <ImageLightbox

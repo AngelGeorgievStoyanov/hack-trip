@@ -113,7 +113,13 @@ export function AdminUsers() {
                             });
                           }
                         }}
-                        sx={{ width: 88, height: 88, bgcolor: 'action.selected', flexShrink: 0, cursor: u.profileImage ? 'zoom-in' : 'default' }}
+                        sx={{
+                          width: 88,
+                          height: 88,
+                          bgcolor: 'action.selected',
+                          flexShrink: 0,
+                          cursor: u.profileImage ? 'zoom-in' : 'default',
+                        }}
                       >
                         {u.profileImage ? (
                           <AppImage
