@@ -299,55 +299,55 @@ Authorization model:
 
 ### 5.1 Matrix
 
-| Endpoint                                       | Anonymous                         | Authenticated                                         | Owner | Manager                    | Admin |
-| ---------------------------------------------- | --------------------------------- | ----------------------------------------------------- | ----- | -------------------------- | ----- |
-| GET `/auth/me`                                 | NO (404/401)                      | YES                                                   | —     | —                          | —     |
-| GET `/auth/session`                            | YES (public token + cookie probe) | YES (valid JWT accepted; result remains cookie-based) | —     | —                          | —     |
-| PUT `/auth/me`                                 | NO                                | YES (self only)                                       | —     | —                          | —     |
-| GET/POST/DELETE `/auth/me/image`               | NO                                | YES (self only)                                       | —     | —                          | —     |
-| GET `/config/selects`                          | YES (public token)                | YES                                                   | —     | —                          | —     |
-| GET `/config/services`                         | YES (public token)                | YES                                                   | —     | —                          | —     |
-| GET `/config/social`                           | YES (public token)                | YES                                                   | —     | —                          | —     |
-| GET `/trips`                                   | YES (public token)                | YES                                                   | —     | —                          | —     |
-| GET `/trips/:tripGroupId`                      | YES (public token)                | YES                                                   | —     | —                          | —     |
-| GET `/trips/top`                               | YES (public token)                | YES                                                   | —     | —                          | —     |
-| GET `/trips/background`                        | YES (public token)                | YES                                                   | —     | —                          | —     |
-| GET `/me/trips`                                | NO                                | YES                                                   | YES*  | —                          | —     |
-| GET `/me/favorites`                            | NO                                | YES                                                   | —     | —                          | —     |
-| POST `/trips`                                  | NO                                | YES                                                   | —     | —                          | —     |
-| DELETE `/trips/:tripGroupId`                   | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| POST `/trips/:tripGroupId/days`                | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| PUT `/trips/:tripGroupId/days/reorder`         | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| PUT `/trips/:tripGroupId/days/:tripId`         | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| DELETE `/trips/:tripGroupId/days/:tripId`      | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| POST `/trips/:tripGroupId/days/:tripId/images` | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| GET `/trips/:tripId/points`                    | YES (public token)                | YES                                                   | —     | —                          | —     |
-| GET `/points/:pointId`                         | YES (public token)                | YES                                                   | —     | —                          | —     |
-| POST `/points`                                 | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| PUT `/points/:pointId`                         | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| DELETE `/points/:pointId`                      | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| POST `/points/:pointId/images`                 | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| DELETE `/points/:pointId/images/:imageId`      | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| PUT `/days/:tripId/points/reorder`             | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| DELETE `/images/:imageId`                      | NO                                | CONDITIONAL                                           | YES   | YES                        | YES   |
-| GET (comments)                                 | YES (public token)                | YES                                                   | —     | —                          | —     |
-| POST (comments)                                | NO                                | YES                                                   | —     | —                          | —     |
-| PUT `/comments/:commentId`                     | NO                                | CONDITIONAL (author/moderator)                        | —     | YES                        | YES   |
-| DELETE `/comments/:commentId`                  | NO                                | CONDITIONAL (author/moderator)                        | NO    | YES                        | YES   |
-| POST/DELETE `/likes`                           | NO                                | YES                                                   | —     | —                          | —     |
-| POST/DELETE `/favorites`                       | NO                                | YES                                                   | —     | —                          | —     |
-| POST `/reports`                                | NO                                | YES                                                   | —     | —                          | —     |
-| DELETE `/reports`                              | NO                                | YES                                                   | —     | YES                        | YES   |
-| GET `/admin/users`                             | NO                                | NO                                                    | NO    | YES                        | YES   |
-| PUT `/admin/users/:userId`                     | NO                                | NO                                                    | NO    | PARTIAL (no role/password) | YES   |
-| DELETE `/admin/users/:userId`                  | NO                                | NO                                                    | NO    | YES                        | YES   |
-| GET/DELETE `/admin/failed-login-logs`          | NO                                | NO                                                    | NO    | YES                        | YES   |
-| GET `/admin/route-not-found-logs`              | NO                                | NO                                                    | NO    | YES                        | YES   |
-| GET `/admin/images/cloud`                      | NO                                | NO                                                    | NO    | YES                        | YES   |
-| GET `/admin/images/database`                   | NO                                | NO                                                    | NO    | YES                        | YES   |
-| GET `/admin/images/orphans`                    | NO                                | NO                                                    | NO    | YES                        | YES   |
-| GET `/admin/reports`                           | NO                                | NO                                                    | NO    | YES                        | YES   |
-| DELETE `/admin/reports/:reportId`              | NO                                | NO                                                    | NO    | YES                        | YES   |
+| Endpoint                                       | Anonymous                         | Authenticated                                         | Owner | Manager                                        | Admin                    |
+| ---------------------------------------------- | --------------------------------- | ----------------------------------------------------- | ----- | ---------------------------------------------- | ------------------------ |
+| GET `/auth/me`                                 | NO (404/401)                      | YES                                                   | —     | —                                              | —                        |
+| GET `/auth/session`                            | YES (public token + cookie probe) | YES (valid JWT accepted; result remains cookie-based) | —     | —                                              | —                        |
+| PUT `/auth/me`                                 | NO                                | YES (self only)                                       | —     | —                                              | —                        |
+| GET/POST/DELETE `/auth/me/image`               | NO                                | YES (self only)                                       | —     | —                                              | —                        |
+| GET `/config/selects`                          | YES (public token)                | YES                                                   | —     | —                                              | —                        |
+| GET `/config/services`                         | YES (public token)                | YES                                                   | —     | —                                              | —                        |
+| GET `/config/social`                           | YES (public token)                | YES                                                   | —     | —                                              | —                        |
+| GET `/trips`                                   | YES (public token)                | YES                                                   | —     | —                                              | —                        |
+| GET `/trips/:tripGroupId`                      | YES (public token)                | YES                                                   | —     | —                                              | —                        |
+| GET `/trips/top`                               | YES (public token)                | YES                                                   | —     | —                                              | —                        |
+| GET `/trips/background`                        | YES (public token)                | YES                                                   | —     | —                                              | —                        |
+| GET `/me/trips`                                | NO                                | YES                                                   | YES*  | —                                              | —                        |
+| GET `/me/favorites`                            | NO                                | YES                                                   | —     | —                                              | —                        |
+| POST `/trips`                                  | NO                                | YES                                                   | —     | —                                              | —                        |
+| DELETE `/trips/:tripGroupId`                   | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| POST `/trips/:tripGroupId/days`                | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| PUT `/trips/:tripGroupId/days/reorder`         | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| PUT `/trips/:tripGroupId/days/:tripId`         | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| DELETE `/trips/:tripGroupId/days/:tripId`      | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| POST `/trips/:tripGroupId/days/:tripId/images` | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| GET `/trips/:tripId/points`                    | YES (public token)                | YES                                                   | —     | —                                              | —                        |
+| GET `/points/:pointId`                         | YES (public token)                | YES                                                   | —     | —                                              | —                        |
+| POST `/points`                                 | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| PUT `/points/:pointId`                         | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| DELETE `/points/:pointId`                      | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| POST `/points/:pointId/images`                 | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| DELETE `/points/:pointId/images/:imageId`      | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| PUT `/days/:tripId/points/reorder`             | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| DELETE `/images/:imageId`                      | NO                                | CONDITIONAL                                           | YES   | YES                                            | YES                      |
+| GET (comments)                                 | YES (public token)                | YES                                                   | —     | —                                              | —                        |
+| POST (comments)                                | NO                                | YES                                                   | —     | —                                              | —                        |
+| PUT `/comments/:commentId`                     | NO                                | CONDITIONAL (author/moderator)                        | —     | YES                                            | YES                      |
+| DELETE `/comments/:commentId`                  | NO                                | CONDITIONAL (author/moderator)                        | NO    | YES                                            | YES                      |
+| POST/DELETE `/likes`                           | NO                                | YES                                                   | —     | —                                              | —                        |
+| POST/DELETE `/favorites`                       | NO                                | YES                                                   | —     | —                                              | —                        |
+| POST `/reports`                                | NO                                | YES                                                   | —     | —                                              | —                        |
+| DELETE `/reports`                              | NO                                | YES                                                   | —     | YES                                            | YES                      |
+| GET `/admin/users`                             | NO                                | NO                                                    | NO    | YES (user-role records only)                   | YES (all roles)          |
+| PUT `/admin/users/:userId`                     | NO                                | NO                                                    | NO    | PARTIAL (user targets; no email/role/password) | YES (all targets/fields) |
+| DELETE `/admin/users/:userId`                  | NO                                | NO                                                    | NO    | PARTIAL (user targets only)                    | YES (all roles)          |
+| GET/DELETE `/admin/failed-login-logs`          | NO                                | NO                                                    | NO    | YES                                            | YES                      |
+| GET `/admin/route-not-found-logs`              | NO                                | NO                                                    | NO    | YES                                            | YES                      |
+| GET `/admin/images/cloud`                      | NO                                | NO                                                    | NO    | YES                                            | YES                      |
+| GET `/admin/images/database`                   | NO                                | NO                                                    | NO    | YES                                            | YES                      |
+| GET `/admin/images/orphans`                    | NO                                | NO                                                    | NO    | YES                                            | YES                      |
+| GET `/admin/reports`                           | NO                                | NO                                                    | NO    | YES                                            | YES                      |
+| DELETE `/admin/reports/:reportId`              | NO                                | NO                                                    | NO    | YES                                            | YES                      |
 
 `*` The authenticated actor is the owner being used to scope the result. The request does not contain a user id.
 
@@ -499,9 +499,18 @@ The auth/profile endpoints return `ProfileDto` (inside `{ "user": ... }` and ins
   "lastName": "<string>",
   "role": "user" | "admin" | "manager",
   "status": "PENDING_VERIFICATION" | "ACTIVE" | "SUSPENDED" | "DEACTIVATED",
-  "emailVerified": true | false
+  "emailVerified": true | false,
+  "profileImage": ImageDto | null,
+  "createdAt": "<ISO 8601 datetime>" | null,
+  "updatedAt": "<ISO 8601 datetime>" | null,
+  "countOfLogs": <number> | null,
+  "lastTimeLogin": "<datetime string>" | null
 }
 ```
+
+- `countOfLogs` counts successful credential-based logins. It increases atomically by one for each successful login; failed attempts and refresh-token rotations do not increment it.
+- `lastTimeLogin` is the ISO 8601 timestamp of the most recent successful credential-based login and is updated together with the counter.
+- Existing NULL counters are treated as zero on the first successful login.
 
 ---
 
@@ -1426,7 +1435,7 @@ Mounted at `/api/v1/images`.
 
 ### 11.2 Image upload contract (all image uploads)
 
-Applies to `POST /auth/me/image`, `POST /trips/:tripGroupId/days/:tripId/images`, and `POST /points/:pointId/images`.
+Applies to `POST /auth/me/image`, `POST /admin/users/:userId/image`, `POST /trips/:tripGroupId/days/:tripId/images`, and `POST /points/:pointId/images`.
 
 - Multipart field name: `file`.
 - Exactly one binary part per request; no text fields are part of the contract (`files: 1`, `fields: 0`, `parts: 1`).
@@ -1651,6 +1660,8 @@ Admin pagination query (strict, shared by all admin list endpoints):
 ### 16.1 GET `/admin/users`
 
 - Role: `admin` or `manager`.
+- `admin` receives users of all roles (`user`, `manager`, `admin`). `manager` receives only records whose database role is `user`.
+- The role filter is applied in the database before pagination; `pagination.total` and `totalPages` count only records visible to the requesting role.
 - Response `200`: `AdminPage<AuthUserDto>` (ordered by email asc).
 
 ```text
@@ -1662,30 +1673,60 @@ Admin pagination query (strict, shared by all admin list endpoints):
 
 ### 16.2 PUT `/admin/users/:userId`
 
-- Role: `admin` or `manager` on the route. Assigning `role` or `password` additionally requires the `admin` role: a `manager` request whose body contains `role` or `password` is rejected with `403 FORBIDDEN` ("Only an admin can change role or password."). `firstName`, `lastName`, `email`, `status` and `emailVerified` are assignable by both roles.
+- Role: `admin` or `manager` on the route. `admin` may update any target account and assign all fields. `manager` may update only a target whose current database role is `user`; attempts to update a `manager` or `admin` target are rejected with `403 FORBIDDEN`. Managers may assign only `firstName`, `lastName`, `status` and `emailVerified`; a request containing `email`, `role` or `password` is rejected with `403 FORBIDDEN` ("Only an admin can change email, role or password.").
 - Path params (strict): `{ userId: UUID }`.
 - Body (strict): `{ firstName?, lastName?, email?, role?, status?, emailVerified?, password? }` (at least one required).
 
+  - `email` is trimmed, lowercased and pattern-checked (admin only).
   - `role` enum: `user` | `admin` | `manager` (admin only).
   - `status` enum: `PENDING_VERIFICATION` | `ACTIVE` | `SUSPENDED` | `DEACTIVATED`.
-  - `email` is trimmed, lowercased and pattern-checked; a `emailVerified` boolean is stored as `emailVerifiedAt` (`true` -> now, `false` -> `null`).
+  - `emailVerified` boolean is stored as `emailVerifiedAt` (`true` -> now, `false` -> `null`).
   - `password` follows the account password policy (8..72 bytes) and is stored hashed.
 
 - Response `200`: `AuthUserDto`.
-- Errors: unknown user -> `404 NOT_FOUND`; email already used by another account -> `409 CONFLICT` ("Another account already uses this email address.").
-- Identity/credential/verification columns (`id`, `hashedPassword`, `imageFile`, `verifyEmail`, `emailVerifiedAt`, `createdAt`) are not settable through this endpoint; the strict schema rejects every undeclared field.
+- Errors: unknown user -> `404 NOT_FOUND`; manager target role is not `user` -> `403 FORBIDDEN`; manager submits `email`, `role` or `password` -> `403 FORBIDDEN`; email already used by another account -> `409 CONFLICT` ("Another account already uses this email address.").
+- Identity/credential/verification columns (`id`, `hashedPassword`, `imageFile`, `verifyEmail`, `emailVerifiedAt`, `createdAt`, `updatedAt`, `countOfLogs`, `lastTimeLogin`) are not settable through this endpoint; the strict schema rejects every undeclared field.
+- The admin `AuthUserDto` exposes `profileImage` as the latest image owned by the user and not attached to a trip or point (or `null` when absent), plus `createdAt`, `updatedAt`, `countOfLogs`, and `lastTimeLogin` as read-only account activity metadata. `createdAt` and `updatedAt` are ISO 8601 strings; `lastTimeLogin` is returned as stored. Nullable database values are returned as `null`.
+
+### 16.2.1 GET `/admin/users/:userId/image`
+
+- Role: `admin` or `manager`. Admin may access any target user; manager may access only a target whose current database role is `user`.
+- Path params (strict): `{ userId: UUID }`.
+- Response `200`: `ImageDto` or `null` when the target user has no profile image.
+- Errors: unknown user -> `404 NOT_FOUND`; manager target role is not `user` -> `403 FORBIDDEN`.
+
+### 16.2.2 POST `/admin/users/:userId/image`
+
+- Role and target scope: same as `GET /admin/users/:userId/image`.
+- Path params (strict): `{ userId: UUID }`.
+- Multipart: field `file`, exactly one file and no text fields; follows the shared image-upload contract in §11.2.
+- The target-user authorization check runs before the upload middleware stores the file.
+- Response `201`: `ImageDto`.
+- The existing profile image is replaced using the same profile-image service behavior as `POST /auth/me/image`; the frontend must treat profile-image management as a separate operation from `PUT /admin/users/:userId`.
+- Errors: unknown user -> `404 NOT_FOUND`; manager target role is not `user` -> `403 FORBIDDEN`; invalid/unsupported upload -> `400 VALIDATION_ERROR`.
+
+### 16.2.3 DELETE `/admin/users/:userId/image`
+
+- Role and target scope: same as `GET /admin/users/:userId/image`.
+- Path params (strict): `{ userId: UUID }`.
+- Response `204` (empty).
+- Removes the target user's profile image and its thumbnail using the existing profile-image service.
+- Errors: unknown user -> `404 NOT_FOUND`; manager target role is not `user` -> `403 FORBIDDEN`.
 
 ### 16.3 DELETE `/admin/users/:userId`
 
-- Role: `admin` or `manager`.
+- Role: `admin` or `manager`. `admin` may delete targets of any role; `manager` may delete only targets whose current database role is `user`. Attempts by a manager to delete a `manager` or `admin` target are rejected with `403 FORBIDDEN`.
 - Path params (strict): `{ userId: UUID }`.
 - Response `204` (empty).
-- Error: user still owns trips/days/points/comments -> `409 CONFLICT` ("The account still owns trips, days, points or comments.").
+- Errors: unknown user -> `404 NOT_FOUND`; manager target role is not `user` -> `403 FORBIDDEN`; user still owns trips/days/points/comments -> `409 CONFLICT` ("The account still owns trips, days, points or comments.").
 
 ### 16.4 GET `/admin/failed-login-logs`
 
 - Role: `admin` or `manager`.
 - Response `200`: `AdminPage<FailedLogDto>` (newest first).
+- Login policy: invalid credentials are counted per normalized email. Five failures within a 10-minute window trigger a 10-minute lockout; one FailedLog row is written when the threshold is reached. Earlier failures and requests during the active lockout do not create rows. A successful credential check clears the email's failure state.
+- The lockout map is process-local (not shared across API instances and reset on process restart). Expired entries are swept on each login request; there is no scheduled cleanup job. The separate IP-based auth rate limiter remains active.
+- FailedLog rows are persistent history and are not automatically pruned. Admin/Manager can delete selected rows through `DELETE /admin/failed-login-logs`.
 
 `FailedLogDto`:
 
@@ -1716,6 +1757,16 @@ Admin pagination query (strict, shared by all admin list endpoints):
 
 - Role: `admin` or `manager`.
 - Response `200`: `AdminPage<RouteNotFoundLogDto>` (newest first).
+- Scope: records unmatched endpoints only after a request has entered one of the explicitly instrumented resource routers. The final API v1 fallback does not log arbitrary unknown paths, so nonexistent API roots and random scanner paths are not added to this table.
+- `reqUrl` contains the actual request pathname (including the API prefix), without its query string. Token-like path segments are redacted.
+- `reqHeaders` stores the parsed request headers as a JSON string. Sensitive header values are replaced with `[REDACTED]`; the header names remain visible.
+- `reqQuery` stores query parameters as JSON. Repeated query keys are preserved as arrays.
+- `reqBody` stores parsed object/array bodies as JSON. Multipart and binary bodies are not stored; a body-present omission marker is stored instead. Unstructured string bodies are also represented by an omission marker.
+- `reqParams` stores the Express route params object as JSON.
+- `reqUserEmail` stores the first non-empty `email`, `userEmail` or `emailAddress` value found in the request body, query, route params or headers (in that order). It is empty when the request contains no such field. The email is stored separately so it remains available even when the diagnostic body/query is truncated.
+- Sensitive values are redacted recursively by field name (passwords, tokens, secrets, authorization, cookies, API keys, credentials, private keys, sessions and signatures). The field name remains in the log with the value `[REDACTED]`, so the Admin can see that the request contained that field.
+- Request diagnostics are bounded by the existing live database column widths: URL 145, headers 1000, query 145, body 1000, params 145, request email 245 characters. Values exceeding a column limit end with `...[TRUNCATED]`. These limits are not a reason to silently omit the fields.
+- Scope remains router-local: arbitrary unknown API roots and random scanner paths that never enter an instrumented router are not logged.
 
 `RouteNotFoundLogDto`:
 
@@ -1723,19 +1774,19 @@ Admin pagination query (strict, shared by all admin list endpoints):
 {
   "id": 0,
   "date": null | "<string>",
-  "reqUrl": null,
+  "reqUrl": null | "<string>",
   "reqMethod": null | "<string>",
-  "reqHeaders": null,
-  "reqQuery": null,
-  "reqBody": null,
-  "reqParams": null,
+  "reqHeaders": null | "<JSON string>",
+  "reqQuery": null | "<JSON string>",
+  "reqBody": null | "<JSON string>",
+  "reqParams": null | "<JSON string>",
   "reqIp": null | "<string>",
   "reqUserId": null | "<uuid>",
   "reqUserEmail": null | "<string>"
 }
 ```
 
-> The detail fields (`reqUrl`, `reqHeaders`, `reqQuery`, `reqBody`, `reqParams`) are always `null` in the response: only the summary columns are returned.
+> The list endpoint now returns the stored diagnostic detail fields. Sensitive values are represented by `[REDACTED]`; the presence and name of each sensitive field remain visible.
 
 ### 16.7 GET `/admin/images/cloud`
 
@@ -1806,14 +1857,27 @@ Response:
 ```text
 {
   "id": 0,
+  "userId": "<reporter-user-id>",
   "targetType": "tripGroup" | "trip" | "point" | "image" | "comment",
   "targetId": 0,
+  "target": {
+    // Discriminated summary; exact fields depend on targetType.
+    // tripGroup: { type, id, title, destination }
+    // trip: { type, id, tripGroupId, dayNumber, title, description }
+    // point: { type, id, tripId, tripGroupId, name, description, lat, lng }
+    // image: { type, id, tripGroupId, tripId, pointId }
+    // comment: { type, id, comment, authorName, targetTypeId, targetId, parentCommentId }
+  } | null,
   "reason": null | "<string>",
   "createdAt": null | "<iso>"
 }
 ```
 
-The initial report queue intentionally keeps the DTO minimal. The backend must not expose internal database models or arbitrary report-related columns merely because they exist in the database.
+- `userId` identifies the user who submitted the report.
+- `target` is a safe, type-specific summary resolved by the backend, not a raw database record.
+- If the referenced content no longer exists or cannot be resolved, `target` is `null`; `targetType` and `targetId` remain available.
+- Target summaries include only the fields needed to identify the reported content. They do not expose owner records, storage file paths, or arbitrary database columns.
+- Target summaries are loaded in batches for the current page; the endpoint does not issue one target query per report.
 
 ### 16.11 DELETE `/admin/reports/:reportId`
 
@@ -2036,80 +2100,85 @@ The frontend must preserve these semantics and must never silently turn an inval
 
 Base path: `/api/v1`. "Public" = public bearer token (anonymous read); "Auth" = user access token. "Owner/Mod" = owner or `admin`/`manager`.
 
-| Method | Path                                        | Access              | Request                                                                                                                        | Response                                  | Errors                       |
-| ------ | ------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- | ---------------------------- |
-| POST   | `/auth/register`                            | None                | `{ email, password, firstName, lastName, captchaToken }`                                                                       | 201 `{ message }`                         | 400, 403                     |
-| POST   | `/auth/verify-email`                        | None                | `{ token }`                                                                                                                    | 200 `{ user }`                            | 400, 403                     |
-| POST   | `/auth/resend-verification`                 | None                | `{ email, captchaToken }`                                                                                                      | 200 `{ message }`                         | 400, 403, 500                |
-| POST   | `/auth/login`                               | None                | `{ email, password, captchaToken }`                                                                                            | 200 `AuthSessionDto` + cookie             | 401, 403, 400                |
-| POST   | `/auth/refresh`                             | Cookie              | none                                                                                                                           | 200 `AuthSessionDto` + cookie             | 401, 403                     |
-| POST   | `/auth/logout`                              | Cookie              | none                                                                                                                           | 200 `{ message }`                         | 500                          |
-| GET    | `/auth/session`                             | Public/OptionalAuth | public token or valid user JWT; credentials enabled for refresh cookie                                                         | 200 `{ hasSession }`                      | 400, 401, 403, 404           |
-| GET    | `/auth/me`                                  | Auth                | none                                                                                                                           | 200 `{ user }`                            | 401, 403                     |
-| PUT    | `/auth/me`                                  | Auth                | `{ firstName, lastName }`                                                                                                      | 200 `{ user }`                            | 400, 401, 403                |
-| POST   | `/auth/confirm-password`                    | Auth                | `{ password }`                                                                                                                 | 200 `{ valid }`                           | 400, 401, 403                |
-| PUT    | `/auth/me/password`                         | Auth                | `{ currentPassword, newPassword }`                                                                                             | 204                                       | 400, 401, 403                |
-| GET    | `/auth/me/image`                            | Auth                | none                                                                                                                           | 200 `ImageDto` or null                    | 401, 403                     |
-| POST   | `/auth/me/image`                            | Auth                | multipart `file`                                                                                                               | 201 `ImageDto`                            | 400, 401, 403, 409           |
-| DELETE | `/auth/me/image`                            | Auth                | none                                                                                                                           | 204                                       | 401, 403, 404                |
-| POST   | `/auth/forgot-password`                     | None                | `{ email, captchaToken }`                                                                                                      | 200 `{ message }`                         | 400, 403, 500                |
-| POST   | `/auth/reset-password`                      | None                | `{ token, password }`                                                                                                          | 200 `{ message }`                         | 400, 403                     |
-| GET    | `/config/selects`                           | Public              | none                                                                                                                           | 200 `SelectConfig[]`                      | 401                          |
-| GET    | `/config/services`                          | Public              | none                                                                                                                           | 200 `PublicServiceConfig[]`               | 401                          |
-| GET    | `/config/social`                            | Public              | none                                                                                                                           | 200 `{ social: SocialConfig[] }`          | 401                          |
-| GET    | `/trips`                                    | Public              | query `page,limit,search,group,transport,sort`                                                                                 | 200 `TripGroupResponse[]`                 | 400, 401                     |
-| GET    | `/trips/:tripGroupId`                       | Public              | param `tripGroupId` (INT)                                                                                                      | 200 `TripGroupResponse`                   | 400, 401, 404                |
-| GET    | `/trips/top`                                | Public              | none                                                                                                                           | 200 `TripGroupResponse[]` (max 5)         | 401                          |
-| GET    | `/me/trips`                                 | Auth                | none                                                                                                                           | 200 `TripGroupResponse[]`                 | 401, 403                     |
-| GET    | `/me/favorites`                             | Auth                | none                                                                                                                           | 200 `TripGroupResponse[]`                 | 401, 403                     |
-| GET    | `/trips/background`                         | Public              | none                                                                                                                           | 200 `{ current: { url }, next: { url } }` | 401, 404                     |
-| POST   | `/trips`                                    | Auth                | full body: `dayNumber,title,price,transport,countPeoples,typeOfPeople,currency`; optional `description,destination,lat,lng`    | 201 `TripGroupResponse`                   | 400, 401, 403, 500           |
-| DELETE | `/trips/:tripGroupId`                       | Owner/Mod           | param `tripGroupId`                                                                                                            | 204                                       | 400, 401, 403, 404           |
-| POST   | `/trips/:tripGroupId/days`                  | Owner/Mod           | param `tripGroupId`; full create body in §8.9 (same `tripWriteSchema` as `POST /trips`)                                        | 201 `TripGroupResponse`                   | 400, 401, 403, 404, 409      |
-| PUT    | `/trips/:tripGroupId/days/reorder`          | Owner/Mod           | param `tripGroupId`; body `{ days: [{ tripId, dayNumber }] }`; exact complete group day set                                    | 200 `TripGroupResponse`                   | 400, 401, 403, 404, 500      |
-| PUT    | `/trips/:tripGroupId/days/:tripId`          | Owner/Mod           | params `tripGroupId,tripId`; full 11-field body in §8.11                                                                       | 200 `TripGroupResponse`                   | 400, 401, 403, 404, 409, 500 |
-| DELETE | `/trips/:tripGroupId/days/:tripId`          | Owner/Mod           | params `tripGroupId,tripId`                                                                                                    | 200 `TripGroupResponse`                   | 400, 401, 403, 404, 409      |
-| POST   | `/trips/:tripGroupId/days/:tripId/images`   | Owner/Mod           | params `tripGroupId,tripId`; multipart `file`                                                                                  | 201 `ImageDto`                            | 400, 401, 403, 404, 409      |
-| POST   | `/points`                                   | Owner/Mod           | `{ tripId, name, description?, lat, lng }`                                                                                     | 201 `TripPoint[]`                         | 400, 401, 403, 404           |
-| GET    | `/trips/:tripId/points`                     | Public              | param `tripId` (day row id)                                                                                                    | 200 `TripPoint[]`                         | 400, 401, 404                |
-| GET    | `/points/:pointId`                          | Public              | param `pointId`                                                                                                                | 200 `TripPoint`                           | 400, 401, 404                |
-| PUT    | `/points/:pointId`                          | Owner/Mod           | param `pointId`; body `{ name?, description?, lat?, lng? }`                                                                    | 200 `TripPoint[]`                         | 400, 401, 403, 404           |
-| DELETE | `/points/:pointId`                          | Owner/Mod           | param `pointId`                                                                                                                | 204                                       | 400, 401, 403, 404           |
-| POST   | `/points/:pointId/images`                   | Owner/Mod           | param `pointId`; multipart `file`                                                                                              | 201 `ImageDto`                            | 400, 401, 403, 404, 409      |
-| DELETE | `/points/:pointId/images/:imageId`          | Owner/Mod           | params `pointId,imageId`                                                                                                       | 204                                       | 400, 401, 403, 404           |
-| PUT    | `/days/:tripId/points/reorder`              | Owner/Mod           | param `tripId`; body `{ pointIds }`                                                                                            | 200 `TripPoint[]`                         | 400, 401, 403, 404           |
-| DELETE | `/images/:imageId`                          | Owner/Mod           | param `imageId`                                                                                                                | 204                                       | 400, 401, 403, 404           |
-| GET    | `/trip-groups/:tripGroupId/comments`        | Public              | param `tripGroupId`; query `page,limit`                                                                                        | 200 `CommentListResponse`                 | 400, 401, 404                |
-| POST   | `/trip-groups/:tripGroupId/comments`        | Auth                | param `tripGroupId`; body `{ comment }`                                                                                        | 201 `CommentDto`                          | 400, 401, 403, 404           |
-| GET    | `/trips/:tripGroupId/days/:tripId/comments` | Public              | params `tripGroupId,tripId`; query `page,limit`                                                                                | 200 `CommentListResponse`                 | 400, 401, 404                |
-| POST   | `/trips/:tripGroupId/days/:tripId/comments` | Auth                | params `tripGroupId,tripId`; body `{ comment }`                                                                                | 201 `CommentDto`                          | 400, 401, 403, 404           |
-| GET    | `/points/:pointId/comments`                 | Public              | param `pointId`; query `page,limit`                                                                                            | 200 `CommentListResponse`                 | 400, 401, 404                |
-| POST   | `/points/:pointId/comments`                 | Auth                | param `pointId`; body `{ comment }`                                                                                            | 201 `CommentDto`                          | 400, 401, 403, 404           |
-| GET    | `/images/:imageId/comments`                 | Public              | param `imageId`; query `page,limit`                                                                                            | 200 `CommentListResponse`                 | 400, 401, 404                |
-| POST   | `/images/:imageId/comments`                 | Auth                | param `imageId`; body `{ comment }`                                                                                            | 201 `CommentDto`                          | 400, 401, 403, 404           |
-| PUT    | `/comments/:commentId`                      | Author/Mod          | param `commentId`; body `{ comment }`                                                                                          | 200 `CommentDto`                          | 400, 401, 403, 404           |
-| DELETE | `/comments/:commentId`                      | Author/Mod          | param `commentId`                                                                                                              | 204                                       | 400, 401, 403, 404           |
-| GET    | `/comments/:commentId/replies`              | Public              | param `commentId`; query `page,limit`                                                                                          | 200 `CommentListResponse`                 | 400, 401, 404                |
-| POST   | `/comments/:commentId/replies`              | Auth                | param `commentId`; body `{ comment }`                                                                                          | 201 `CommentDto`                          | 400, 401, 403, 404           |
-| PUT    | `/replies/:replyId`                         | Author/Mod          | param `replyId`; body `{ comment }`                                                                                            | 200 `CommentDto`                          | 400, 401, 403, 404           |
-| DELETE | `/replies/:replyId`                         | Author/Mod          | param `replyId`                                                                                                                | 204                                       | 400, 401, 403, 404           |
-| POST   | `/likes`                                    | Auth                | `{ targetType, targetId }`                                                                                                     | 200 `SocialState`                         | 400, 401, 403, 404           |
-| DELETE | `/likes`                                    | Auth                | query `targetType,targetId`                                                                                                    | 204                                       | 400, 401, 403, 404           |
-| POST   | `/favorites`                                | Auth                | `{ tripGroupId }` or `{ targetType,targetId }`                                                                                 | 200 `SocialState`                         | 400, 401, 403, 404           |
-| DELETE | `/favorites`                                | Auth                | query `tripGroupId` or `targetType,targetId`                                                                                   | 204                                       | 400, 401, 403, 404           |
-| POST   | `/reports`                                  | Auth                | `{ targetType, targetId, reason? }`                                                                                            | 201 `ReportDto`                           | 400, 401, 403, 404, 409      |
-| DELETE | `/reports`                                  | Auth                | query `targetType,targetId`                                                                                                    | 204                                       | 400, 401, 403, 404           |
-| GET    | `/admin/users`                              | admin/manager       | query `page,pageSize`                                                                                                          | 200 `AdminPage<AuthUserDto>`              | 400, 401, 403                |
-| PUT    | `/admin/users/:userId`                      | admin/manager       | param `userId`; body `{ firstName?, lastName?, email?, role?, status?, emailVerified?, password? }` (role/password admin-only) | 200 `AuthUserDto`                         | 400, 401, 403, 404, 409      |
-| DELETE | `/admin/users/:userId`                      | admin/manager       | param `userId`                                                                                                                 | 204                                       | 400, 401, 403, 404, 409      |
-| GET    | `/admin/failed-login-logs`                  | admin/manager       | query `page,pageSize`                                                                                                          | 200 `AdminPage<FailedLogDto>`             | 400, 401, 403                |
-| DELETE | `/admin/failed-login-logs`                  | admin/manager       | body `{ ids }`                                                                                                                 | 200 `{ deleted }`                         | 400, 401, 403                |
-| GET    | `/admin/route-not-found-logs`               | admin/manager       | query `page,pageSize`                                                                                                          | 200 `AdminPage<RouteNotFoundLogDto>`      | 400, 401, 403                |
-| GET    | `/admin/images/cloud`                       | admin/manager       | query `page,pageSize`                                                                                                          | 200 `AdminPage<string>` (cursor)          | 400, 401, 403                |
-| GET    | `/admin/images/database`                    | admin/manager       | query `page,pageSize`                                                                                                          | 200 `AdminPage<string>`                   | 400, 401, 403                |
-| GET    | `/admin/images/orphans`                     | admin/manager       | query `page,pageSize`                                                                                                          | 200 `ImageInventoryComparison`            | 400, 401, 403                |
-| GET    | `/admin/reports`                            | admin/manager       | query `page,pageSize`                                                                                                          | 200 `AdminPage<AdminReportDto>`           | 400, 401, 403                |
-| DELETE | `/admin/reports/:reportId`                  | admin/manager       | param `reportId`                                                                                                               | 204                                       | 400, 401, 403, 404           |
+| Method | Path                                        | Access              | Request                                                                                                                     | Response                                  | Errors                       |
+| ------ | ------------------------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ---------------------------- |
+| POST   | `/auth/register`                            | None                | `{ email, password, firstName, lastName, captchaToken }`                                                                    | 201 `{ message }`                         | 400, 403                     |
+| POST   | `/auth/verify-email`                        | None                | `{ token }`                                                                                                                 | 200 `{ user }`                            | 400, 403                     |
+| POST   | `/auth/resend-verification`                 | None                | `{ email, captchaToken }`                                                                                                   | 200 `{ message }`                         | 400, 403, 500                |
+| POST   | `/auth/login`                               | None                | `{ email, password, captchaToken }`                                                                                         | 200 `AuthSessionDto` + cookie             | 401, 403, 400                |
+| POST   | `/auth/refresh`                             | Cookie              | none                                                                                                                        | 200 `AuthSessionDto` + cookie             | 401, 403                     |
+| POST   | `/auth/logout`                              | Cookie              | none                                                                                                                        | 200 `{ message }`                         | 500                          |
+| GET    | `/auth/session`                             | Public/OptionalAuth | public token or valid user JWT; credentials enabled for refresh cookie                                                      | 200 `{ hasSession }`                      | 400, 401, 403, 404           |
+| GET    | `/auth/me`                                  | Auth                | none                                                                                                                        | 200 `{ user }`                            | 401, 403                     |
+| PUT    | `/auth/me`                                  | Auth                | `{ firstName, lastName }`                                                                                                   | 200 `{ user }`                            | 400, 401, 403                |
+| POST   | `/auth/confirm-password`                    | Auth                | `{ password }`                                                                                                              | 200 `{ valid }`                           | 400, 401, 403                |
+| PUT    | `/auth/me/password`                         | Auth                | `{ currentPassword, newPassword }`                                                                                          | 204                                       | 400, 401, 403                |
+| GET    | `/auth/me/image`                            | Auth                | none                                                                                                                        | 200 `ImageDto` or null                    | 401, 403                     |
+| POST   | `/auth/me/image`                            | Auth                | multipart `file`                                                                                                            | 201 `ImageDto`                            | 400, 401, 403, 409           |
+| DELETE | `/auth/me/image`                            | Auth                | none                                                                                                                        | 204                                       | 401, 403, 404                |
+| POST   | `/auth/forgot-password`                     | None                | `{ email, captchaToken }`                                                                                                   | 200 `{ message }`                         | 400, 403, 500                |
+| POST   | `/auth/reset-password`                      | None                | `{ token, password }`                                                                                                       | 200 `{ message }`                         | 400, 403                     |
+| GET    | `/config/selects`                           | Public              | none                                                                                                                        | 200 `SelectConfig[]`                      | 401                          |
+| GET    | `/config/services`                          | Public              | none                                                                                                                        | 200 `PublicServiceConfig[]`               | 401                          |
+| GET    | `/config/social`                            | Public              | none                                                                                                                        | 200 `{ social: SocialConfig[] }`          | 401                          |
+| GET    | `/trips`                                    | Public              | query `page,limit,search,group,transport,sort`                                                                              | 200 `TripGroupResponse[]`                 | 400, 401                     |
+| GET    | `/trips/:tripGroupId`                       | Public              | param `tripGroupId` (INT)                                                                                                   | 200 `TripGroupResponse`                   | 400, 401, 404                |
+| GET    | `/trips/top`                                | Public              | none                                                                                                                        | 200 `TripGroupResponse[]` (max 5)         | 401                          |
+| GET    | `/me/trips`                                 | Auth                | none                                                                                                                        | 200 `TripGroupResponse[]`                 | 401, 403                     |
+| GET    | `/me/favorites`                             | Auth                | none                                                                                                                        | 200 `TripGroupResponse[]`                 | 401, 403                     |
+| GET    | `/trips/background`                         | Public              | none                                                                                                                        | 200 `{ current: { url }, next: { url } }` | 401, 404                     |
+| POST   | `/trips`                                    | Auth                | full body: `dayNumber,title,price,transport,countPeoples,typeOfPeople,currency`; optional `description,destination,lat,lng` | 201 `TripGroupResponse`                   | 400, 401, 403, 500           |
+| DELETE | `/trips/:tripGroupId`                       | Owner/Mod           | param `tripGroupId`                                                                                                         | 204                                       | 400, 401, 403, 404           |
+| POST   | `/trips/:tripGroupId/days`                  | Owner/Mod           | param `tripGroupId`; full create body in §8.9 (same `tripWriteSchema` as `POST /trips`)                                     | 201 `TripGroupResponse`                   | 400, 401, 403, 404, 409      |
+| PUT    | `/trips/:tripGroupId/days/reorder`          | Owner/Mod           | param `tripGroupId`; body `{ days: [{ tripId, dayNumber }] }`; exact complete group day set                                 | 200 `TripGroupResponse`                   | 400, 401, 403, 404, 500      |
+| PUT    | `/trips/:tripGroupId/days/:tripId`          | Owner/Mod           | params `tripGroupId,tripId`; full 11-field body in §8.11                                                                    | 200 `TripGroupResponse`                   | 400, 401, 403, 404, 409, 500 |
+| DELETE | `/trips/:tripGroupId/days/:tripId`          | Owner/Mod           | params `tripGroupId,tripId`                                                                                                 | 200 `TripGroupResponse`                   | 400, 401, 403, 404, 409      |
+| POST   | `/trips/:tripGroupId/days/:tripId/images`   | Owner/Mod           | params `tripGroupId,tripId`; multipart `file`                                                                               | 201 `ImageDto`                            | 400, 401, 403, 404, 409      |
+| POST   | `/points`                                   | Owner/Mod           | `{ tripId, name, description?, lat, lng }`                                                                                  | 201 `TripPoint[]`                         | 400, 401, 403, 404           |
+| GET    | `/trips/:tripId/points`                     | Public              | param `tripId` (day row id)                                                                                                 | 200 `TripPoint[]`                         | 400, 401, 404                |
+| GET    | `/points/:pointId`                          | Public              | param `pointId`                                                                                                             | 200 `TripPoint`                           | 400, 401, 404                |
+| PUT    | `/points/:pointId`                          | Owner/Mod           | param `pointId`; body `{ name?, description?, lat?, lng? }`                                                                 | 200 `TripPoint[]`                         | 400, 401, 403, 404           |
+| DELETE | `/points/:pointId`                          | Owner/Mod           | param `pointId`                                                                                                             | 204                                       | 400, 401, 403, 404           |
+| POST   | `/points/:pointId/images`                   | Owner/Mod           | param `pointId`; multipart `file`                                                                                           | 201 `ImageDto`                            | 400, 401, 403, 404, 409      |
+| DELETE | `/points/:pointId/images/:imageId`          | Owner/Mod           | params `pointId,imageId`                                                                                                    | 204                                       | 400, 401, 403, 404           |
+| PUT    | `/days/:tripId/points/reorder`              | Owner/Mod           | param `tripId`; body `{ pointIds }`                                                                                         | 200 `TripPoint[]`                         | 400, 401, 403, 404           |
+| DELETE | `/images/:imageId`                          | Owner/Mod           | param `imageId`                                                                                                             | 204                                       | 400, 401, 403, 404           |
+| GET    | `/trip-groups/:tripGroupId/comments`        | Public              | param `tripGroupId`; query `page,limit`                                                                                     | 200 `CommentListResponse`                 | 400, 401, 404                |
+| POST   | `/trip-groups/:tripGroupId/comments`        | Auth                | param `tripGroupId`; body `{ comment }`                                                                                     | 201 `CommentDto`                          | 400, 401, 403, 404           |
+| GET    | `/trips/:tripGroupId/days/:tripId/comments` | Public              | params `tripGroupId,tripId`; query `page,limit`                                                                             | 200 `CommentListResponse`                 | 400, 401, 404                |
+| POST   | `/trips/:tripGroupId/days/:tripId/comments` | Auth                | params `tripGroupId,tripId`; body `{ comment }`                                                                             | 201 `CommentDto`                          | 400, 401, 403, 404           |
+| GET    | `/points/:pointId/comments`                 | Public              | param `pointId`; query `page,limit`                                                                                         | 200 `CommentListResponse`                 | 400, 401, 404                |
+| POST   | `/points/:pointId/comments`                 | Auth                | param `pointId`; body `{ comment }`                                                                                         | 201 `CommentDto`                          | 400, 401, 403, 404           |
+| GET    | `/images/:imageId/comments`                 | Public              | param `imageId`; query `page,limit`                                                                                         | 200 `CommentListResponse`                 | 400, 401, 404                |
+| POST   | `/images/:imageId/comments`                 | Auth                | param `imageId`; body `{ comment }`                                                                                         | 201 `CommentDto`                          | 400, 401, 403, 404           |
+| PUT    | `/comments/:commentId`                      | Author/Mod          | param `commentId`; body `{ comment }`                                                                                       | 200 `CommentDto`                          | 400, 401, 403, 404           |
+| DELETE | `/comments/:commentId`                      | Author/Mod          | param `commentId`                                                                                                           | 204                                       | 400, 401, 403, 404           |
+| GET    | `/comments/:commentId/replies`              | Public              | param `commentId`; query `page,limit`                                                                                       | 200 `CommentListResponse`                 | 400, 401, 404                |
+| POST   | `/comments/:commentId/replies`              | Auth                | param `commentId`; body `{ comment }`                                                                                       | 201 `CommentDto`                          | 400, 401, 403, 404           |
+| PUT    | `/replies/:replyId`                         | Author/Mod          | param `replyId`; body `{ comment }`                                                                                         | 200 `CommentDto`                          | 400, 401, 403, 404           |
+| DELETE | `/replies/:replyId`                         | Author/Mod          | param `replyId`                                                                                                             | 204                                       | 400, 401, 403, 404           |
+| POST   | `/likes`                                    | Auth                | `{ targetType, targetId }`                                                                                                  | 200 `SocialState`                         | 400, 401, 403, 404           |
+| DELETE | `/likes`                                    | Auth                | query `targetType,targetId`                                                                                                 | 204                                       | 400, 401, 403, 404           |
+| POST   | `/favorites`                                | Auth                | `{ tripGroupId }` or `{ targetType,targetId }`                                                                              | 200 `SocialState`                         | 400, 401, 403, 404           |
+| DELETE | `/favorites`                                | Auth                | query `tripGroupId` or `targetType,targetId`                                                                                | 204                                       | 400, 401, 403, 404           |
+| POST   | `/reports`                                  | Auth                | `{ targetType, targetId, reason? }`                                                                                         | 201 `ReportDto`                           | 400, 401, 403, 404, 409      |
+| DELETE | `/reports`                                  | Auth                | query `targetType,targetId`                                                                                                 | 204                                       | 400, 401, 403, 404           |
+| GET    | `/admin/users`                              | admin/manager       | query `page,pageSize`; manager sees only role `user`                                                                        | 200 `AdminPage<AuthUserDto>`              | 400, 401, 403                |
+| PUT    | `/admin/users/:userId`                      | admin/manager       | param `userId`; manager targets role `user` only; sensitive fields admin-only                                               | 200 `AuthUserDto`                         | 400, 401, 403, 404, 409      |
+| DELETE | `/admin/users/:userId`                      | admin/manager       | param `userId`; manager targets role `user` only                                                                            | 204                                       | 400, 401, 403, 404, 409      |
+| GET    | `/admin/failed-login-logs`                  | admin/manager       | query `page,pageSize`                                                                                                       | 200 `AdminPage<FailedLogDto>`             | 400, 401, 403                |
+| DELETE | `/admin/failed-login-logs`                  | admin/manager       | body `{ ids }`                                                                                                              | 200 `{ deleted }`                         | 400, 401, 403                |
+| GET    | `/admin/route-not-found-logs`               | admin/manager       | query `page,pageSize`                                                                                                       | 200 `AdminPage<RouteNotFoundLogDto>`      | 400, 401, 403                |
+| GET    | `/admin/images/cloud`                       | admin/manager       | query `page,pageSize`                                                                                                       | 200 `AdminPage<string>` (cursor)          | 400, 401, 403                |
+| GET    | `/admin/images/database`                    | admin/manager       | query `page,pageSize`                                                                                                       | 200 `AdminPage<string>`                   | 400, 401, 403                |
+| GET    | `/admin/images/orphans`                     | admin/manager       | query `page,pageSize`                                                                                                       | 200 `ImageInventoryComparison`            | 400, 401, 403                |
+| GET    | `/admin/users/:userId/image`                 | admin/manager       | param `userId`; manager target role `user` only                                                                             | 200 `ImageDto` or null                   | 400, 401, 403, 404           |
+| POST   | `/admin/users/:userId/image`                 | admin/manager       | param `userId`; multipart `file`; manager target role `user` only                                                          | 201 `ImageDto`                            | 400, 401, 403, 404           |
+| DELETE | `/admin/users/:userId/image`                 | admin/manager       | param `userId`; manager target role `user` only                                                                             | 204                                       | 400, 401, 403, 404           |
+| GET    | `/admin/images/missing-thumbnails`          | admin/manager       | query `page,pageSize`                                                                                                       | 200 `MissingThumbnailPageDto`            | 400, 401, 403                |
+| POST   | `/admin/images/generate-thumbnails`         | admin/manager       | body `{ imageIds }` (1–100 unique positive IDs)                                                                              | 200 `GenerateThumbnailsResponse`         | 400, 401, 403                |
+| GET    | `/admin/reports`                            | admin/manager       | query `page,pageSize`                                                                                                       | 200 `AdminPage<AdminReportDto>`           | 400, 401, 403                |
+| DELETE | `/admin/reports/:reportId`                  | admin/manager       | param `reportId`                                                                                                            | 204                                       | 400, 401, 403, 404           |
 
 ---
 
@@ -2676,3 +2745,39 @@ The following currently implemented capabilities are part of this API contract. 
 17. **Existing endpoints continue to follow the authentication, security, image, comment, trip, schema, and DTO rules defined in this contract unless a specific section states otherwise.**
 18. **Keep the endpoint inventory, schemas, DTOs, and security rules aligned with the implemented backend when they evolve.
 19. **`GET /auth/session` is the only new session-presence probe: it is read-only, returns only `hasSession`, and must not rotate or expose refresh/access tokens or user identity.**
+
+## Admin profile image management
+
+The three `/admin/users/:userId/image` routes above use the same underlying profile-image operations as the authenticated user's own profile-image routes. They are separate from `PUT /admin/users/:userId`:
+
+- Fetch the target user's profile image with `GET`.
+- Upload/replace it with `POST` using the shared one-file multipart upload contract.
+- Delete it with `DELETE`.
+- Admin may manage any target account. Manager may manage only targets whose current role is `user`.
+- Profile image changes do not form part of the admin user-details update payload.
+
+## Admin image thumbnail maintenance
+
+All routes below are mounted under `/api/v1/admin` and require the existing admin/moderator authentication boundary (currently Admin and Manager), plus the admin rate limiter.
+
+### List images missing thumbnails
+
+`GET /images/missing-thumbnails?page=1&pageSize=50`
+
+Returns database-backed images only when the original object exists in the primary GCS image bucket and the expected `_thumb.webp` sidecar does not exist. The database is the source of truth: GCS-only orphan objects are not included. Each item uses the normal `ImageDto` shape (`id`, `url`, `thumbnailUrl`); for this queue, `url` is used as the preview source because the thumbnail is absent. Pagination is applied to the filtered result and exposes `hasNext`.
+
+### Generate selected thumbnails
+
+`POST /images/generate-thumbnails`
+
+Request body:
+
+```json
+{
+  "imageIds": [12, 18, 25]
+}
+```
+
+The body is strict, requires 1–100 unique positive image IDs, and does not accept client-supplied object paths. The backend resolves every ID through the images table, rechecks the original and thumbnail objects in GCS, and creates only a missing thumbnail using the configured 400×300 WebP recipe. GCS creation uses `ifGenerationMatch: 0`, so concurrent requests cannot overwrite an existing thumbnail.
+
+The response contains a per-image status (`generated`, `already_exists`, `original_missing`, `not_found`, or `failed`) and summary counts. One failed image does not prevent processing the other selected images. The client should refresh the missing-thumbnail list after the operation.
