@@ -5,6 +5,7 @@ import type {
   AdminPage,
   AdminReportDto,
   AuthUserDto,
+  ImageDto,
   DeleteCountResponse,
   FailedLogDto,
   ImageInventoryComparison,
@@ -53,6 +54,22 @@ export const adminApi = {
 
   deleteUser: async (userId: string): Promise<void> => {
     await apiClient.delete(`${ADMIN}/users/${userId}`);
+  },
+
+  getUserProfileImage: async (userId: string): Promise<ImageDto | null> => {
+    const { data } = await apiClient.get<ImageDto | null>(`${ADMIN}/users/${userId}/image`);
+    return data;
+  },
+
+  uploadUserProfileImage: async (userId: string, file: File): Promise<ImageDto> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await apiClient.post<ImageDto>(`${ADMIN}/users/${userId}/image`, formData);
+    return data;
+  },
+
+  deleteUserProfileImage: async (userId: string): Promise<void> => {
+    await apiClient.delete(`${ADMIN}/users/${userId}/image`);
   },
 
   listFailedLogs: async (query: AdminListQuery = {}): Promise<AdminPage<FailedLogDto>> => {
