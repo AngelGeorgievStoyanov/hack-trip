@@ -258,12 +258,12 @@ Axios
 HackTrip Backend
 ```
 
-A service is an optional application-orchestration layer, not a mandatory pass-through layer:
+The frontend uses a direct feature-oriented API architecture:
 
 ```text
-Component / Page
+Client Component
        ↓
-Feature Hook or Service (only when useful)
+Feature Hook (when React Query or client lifecycle coordination is needed)
        ↓
 Feature API
        ↓
@@ -274,6 +274,8 @@ Axios
 HackTrip Backend
 ```
 
+A Server Component may call the Feature API directly. Do not add an intermediate frontend layer.
+
 ### Responsibilities
 
 **`src/api/client.ts`** owns common HTTP transport behavior: backend base URL, common headers and `x-hacktrip-client`, authentication and credential handling, refresh behavior, shared request/response behavior, and transport-level payload normalization.
@@ -282,11 +284,7 @@ HackTrip Backend
 
 **Feature hooks** under `src/hooks/` or a feature-local hooks directory coordinate React Query queries/mutations, cache keys and invalidation, loading/error state, client lifecycle, and calls to one or more feature API operations. Do not create hooks that only rename one API call without adding a useful React-facing contract.
 
-**Services** are introduced only when there is meaningful application-level orchestration, such as coordinating multiple API operations, applying application-specific transformations, or implementing a workflow shared by multiple UI entry points.
-
-Services must not wrap every API method, duplicate Axios configuration, contain presentation logic, or replace React Query for server-state caching.
-
-A direct Feature Hook → Feature API or Server Component → Feature API path is valid when no orchestration is needed.
+A direct Feature Hook → Feature API or Server Component → Feature API path is the standard. Keep any necessary coordination in the feature hook or calling component; do not introduce an intermediate frontend layer.
 
 Google Maps and other external browser SDK integrations remain outside the HackTrip Backend API layer.
 ## 7. Google Maps Boundary
@@ -563,9 +561,6 @@ Forms use:
 * Zod and centralized feature validation schemas
 * feature hooks for React Query mutations and client-side lifecycle
 * feature API modules for endpoint-specific HTTP operations
-* services only when a form workflow requires meaningful multi-operation orchestration
-
-A service is not required merely because a form submits data.
 
 Forms must display backend validation and authorization errors using documented error semantics, distinguish field validation from general submission errors, prevent duplicate submissions while pending, avoid duplicating request payload construction across unrelated components, submit only fields accepted by the backend contract, and preserve existing behavior during modernization.
 
@@ -762,7 +757,6 @@ Components should have a clear responsibility:
 * feature components compose feature UI and feature behavior
 * feature hooks own reusable React-facing state and server-state coordination
 * API modules own backend HTTP operations
-* services own only meaningful application-level orchestration
 
 Avoid feature-specific business logic inside generic UI components and API calls directly from presentational components.
 
@@ -813,7 +807,6 @@ The major responsibilities are:
 app/              Next.js routes and page composition
 components/       reusable UI
 api/              HTTP/API endpoint clients
-services/         optional application orchestration when a workflow needs it
 hooks/            reusable React hooks
 validations/      Zod schemas
 types/            TypeScript models
