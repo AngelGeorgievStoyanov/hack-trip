@@ -23,6 +23,7 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { ADMIN_PAGE_SIZE_DEFAULT } from '@/constants/ui';
 import { hasRole } from '@/constants/roles';
 import { ImageLightbox } from '@/components/images/ImageLightbox';
+import { AppImage } from '@/components/images/AppImage';
 import type { ImageDto } from '@/types';
 
 function formatDate(value: string | null): string {
@@ -37,8 +38,6 @@ export function AdminUsers() {
   const { confirm } = useConfirm();
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  const [failedThumbnailIds, setFailedThumbnailIds] = useState<Set<string>>(() => new Set());
-  const [failedProfileImageIds, setFailedProfileImageIds] = useState<Set<string>>(() => new Set());
   const [preview, setPreview] = useState<{ image: ImageDto; alt: string } | null>(null);
   const isAdmin = hasRole(user, 'admin');
   const isManager = hasRole(user, 'manager');
@@ -105,13 +104,6 @@ export function AdminUsers() {
                   >
                     <Stack direction="row" spacing={1.5} alignItems="center">
                       <Avatar
-                        src={
-                          failedProfileImageIds.has(u.id)
-                            ? undefined
-                            : failedThumbnailIds.has(u.id)
-                              ? u.profileImage?.url || undefined
-                              : u.profileImage?.thumbnailUrl || u.profileImage?.url || undefined
-                        }
                         alt={`${u.firstName} ${u.lastName}`.trim() || 'User profile'}
                         onClick={() => {
                           if (u.profileImage) {
@@ -121,20 +113,21 @@ export function AdminUsers() {
                             });
                           }
                         }}
-                        onError={() => {
-                          if (
-                            !failedThumbnailIds.has(u.id) &&
-                            u.profileImage?.thumbnailUrl &&
-                            u.profileImage?.url
-                          ) {
-                            setFailedThumbnailIds((current) => new Set(current).add(u.id));
-                          } else {
-                            setFailedProfileImageIds((current) => new Set(current).add(u.id));
-                          }
-                        }}
                         sx={{ width: 88, height: 88, bgcolor: 'action.selected', flexShrink: 0, cursor: u.profileImage ? 'zoom-in' : 'default' }}
                       >
-                        <PersonOutlineRoundedIcon fontSize="large" />
+                        {u.profileImage ? (
+                          <AppImage
+                            image={u.profileImage}
+                            alt={`${u.firstName} ${u.lastName}`.trim() || 'User profile'}
+                            useThumbnail
+                            width={88}
+                            height={88}
+                            sizes="88px"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <PersonOutlineRoundedIcon fontSize="large" />
+                        )}
                       </Avatar>
                       <Box sx={{ minWidth: 0 }}>
                         <Typography variant="h6">
