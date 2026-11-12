@@ -22,6 +22,8 @@ import { useConfirm } from '@/components/common/ConfirmDialog';
 import { getGenericErrorMessage } from '@/lib/errors';
 import { ADMIN_PAGE_SIZE_DEFAULT } from '@/constants/ui';
 import { hasRole } from '@/constants/roles';
+import { ImageLightbox } from '@/components/images/ImageLightbox';
+import type { ImageDto } from '@/types';
 
 function formatDate(value: string | null): string {
   if (!value) return '—';
@@ -37,6 +39,7 @@ export function AdminUsers() {
   const [error, setError] = useState<string | null>(null);
   const [failedThumbnailIds, setFailedThumbnailIds] = useState<Set<string>>(() => new Set());
   const [failedProfileImageIds, setFailedProfileImageIds] = useState<Set<string>>(() => new Set());
+  const [preview, setPreview] = useState<{ image: ImageDto; alt: string } | null>(null);
   const isAdmin = hasRole(user, 'admin');
   const isManager = hasRole(user, 'manager');
 
@@ -110,6 +113,14 @@ export function AdminUsers() {
                               : u.profileImage?.thumbnailUrl || u.profileImage?.url || undefined
                         }
                         alt={`${u.firstName} ${u.lastName}`.trim() || 'User profile'}
+                        onClick={() => {
+                          if (u.profileImage) {
+                            setPreview({
+                              image: u.profileImage,
+                              alt: `${u.firstName} ${u.lastName}`.trim() || 'User profile',
+                            });
+                          }
+                        }}
                         onError={() => {
                           if (
                             !failedThumbnailIds.has(u.id) &&
@@ -121,7 +132,7 @@ export function AdminUsers() {
                             setFailedProfileImageIds((current) => new Set(current).add(u.id));
                           }
                         }}
-                        sx={{ width: 88, height: 88, bgcolor: 'action.selected', flexShrink: 0 }}
+                        sx={{ width: 88, height: 88, bgcolor: 'action.selected', flexShrink: 0, cursor: u.profileImage ? 'zoom-in' : 'default' }}
                       >
                         <PersonOutlineRoundedIcon fontSize="large" />
                       </Avatar>
@@ -187,6 +198,13 @@ export function AdminUsers() {
           {visibleUsers.length === 0 ? <Typography>WELCOME!</Typography> : null}
         </>
       ) : null}
+      <ImageLightbox
+        images={preview ? [preview.image] : []}
+        index={preview ? 0 : null}
+        alt={preview?.alt ?? 'User profile'}
+        onIndexChange={() => undefined}
+        onClose={() => setPreview(null)}
+      />
       {pagination && (pagination.totalPages ?? 0) > 1 ? (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 2 }}>
           <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
