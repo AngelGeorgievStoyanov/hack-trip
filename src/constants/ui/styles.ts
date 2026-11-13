@@ -32,6 +32,7 @@ export const COLORS = {
   legalBorder: 'rgb(23 33 43 / 22%)',
   legalBackBackground: 'rgb(194 194 224)',
   dialogBackground: '#eee7e7',
+  headingShadow: 'rgb(10 10 10)',
 } as const;
 
 /** Legacy card/panel elevation, a plain box-shadow rather than an MUI elevation. */
@@ -41,6 +42,10 @@ export const CARD_SHADOW = '3px 2px 5px black';
 export const CARD_BORDER = 'solid 1px';
 
 /** Shared shape tokens; the square value preserves the legacy card and panel treatment. */
+export const TYPOGRAPHY = {
+  fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+} as const;
+
 export const UI_SHAPE = {
   borderRadius: 4,
   squareRadius: 0,
@@ -65,6 +70,14 @@ export const BUTTON_STYLES = {
     '&:hover': {
       backgroundColor: COLORS.secondaryButtonBackground,
       color: COLORS.secondaryButtonHoverText,
+    },
+  },
+  secondaryLightText: {
+    backgroundColor: COLORS.secondaryButtonBackground,
+    color: 'black',
+    '&:hover': {
+      backgroundColor: COLORS.secondaryButtonBackground,
+      color: COLORS.textLight,
     },
   },
   secondaryBack: {
@@ -93,7 +106,7 @@ export const headingTextStyle: CSSProperties = {
   fontFamily: 'Space Mono, monospace',
   color: COLORS.textLight,
   opacity: 1,
-  textShadow: '3px 3px 3px rgb(10,10,10)',
+  textShadow: `3px 3px 3px ${COLORS.headingShadow}`,
 };
 
 /**
