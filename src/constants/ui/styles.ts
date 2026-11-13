@@ -31,6 +31,7 @@ export const COLORS = {
   legalLink: '#174f7a',
   legalBorder: 'rgb(23 33 43 / 22%)',
   legalBackBackground: 'rgb(194 194 224)',
+  dialogBackground: '#eee7e7',
 } as const;
 
 /** Legacy card/panel elevation, a plain box-shadow rather than an MUI elevation. */
