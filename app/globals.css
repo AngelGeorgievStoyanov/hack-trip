@@ -199,7 +199,7 @@ code {
   max-width: 1100px;
   color: var(--ht-color-text-light);
   text-align: center;
-  text-shadow: 3px 3px 3px rgb(10 10 10);
+  text-shadow: 3px 3px 3px var(--ht-color-heading-shadow);
 }
 
 .about-page__content h1,
