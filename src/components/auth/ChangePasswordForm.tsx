@@ -13,6 +13,7 @@ import { changePasswordSchema } from '@/validations/auth';
 import { PasswordField } from '@/components/common/PasswordField';
 import { PasswordRequirements } from '@/components/common/PasswordRequirements';
 import { useNotification } from '@/components/common/NotificationProvider';
+import { BUTTON_STYLES } from '@/constants/ui';
 
 const changePasswordFormSchema = changePasswordSchema
   .extend({
@@ -135,7 +136,7 @@ export function ChangePasswordForm({ expanded }: ChangePasswordFormProps) {
             variant="contained"
             disabled={submitting || !isValid}
             startIcon={submitting ? <CircularProgress size={18} /> : undefined}
-            sx={{ alignSelf: 'flex-start', m: '2px', ':hover': { backgroundColor: '#4daf30' } }}
+            sx={{ alignSelf: 'flex-start', m: '2px', ...BUTTON_STYLES.containedHover }}
           >
             Save password
           </Button>
