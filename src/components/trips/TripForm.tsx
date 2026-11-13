@@ -602,7 +602,7 @@ export function TripForm() {
             onClick={() => {
               void handleSubmit((values) => onSubmit(values, 'add-next-day'))();
             }}
-            sx={{ '&:hover': { backgroundColor: '#4daf30' } }}
+            sx={BUTTON_STYLES.containedHover}
           >
             Add next day trip
           </Button>
@@ -613,11 +613,7 @@ export function TripForm() {
             onClick={() => {
               void handleSubmit((values) => onSubmit(values, 'add-point'))();
             }}
-            sx={{
-              color: 'black',
-              backgroundColor: 'rgb(194 194 224)',
-              '&:hover': { color: 'white', backgroundColor: 'rgb(194 194 224)' },
-            }}
+            sx={BUTTON_STYLES.secondaryLightText}
           >
             Add point's for the trip
           </Button>
@@ -625,7 +621,7 @@ export function TripForm() {
             type="button"
             variant="contained"
             onClick={() => router.back()}
-            sx={{ '&:hover': { backgroundColor: '#4daf30' } }}
+            sx={BUTTON_STYLES.containedHover}
           >
             Back
           </Button>
