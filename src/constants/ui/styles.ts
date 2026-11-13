@@ -1,9 +1,8 @@
 import type { CSSProperties } from 'react';
 
 /**
- * Shared visual tokens. These are plain CSS objects rather than MUI `sx` presets so the
- * same value can be used by a Server Component (`style`) and a Client Component (`style`
- * or `sx`), keeping the public pages server-rendered.
+ * Shared visual tokens and reusable style fragments. Plain CSS objects remain available
+ * for Server Components; MUI `sx` fragments are used only by Client Components.
  */
 
 /** Legacy palette values shared by the shell and the public pages. */
@@ -93,7 +92,7 @@ export const BUTTON_STYLES = {
 /** Shared form-panel treatment used by authentication forms. */
 export const FORM_PANEL_SX = {
   backgroundColor: COLORS.formPanelBackground,
-  boxShadow: CARD_SHADOW,
+  boxShadow: UI_SHADOWS.card,
   border: CARD_BORDER,
   borderRadius: UI_SHAPE.squareRadius,
 } as const;
@@ -143,9 +142,9 @@ export const cardStyle: CSSProperties = {
   width: '-webkit-fill-available',
   padding: '25px 0px 0px 0px',
   backgroundColor: COLORS.cardBackground,
-  boxShadow: CARD_SHADOW,
+  boxShadow: UI_SHADOWS.card,
   border: CARD_BORDER,
-  borderRadius: '0px',
+  borderRadius: UI_SHAPE.squareRadius,
 };
 
 /** The legacy trip-details information panel skin. */
@@ -157,9 +156,9 @@ export const infoPanelStyle: CSSProperties = {
   margin: '20px',
   padding: '25px',
   backgroundColor: COLORS.cardBackground,
-  boxShadow: CARD_SHADOW,
+  boxShadow: UI_SHADOWS.card,
   border: CARD_BORDER,
-  borderRadius: '0px',
+  borderRadius: UI_SHAPE.squareRadius,
 };
 
 /**
@@ -172,9 +171,9 @@ export const commentsPanelStyle: CSSProperties = {
   margin: '20px 0',
   padding: '25px',
   backgroundColor: COLORS.cardBackground,
-  boxShadow: CARD_SHADOW,
+  boxShadow: UI_SHADOWS.card,
   border: CARD_BORDER,
-  borderRadius: '0px',
+  borderRadius: UI_SHAPE.squareRadius,
 };
 
 /**
@@ -202,7 +201,7 @@ export const commentCardStyle: CSSProperties = {
   height: 'fit-content',
   padding: '30px',
   backgroundColor: COLORS.commentCardBackground,
-  boxShadow: CARD_SHADOW,
+  boxShadow: UI_SHADOWS.card,
   border: CARD_BORDER,
-  borderRadius: '0px',
+  borderRadius: UI_SHAPE.squareRadius,
 };
