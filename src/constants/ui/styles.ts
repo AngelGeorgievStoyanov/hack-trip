@@ -18,6 +18,14 @@ export const COLORS = {
   commentCardBackground: '#eee7e7cc',
   /** Legacy form panel background. */
   formPanelBackground: '#e5e3e3d9',
+  /** Shared legacy contained-button hover color. */
+  buttonHover: '#4daf30',
+  /** Legacy destructive-action hover color. */
+  dangerHover: '#ef0a0a',
+  /** Legacy secondary button surface and hover text colors. */
+  secondaryButtonBackground: 'rgb(194 194 224)',
+  secondaryButtonHoverText: 'rgb(248 245 245)',
+  secondaryButtonHoverBackground: 'rgb(170 170 210)',
 } as const;
 
 /** Legacy card/panel elevation, a plain box-shadow rather than an MUI elevation. */
@@ -25,6 +33,43 @@ export const CARD_SHADOW = '3px 2px 5px black';
 
 /** Legacy card/panel border (width/style; the color falls back to the text color). */
 export const CARD_BORDER = 'solid 1px';
+
+/** Shared shape tokens; the square value preserves the legacy card and panel treatment. */
+export const UI_SHAPE = {
+  borderRadius: 4,
+  squareRadius: 0,
+} as const;
+
+/** Shared shadow tokens. MUI's elevation scale remains at its standard defaults. */
+export const UI_SHADOWS = {
+  card: CARD_SHADOW,
+} as const;
+
+/** Reusable MUI sx fragments for recurring button treatments. */
+export const BUTTON_STYLES = {
+  containedHover: {
+    '&:hover': { backgroundColor: COLORS.buttonHover },
+  },
+  dangerHover: {
+    '&:hover': { backgroundColor: COLORS.dangerHover },
+  },
+  secondary: {
+    backgroundColor: COLORS.secondaryButtonBackground,
+    color: 'black',
+    '&:hover': {
+      backgroundColor: COLORS.secondaryButtonBackground,
+      color: COLORS.secondaryButtonHoverText,
+    },
+  },
+} as const;
+
+/** Shared form-panel treatment used by authentication forms. */
+export const FORM_PANEL_SX = {
+  backgroundColor: COLORS.formPanelBackground,
+  boxShadow: CARD_SHADOW,
+  border: CARD_BORDER,
+  borderRadius: UI_SHAPE.squareRadius,
+} as const;
 
 /**
  * Legacy heading treatment. `Space Mono` was declared by the legacy CSS but never loaded,
