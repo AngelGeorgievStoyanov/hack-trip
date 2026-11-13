@@ -137,11 +137,7 @@ export function ProfileForm() {
             variant="contained"
             onClick={() => setPasswordExpanded((current) => !current)}
             disabled={submitting}
-            sx={{
-              backgroundColor: 'rgb(194 194 224)',
-              color: 'black',
-              ':hover': { color: 'rgb(248 245 245)' },
-            }}
+            sx={BUTTON_STYLES.secondary}
           >
             {passwordExpanded ? 'HIDE CHANGE PASSWORD' : 'CHANGE PASSWORD'}
           </Button>
