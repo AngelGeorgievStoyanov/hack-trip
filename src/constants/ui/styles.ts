@@ -26,6 +26,11 @@ export const COLORS = {
   secondaryButtonBackground: 'rgb(194 194 224)',
   secondaryButtonHoverText: 'rgb(248 245 245)',
   secondaryButtonHoverBackground: 'rgb(170 170 210)',
+  textLight: '#fff',
+  textDark: '#17212b',
+  legalLink: '#174f7a',
+  legalBorder: 'rgb(23 33 43 / 22%)',
+  legalBackBackground: 'rgb(194 194 224)',
 } as const;
 
 /** Legacy card/panel elevation, a plain box-shadow rather than an MUI elevation. */
@@ -77,7 +82,7 @@ export const FORM_PANEL_SX = {
  */
 export const headingTextStyle: CSSProperties = {
   fontFamily: 'Space Mono, monospace',
-  color: '#fff',
+  color: COLORS.textLight,
   opacity: 1,
   textShadow: '3px 3px 3px rgb(10,10,10)',
 };
