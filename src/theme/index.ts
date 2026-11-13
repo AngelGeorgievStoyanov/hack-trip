@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material/styles';
-import { COLORS, UI_SHAPE } from '@/constants/ui';
+import { COLORS, TYPOGRAPHY, UI_SHAPE } from '@/constants/ui';
 
 /**
  * Central MUI theme configuration.
@@ -13,7 +13,7 @@ export const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: TYPOGRAPHY.fontFamily,
   },
   shape: {
     borderRadius: UI_SHAPE.borderRadius,
@@ -38,13 +38,14 @@ export const theme = createTheme({
           '--ht-color-legal-border': COLORS.legalBorder,
           '--ht-color-legal-back-background': COLORS.legalBackBackground,
           '--ht-color-dialog-background': COLORS.dialogBackground,
+          '--ht-color-heading-shadow': COLORS.headingShadow,
         },
       },
     },
     MuiButton: {
       styleOverrides: {
         root: {
-          fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+          fontFamily: TYPOGRAPHY.fontFamily,
         },
       },
     },
