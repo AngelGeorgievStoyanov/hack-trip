@@ -126,11 +126,7 @@ export function ProfileForm() {
           >
             EDIT PROFILE
           </Button>
-          <Button
-            variant="contained"
-            onClick={() => router.back()}
-            sx={BUTTON_STYLES.secondary}
-          >
+          <Button variant="contained" onClick={() => router.back()} sx={BUTTON_STYLES.secondary}>
             BACK
           </Button>
           <Button

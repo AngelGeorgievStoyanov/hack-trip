@@ -87,6 +87,7 @@ Google Maps is deliberately outside the backend API flow:
 ```
 
 Google Maps operations must not be routed through `api/client.ts` unless the backend contract explicitly introduces a corresponding endpoint.
+
 # 4. Repository Structure
 
 The primary frontend structure is:
@@ -143,6 +144,7 @@ src/config/
 ```
 
 Do not add an intermediate frontend layer or unnecessary pass-through abstractions.
+
 # 5. Next.js App Router
 
 The application uses the Next.js App Router.
@@ -308,6 +310,7 @@ The exact directory structure follows the actual repository.
 Feature APIs should contain HTTP endpoint operations and their request/response typing rather than UI logic. They must use the centralized client and follow `docs/API_CONTRACT.md`.
 
 Feature APIs must not contain React hooks, component state, presentation logic, or UI notifications.
+
 # 9. Feature Hooks
 
 ## 9.1 Feature hooks
@@ -1723,7 +1726,6 @@ config/
 ```
 
 Do not place API calls in constants.
-
 
 Do not place backend transport logic in map components.
 

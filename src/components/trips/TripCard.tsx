@@ -20,7 +20,13 @@ import { SocialObjectPlaceholder } from '@/components/placeholders';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
-import { BREAKPOINTS, BUTTON_STYLES, LIGHTBOX_SWIPE_THRESHOLD_PX, cardStyle, maxWidthQuery } from '@/constants/ui';
+import {
+  BREAKPOINTS,
+  BUTTON_STYLES,
+  LIGHTBOX_SWIPE_THRESHOLD_PX,
+  cardStyle,
+  maxWidthQuery,
+} from '@/constants/ui';
 import { buildTripUrl } from '@/lib/tripUrl';
 import type { TripGroupResponse } from '@/types';
 
