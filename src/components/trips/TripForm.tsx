@@ -24,6 +24,7 @@ import ImageUploadField from '@/components/images/ImageUploadField';
 import { TripLocationPicker } from '@/components/maps/TripLocationPicker';
 import { MAX_CONCURRENT_IMAGE_UPLOADS } from '@/constants/images';
 import { useNotification } from '@/components/common/NotificationProvider';
+import { BUTTON_STYLES, CARD_BORDER, CARD_SHADOW, COLORS, UI_SHAPE } from '@/constants/ui';
 
 function preferredSelectValue(choices: SelectChoice[], preferred: string): string {
   const normalize = (value: string) => value.toLowerCase().replace(/[\\s_-]/g, '');
@@ -347,10 +348,10 @@ export function TripForm() {
           minWidth: 0,
           p: { xs: 2, sm: '30px' },
           mb: '5px',
-          backgroundColor: '#eee7e79e',
-          boxShadow: '3px 2px 5px black',
-          border: 'solid 1px',
-          borderRadius: 0,
+          backgroundColor: COLORS.cardBackground,
+          boxShadow: CARD_SHADOW,
+          border: CARD_BORDER,
+          borderRadius: UI_SHAPE.squareRadius,
           gap: 1,
           '& .MuiFormControl-root': {
             m: '4px',
@@ -590,7 +591,7 @@ export function TripForm() {
             variant="contained"
             disabled={submitting || isLoadingExistingTrip || !isValid || isDayNumberOccupied}
             startIcon={submitting ? <CircularProgress size={18} /> : undefined}
-            sx={{ '&:hover': { backgroundColor: '#4daf30' } }}
+            sx={BUTTON_STYLES.containedHover}
           >
             Add trip
           </Button>
