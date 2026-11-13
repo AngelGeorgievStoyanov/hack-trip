@@ -18,7 +18,7 @@ import { TripActions } from './TripActions';
 import { EngagementBar } from '@/components/social/EngagementBar';
 import { FavoriteButton } from '@/components/social/FavoriteButton';
 import type { CommentTarget } from '@/api/comments';
-import { infoPanelStyle } from '@/constants/ui';
+import { BUTTON_STYLES, infoPanelStyle } from '@/constants/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { useSocialConfig } from '@/hooks/useSocialConfig';
 import { isSocialOperationAllowed, socialConfigTargetKey } from '@/lib/socialConfig';
@@ -212,7 +212,7 @@ export function TripDetails({
           <Button
             variant="contained"
             sx={{
-              ':hover': { background: '#4daf30' },
+              ...BUTTON_STYLES.containedHover,
               padding: '10px',
               width: '100%',
               minHeight: '48px',

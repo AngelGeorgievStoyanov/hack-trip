@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { CARD_BORDER, CARD_SHADOW, COLORS, UI_SHAPE } from '@/constants/ui';
 import {
   Button,
   Dialog,
@@ -50,10 +51,10 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
         onClose={() => handleClose(false)}
         PaperProps={{
           sx: {
-            backgroundColor: '#eee7e7',
-            boxShadow: '3px 2px 5px black',
-            border: 'solid 1px',
-            borderRadius: '0px',
+            backgroundColor: COLORS.dialogBackground,
+            boxShadow: CARD_SHADOW,
+            border: CARD_BORDER,
+            borderRadius: UI_SHAPE.squareRadius,
           },
         }}
       >

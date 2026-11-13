@@ -1,9 +1,8 @@
 import type { CSSProperties } from 'react';
 
 /**
- * Shared visual tokens. These are plain CSS objects rather than MUI `sx` presets so the
- * same value can be used by a Server Component (`style`) and a Client Component (`style`
- * or `sx`), keeping the public pages server-rendered.
+ * Shared visual tokens and reusable style fragments. Plain CSS objects remain available
+ * for Server Components; MUI `sx` fragments are used only by Client Components.
  */
 
 /** Legacy palette values shared by the shell and the public pages. */
@@ -18,6 +17,21 @@ export const COLORS = {
   commentCardBackground: '#eee7e7cc',
   /** Legacy form panel background. */
   formPanelBackground: '#e5e3e3d9',
+  /** Shared legacy contained-button hover color. */
+  buttonHover: '#4daf30',
+  /** Legacy destructive-action hover color. */
+  dangerHover: '#ef0a0a',
+  /** Legacy secondary button surface and hover text colors. */
+  secondaryButtonBackground: 'rgb(194 194 224)',
+  secondaryButtonHoverText: 'rgb(248 245 245)',
+  secondaryButtonHoverBackground: 'rgb(170 170 210)',
+  textLight: '#fff',
+  textDark: '#17212b',
+  legalLink: '#174f7a',
+  legalBorder: 'rgb(23 33 43 / 22%)',
+  legalBackBackground: 'rgb(194 194 224)',
+  dialogBackground: '#eee7e7',
+  headingShadow: 'rgb(10 10 10)',
 } as const;
 
 /** Legacy card/panel elevation, a plain box-shadow rather than an MUI elevation. */
@@ -26,15 +40,72 @@ export const CARD_SHADOW = '3px 2px 5px black';
 /** Legacy card/panel border (width/style; the color falls back to the text color). */
 export const CARD_BORDER = 'solid 1px';
 
+/** Shared shape tokens; the square value preserves the legacy card and panel treatment. */
+export const TYPOGRAPHY = {
+  fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+} as const;
+
+export const UI_SHAPE = {
+  borderRadius: 4,
+  squareRadius: 0,
+} as const;
+
+/** Shared shadow tokens. MUI's elevation scale remains at its standard defaults. */
+export const UI_SHADOWS = {
+  card: CARD_SHADOW,
+} as const;
+
+/** Reusable MUI sx fragments for recurring button treatments. */
+export const BUTTON_STYLES = {
+  containedHover: {
+    '&:hover': { backgroundColor: COLORS.buttonHover },
+  },
+  dangerHover: {
+    '&:hover': { backgroundColor: COLORS.dangerHover },
+  },
+  secondary: {
+    backgroundColor: COLORS.secondaryButtonBackground,
+    color: 'black',
+    '&:hover': {
+      backgroundColor: COLORS.secondaryButtonBackground,
+      color: COLORS.secondaryButtonHoverText,
+    },
+  },
+  secondaryLightText: {
+    backgroundColor: COLORS.secondaryButtonBackground,
+    color: 'black',
+    '&:hover': {
+      backgroundColor: COLORS.secondaryButtonBackground,
+      color: COLORS.textLight,
+    },
+  },
+  secondaryBack: {
+    backgroundColor: COLORS.secondaryButtonBackground,
+    color: 'black',
+    '&:hover': {
+      backgroundColor: COLORS.secondaryButtonHoverBackground,
+      color: 'black',
+    },
+  },
+} as const;
+
+/** Shared form-panel treatment used by authentication forms. */
+export const FORM_PANEL_SX = {
+  backgroundColor: COLORS.formPanelBackground,
+  boxShadow: UI_SHADOWS.card,
+  border: CARD_BORDER,
+  borderRadius: UI_SHAPE.squareRadius,
+} as const;
+
 /**
  * Legacy heading treatment. `Space Mono` was declared by the legacy CSS but never loaded,
  * so the browser painted the `monospace` fallback; the declaration is kept to match.
  */
 export const headingTextStyle: CSSProperties = {
   fontFamily: 'Space Mono, monospace',
-  color: '#fff',
+  color: COLORS.textLight,
   opacity: 1,
-  textShadow: '3px 3px 3px rgb(10,10,10)',
+  textShadow: `3px 3px 3px ${COLORS.headingShadow}`,
 };
 
 /**
@@ -71,9 +142,9 @@ export const cardStyle: CSSProperties = {
   width: '-webkit-fill-available',
   padding: '25px 0px 0px 0px',
   backgroundColor: COLORS.cardBackground,
-  boxShadow: CARD_SHADOW,
+  boxShadow: UI_SHADOWS.card,
   border: CARD_BORDER,
-  borderRadius: '0px',
+  borderRadius: UI_SHAPE.squareRadius,
 };
 
 /** The legacy trip-details information panel skin. */
@@ -85,9 +156,9 @@ export const infoPanelStyle: CSSProperties = {
   margin: '20px',
   padding: '25px',
   backgroundColor: COLORS.cardBackground,
-  boxShadow: CARD_SHADOW,
+  boxShadow: UI_SHADOWS.card,
   border: CARD_BORDER,
-  borderRadius: '0px',
+  borderRadius: UI_SHAPE.squareRadius,
 };
 
 /**
@@ -100,9 +171,9 @@ export const commentsPanelStyle: CSSProperties = {
   margin: '20px 0',
   padding: '25px',
   backgroundColor: COLORS.cardBackground,
-  boxShadow: CARD_SHADOW,
+  boxShadow: UI_SHADOWS.card,
   border: CARD_BORDER,
-  borderRadius: '0px',
+  borderRadius: UI_SHAPE.squareRadius,
 };
 
 /**
@@ -130,7 +201,7 @@ export const commentCardStyle: CSSProperties = {
   height: 'fit-content',
   padding: '30px',
   backgroundColor: COLORS.commentCardBackground,
-  boxShadow: CARD_SHADOW,
+  boxShadow: UI_SHADOWS.card,
   border: CARD_BORDER,
-  borderRadius: '0px',
+  borderRadius: UI_SHAPE.squareRadius,
 };

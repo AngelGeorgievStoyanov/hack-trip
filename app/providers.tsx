@@ -3,15 +3,14 @@
 import { useState, type ReactNode } from 'react';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
 import CssBaseline from '@mui/material/CssBaseline';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/hooks/useAuth';
 import { BackgroundProvider } from '@/hooks/useBackground';
 import { ConfirmDialogProvider } from '@/components/common/ConfirmDialog';
 import { NotificationProvider } from '@/components/common/NotificationProvider';
 import { TabSyncListener } from '@/components/common/TabSyncListener';
-
-const theme = createTheme();
+import { theme } from '@/theme';
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());

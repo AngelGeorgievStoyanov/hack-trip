@@ -1,6 +1,7 @@
 'use client';
 
 import { Box, Button, Card, IconButton, Typography } from '@mui/material';
+import { BUTTON_STYLES, CARD_BORDER, CARD_SHADOW, COLORS, UI_SHAPE } from '@/constants/ui';
 import { GoogleMapView } from '@/components/maps/GoogleMapView';
 import { ArrowCircleDownIcon, ArrowCircleUpIcon } from '@/constants/icons';
 import type { TripPoint } from '@/types';
@@ -46,10 +47,10 @@ export function PointCard({
           maxWidth: 300,
           my: '10px',
           p: '15px 0',
-          backgroundColor: '#e5e3e3d9',
-          boxShadow: '3px 2px 5px black',
-          border: '1px solid black',
-          borderRadius: 0,
+          backgroundColor: COLORS.formPanelBackground,
+          boxShadow: CARD_SHADOW,
+          border: CARD_BORDER,
+          borderRadius: UI_SHAPE.squareRadius,
         }}
       >
         <Typography gutterBottom component="h6" sx={{ px: '10px' }}>
@@ -87,7 +88,7 @@ export function PointCard({
             variant="contained"
             onClick={() => onEdit(point)}
             disabled={disabled || !point.permissions.canEdit}
-            sx={{ '&:hover': { backgroundColor: '#4daf30' }, m: '5px' }}
+            sx={{ ...BUTTON_STYLES.containedHover, m: '5px' }}
           >
             EDIT POINT
           </Button>
@@ -95,7 +96,7 @@ export function PointCard({
             variant="contained"
             onClick={() => onDelete(point)}
             disabled={disabled || !point.permissions.canDelete}
-            sx={{ '&:hover': { backgroundColor: '#ef0a0a' }, m: '5px' }}
+            sx={{ ...BUTTON_STYLES.dangerHover, m: '5px' }}
           >
             DELETE POINT
           </Button>

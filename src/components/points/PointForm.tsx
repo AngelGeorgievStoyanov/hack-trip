@@ -15,6 +15,7 @@ import { MAX_IMAGES_PER_ENTITY } from '@/constants/images';
 import { useNotification } from '@/components/common/NotificationProvider';
 import { truncatePointName } from '@/lib/pointName';
 import type { SocialImageDto, TripGroupResponse, TripPoint } from '@/types';
+import { BUTTON_STYLES } from '@/constants/ui';
 
 interface PointFormProps {
   tripGroupId: number;
@@ -43,7 +44,7 @@ const formSchema = pointFormSchema;
 const legacyButtonSx = {
   width: '32ch',
   m: 1,
-  '&:hover': { backgroundColor: '#4daf30' },
+  ...BUTTON_STYLES.containedHover,
 };
 
 const stackedActionButtonSx = {
@@ -279,7 +280,7 @@ export function PointForm({
           onClick={() => void handleFindInMap()}
           disabled={findingLocation || !isLoaded || !watch('name').trim()}
           startIcon={findingLocation ? <CircularProgress size={16} /> : undefined}
-          sx={{ m: 1, '&:hover': { backgroundColor: '#4daf30' } }}
+          sx={{ m: 1, ...BUTTON_STYLES.containedHover }}
         >
           FIND IN MAP
         </Button>
@@ -364,9 +365,7 @@ export function PointForm({
           disabled={submitting}
           sx={{
             ...stackedActionButtonSx,
-            backgroundColor: 'rgb(194, 194, 224)',
-            color: 'black',
-            '&:hover': { backgroundColor: 'rgb(170, 170, 210)', color: 'black' },
+            ...BUTTON_STYLES.secondaryBack,
           }}
         >
           BACK

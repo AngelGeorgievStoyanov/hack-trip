@@ -228,16 +228,26 @@ The exact behavior is defined by `docs/API_CONTRACT.md`.
 
 ## 6. API Layer
 
-All HackTrip Backend API communication must go through the centralized API layer.
+All HackTrip Backend API communication must go through the centralized API layer. Components and pages must not call Axios directly or construct arbitrary backend URLs.
 
-Do not scatter raw Axios calls throughout pages or components.
-
-The intended flow is:
+The transport path is:
 
 ```text
-Component / Page
+Feature API
+    ↓
+api/client.ts
+    ↓
+Axios
+    ↓
+HackTrip Backend
+```
+
+A Server Component may call a feature API directly for server-side data loading. An interactive Client Component normally uses a feature hook when it needs React Query, mutations, cache invalidation, or reusable client-side lifecycle state:
+
+```text
+Client Component
        ↓
-Service
+Feature Hook
        ↓
 Feature API
        ↓
@@ -248,45 +258,35 @@ Axios
 HackTrip Backend
 ```
 
-Responsibilities:
+The frontend uses a direct feature-oriented API architecture:
 
-### `api/client.ts`
+```text
+Client Component
+       ↓
+Feature Hook (when React Query or client lifecycle coordination is needed)
+       ↓
+Feature API
+       ↓
+api/client.ts
+       ↓
+Axios
+       ↓
+HackTrip Backend
+```
 
-Owns common HTTP behavior such as:
+A Server Component may call the Feature API directly. Do not add an intermediate frontend layer.
 
-* base URL handling
-* common headers
-* client marker
-* authentication transport
-* credentials configuration
-* common request/response behavior
+### Responsibilities
 
-### Feature API modules
+**`src/api/client.ts`** owns common HTTP transport behavior: backend base URL, common headers and `x-hacktrip-client`, authentication and credential handling, refresh behavior, shared request/response behavior, and transport-level payload normalization.
 
-Own endpoint-specific HTTP calls.
+**Feature API modules** own endpoint-specific HTTP operations and request/response typing. They use the centralized client and follow `docs/API_CONTRACT.md`. They must not contain React hooks, component state, presentation logic, or UI notifications.
 
-Examples include API modules for:
+**Feature hooks** under `src/hooks/` or a feature-local hooks directory coordinate React Query queries/mutations, cache keys and invalidation, loading/error state, client lifecycle, and calls to one or more feature API operations. Do not create hooks that only rename one API call without adding a useful React-facing contract.
 
-* auth
-* trips
-* points
-* comments
-* social
-* admin
-* config
+A direct Feature Hook → Feature API or Server Component → Feature API path is the standard. Keep any necessary coordination in the feature hook or calling component; do not introduce an intermediate frontend layer.
 
-### Services
-
-Own application-level orchestration.
-
-Services may coordinate multiple API operations and transform data for application use.
-
-Services must not duplicate common HTTP configuration.
-
-Components should not construct arbitrary API URLs or call Axios directly.
-
----
-
+Google Maps and other external browser SDK integrations remain outside the HackTrip Backend API layer.
 ## 7. Google Maps Boundary
 
 Google Maps is a separate frontend/browser integration.
@@ -557,14 +557,12 @@ Tracking must not force the complete Trip page into Client Component mode.
 
 Forms use:
 
-* React
-* Zod
-* existing form patterns
-* centralized validation schemas
-* services
-* API modules
+* React Hook Form for form state where appropriate
+* Zod and centralized feature validation schemas
+* feature hooks for React Query mutations and client-side lifecycle
+* feature API modules for endpoint-specific HTTP operations
 
-Forms must correctly display backend validation and authorization errors.
+Forms must display backend validation and authorization errors using documented error semantics, distinguish field validation from general submission errors, prevent duplicate submissions while pending, avoid duplicating request payload construction across unrelated components, submit only fields accepted by the backend contract, and preserve existing behavior during modernization.
 
 Never assume a successful HTTP request means every submitted field was accepted.
 
@@ -573,9 +571,6 @@ Do not send:
 * unknown fields
 * server-generated fields
 * ownership fields derived by the backend
-
----
-
 ## 17. Error Handling
 
 Preserve backend error semantics.
@@ -733,36 +728,75 @@ Only add comments when they provide information that cannot be understood direct
 
 All application icons must be exported through the central icon registry:
 
-`src/constants/icons/index.ts`
+`src/constants/icons.ts`
+
+Components import icons through the existing alias:
+
+`@/constants/icons`
 
 Rules:
 
-* Components must not import icons directly from icon libraries such as `@mui/icons-material/*`. Import them from `@/constants/icons` instead.
-* Give each exported icon a stable, semantic name based on its purpose, such as `UploadIcon`, `AddIcon`, `RemoveIcon`, or `DeleteIcon`.
-* The registry maps these semantic names to the actual library icons. To change an icon's appearance, update its export in the registry; consumers should not need to change.
-* When a new icon is needed, add its export to the registry first, then import it from the registry in the component.
-* Reuse an existing semantic export when the same icon purpose is already represented. Do not create duplicate aliases for the same purpose without a clear reason.
-* Apply this rule to all new code and whenever existing icon imports are touched during modernization. When auditing or refactoring the frontend, migrate remaining direct icon-library imports to the registry without changing their visual behavior.
-* Keep icon-library dependencies and icon implementation details inside the registry; keep components dependent on semantic icon names.
+* Components must not import icons directly from icon libraries such as `@mui/icons-material/*`.
+* Give each exported icon a stable, semantic name based on its purpose.
+* The registry maps semantic names to actual library icons; consumers should not need to change when an icon implementation changes.
+* Add new icon exports to the registry before using them in components.
+* Reuse an existing semantic export when the same purpose is already represented.
+* Keep icon-library implementation details inside the registry.
+* Do not move the registry without updating all consumers and this document in the same change.
+
+The current registry is a single file, `src/constants/icons.ts`. The directory-style path `src/constants/icons/index.ts` is not the current repository structure and must not be referenced as if it already exists.
 
 ---
-
 ## 22. UI Architecture
 
 MUI is the primary UI component system.
 
-Shared UI components belong under the existing component structure.
+Components should have a clear responsibility:
 
-Components should have a clear responsibility.
+* generic UI components own presentation and reusable interaction patterns
+* feature components compose feature UI and feature behavior
+* feature hooks own reusable React-facing state and server-state coordination
+* API modules own backend HTTP operations
 
-Avoid feature logic inside generic UI components.
-
-Avoid API calls directly from presentational components.
+Avoid feature-specific business logic inside generic UI components and API calls directly from presentational components.
 
 Do not redesign existing UI behavior as part of architectural migration unless the task explicitly requires a UX change.
 
----
+### Design system and styling rules
 
+The target design-system ownership is:
+
+```text
+src/constants/ui/
+    design tokens and shared UI constants
+
+src/theme/
+    MUI theme creation, palette, typography, shape and component overrides
+
+app/providers.tsx
+    provider composition and application-level provider wiring
+```
+
+The current implementation may still define the MUI theme in `app/providers.tsx`. Moving theme construction into `src/theme/` is a planned implementation step, not a claim about the current code.
+
+Rules:
+
+* Reusable colors, typography values, spacing decisions, radii, shadows and breakpoints must have a clear central owner.
+* MUI palette, typography, shape and reusable component defaults belong in the MUI theme.
+* Shared non-theme UI constants and layout presets belong under `src/constants/ui/`.
+* Global CSS is reserved for document-level styles, resets, font declarations, CSS variables and behavior that cannot reasonably be expressed through MUI.
+* Component-local `sx` is appropriate for one-off layout or state-dependent styling; do not use it to introduce repeated palette values or duplicate design tokens.
+* Do not create a global style abstraction for a one-off style. Extract a shared pattern when it is used repeatedly and has the same visual or behavioral meaning.
+* Use MUI theme breakpoints for MUI responsive styles. Use CSS media/container queries when they are the correct tool, while keeping breakpoint values consistent with the responsive system.
+* Preserve existing visual behavior while centralizing styles; theme work must not become an unrequested redesign.
+
+### Reusable component rules
+
+Extract shared components or patterns when multiple call sites have the same semantics and behavior.
+
+Prefer small, composable building blocks for repeated form fields/actions, cards and content surfaces, dialogs and confirmation flows, icon buttons/action groups, and loading/empty/error states.
+
+Do not merge components solely because their markup looks similar when their domain behavior or accessibility semantics differ. Avoid universal components with many feature-specific flags.
 ## 23. Code Organization
 
 The frontend follows feature-oriented organization.
@@ -773,7 +807,6 @@ The major responsibilities are:
 app/              Next.js routes and page composition
 components/       reusable UI
 api/              HTTP/API endpoint clients
-services/         application orchestration
 hooks/            reusable React hooks
 validations/      Zod schemas
 types/            TypeScript models

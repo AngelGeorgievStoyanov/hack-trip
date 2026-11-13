@@ -19,7 +19,7 @@ import { zodResolver } from '@/lib/zodResolver';
 import { getAuthErrorMessage } from '@/lib/errors';
 import { loginSchema } from '@/validations/auth';
 import type { LoginInput } from '@/api/auth';
-import { COLORS, CARD_SHADOW, CARD_BORDER } from '@/constants/ui';
+import { BUTTON_STYLES, FORM_PANEL_SX } from '@/constants/ui';
 import { WelcomeHeading } from '@/components/common/WelcomeHeading';
 import { useNotification } from '@/components/common/NotificationProvider';
 import { Captcha } from '@/components/auth/Captcha';
@@ -73,12 +73,7 @@ export function LoginForm() {
     }
   }
 
-  const SECONDARY_BUTTON_SX = {
-    ':hover': { color: 'rgb(248 245 245)' },
-    margin: '5px',
-    backgroundColor: 'rgb(194 194 224)',
-    color: 'black',
-  } as const;
+  const SECONDARY_BUTTON_SX = BUTTON_STYLES.secondary;
 
   return (
     <WelcomeHeading>
@@ -90,10 +85,7 @@ export function LoginForm() {
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
-          backgroundColor: COLORS.formPanelBackground,
-          boxShadow: CARD_SHADOW,
-          border: CARD_BORDER,
-          borderRadius: '0px',
+          ...FORM_PANEL_SX,
           padding: '30px',
           maxWidth: '700px',
           width: '100%',
@@ -150,7 +142,7 @@ export function LoginForm() {
           variant="contained"
           disabled={submitting || !captchaToken}
           startIcon={submitting ? <CircularProgress size={18} /> : undefined}
-          sx={{ ':hover': { backgroundColor: '#4daf30' } }}
+          sx={BUTTON_STYLES.containedHover}
         >
           Login
         </Button>
