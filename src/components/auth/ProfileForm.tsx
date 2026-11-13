@@ -13,6 +13,7 @@ import { getGenericErrorMessage } from '@/lib/errors';
 import { updateProfileSchema } from '@/validations/auth';
 import { ChangePasswordForm } from '@/components/auth/ChangePasswordForm';
 import { useNotification } from '@/components/common/NotificationProvider';
+import { BUTTON_STYLES } from '@/constants/ui';
 
 export function ProfileForm() {
   const { user, updateUser } = useAuth();
@@ -121,18 +122,14 @@ export function ProfileForm() {
             variant="contained"
             disabled={submitting || ((!isDirty || !isValid) && !selectedImage)}
             startIcon={submitting ? <CircularProgress size={18} /> : undefined}
-            sx={{ ':hover': { backgroundColor: '#4daf30' } }}
+            sx={BUTTON_STYLES.containedHover}
           >
             EDIT PROFILE
           </Button>
           <Button
             variant="contained"
             onClick={() => router.back()}
-            sx={{
-              backgroundColor: 'rgb(194 194 224)',
-              color: 'black',
-              ':hover': { color: 'rgb(248 245 245)' },
-            }}
+            sx={BUTTON_STYLES.secondary}
           >
             BACK
           </Button>
