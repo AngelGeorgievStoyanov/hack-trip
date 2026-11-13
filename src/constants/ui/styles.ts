@@ -67,6 +67,14 @@ export const BUTTON_STYLES = {
       color: COLORS.secondaryButtonHoverText,
     },
   },
+  secondaryBack: {
+    backgroundColor: COLORS.secondaryButtonBackground,
+    color: 'black',
+    '&:hover': {
+      backgroundColor: COLORS.secondaryButtonHoverBackground,
+      color: 'black',
+    },
+  },
 } as const;
 
 /** Shared form-panel treatment used by authentication forms. */
