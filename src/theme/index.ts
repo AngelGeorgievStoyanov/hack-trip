@@ -1,9 +1,10 @@
 import { createTheme } from '@mui/material/styles';
-import { COLORS } from '@/constants/ui';
+import { COLORS, UI_SHAPE } from '@/constants/ui';
 
 /**
  * Central MUI theme configuration.
- * Keep values aligned with the existing UI tokens to preserve current rendering.
+ * Typography matches MUI's previous defaults; shape keeps the existing 4px MUI radius.
+ * Existing page-specific styles continue to own their intentional square card treatment.
  */
 export const theme = createTheme({
   palette: {
@@ -11,12 +12,33 @@ export const theme = createTheme({
       main: COLORS.brand,
     },
   },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  shape: {
+    borderRadius: UI_SHAPE.borderRadius,
+  },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         ':root': {
           '--ht-color-brand': COLORS.brand,
           '--ht-color-page-background': COLORS.pageBackground,
+          '--ht-color-card-background': COLORS.cardBackground,
+          '--ht-color-comment-card-background': COLORS.commentCardBackground,
+          '--ht-color-form-panel-background': COLORS.formPanelBackground,
+          '--ht-color-button-hover': COLORS.buttonHover,
+          '--ht-color-danger-hover': COLORS.dangerHover,
+          '--ht-color-secondary-button-background': COLORS.secondaryButtonBackground,
+          '--ht-color-secondary-button-hover-text': COLORS.secondaryButtonHoverText,
+          '--ht-color-secondary-button-hover-background': COLORS.secondaryButtonHoverBackground,
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
         },
       },
     },
