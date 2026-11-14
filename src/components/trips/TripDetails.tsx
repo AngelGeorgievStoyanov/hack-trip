@@ -35,7 +35,13 @@ interface TripDetailsProps {
   onDayDeleted: (updatedTripGroup: TripGroupResponse) => void;
 }
 
-const NAME_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1.5rem', fontWeight: 500 };
+const NAME_STYLE: CSSProperties = {
+  margin: '0 0 0.35em',
+  fontSize: '1.5rem',
+  fontWeight: 500,
+  flex: '1 1 auto',
+  minWidth: 0,
+};
 const LINE_STYLE: CSSProperties = { margin: '0 0 0.35em', fontSize: '1rem', fontWeight: 400 };
 
 /**
@@ -91,14 +97,27 @@ export function TripDetails({
         <Typography variant="h5" component="div" style={NAME_STYLE}>
           TRIP NAME : {day.title ?? tripGroup.days[0]?.title ?? 'Trip'}
         </Typography>
-        {isAuthenticated && canFavorite ? (
-          <FavoriteButton
-            targetType="trip"
-            targetId={day.id}
-            initialFavorited={day.social.favoritedByMe ?? false}
-            initialFavorites={day.social.favorites ?? 0}
-          />
-        ) : null}
+        {/* Keep the title row geometry stable while the auth session is restored. */}
+        <Box
+          aria-hidden={!isAuthenticated || !canFavorite}
+          sx={{
+            flex: '0 0 40px',
+            width: 40,
+            height: 40,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {isAuthenticated && canFavorite ? (
+            <FavoriteButton
+              targetType="trip"
+              targetId={day.id}
+              initialFavorited={day.social.favoritedByMe ?? false}
+              initialFavorites={day.social.favorites ?? 0}
+            />
+          ) : null}
+        </Box>
       </Box>
 
       {day.price != null ? (
