@@ -360,7 +360,7 @@ code {
   animation: about-image-rotate 1s ease-in-out 3s both;
 }
 
-/* Keep the above-the-fold LCP illustration out of the delayed entrance animation. */
-.about-page__content > img:first-of-type {
+/* Keep the above-the-fold LCP SVG illustration out of the delayed entrance animation. */
+.about-page__content img[src="/og/hacktrip-travel-planner.svg"] {
   animation: none;
 }
