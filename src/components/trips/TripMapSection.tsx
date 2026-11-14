@@ -191,18 +191,18 @@ export function TripMapSection({
       {shouldLoadMap ? (
         <GoogleMapView
           markers={mapMarkers}
-        path={showingPointMarkers ? path : []}
-        center={showingPointMarkers ? MAP_DEFAULT_CENTER : (dayPosition ?? MAP_DEFAULT_CENTER)}
-        height={MAP_TRIP_HEIGHT}
-        maxWidth={MAP_TRIP_WIDTH}
-        options={MAP_TRIP_OPTIONS as google.maps.MapOptions}
-        // Fit the full route only in overview mode. Fallback day/Sofia maps have no route.
-        fitBounds={showingPointMarkers && isOverview}
-        fitBoundsTrigger={isOverview ? 'overview' : selectedPointIndex}
-        focusMarkerId={showingPointMarkers ? focusPointId : null}
-        focusZoom={MAP_DEFAULT_ZOOM}
-        selectedMarkerId={showingPointMarkers ? (selectedMarker?.id ?? null) : null}
-        onMarkerSelect={showingPointMarkers ? handleMarkerSelect : undefined}
+          path={showingPointMarkers ? path : []}
+          center={showingPointMarkers ? MAP_DEFAULT_CENTER : (dayPosition ?? MAP_DEFAULT_CENTER)}
+          height={MAP_TRIP_HEIGHT}
+          maxWidth={MAP_TRIP_WIDTH}
+          options={MAP_TRIP_OPTIONS as google.maps.MapOptions}
+          // Fit the full route only in overview mode. Fallback day/Sofia maps have no route.
+          fitBounds={showingPointMarkers && isOverview}
+          fitBoundsTrigger={isOverview ? 'overview' : selectedPointIndex}
+          focusMarkerId={showingPointMarkers ? focusPointId : null}
+          focusZoom={MAP_DEFAULT_ZOOM}
+          selectedMarkerId={showingPointMarkers ? (selectedMarker?.id ?? null) : null}
+          onMarkerSelect={showingPointMarkers ? handleMarkerSelect : undefined}
           renderInfoWindow={showingPointMarkers ? (marker) => marker.title : undefined}
         />
       ) : (
