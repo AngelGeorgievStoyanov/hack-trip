@@ -345,22 +345,3 @@ code {
 .legal-page__back:hover {
   color: var(--ht-color-text-light);
 }
-
-/* Legacy About page image entrance animation. */
-@keyframes about-image-rotate {
-  0% {
-    transform: rotate(0);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.about-page__content img {
-  animation: about-image-rotate 1s ease-in-out 3s both;
-}
-
-/* Keep the above-the-fold LCP SVG illustration out of the delayed entrance animation. */
-.about-page__content img[src='/og/hacktrip-travel-planner.svg'] {
-  animation: none;
-}
