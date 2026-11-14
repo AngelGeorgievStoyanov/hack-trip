@@ -19,6 +19,7 @@ interface ImageGalleryProps {
   variant?: 'row' | 'stack' | 'grid';
   activeCommentTarget: CommentTarget | null;
   onToggleComments: (target: CommentTarget) => void;
+  prioritizeFirstImage?: boolean;
 }
 
 export function ImageGallery({
@@ -29,6 +30,7 @@ export function ImageGallery({
   variant = 'row',
   activeCommentTarget,
   onToggleComments,
+  prioritizeFirstImage = false,
 }: ImageGalleryProps) {
   const [index, setIndex] = useState<number | null>(null);
   const socialConfig = useSocialConfig();
@@ -101,6 +103,9 @@ export function ImageGallery({
                     alt={alt}
                     preset={position === 0 && leadPreset ? leadPreset : preset}
                     fill={variant === 'grid'}
+                    priority={prioritizeFirstImage && position === 0}
+                    loading={prioritizeFirstImage && position === 0 ? 'eager' : undefined}
+                    fetchPriority={prioritizeFirstImage && position === 0 ? 'high' : undefined}
                     style={variant === 'grid' ? { objectFit: 'cover' } : undefined}
                   />
                 </Box>
