@@ -25,6 +25,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "deploy": "npm run build && pm2 startOrRestart ecosystem.config.cjs --env production",
     "lint": "eslint src app",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
