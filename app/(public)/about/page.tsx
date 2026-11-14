@@ -42,6 +42,7 @@ export default function AboutPage() {
             width={1200}
             height={630}
             priority
+            fetchPriority="high"
             style={{ ...imageStyle, maxWidth: 760 }}
           />
 
