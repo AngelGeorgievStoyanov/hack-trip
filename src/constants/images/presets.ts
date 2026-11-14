@@ -11,7 +11,7 @@ const IMAGE_SIZES = {
   hero: '100vw',
   card: '(max-width: 600px) 100vw, 33vw',
   gallery: '(max-width: 600px) 50vw, 33vw',
-  about: '(max-width: 820px) 100vw, 640px',
+  about: '(max-width: 820px) calc(100vw - 32px), 640px',
 } as const;
 
 export const IMAGE_PRESETS = {
