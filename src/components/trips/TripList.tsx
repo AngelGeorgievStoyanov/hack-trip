@@ -18,9 +18,10 @@ const EMPTY_TEXT_STYLE: CSSProperties = {
 
 interface TripListProps {
   trips: TripGroupResponse[];
+  prioritizeFirstImage?: boolean;
 }
 
-export function TripList({ trips }: TripListProps) {
+export function TripList({ trips, prioritizeFirstImage = false }: TripListProps) {
   if (trips.length === 0) {
     return (
       <div>
@@ -32,9 +33,9 @@ export function TripList({ trips }: TripListProps) {
 
   return (
     <ul style={cardListStyle}>
-      {trips.map((tripGroup) => (
+      {trips.map((tripGroup, index) => (
         <li key={tripGroup.id}>
-          <TripCard tripGroup={tripGroup} />
+          <TripCard tripGroup={tripGroup} prioritizeImage={prioritizeFirstImage && index === 0} />
         </li>
       ))}
     </ul>

@@ -17,6 +17,8 @@ interface AppImageProps {
   height?: number;
   sizes?: string;
   priority?: boolean;
+  loading?: 'eager' | 'lazy';
+  fetchPriority?: 'high' | 'low' | 'auto';
   className?: string;
   style?: CSSProperties;
 }
@@ -32,6 +34,8 @@ export function AppImage({
   height,
   sizes,
   priority,
+  loading,
+  fetchPriority,
   className,
   style,
 }: AppImageProps) {
@@ -63,6 +67,8 @@ export function AppImage({
       height={resolvedFill ? undefined : resolvedHeight}
       sizes={resolvedSizes}
       priority={resolvedPriority}
+      loading={loading}
+      fetchPriority={fetchPriority}
       className={className}
       style={style}
       onError={() => {
