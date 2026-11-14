@@ -29,6 +29,7 @@ export function DayImagesGallery({
       alt={dayLabel}
       preset="gallery"
       variant="grid"
+      prioritizeFirstImage
       activeCommentTarget={tripCommentTarget}
       onToggleComments={toggleTripComments}
     />

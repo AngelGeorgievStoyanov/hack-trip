@@ -32,6 +32,7 @@ import type { TripGroupResponse } from '@/types';
 
 interface TripCardProps {
   tripGroup: TripGroupResponse;
+  prioritizeImage?: boolean;
 }
 
 const IMAGE_STYLE: CSSProperties = {
@@ -109,7 +110,7 @@ const DESCRIPTION_SX = {
  * The group response already carries every day, so changing days/images stays local
  * and does not issue additional API requests.
  */
-export function TripCard({ tripGroup }: TripCardProps) {
+export function TripCard({ tripGroup, prioritizeImage = false }: TripCardProps) {
   const days = tripGroup.days;
   const [dayNumber, setDayNumber] = useState(days[0]?.dayNumber ?? 1);
   const [activeStep, setActiveStep] = useState(0);
@@ -238,6 +239,8 @@ export function TripCard({ tripGroup }: TripCardProps) {
           <AppImage
             image={images[activeStep]}
             useThumbnail
+            loading={prioritizeImage ? 'eager' : undefined}
+            fetchPriority={prioritizeImage ? 'high' : undefined}
             alt={title}
             width={300}
             height={200}

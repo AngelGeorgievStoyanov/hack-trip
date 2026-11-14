@@ -14,7 +14,7 @@ export function HomeTrips({ trips }: { trips: TripGroupResponse[] }) {
   return (
     <>
       <h3 style={HEADING_STYLE}>These are our TOP 5 most liked in Hack Trips!</h3>
-      <TripList trips={trips} />
+      <TripList trips={trips} prioritizeFirstImage />
     </>
   );
 }
